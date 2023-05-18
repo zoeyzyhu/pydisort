@@ -1,6 +1,6 @@
 import unittest
 
-from rules_python.python.runfiles import runfiles
+# from rules_python.python.runfiles import runfiles
 
 # gazelle:ignore wrapper
 import pydisort

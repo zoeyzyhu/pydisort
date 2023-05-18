@@ -27,25 +27,25 @@ pydt.set_flags(flags)
 pydt.set_intensity_dimension(5, 15, 25)
 
 # Set other parameters
-pydt.btemp = 300.0
-pydt.ttemp = 280.0
-pydt.fluor = 0.5
-pydt.albedo = 0.2
-pydt.fisot = 0.8
-pydt.fbeam = 0.6
-pydt.temis = 290.0
-pydt.umu0 = 0.8
-pydt.phi0 = 0.0
+# pydt.btemp = 300.0
+# pydt.ttemp = 280.0
+# pydt.fluor = 0.5
+# pydt.albedo = 0.2
+# pydt.fisot = 0.8
+# pydt.fbeam = 0.6
+# pydt.temis = 290.0
+# pydt.umu0 = 0.8
+# pydt.phi0 = 0.0
 
 # Finalize the DisortWrapper instance
-pydt.finalize()
+# pydt.finalize()
 
 # Run RT Flux calculation
-flxup, flxdn = disort.run_rt_flux()
+flxup, flxdn = pydt.run_rt_flux()
 print("RT Flux Up:", flxup)
 print("RT Flux Down:", flxdn)
 
 # Run RT Intensity calculation
-rt_intensity = disort.run_rt_intensity()
+rt_intensity = pydt.run_rt_intensity()
 print("RT Intensity:", rt_intensity)
 
