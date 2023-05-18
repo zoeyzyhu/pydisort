@@ -47,10 +47,8 @@ execute_process(
 string(REGEX MATCH "-I([^\\\"]+)" PYTHON_INCLUDE_PATH "${PYTHON_INCLUDE_FLAGS}")
 # 3.2.3 Add the Python include path to include_directories
 include_directories(${PYTHON_INCLUDE_PATH})
-
-message(STATUS "3.3. Set up python binding--------------------------")
 include(${CMAKE_SOURCE_DIR}/cmake/pybind11.cmake)
-add_subdirectory(python)
+
 
 
 ## 4. Set up project configure file and library ##
@@ -58,7 +56,12 @@ message(STATUS "5. Set up project libraries")
 configure_file(${CMAKE_SOURCE_DIR}/configure.hpp.in configure.hpp @ONLY)
 add_subdirectory(src)
 
+## 5. Python binding
+message(STATUS "5. Set up python binding")
+add_subdirectory(python)
 
-## 5. Set up unit tests
-message(STATUS "5. Set up unit tests")
+## 6. Set up unit tests
+message(STATUS "6. Set up unit tests")
 add_subdirectory(tests)
+
+

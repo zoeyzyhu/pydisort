@@ -1,0 +1,4 @@
+[inputs]
+    test = "data"
+[outputs]
+    test = "result"
