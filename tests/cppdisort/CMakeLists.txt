@@ -34,7 +34,7 @@ target_include_directories(test_cppdisort.${buildl}
 
 # 2. Copy input file to run directory
 
-file(GLOB inputs *.inp)
+file(GLOB inputs *.inp *.toml)
 foreach(input ${inputs})
 	get_filename_component(name ${input} NAME)
   	configure_file(${input}

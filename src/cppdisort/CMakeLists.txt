@@ -28,7 +28,10 @@ target_include_directories(${namel}_${buildl}
     ${PYBIND11_INCLUDE_DIR}
     )
 
-target_link_libraries(${namel}_${buildl} m)
+target_link_libraries(${namel}_${buildl}
+    ${CDISORT_LIBRARY_${buildu}}
+    ${PYTHON_LIBRARIES}
+    )
 
 set(${nameu}_LIBRARY_${buildu} ${namel}_${buildl}
     CACHE STRING 
