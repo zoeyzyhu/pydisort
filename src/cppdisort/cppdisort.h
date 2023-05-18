@@ -151,13 +151,13 @@ class DisortWrapper {
         return std::make_tuple(flxup, flxdn);
     }
 
-    py::array_t<double> RunRTIntensity() {
-        _ds.flag.onlyfl = false;
-        runDisort();
-        py::array_t<double> numpy_array({_ds.nphi, _ds.ntau, _ds.numu},
-                                        _ds_out.uu);
-        return numpy_array;
-    }
+   py::array_t<double> RunRTIntensity() {
+       _ds.flag.onlyfl = false;
+       runDisort();
+       py::array_t<double> numpy_array({_ds.nphi, _ds.ntau, _ds.numu},
+                                       _ds_out.uu);
+       return numpy_array;
+   }
 
    protected:
     disort_state _ds;

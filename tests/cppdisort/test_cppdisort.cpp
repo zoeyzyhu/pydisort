@@ -61,33 +61,3 @@ int main() {
     return 0;
 }
 
-
-// int main() {
-//   DisortWrapper disort;
-//   disort.SetAccuracy(0.01);
-//   disort.SetAtmosphereDimension(2, 20, 4, 2);
-//   disort.SetIntensityDimension(6, 12, 4);
-//   disort.SetLevelTemperature(new double[3]{ 250.0, 225.0, 200.0 }, 3);
-//   disort.SetOpticalDepth(new double[2]{ 0.1, 0.3 }, 2);
-//   disort.SetSingleScatteringAlbedo(new double[2]{ 0.8, 0.7 }, 2);
-//   disort.SetWavenumberRange_invcm(600, 3000);
-//   disort.SetOutgoingRay(new double[4]{ 0.1, 0.2, 0.3, 0.4 },
-//                        new double[6]{ 0.0, 1.5, 3.0, 4.5, 6.0, 7.5 });
-//   disort.Finalize();
-
-//   auto [flxup, flxdn] = disort.RunRTFlux();
-
-//   std::cout << "Flux up: ";
-//   for (auto i : flxup) {
-//     std::cout << i << " ";
-//   }
-//   std::cout << std::endl;
-
-//   std::cout << "Flux down: ";
-//   for (auto i : flxdn) {
-//     std::cout << i << " ";
-//   }
-//   std::cout << std::endl;
-
-//   return 0;
-// }
