@@ -23,7 +23,7 @@ PYBIND11_MODULE(pydisort, m) {
         .def("set_wavenumber_invcm", &DisortWrapper::SetWavenumber_invcm, py::arg("wave"))
         .def("set_output_optical_depth", &DisortWrapper::SetOutputOpticalDepth, py::arg("usrtau"), py::arg("len"))
         .def("set_outgoing_ray", &DisortWrapper::SetOutgoingRay, py::arg("umu"), py::arg("phi"))
-        .def("set_planck_source", &DisortWrapper::SetPlanckSource, py::arg("planck"))
+        //.def("set_planck_source", &DisortWrapper::SetPlanckSource, py::arg("planck"))
         //.def("set_legendre_coefficients", &DisortWrapper::SetLegendreCoefficients, py::arg("legendre"))
         .def("run_rt_flux", &DisortWrapper::RunRTFlux)
         .def("run_rt_intensity", &DisortWrapper::RunRTIntensity);
