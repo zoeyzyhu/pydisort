@@ -11,10 +11,10 @@ DisortWrapper *DisortWrapper::fromTomlTable(const toml::table &table) {
     auto ds_out = &disort->_ds_out;
 
     // set disort state
-    ds->nlyr = table["dim"]["nlyr"].value<int>().value_or(0);
-    ds->nmom = table["dim"]["nmom"].value<int>().value_or(0);
-    ds->nstr = table["dim"]["nstr"].value<int>().value_or(0);
-    ds->nphase = table["dim"]["nphase"].value<int>().value_or(0);
+    //ds->nlyr = table["dim"]["nlyr"].value<int>().value_or(0);
+    //ds->nmom = table["dim"]["nmom"].value<int>().value_or(0);
+    //ds->nstr = table["dim"]["nstr"].value<int>().value_or(0);
+    //ds->nphase = table["dim"]["nphase"].value<int>().value_or(0);
 
     ds->flag.ibcnd = table["flag"]["ibcnd"].value<bool>().value_or(false);
     ds->flag.usrtau = table["flag"]["usrtau"].value<bool>().value_or(false);
@@ -24,6 +24,7 @@ DisortWrapper *DisortWrapper::fromTomlTable(const toml::table &table) {
     ds->flag.spher = table["flag"]["spher"].value<bool>().value_or(false);
     ds->flag.onlyfl = table["flag"]["onlyfl"].value<bool>().value_or(false);
     ds->flag.quiet = table["flag"]["quiet"].value<bool>().value_or(false);
+    ds->flag.brdf_type = table["flag"]["brdf_type"].value<int>().value_or(0);
     ds->flag.intensity_correction =
         table["flag"]["intensity_correction"].value<bool>().value_or(false);
     ds->flag.old_intensity_correction =
@@ -39,24 +40,24 @@ DisortWrapper *DisortWrapper::fromTomlTable(const toml::table &table) {
     }
 
     ds->flag.usrtau = table["flag"]["usrtau"].value<bool>().value_or(false);
-    if (ds->flag.usrtau) {
+    /*if (ds->flag.usrtau) {
         ds->ntau = table["dim"]["ntau"].value<int>().value();
-    }
+    }*/
 
     ds->flag.usrang = table["flag"]["usrang"].value<bool>().value_or(false);
-    if (ds->flag.usrang) {
+    /*if (ds->flag.usrang) {
         ds->numu = table["dim"]["numu"].value<int>().value();
         ds->nphi = table["dim"]["nphi"].value<int>().value();
     } else {
         ds->nphi = 1;
-    }
+    }*/
 
     //disort->Finalize();
     return disort;
 }
 
 DisortWrapper *DisortWrapper::SetAtmosphereDimension(
-    int nlyr, int nmom, int nstr) {
+    int nlyr, int nmom, int nstr, int nphase) {
     if (_is_finalized) {
         // LOG(ERROR) << "Cannot set dimension after finalizing.";
         return this;
@@ -77,10 +78,15 @@ DisortWrapper *DisortWrapper::SetAtmosphereDimension(
         return this;
     }
 
+    if (nphase <= 0) {
+        // LOG(ERROR) << "nstr must be positive.";
+        return this;
+    }
+
     _ds.nlyr = nlyr;
     _ds.nmom = nmom;
     _ds.nstr = nstr;
-    _ds.nphi = 1;
+    _ds.nphi = nphase;
 
     return this;
 }

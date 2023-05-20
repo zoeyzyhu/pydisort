@@ -30,7 +30,7 @@ class DisortWrapper {
         return fromTomlTable(toml::parse_file(filename));
     }
 
-    DisortWrapper *SetAtmosphereDimension(int nlyr, int nstr, int nmom);
+    DisortWrapper *SetAtmosphereDimension(int nlyr, int nstr, int nmom, int nphase);
 
     DisortWrapper *SetFlags(std::map<std::string, bool> const &flags);
 
@@ -106,7 +106,7 @@ class DisortWrapper {
         return this;
     }
 
-    DisortWrapper *SetOutputOpticalDepth(double *usrtau, int len) {
+    DisortWrapper *SetUserOpticalDepth(double *usrtau, int len) {
         if (_ds.flag.usrtau) {
             for (int i = 0; i < std::min(_ds.ntau, len); ++i) {
                 _ds.utau[i] = usrtau[i];
@@ -115,11 +115,17 @@ class DisortWrapper {
         return this;
     }
 
-    DisortWrapper *SetOutgoingRay(double *umu, double *phi, int len) {
+    DisortWrapper *SetUserCosinePolarAngle(double *umu, int len) {
         if (_ds.flag.usrang) {
             for (int i = 0; i < std::min(_ds.numu, len); ++i) {
                 _ds.umu[i] = umu[i];
             }
+        }
+        return this;
+    }
+
+    DisortWrapper *SetUserAzimuthalAngle(double *phi, int len) {
+        if (_ds.flag.usrang) {
             for (int i = 0; i < std::min(_ds.nphi, len); ++i) {
                 _ds.phi[i] = phi[i];
             }
@@ -129,28 +135,32 @@ class DisortWrapper {
 
     void SetPlanckSource(double *planck);
 
-    void SetLegendreCoefficients(double **legendre);
+    void SetLegendreCoefficients(double **legendre, int len1, int len2);
 
-    std::tuple<std::vector<double>, std::vector<double>> RunRTFlux() {
-        _ds.flag.onlyfl = true;
+    //std::tuple<std::vector<double>, std::vector<double>> RunRTFlux() {
+    std::array_t<double> RunRTFlux(std::string fields) {
         runDisort();
-        std::vector<double> flxup(_ds.nlyr);
-        std::vector<double> flxdn(_ds.nlyr);
 
-        for (int i = 0; i < _ds.nlyr; ++i) {
-            flxup[i] = _ds_out.rad[i].flup;
-            flxdn[i] = _ds_out.rad[i].rfldir + _ds_out.rad[i].rfldn;
-        }
+        std::vector<std::string> fields = {
+            "rfldir", "rfldn", "flup", "dfdt", "uavg", "uavgdn",
+            "uavgup", "uavgso"};
 
-        return std::make_tuple(flxup, flxdn);
+        //for (int i = 0; i < _ds.nlyr; ++i) {
+        //    flxup[i] = _ds_out.rad[i].flup;
+        //    flxdn[i] = _ds_out.rad[i].rfldir + _ds_out.rad[i].rfldn;
+        //}
+
+        py::array_t<double> ndarray({_ds.nlyr + 1}, _ds_out.rad});
+
+        return ndarray;
     }
 
    py::array_t<double> RunRTIntensity() {
-       _ds.flag.onlyfl = false;
        runDisort();
-       py::array_t<double> numpy_array({_ds.nphi, _ds.ntau, _ds.numu},
-                                       _ds_out.uu);
-       return numpy_array;
+       py::array_t<double> ndarray(
+            {_ds.nphi, _ds.ntau, _ds.numu}, _ds_out.uu
+            );
+       return ndarray;
    }
 
    protected:

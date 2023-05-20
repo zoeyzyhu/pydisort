@@ -17,7 +17,7 @@ PYBIND11_MODULE(pydisort, m) {
 
         .def("set_atmosphere_dimension",
                 &DisortWrapper::SetAtmosphereDimension,
-            py::arg("nlyr"), py::arg("nmom"), py::arg("nstr")
+            py::arg("nlyr"), py::arg("nmom"), py::arg("nstr"), py::arg("nphase")
             )
             
         .def("set_flags",
@@ -189,6 +189,54 @@ PYBIND11_MODULE(pydisort, m) {
                         throw std::runtime_error("Incompatible buffer format!");
                     }
                     disort.SetOpticalDepth((double *)info.ptr, info.shape[0]);
+                }
+
+                if (kwargs.contains("pmom")) {
+                    py::buffer_info info =
+                        py::cast<py::buffer>(kwargs["pmom"]).request();
+                    if (info.format !=
+                            py::format_descriptor<double>::format() ||
+                        info.ndim != 2) {
+                        throw std::runtime_error("Incompatible buffer format!");
+                    }
+                    disort.SetLegendreCoefficients((double *)info.ptr,
+                            info.shape[0], info.shape[1]);
+                }
+
+                if (kwargs.contains("utau")) {
+                    py::buffer_info info =
+                        py::cast<py::buffer>(kwargs["utau"]).request();
+                    if (info.format !=
+                            py::format_descriptor<double>::format() ||
+                        info.ndim != 1) {
+                        throw std::runtime_error("Incompatible buffer format!");
+                    }
+                    disort.SetUserOpticalDepth((double *)info.ptr,
+                            info.shape[0]);
+                }
+
+                if (kwargs.contains("umu")) {
+                    py::buffer_info info =
+                        py::cast<py::buffer>(kwargs["umu"]).request();
+                    if (info.format !=
+                            py::format_descriptor<double>::format() ||
+                        info.ndim != 1) {
+                        throw std::runtime_error("Incompatible buffer format!");
+                    }
+                    disort.SetUserCosinePolarAngle((double *)info.ptr,
+                            info.shape[0]);
+                }
+
+                if (kwargs.contains("uphi")) {
+                    py::buffer_info info =
+                        py::cast<py::buffer>(kwargs["uphi"]).request();
+                    if (info.format !=
+                            py::format_descriptor<double>::format() ||
+                        info.ndim != 1) {
+                        throw std::runtime_error("Incompatible buffer format!");
+                    }
+                    disort.SetUserAzimuthalAngle((double *)info.ptr,
+                            info.shape[0]);
                 }
 
                 return disort.RunRTIntensity();
