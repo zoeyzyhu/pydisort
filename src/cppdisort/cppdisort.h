@@ -1,5 +1,5 @@
-#ifndef PROD_RAD_DISORT_DISORT_WRAPPER_H_
-#define PROD_RAD_DISORT_DISORT_WRAPPER_H_
+#ifndef DISORT_CPPDISORT_DISORTWRAPPER_H_
+#define DISORT_CPPDISORT_DISORTWRAPPER_H_
 
 #include <cdisort/cdisort.h>
 #include <pybind11/numpy.h>
@@ -38,14 +38,11 @@ class DisortWrapper {
     DisortWrapper *SetIntensityDimension(int nphi, int ntau, int numu);
 
     void Finalize() {
-        if (_is_finalized) {
-            throw std::runtime_error("Disort is already initialized!");
+        if (!_is_finalized) {
+            c_disort_state_alloc(&_ds);
+            c_disort_out_alloc(&_ds, &_ds_out);
+            _is_finalized = true;
         }
-
-        c_disort_state_alloc(&_ds);
-        c_disort_out_alloc(&_ds, &_ds_out);
-
-        _is_finalized = true;
     }
 
     void SetAccuracy(double accur) { _ds.accur = accur; }
@@ -61,35 +58,22 @@ class DisortWrapper {
     }
 
     DisortWrapper *SetOpticalDepth(double *tau, int len) {
-        if (len != _ds.nlyr) {
-            throw std::runtime_error("Optical depth array length mismatch!");
-        }
-        for (int i = 0; i < _ds.nlyr; ++i) {
+        for (int i = 0; i < std::min(_ds.nlyr, len); ++i) {
             _ds.dtauc[i] = tau[i];
         }
         return this;
     }
 
     DisortWrapper *SetSingleScatteringAlbedo(double *ssa, int len) {
-        if (len != _ds.nlyr) {
-            throw std::runtime_error(
-                "Single Scattering array length mismatch!");
-        }
-
-        for (int i = 0; i < _ds.nlyr; ++i) {
+        for (int i = 0; i < std::min(_ds.nlyr, len); ++i) {
             _ds.ssalb[i] = ssa[i];
         }
         return this;
     }
 
     DisortWrapper *SetLevelTemperature(double *temp, int len) {
-        if (len != _ds.nlyr + 1) {
-            throw std::runtime_error("Temperature array length mismatch!");
-        }
-        for (int i = 0; i <= _ds.nlyr; ++i) {
-            if (temp[i] < 0) {
-                throw std::runtime_error("Temperature must be positive!");
-            }
+        // temperature array is defined on levels
+        for (int i = 0; i <= std::min(_ds.nlyr, len - 1); ++i) {
             _ds.temper[i] = temp[i];
         }
         return this;
@@ -108,25 +92,20 @@ class DisortWrapper {
     }
 
     DisortWrapper *SetOutputOpticalDepth(double *usrtau, int len) {
-        if (len != _ds.ntau) {
-            throw std::runtime_error(
-                "Output optical depth array length mismatch!");
-        }
-
         if (_ds.flag.usrtau) {
-            for (int i = 0; i < _ds.ntau; ++i) {
+            for (int i = 0; i < std::min(_ds.ntau, len); ++i) {
                 _ds.utau[i] = usrtau[i];
             }
         }
         return this;
     }
 
-    DisortWrapper *SetOutgoingRay(double *umu, double *phi) {
+    DisortWrapper *SetOutgoingRay(double *umu, double *phi, int len) {
         if (_ds.flag.usrang) {
-            for (int i = 0; i < _ds.numu; ++i) {
+            for (int i = 0; i < std::min(_ds.numu, len); ++i) {
                 _ds.umu[i] = umu[i];
             }
-            for (int i = 0; i < _ds.nphi; ++i) {
+            for (int i = 0; i < std::min(_ds.nphi, len); ++i) {
                 _ds.phi[i] = phi[i];
             }
         }

@@ -2,31 +2,204 @@
 #include <pybind11/stl.h>
 #include <cppdisort/cppdisort.h>
 
+#include <iostream>
+
 namespace py = pybind11;
+
+// TODO(CLI): most function should support double, flat and int types
 
 PYBIND11_MODULE(pydisort, m) {
     py::class_<DisortWrapper>(m, "disort")
-        //.def(py::init<>())
-        .def_static("from_file", &DisortWrapper::FromFile, py::arg("filename"))
-        .def("set_atmosphere_dimension", &DisortWrapper::SetAtmosphereDimension,
-            py::arg("nlyr"), py::arg("nmom"), py::arg("nstr"), py::arg("nphase"))
-        .def("set_flags", py::overload_cast<std::map<std::string, bool> const &>(&DisortWrapper::SetFlags),
-            py::arg("flags"))
-        .def("set_intensity_dimension", &DisortWrapper::SetIntensityDimension,
-            py::arg("nphi"), py::arg("numu"), py::arg("ntau"))
-        .def("finalize", &DisortWrapper::Finalize)
-        .def("set_accuracy", &DisortWrapper::SetAccuracy, py::arg("accur"))
-        .def("set_optical_depth", &DisortWrapper::SetOpticalDepth, py::arg("tau"), py::arg("len"))
-        .def("set_single_scattering_albedo", &DisortWrapper::SetSingleScatteringAlbedo, py::arg("ssa"), py::arg("len"))
-        .def("set_level_temperature", &DisortWrapper::SetLevelTemperature, py::arg("temp"), py::arg("len"))
-        .def("set_wavenumber_range_invcm", &DisortWrapper::SetWavenumberRange_invcm, py::arg("wmin"), py::arg("wmax"))
-        .def("set_wavenumber_invcm", &DisortWrapper::SetWavenumber_invcm, py::arg("wave"))
-        .def("set_output_optical_depth", &DisortWrapper::SetOutputOpticalDepth, py::arg("usrtau"), py::arg("len"))
-        .def("set_outgoing_ray", &DisortWrapper::SetOutgoingRay, py::arg("umu"), py::arg("phi"))
-        //.def("set_planck_source", &DisortWrapper::SetPlanckSource, py::arg("planck"))
-        //.def("set_legendre_coefficients", &DisortWrapper::SetLegendreCoefficients, py::arg("legendre"))
-        .def("run_rt_flux", &DisortWrapper::RunRTFlux)
-        .def("run_rt_intensity", &DisortWrapper::RunRTIntensity);
+        // No need to expose the constructor, since we have static factory
+        // methods such as from_{file,string,...}.
+        .def_static("from_file",
+            &DisortWrapper::FromFile)
 
-    py::register_exception<std::runtime_error>(m, "RuntimeError");
+        .def("set_atmosphere_dimension",
+                &DisortWrapper::SetAtmosphereDimension,
+            py::arg("nlyr"), py::arg("nmom"), py::arg("nstr"), py::arg("nphase")
+            )
+            
+        .def("set_flags",
+            py::overload_cast<std::map<std::string, bool> const &>(&DisortWrapper::SetFlags)
+            )
+
+        .def("set_intensity_dimension",
+            &DisortWrapper::SetIntensityDimension,
+            py::arg("nphi"), py::arg("numu"), py::arg("ntau")
+            )
+
+        .def("finalize",
+            &DisortWrapper::Finalize
+            )
+
+        .def("set_accuracy",
+            &DisortWrapper::SetAccuracy
+            )
+
+        .def("set_optical_depth",
+            [](DisortWrapper &disort, py::buffer b) {
+                 py::buffer_info info = b.request();
+                 if (info.format != py::format_descriptor<double>::format() ||
+                     info.ndim != 1) {
+                     throw std::runtime_error("Incompatible buffer format!");
+                 }
+                 // call the function
+                 return disort.SetOpticalDepth((double *)info.ptr,
+                                               info.shape[0]);
+             })
+
+        .def("set_optical_depth",
+             [](DisortWrapper &disort, py::list lst) {
+                 std::vector<double> optical_depth;
+                 for (auto elem : lst) {
+                     optical_depth.push_back(py::cast<double>(elem));
+                 }
+                 // call the function
+                 return disort.SetOpticalDepth(optical_depth.data(),
+                                               optical_depth.size());
+             })
+
+        .def("set_single_scattering_albedo",
+             [](DisortWrapper &disort, py::buffer b) {
+                 py::buffer_info info = b.request();
+                 if (info.format != py::format_descriptor<double>::format() ||
+                     info.ndim != 1) {
+                     throw std::runtime_error("Incompatible buffer format!");
+                 }
+                 // call the function
+                 return disort.SetSingleScatteringAlbedo((double *)info.ptr,
+                                                         info.shape[0]);
+             })
+
+        .def("set_single_scattering_albedo",
+             [](DisortWrapper &disort, py::list lst) {
+                 std::vector<double> ssa;
+                 for (auto elem : lst) {
+                     ssa.push_back(py::cast<double>(elem));
+                 }
+                 // call the function
+                 return disort.SetSingleScatteringAlbedo(ssa.data(),
+                                                         ssa.size());
+             })
+
+        .def("set_level_temperature",
+             [](DisortWrapper &disort, py::buffer b) {
+                 py::buffer_info info = b.request();
+                 if (info.format != py::format_descriptor<double>::format() ||
+                     info.ndim != 1) {
+                     throw std::runtime_error("Incompatible buffer format!");
+                 }
+                 // call the function
+                 return disort.SetLevelTemperature((double *)info.ptr,
+                                                   info.shape[0]);
+             })
+
+        .def("set_level_temperature",
+             [](DisortWrapper &disort, py::list lst) {
+                 std::vector<double> level_temperature;
+                 for (auto elem : lst) {
+                     level_temperature.push_back(py::cast<double>(elem));
+                 }
+                 // call the function
+                 return disort.SetLevelTemperature(level_temperature.data(),
+                                                   level_temperature.size());
+             })
+
+        .def("run_rt_flux", &DisortWrapper::RunRTFlux)
+        .def("run_rt_flux",
+            [](DisortWrapper &disort, py::dict &kwargs) {
+                // TODO(CLI): support more options
+                if (kwargs.contains("temp")) {
+                    py::buffer_info info =
+                        py::cast<py::buffer>(kwargs["temp"]).request();
+                    if (info.format !=
+                            py::format_descriptor<double>::format() ||
+                        info.ndim != 1) {
+                        throw std::runtime_error("Incompatible buffer format!");
+                    }
+
+                    disort.SetLevelTemperature((double *)info.ptr,
+                                               info.shape[0]);
+                }
+
+                if (kwargs.contains("ssa")) {
+                    py::buffer_info info =
+                        py::cast<py::buffer>(kwargs["ssa"]).request();
+                    if (info.format !=
+                            py::format_descriptor<double>::format() ||
+                        info.ndim != 1) {
+                        throw std::runtime_error("Incompatible buffer format!");
+                    }
+
+                    disort.SetSingleScatteringAlbedo((double *)info.ptr,
+                                                     info.shape[0]);
+                }
+
+                if (kwargs.contains("tau")) {
+                    py::buffer_info info =
+                        py::cast<py::buffer>(kwargs["tau"]).request();
+                    if (info.format !=
+                            py::format_descriptor<double>::format() ||
+                        info.ndim != 1) {
+                        throw std::runtime_error("Incompatible buffer format!");
+                    }
+                    disort.SetOpticalDepth((double *)info.ptr, info.shape[0]);
+                }
+
+                return disort.RunRTFlux();
+            })
+
+        .def("run_rt_intensity", &DisortWrapper::RunRTIntensity)
+        .def("run_rt_intensity",
+            [](DisortWrapper &disort, py::dict &kwargs) {
+                // TODO(CLI): support more options
+                if (kwargs.contains("temp")) {
+                    py::buffer_info info =
+                        py::cast<py::buffer>(kwargs["temp"]).request();
+                    if (info.format !=
+                            py::format_descriptor<double>::format() ||
+                        info.ndim != 1) {
+                        throw std::runtime_error("Incompatible buffer format!");
+                    }
+
+                    disort.SetLevelTemperature((double *)info.ptr,
+                                               info.shape[0]);
+                }
+
+                if (kwargs.contains("ssa")) {
+                    py::buffer_info info =
+                        py::cast<py::buffer>(kwargs["ssa"]).request();
+                    if (info.format !=
+                            py::format_descriptor<double>::format() ||
+                        info.ndim != 1) {
+                        throw std::runtime_error("Incompatible buffer format!");
+                    }
+
+                    disort.SetSingleScatteringAlbedo((double *)info.ptr,
+                                                     info.shape[0]);
+                }
+
+                if (kwargs.contains("tau")) {
+                    py::buffer_info info =
+                        py::cast<py::buffer>(kwargs["tau"]).request();
+                    if (info.format !=
+                            py::format_descriptor<double>::format() ||
+                        info.ndim != 1) {
+                        throw std::runtime_error("Incompatible buffer format!");
+                    }
+                    disort.SetOpticalDepth((double *)info.ptr, info.shape[0]);
+                }
+
+                return disort.RunRTIntensity();
+            })
+
+        .def("set_wavenumber_range_invcm",
+            &DisortWrapper::SetWavenumberRange_invcm,
+            py::arg("wmin"), py::arg("wmax")
+            )
+
+        .def("set_wavenumber_invcm",
+            &DisortWrapper::SetWavenumber_invcm
+            );
 }
