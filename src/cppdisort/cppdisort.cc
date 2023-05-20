@@ -3,14 +3,6 @@
 #include <iostream>
 #include <sstream>
 #include <toml++/toml.h>
-
-// TODO(zhongmingqu): Uncomment the following line after fixing the erorr:
-//    In file included from prod/rad/disort/disort_wrapper.cc:7:
-//    bazel-out/k8-fastbuild/bin/external/org_libradtran_dowling_disort/_virtual_includes/disort/disort/cdisort.h:1308:1:
-//    error: extraneous closing brace ('}') } /* extern "C" */
-//    ^
-// #include <disort/cdisort.h>
-
 #include "cppdisort.h"
 
 DisortWrapper *DisortWrapper::fromTomlTable(const toml::table &table) {
@@ -59,12 +51,12 @@ DisortWrapper *DisortWrapper::fromTomlTable(const toml::table &table) {
         ds->nphi = 1;
     }
 
-    disort->Finalize();
+    //disort->Finalize();
     return disort;
 }
 
-DisortWrapper *DisortWrapper::SetAtmosphereDimension(int nlyr, int nmom,
-                                                     int nstr, int nphase) {
+DisortWrapper *DisortWrapper::SetAtmosphereDimension(
+    int nlyr, int nmom, int nstr) {
     if (_is_finalized) {
         // LOG(ERROR) << "Cannot set dimension after finalizing.";
         return this;
@@ -85,15 +77,9 @@ DisortWrapper *DisortWrapper::SetAtmosphereDimension(int nlyr, int nmom,
         return this;
     }
 
-    if (nphase <= 0) {
-        // LOG(ERROR) << "nphase must be positive.";
-        return this;
-    }
-
     _ds.nlyr = nlyr;
     _ds.nmom = nmom;
     _ds.nstr = nstr;
-    _ds.nphase = nphase;
     _ds.nphi = 1;
 
     return this;
@@ -201,7 +187,7 @@ void DisortWrapper::runDisort() {
     _ds.bc.phi0 = phi0;
 
     // LOG(INFO) << "Disort is running. ds = ";
-    printDisortState();
+    //printDisortState();
     c_disort(&_ds, &_ds_out);
     // LOG(INFO) << "Disort is finished. ds_out = ";
 }

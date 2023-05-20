@@ -4,7 +4,8 @@ import pydisort
 pydt = pydisort.disort.from_file("input.toml")
 
 # Set the atmosphere dimensions
-pydt.set_atmosphere_dimension(10, 20, 30, 40)
+pydt.set_atmosphere_dimension(
+    nlyr = 10, nmom = 4, nstr = 4)
 
 # Set the flags
 flags = {
@@ -24,21 +25,21 @@ flags = {
 pydt.set_flags(flags)
 
 # Set the intensity dimensions
-pydt.set_intensity_dimension(5, 15, 25)
+pydt.set_intensity_dimension(5, 5, 5)
 
 # Set other parameters
-# pydt.btemp = 300.0
-# pydt.ttemp = 280.0
-# pydt.fluor = 0.5
-# pydt.albedo = 0.2
-# pydt.fisot = 0.8
-# pydt.fbeam = 0.6
-# pydt.temis = 290.0
-# pydt.umu0 = 0.8
-# pydt.phi0 = 0.0
+pydt.btemp = 300.0
+pydt.ttemp = 280.0
+pydt.fluor = 0.5
+pydt.albedo = 0.2
+pydt.fisot = 0.8
+pydt.fbeam = 0.6
+pydt.temis = 290.0
+pydt.umu0 = 0.8
+pydt.phi0 = 0.0
 
 # Finalize the DisortWrapper instance
-# pydt.finalize()
+pydt.finalize()
 
 # Run RT Flux calculation
 flxup, flxdn = pydt.run_rt_flux()

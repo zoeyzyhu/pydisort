@@ -17,7 +17,7 @@ PYBIND11_MODULE(pydisort, m) {
 
         .def("set_atmosphere_dimension",
                 &DisortWrapper::SetAtmosphereDimension,
-            py::arg("nlyr"), py::arg("nmom"), py::arg("nstr"), py::arg("nphase")
+            py::arg("nlyr"), py::arg("nmom"), py::arg("nstr")
             )
             
         .def("set_flags",
@@ -201,5 +201,15 @@ PYBIND11_MODULE(pydisort, m) {
 
         .def("set_wavenumber_invcm",
             &DisortWrapper::SetWavenumber_invcm
-            );
+            )
+
+        .def_readwrite("btemp", &DisortWrapper::btemp)
+        .def_readwrite("ttemp", &DisortWrapper::ttemp)
+        .def_readwrite("fluor", &DisortWrapper::fluor)
+        .def_readwrite("albedo", &DisortWrapper::albedo)
+        .def_readwrite("fisot", &DisortWrapper::fisot)
+        .def_readwrite("fbeam", &DisortWrapper::fbeam)
+        .def_readwrite("temis", &DisortWrapper::temis)
+        .def_readwrite("umu0", &DisortWrapper::umu0)
+        .def_readwrite("phi0", &DisortWrapper::phi0);
 }

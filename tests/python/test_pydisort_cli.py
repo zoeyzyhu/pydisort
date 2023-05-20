@@ -10,7 +10,7 @@ class TestPydisort(unittest.TestCase):
 
     def setUp(self):
         self.toml_path = "input.toml"
-        assert self.toml_path, f'{self.toml_path} is not found.'
+        assert self.toml_path, '{self.toml_path} is not found.'
 
     def test_from_file(self):
         disort = pydisort.disort.from_file(self.toml_path)

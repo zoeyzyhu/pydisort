@@ -30,8 +30,7 @@ class DisortWrapper {
         return fromTomlTable(toml::parse_file(filename));
     }
 
-    DisortWrapper *SetAtmosphereDimension(int nlyr, int nstr, int nmom,
-                                          int nphase);
+    DisortWrapper *SetAtmosphereDimension(int nlyr, int nstr, int nmom);
 
     DisortWrapper *SetFlags(std::map<std::string, bool> const &flags);
 
@@ -43,6 +42,22 @@ class DisortWrapper {
             c_disort_out_alloc(&_ds, &_ds_out);
             _is_finalized = true;
         }
+    }
+
+    bool IsFinalized() const {
+        return _is_finalized;
+    }
+
+    int nLayers() const {
+        return _ds.nlyr;
+    }
+
+    int nMoments() const {
+        return _ds.nmom;
+    }
+
+    int nStreams() const {
+        return _ds.nstr;
     }
 
     void SetAccuracy(double accur) { _ds.accur = accur; }
@@ -160,6 +175,7 @@ class DisortWrapper {
 
     void runDisort();
     void printDisortState();
+    void printDisortFlags();
 };
 
 class DisortWrapperTestOnly : public DisortWrapper {
