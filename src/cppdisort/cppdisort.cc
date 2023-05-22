@@ -172,14 +172,14 @@ DisortWrapper *DisortWrapper::SetFlags(
     return this;
 }
 
-DisortWrapper *DisortWrapper::SetIntensityDimension(int nphi, int numu,
-                                                    int ntau) {
+DisortWrapper *DisortWrapper::SetIntensityDimension(
+        int nuphi, int nutau, int numu) {
     if (_is_finalized) {
         // LOG(ERROR) << "Cannot set dimension after finalizing.";
         return this;
     }
 
-    if (nphi <= 0) {
+    if (nuphi <= 0) {
         // LOG(ERROR) << "nphi must be positive.";
         return this;
     }
@@ -189,17 +189,17 @@ DisortWrapper *DisortWrapper::SetIntensityDimension(int nphi, int numu,
         return this;
     }
 
-    if (ntau <= 0) {
+    if (nutau <= 0) {
         // LOG(ERROR) << "ntau must be positive.";
         return this;
     }
 
     if (_ds.flag.usrang) {
-        _ds.nphi = nphi;
+        _ds.nphi = nuphi;
         _ds.numu = numu;
     }
 
-    if (_ds.flag.usrtau) _ds.ntau = ntau;
+    if (_ds.flag.usrtau) _ds.ntau = nutau;
     return this;
 }
 

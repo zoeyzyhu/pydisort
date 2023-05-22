@@ -40,7 +40,7 @@ class DisortWrapper {
 
     DisortWrapper *SetFlags(std::map<std::string, bool> const &flags);
 
-    DisortWrapper *SetIntensityDimension(int nphi, int ntau, int numu);
+    DisortWrapper *SetIntensityDimension(int nuphi, int nutau, int numu);
 
     void Finalize() {
         if (!_is_finalized) {

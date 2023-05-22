@@ -33,7 +33,7 @@ PYBIND11_MODULE(pydisort, m) {
 
         .def("set_intensity_dimension",
             &DisortWrapper::SetIntensityDimension,
-            py::arg("nphi"), py::arg("numu"), py::arg("ntau")
+            py::arg("nuphi"), py::arg("nutau"), py::arg("numu")
             )
 
         .def("finalize",
