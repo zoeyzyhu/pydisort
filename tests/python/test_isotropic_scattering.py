@@ -15,11 +15,9 @@ class PyDisortTests(unittest.TestCase):
         ds.set_header("01. test isotropic scattering")
 
         # set dimension
-        ds.set_atmosphere_dimension(
-            nlyr = 1, nstr = 16, nmom = 16, nphase = 16)
-        ds.set_intensity_dimension(
-            nuphi = 1, nutau = 2, numu = 6)
-        ds.finalize()
+        ds.set_atmosphere_dimension(nlyr = 1, nstr = 16, nmom = 16, nphase = 16) \
+          .set_intensity_dimension(nuphi = 1, nutau = 2, numu = 6) \
+          .finalize()
 
         # get scattering moments
         pmom = get_legendre_coefficients(ds.get_nmom(), "isotropic")
@@ -50,7 +48,15 @@ class PyDisortTests(unittest.TestCase):
         assert_allclose(result, array([
             [[0., 0., 0., 0.11777066, 0.02641704, 0.01340413],
              [0.01338263, 0.02633235, 0.11589789, 0., 0., 0.]]
-            ]), atol=1e-8, rtol=1e-5)
+            ]), atol = 1e-8, rtol = 1e-5)
+
+        # case No.2
+        ssa = array([1.])
+        result = ds.run_rt_intensity({'ssa':ssa})
+        assert_allclose(result, array([
+            [[0., 0., 0., 0.62288378, 0.13976294, 0.07091916],
+             [0.07081093, 0.1393367, 0.61345786, 0., 0., 0.]]
+            ]), atol = 1e-8, rtol = 1e-5)
 
 if __name__ == '__main__':
     unittest.main()
