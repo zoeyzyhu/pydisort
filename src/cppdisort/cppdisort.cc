@@ -1,5 +1,3 @@
-//#include <glog/logging.h>
-
 #include <memory>
 #include <iostream>
 #include <sstream>
@@ -43,12 +41,6 @@ DisortWrapper *DisortWrapper::fromTomlTable(const toml::table &table) {
     auto ds = &disort->_ds;
     auto ds_out = &disort->_ds_out;
 
-    // set disort state
-    //ds->nlyr = table["dim"]["nlyr"].value<int>().value_or(0);
-    //ds->nmom = table["dim"]["nmom"].value<int>().value_or(0);
-    //ds->nstr = table["dim"]["nstr"].value<int>().value_or(0);
-    //ds->nphase = table["dim"]["nphase"].value<int>().value_or(0);
-
     ds->flag.ibcnd = table["flag"]["ibcnd"].value<bool>().value_or(false);
     ds->flag.usrtau = table["flag"]["usrtau"].value<bool>().value_or(false);
     ds->flag.usrang = table["flag"]["usrang"].value<bool>().value_or(false);
@@ -73,19 +65,9 @@ DisortWrapper *DisortWrapper::fromTomlTable(const toml::table &table) {
     }
 
     ds->flag.usrtau = table["flag"]["usrtau"].value<bool>().value_or(false);
-    /*if (ds->flag.usrtau) {
-        ds->ntau = table["dim"]["ntau"].value<int>().value();
-    }*/
 
     ds->flag.usrang = table["flag"]["usrang"].value<bool>().value_or(false);
-    /*if (ds->flag.usrang) {
-        ds->numu = table["dim"]["numu"].value<int>().value();
-        ds->nphi = table["dim"]["nphi"].value<int>().value();
-    } else {
-        ds->nphi = 1;
-    }*/
 
-    //disort->Finalize();
     return disort;
 }
 
@@ -96,27 +78,22 @@ void DisortWrapper::SetHeader(std::string header) {
 DisortWrapper *DisortWrapper::SetAtmosphereDimension(
     int nlyr, int nmom, int nstr, int nphase) {
     if (_is_finalized) {
-        // LOG(ERROR) << "Cannot set dimension after finalizing.";
         return this;
     }
 
     if (nlyr <= 0) {
-        // LOG(ERROR) << "nlyr must be positive.";
         return this;
     }
 
     if (nmom <= 0) {
-        // LOG(ERROR) << "nmom must be positive.";
         return this;
     }
 
     if (nstr <= 0) {
-        // LOG(ERROR) << "nstr must be positive.";
         return this;
     }
 
     if (nphase <= 0) {
-        // LOG(ERROR) << "nstr must be positive.";
         return this;
     }
 
@@ -184,22 +161,18 @@ DisortWrapper *DisortWrapper::SetFlags(
 DisortWrapper *DisortWrapper::SetIntensityDimension(
         int nuphi, int nutau, int numu) {
     if (_is_finalized) {
-        // LOG(ERROR) << "Cannot set dimension after finalizing.";
         return this;
     }
 
     if (nuphi <= 0) {
-        // LOG(ERROR) << "nphi must be positive.";
         return this;
     }
 
     if (numu <= 0) {
-        // LOG(ERROR) << "numu must be positive.";
         return this;
     }
 
     if (nutau <= 0) {
-        // LOG(ERROR) << "ntau must be positive.";
         return this;
     }
 
@@ -297,11 +270,9 @@ py::array_t<double> DisortWrapper::GetIntensity() const {
 
 DisortWrapper* DisortWrapper::Run() {
     if (!_is_finalized) {
-        // LOG(ERROR) << "Disort is not finalized.";
         return this;
     }
 
-    // LOG(INFO) << "Set Disort boundary condition";
     _ds.bc.btemp = btemp;
     _ds.bc.ttemp = ttemp;
     _ds.bc.fluor = fluor;
@@ -312,10 +283,7 @@ DisortWrapper* DisortWrapper::Run() {
     _ds.bc.umu0 = umu0;
     _ds.bc.phi0 = phi0;
 
-    // LOG(INFO) << "Disort is running. ds = ";
-    //printDisortState();
     c_disort(&_ds, &_ds_out);
-    // LOG(INFO) << "Disort is finished. ds_out = ";
 
     return this;
 }
