@@ -203,9 +203,98 @@ DisortWrapper *DisortWrapper::SetIntensityDimension(
     return this;
 }
 
-void DisortWrapper::SetPhaseMoments(double *pmom, int nlyr, int nmom_p1)
+void DisortWrapper::Finalize() {
+    if (!_is_finalized) {
+        c_disort_state_alloc(&_ds);
+        c_disort_out_alloc(&_ds, &_ds_out);
+        _is_finalized = true;
+    }
+}
+
+DisortWrapper::~DisortWrapper() {
+    if (_is_finalized) {
+        c_disort_state_free(&_ds);
+        c_disort_out_free(&_ds, &_ds_out);
+        _is_finalized = false;
+    }
+}
+
+void DisortWrapper::SetOpticalDepth(double *tau, int len) {
+    for (int i = 0; i < std::min(_ds.nlyr, len); ++i) {
+        _ds.dtauc[i] = tau[i];
+    }
+}
+
+void DisortWrapper::SetSingleScatteringAlbedo(
+        double *ssa, int len) {
+    for (int i = 0; i < std::min(_ds.nlyr, len); ++i) {
+        _ds.ssalb[i] = ssa[i];
+    }
+}
+
+void DisortWrapper::SetLevelTemperature(
+        double *temp, int len) {
+    for (int i = 0; i <= std::min(_ds.nlyr, len - 1); ++i) {
+        _ds.temper[i] = temp[i];
+    }
+}
+
+
+void DisortWrapper::SetUserOpticalDepth(
+        double *usrtau, int len) {
+    if (_ds.flag.usrtau) {
+        for (int i = 0; i < std::min(_ds.ntau, len); ++i) {
+            _ds.utau[i] = usrtau[i];
+        }
+    }
+}
+
+void DisortWrapper::SetUserCosinePolarAngle(double *umu, int len) {
+    if (_ds.flag.usrang) {
+        for (int i = 0; i < std::min(_ds.numu, len); ++i) {
+            _ds.umu[i] = umu[i];
+        }
+    }
+}
+
+void DisortWrapper::SetUserAzimuthalAngle(double *phi, int len) {
+    if (_ds.flag.usrang) {
+        for (int i = 0; i < std::min(_ds.nphi, len); ++i) {
+            _ds.phi[i] = phi[i];
+        }
+    }
+}
+
+void DisortWrapper::SetPhaseMoments(
+        double *pmom, int nlyr, int nmom_p1)
 {
     std::memcpy(_ds.pmom, pmom, nlyr * nmom_p1 * sizeof(double));
+}
+
+py::array_t<double> DisortWrapper::RunRTFlux(std::string outputs) {
+    runDisort();
+
+    std::vector<std::string> allfields = {
+        "rfldir", "rfldn", "flup", "dfdt", "uavg", "uavgdn",
+        "uavgup", "uavgso"};
+
+    //for (int i = 0; i < _ds.nlyr; ++i) {
+    //    flxup[i] = _ds_out.rad[i].flup;
+    //    flxdn[i] = _ds_out.rad[i].rfldir + _ds_out.rad[i].rfldn;
+    //}
+
+    //py::array_t<double> ndarray({_ds.nlyr + 1}, _ds_out.rad);
+    py::array_t<double> ndarray;
+
+    return ndarray;
+}
+
+py::array_t<double> DisortWrapper::RunRTIntensity() {
+   runDisort();
+   py::array_t<double> ndarray(
+        {_ds.nphi, _ds.ntau, _ds.numu}, _ds_out.uu
+        );
+   return ndarray;
 }
 
 void DisortWrapper::runDisort() {

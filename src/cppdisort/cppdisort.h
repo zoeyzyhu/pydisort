@@ -34,6 +34,8 @@ class DisortWrapper {
         return fromTomlTable(toml::parse_file(filename));
     }
 
+    virtual ~DisortWrapper();
+
     void SetHeader(std::string header);
 
     DisortWrapper *SetAtmosphereDimension(int nlyr, int nstr, int nmom, int nphase);
@@ -42,13 +44,9 @@ class DisortWrapper {
 
     DisortWrapper *SetIntensityDimension(int nuphi, int nutau, int numu);
 
-    void Finalize() {
-        if (!_is_finalized) {
-            c_disort_state_alloc(&_ds);
-            c_disort_out_alloc(&_ds, &_ds_out);
-            _is_finalized = true;
-        }
-    }
+    //void SetFlags(py::dict const& dict);
+
+    void Finalize();
 
     bool IsFinalized() const {
         return _is_finalized;
@@ -66,78 +64,32 @@ class DisortWrapper {
         return _ds.nstr;
     }
 
-    void SetAccuracy(double accur) { _ds.accur = accur; }
-
-    void SetFlags(py::dict const& dict);
-
-    virtual ~DisortWrapper() {
-        if (_is_finalized) {
-            c_disort_state_free(&_ds);
-            c_disort_out_free(&_ds, &_ds_out);
-            _is_finalized = false;
-        }
+    void SetAccuracy(double accur) {
+        _ds.accur = accur;
     }
 
-    DisortWrapper *SetOpticalDepth(double *tau, int len) {
-        for (int i = 0; i < std::min(_ds.nlyr, len); ++i) {
-            _ds.dtauc[i] = tau[i];
-        }
-        return this;
-    }
-
-    DisortWrapper *SetSingleScatteringAlbedo(double *ssa, int len) {
-        for (int i = 0; i < std::min(_ds.nlyr, len); ++i) {
-            _ds.ssalb[i] = ssa[i];
-        }
-        return this;
-    }
-
-    DisortWrapper *SetLevelTemperature(double *temp, int len) {
-        // temperature array is defined on levels
-        for (int i = 0; i <= std::min(_ds.nlyr, len - 1); ++i) {
-            _ds.temper[i] = temp[i];
-        }
-        return this;
-    }
-
-    DisortWrapper *SetWavenumberRange_invcm(double wmin, double wmax) {
+    void SetWavenumberRange_invcm(double wmin, double wmax) {
         _ds.wvnmlo = wmin;
         _ds.wvnmhi = wmax;
-        return this;
     }
 
-    DisortWrapper *SetWavenumber_invcm(double wave) {
+    void SetWavenumber_invcm(double wave) {
         _ds.wvnmlo = wave;
         _ds.wvnmhi = wave;
-        return this;
     }
 
-    DisortWrapper *SetUserOpticalDepth(double *usrtau, int len) {
-        if (_ds.flag.usrtau) {
-            for (int i = 0; i < std::min(_ds.ntau, len); ++i) {
-                _ds.utau[i] = usrtau[i];
-            }
-        }
-        return this;
-    }
+    void SetOpticalDepth(double *tau, int len);
 
-    DisortWrapper *SetUserCosinePolarAngle(double *umu, int len) {
-        if (_ds.flag.usrang) {
-            for (int i = 0; i < std::min(_ds.numu, len); ++i) {
-                _ds.umu[i] = umu[i];
-            }
-        }
-        return this;
-    }
+    void SetSingleScatteringAlbedo(double *ssa, int len);
 
-    DisortWrapper *SetUserAzimuthalAngle(double *phi, int len) {
-        if (_ds.flag.usrang) {
-            for (int i = 0; i < std::min(_ds.nphi, len); ++i) {
-                _ds.phi[i] = phi[i];
-            }
-        }
-        return this;
-    }
+    // temperature array is defined on levels
+    void SetLevelTemperature(double *temp, int len);
+
+    void SetUserOpticalDepth(double *usrtau, int len);
+
+    void SetUserCosinePolarAngle(double *umu, int len);
+
+    void SetUserAzimuthalAngle(double *phi, int len);
 
     void SetPlanckSource(double *planck);
 
@@ -145,34 +97,11 @@ class DisortWrapper {
     // with nlyr being the number of layers and nmom the number of scattering moments
     void SetPhaseMoments(double *pmom, int nlyr, int nmom_p1);
 
-    //std::tuple<std::vector<double>, std::vector<double>> RunRTFlux() {
-    py::array_t<double> RunRTFlux(std::string outputs) {
-        runDisort();
+    py::array_t<double> RunRTFlux(std::string outputs);
 
-        std::vector<std::string> allfields = {
-            "rfldir", "rfldn", "flup", "dfdt", "uavg", "uavgdn",
-            "uavgup", "uavgso"};
+    py::array_t<double> RunRTIntensity();
 
-        //for (int i = 0; i < _ds.nlyr; ++i) {
-        //    flxup[i] = _ds_out.rad[i].flup;
-        //    flxdn[i] = _ds_out.rad[i].rfldir + _ds_out.rad[i].rfldn;
-        //}
-
-        //py::array_t<double> ndarray({_ds.nlyr + 1}, _ds_out.rad);
-        py::array_t<double> ndarray;
-
-        return ndarray;
-   }
-
-   py::array_t<double> RunRTIntensity() {
-       runDisort();
-       py::array_t<double> ndarray(
-            {_ds.nphi, _ds.ntau, _ds.numu}, _ds_out.uu
-            );
-       return ndarray;
-   }
-
-   protected:
+protected:
     disort_state _ds;
     disort_output _ds_out;
 
