@@ -32,6 +32,7 @@ message(STATUS "----- Placeholder ----- ")
 
 ## 3. Set up project system libraries ##
 message(STATUS "3. Set up project system libraries----------------")
+
 message(STATUS "Setup tomlpp ")
 include(${CMAKE_SOURCE_DIR}/cmake/tomlpp.cmake)
 
