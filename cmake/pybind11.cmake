@@ -4,17 +4,6 @@ set(FETCHCONTENT_QUIET FALSE)
 
 # Execute python3-config to get the include flags
 find_package(Python COMPONENTS Interpreter Development)
-#execute_process(
-#    COMMAND python3-config --includes
-#    OUTPUT_VARIABLE PYTHON_INCLUDE_FLAGS
-#    OUTPUT_STRIP_TRAILING_WHITESPACE
-#)
-
-# 3.2.2 Extract the include path from the flags
-#string(REGEX MATCH "-I([^\\\"]+)" PYTHON_INCLUDE_PATH "${PYTHON_INCLUDE_FLAGS}")
-# 3.2.3 Add the Python include path to include_directories
-#include_directories(${PYTHON_INCLUDE_PATH})
-
 set(PYTHON_INCLUDE_DIR ${_Python_INCLUDE_DIR}
     CACHE PATH 
     "include directory of python")
@@ -24,7 +13,6 @@ set(PYTHON_EXECUTABLE ${_Python_EXECUTABLE}
 set(PYTHON_LIBRARY_RELEASE ${_Python_LIBRARY_RELEASE}
     CACHE FILEPATH 
     "library of python")
-
 execute_process(
 	COMMAND "${PYTHON_EXECUTABLE}" -c "import sysconfig; print(sysconfig.get_paths()['purelib'])"
 	OUTPUT_VARIABLE PYTHON_SITE_PACKAGES
