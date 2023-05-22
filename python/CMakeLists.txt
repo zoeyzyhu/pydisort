@@ -18,15 +18,15 @@ target_include_directories(${namel}
 	${CPPDISORT_INCLUDE_DIR}
 	${CMAKE_BINARY_DIR}
 	${TOMLPP_INCLUDE_DIR}
-    ${CDISORT_INCLUDE_DIR}
-    ${PYTHON_INCLUDE_DIR}
-    ${PYBIND11_INCLUDE_DIR}
+	${CDISORT_INCLUDE_DIR}
+	${PYTHON_INCLUDE_DIR}
+	${PYBIND11_INCLUDE_DIR}
 	)
 
 target_link_libraries(${namel}
 	PRIVATE
 	${CPPDISORT_LIBRARY_${buildu}}
-    ${PYTHON_LIBRARY_RELEASE}
+    	${PYTHON_LIBRARY_RELEASE}
 	)
 
 install(TARGETS ${namel}
