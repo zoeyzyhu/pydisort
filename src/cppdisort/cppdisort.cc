@@ -6,6 +6,15 @@
 #include <toml++/toml.h>
 #include "cppdisort.h"
 
+const int Radiant::RFLDIR;
+const int Radiant::FLDN;
+const int Radiant::FLUP;
+const int Radiant::DFDT;
+const int Radiant::UAVG;
+const int Radiant::UAVGDN;
+const int Radiant::UAVGUP;
+const int Radiant::UAVGSO;
+
 py::array_t<double> getLegendreCoefficients(int nmom, std::string model, double gg)
 {
     py::array_t<double> py_pmom(1 + nmom);
@@ -271,15 +280,11 @@ void DisortWrapper::SetPhaseMoments(
     std::memcpy(_ds.pmom, pmom, nlyr * nmom_p1 * sizeof(double));
 }
 
-py::array_t<double> DisortWrapper::GetFlux(std::string outputs)  const {
-    std::vector<std::string> allfields = {
-        "rfldir", "rfldn", "flup", "dfdt", "uavg", "uavgdn",
-        "uavgup", "uavgso"};
-
-    py::array_t<double> ndarray({_ds.nlyr + 1, 8}, &_ds_out.rad[0].rfldir);
-    //auto all = py::slice(0, py::none(), 1);
-    //py::array_t<double> cols = ndarray(py::make_tuple(1,2,4));*/
-
+py::array_t<double> DisortWrapper::GetFlux() const
+{
+    py::array_t<double> ndarray(
+            {_ds.nlyr + 1, 8}, &_ds_out.rad[0].rfldir
+            );
     return ndarray;
 }
 

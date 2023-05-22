@@ -16,6 +16,36 @@ namespace py = pybind11;
 // wraps c_getmom
 py::array_t<double> getLegendreCoefficients(int nmom, std::string model, double gg = 0.);
 
+// flux index constants
+struct Radiant {
+    // Direct-beam flux (w/o delta-M scaling)
+    static const int RFLDIR = 0;
+
+    // Diffuse down-flux (tot.-direct-beam; w/o delta-M scaling)
+    static const int FLDN = 1;
+
+    // Diffuse up-flux
+    static const int FLUP = 2;
+
+    // Flux divergence, d(net flux)/d(optical depth)
+    static const int DFDT = 3;
+
+    // Mean intensity, incl. direct beam (not corr. for delta-M scaling)
+    static const int UAVG = 4;
+
+    // Mean diffuse downward intensity, not incl. direct beam
+    // (not corr. for delta-M scaling)
+    static const int UAVGDN = 5;
+
+    // Mean diffuse downward intensity, not incl. direct beam
+    // (not corr. for delta-M scaling)
+    static const int UAVGUP = 6;
+
+    // Mean diffuse direct solar, that is the direct beam
+    // (not corr. for delta-M scaling)
+    static const int UAVGSO = 7;
+};
+
 // wraps disort_state and disort_output
 class DisortWrapper {
    public:
@@ -99,7 +129,7 @@ class DisortWrapper {
 
     DisortWrapper* Run();
     // \todo how to make them actually constant ?
-    py::array_t<double> GetFlux(std::string outputs) const;
+    py::array_t<double> GetFlux() const;
     py::array_t<double> GetIntensity() const;
 
 protected:

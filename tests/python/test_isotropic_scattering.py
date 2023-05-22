@@ -1,6 +1,6 @@
 #! python3
 from numpy import array, pi
-from pydisort import disort, get_legendre_coefficients
+from pydisort import disort, get_legendre_coefficients, Radiant
 from numpy.testing import assert_allclose
 import os, unittest
 
@@ -49,7 +49,8 @@ class PyDisortTests(unittest.TestCase):
             [[0., 0., 0., 0.11777066, 0.02641704, 0.01340413],
              [0.01338263, 0.02633235, 0.11589789, 0., 0., 0.]]
             ]), atol = 1e-8, rtol = 1e-5)
-        print(ds.get_flux("fldir"))
+        print(ds.get_flux().shape)
+        print(ds.get_flux()[:,[Radiant.RFLDIR,Radiant.FLUP,Radiant.FLDN]])
 
         # case No.2
         ssa = array([1.])

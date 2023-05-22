@@ -2,8 +2,6 @@
 #include <pybind11/stl.h>
 #include <cppdisort/cppdisort.h>
 
-#include <iostream>
-
 namespace py = pybind11;
 
 // TODO(CLI): most function should support double, flat and int types
@@ -239,4 +237,15 @@ PYBIND11_MODULE(pydisort, m) {
         .def_readwrite("temis", &DisortWrapper::temis)
         .def_readwrite("umu0", &DisortWrapper::umu0)
         .def_readwrite("phi0", &DisortWrapper::phi0);
+
+        py::class_<Radiant>(m, "Radiant")
+            .def(py::init<>())
+            .def_readonly_static("RFLDIR", &Radiant::RFLDIR)
+            .def_readonly_static("FLUP", &Radiant::FLUP)
+            .def_readonly_static("FLDN", &Radiant::FLDN)
+            .def_readonly_static("DFDT", &Radiant::DFDT)
+            .def_readonly_static("UAVG", &Radiant::UAVG)
+            .def_readonly_static("UAVGDN", &Radiant::UAVGDN)
+            .def_readonly_static("UAVGUP", &Radiant::UAVGUP)
+            .def_readonly_static("UAVGSO", &Radiant::UAVGSO);
 }
