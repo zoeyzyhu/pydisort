@@ -14,23 +14,17 @@ set_target_properties(test_cppdisort.${buildl}
 
 target_link_libraries(test_cppdisort.${buildl}
 	${CPPDISORT_LIBRARY_${buildu}}
-	pybind11::pybind11
-	pybind11::module
+    ${PYTHON_LIBRARY_RELEASE}
 	)
-
-#include <pybind11/numpy.h>
-#include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
 
 target_include_directories(test_cppdisort.${buildl}
 	PRIVATE
 	${CPPDISORT_INCLUDE_DIR}
 	${CMAKE_BINARY_DIR}
     ${TOMLPP_INCLUDE_DIR}
-    ${PYTHON_INCLUDE_DIRS}
+    ${PYTHON_INCLUDE_DIR}
     ${PYBIND11_INCLUDE_DIR}
 	)
-
 
 # 2. Copy input file to run directory
 

@@ -26,13 +26,7 @@ target_include_directories(${namel}
 target_link_libraries(${namel}
 	PRIVATE
 	${CPPDISORT_LIBRARY_${buildu}}
-	${PYTHON_LIBRARIES}
-	)
-
-execute_process(
-	COMMAND "${PYTHON_EXECUTABLE}" -c "import sysconfig; print(sysconfig.get_paths()['purelib'])"
-	OUTPUT_VARIABLE PYTHON_SITE_PACKAGES
-	OUTPUT_STRIP_TRAILING_WHITESPACE
+    ${PYTHON_LIBRARY_RELEASE}
 	)
 
 install(TARGETS ${namel}
