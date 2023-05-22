@@ -1,9 +1,32 @@
 //#include <glog/logging.h>
 
+#include <memory>
 #include <iostream>
 #include <sstream>
 #include <toml++/toml.h>
 #include "cppdisort.h"
+
+py::array_t<double> getLegendreCoefficients(double gg, int nmom, std::string model)
+{
+    py::array_t<double> py_pmom(1 + nmom);
+    double *ptr = static_cast<double *>(py_pmom.request().ptr);
+
+    if (model == "isotropic") {
+        c_getmom(ISOTROPIC, gg, nmom, ptr);
+    } else if (model == "rayleigh") {
+        c_getmom(RAYLEIGH, gg, nmom, ptr);
+    } else if (model == "henyey_greenstein") {
+        c_getmom(HENYEY_GREENSTEIN, gg, nmom, ptr);
+    } else if (model == "haze_garcia_siewert") {
+        c_getmom(HAZE_GARCIA_SIEWERT, gg, nmom, ptr);
+    } else if (model == "cloud_garcia_siewart") {
+        c_getmom(CLOUD_GARCIA_SIEWERT, gg, nmom, ptr);
+    } else {
+        throw std::invalid_argument("invalid scattering model");
+    }
+
+    return py_pmom;
+}
 
 DisortWrapper *DisortWrapper::fromTomlTable(const toml::table &table) {
     auto disort = new DisortWrapper();
@@ -173,6 +196,11 @@ DisortWrapper *DisortWrapper::SetIntensityDimension(int nphi, int numu,
 
     if (_ds.flag.usrtau) _ds.ntau = ntau;
     return this;
+}
+
+void DisortWrapper::SetPhaseMoments(double *pmom, int nlyr, int nmom_p1)
+{
+    std::memcpy(_ds.pmom, pmom, nlyr * nmom_p1 * sizeof(double));
 }
 
 void DisortWrapper::runDisort() {

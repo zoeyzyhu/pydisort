@@ -1,13 +1,13 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.20)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-project(cppdisort LANGUAGES CXX C)
+project(pydisort LANGUAGES CXX C)
 
 message(STATUS "")
-message(STATUS "== Setting up cppdisort library ==")
+message(STATUS "== Setting up pydisort library ==")
 
 if (NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release)

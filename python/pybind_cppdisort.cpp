@@ -147,7 +147,12 @@ PYBIND11_MODULE(pydisort, m) {
                     disort.SetOpticalDepth((double *)info.ptr, info.shape[0]);
                 }
 
-                return disort.RunRTFlux();
+                std::string outputs = "rfldir,rfldn,flup";
+                if (kwargs.contains("outputs")) {
+                    outputs = py::cast<std::string>(kwargs["outputs"]);
+                }
+
+                return disort.RunRTFlux(outputs);
             })
 
         .def("run_rt_intensity", &DisortWrapper::RunRTIntensity)
@@ -194,13 +199,18 @@ PYBIND11_MODULE(pydisort, m) {
                 if (kwargs.contains("pmom")) {
                     py::buffer_info info =
                         py::cast<py::buffer>(kwargs["pmom"]).request();
-                    if (info.format !=
-                            py::format_descriptor<double>::format() ||
-                        info.ndim != 2) {
+                    if (info.format != py::format_descriptor<double>::format()) {
                         throw std::runtime_error("Incompatible buffer format!");
+                    } else {
+                        if (info.ndim == 1) {
+                            disort.SetPhaseMoments((double *)info.ptr, 1, info.shape[1]);
+                        } else if (info.ndim == 2) {
+                            disort.SetPhaseMoments((double *)info.ptr,
+                                    info.shape[0], info.shape[1]);
+                        } else {
+                            throw std::runtime_error("Incompatible buffer format!");
+                        }
                     }
-                    disort.SetLegendreCoefficients((double *)info.ptr,
-                            info.shape[0], info.shape[1]);
                 }
 
                 if (kwargs.contains("utau")) {
@@ -260,4 +270,7 @@ PYBIND11_MODULE(pydisort, m) {
         .def_readwrite("temis", &DisortWrapper::temis)
         .def_readwrite("umu0", &DisortWrapper::umu0)
         .def_readwrite("phi0", &DisortWrapper::phi0);
+
+        m.def("get_legendre_coefficients", &getLegendreCoefficients,
+            py::arg("gg"), py::arg("nmom"), py::arg("model"));
 }

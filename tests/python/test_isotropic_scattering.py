@@ -46,7 +46,6 @@ class PyDisortTests(unittest.TestCase):
 
         ds.run_rt_intensity(ssa = ssa, tau = tau, pmom = pmom,
                             umu = umu, uphi = uphi, utau = utau)
-        assert ds.rfldir[0] == 
 
 if __name__ == '__main__':
     unittest.main()

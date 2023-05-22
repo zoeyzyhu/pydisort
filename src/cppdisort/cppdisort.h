@@ -13,6 +13,10 @@
 
 namespace py = pybind11;
 
+// wraps c_getmom
+py::array_t<double> getLegendreCoefficients(double gg, int nmom, std::string method);
+
+// wraps disort_state and disort_output
 class DisortWrapper {
    public:
     // accessible boundary conditions
@@ -135,13 +139,15 @@ class DisortWrapper {
 
     void SetPlanckSource(double *planck);
 
-    void SetLegendreCoefficients(double **legendre, int len1, int len2);
+    // pmom is a 1D array of length nlyr * (nmom + 1)
+    // with nlyr being the number of layers and nmom the number of scattering moments
+    void SetPhaseMoments(double *pmom, int nlyr, int nmom_p1);
 
     //std::tuple<std::vector<double>, std::vector<double>> RunRTFlux() {
-    std::array_t<double> RunRTFlux(std::string fields) {
+    py::array_t<double> RunRTFlux(std::string outputs) {
         runDisort();
 
-        std::vector<std::string> fields = {
+        std::vector<std::string> allfields = {
             "rfldir", "rfldn", "flup", "dfdt", "uavg", "uavgdn",
             "uavgup", "uavgso"};
 
@@ -150,10 +156,11 @@ class DisortWrapper {
         //    flxdn[i] = _ds_out.rad[i].rfldir + _ds_out.rad[i].rfldn;
         //}
 
-        py::array_t<double> ndarray({_ds.nlyr + 1}, _ds_out.rad});
+        //py::array_t<double> ndarray({_ds.nlyr + 1}, _ds_out.rad);
+        py::array_t<double> ndarray;
 
         return ndarray;
-    }
+   }
 
    py::array_t<double> RunRTIntensity() {
        runDisort();
@@ -188,6 +195,7 @@ class DisortWrapper {
     void printDisortFlags();
 };
 
+// exposing private members for testing
 class DisortWrapperTestOnly : public DisortWrapper {
    public:
     static DisortWrapper *FromString(std::string_view content) {
@@ -198,4 +206,4 @@ class DisortWrapperTestOnly : public DisortWrapper {
     disort_output *GetDisortOutput() { return &_ds_out; }
 };
 
-#endif  // PROD_RAD_DISORT_DISORT_WRAPPER_H_
+#endif  // DISORT_CPPDISORT_DISORTWRAPPER_H_

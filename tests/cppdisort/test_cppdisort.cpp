@@ -34,10 +34,9 @@ int main() {
     disort->Finalize();
 
     // Run the DisortWrapper and get the results
-    std::tuple<std::vector<double>, std::vector<double>> fluxes = disort->RunRTFlux();
-    py::array_t<double> intensities = disort->RunRTIntensity();
+    //std::tuple<std::vector<double>, std::vector<double>> fluxes = disort->RunRTFlux();
 
-    // Print the results
+    /* Print the results
     std::vector<double> flxup = std::get<0>(fluxes);
     std::vector<double> flxdn = std::get<1>(fluxes);
 
@@ -51,7 +50,9 @@ int main() {
     for (const double& flux : flxdn) {
         std::cout << flux << " ";
     }
-    std::cout << std::endl;
+    std::cout << std::endl;*/
+
+    py::array_t<double> intensities = disort->RunRTIntensity();
 
     // Access intensity data
     py::buffer_info info = intensities.request();
