@@ -266,41 +266,34 @@ void DisortWrapper::SetUserAzimuthalAngle(double *phi, int len) {
 }
 
 void DisortWrapper::SetPhaseMoments(
-        double *pmom, int nlyr, int nmom_p1)
+    double *pmom, int nlyr, int nmom_p1)
 {
     std::memcpy(_ds.pmom, pmom, nlyr * nmom_p1 * sizeof(double));
 }
 
-py::array_t<double> DisortWrapper::RunRTFlux(std::string outputs) {
-    runDisort();
-
+py::array_t<double> DisortWrapper::GetFlux(std::string outputs)  const {
     std::vector<std::string> allfields = {
         "rfldir", "rfldn", "flup", "dfdt", "uavg", "uavgdn",
         "uavgup", "uavgso"};
 
-    //for (int i = 0; i < _ds.nlyr; ++i) {
-    //    flxup[i] = _ds_out.rad[i].flup;
-    //    flxdn[i] = _ds_out.rad[i].rfldir + _ds_out.rad[i].rfldn;
-    //}
-
-    //py::array_t<double> ndarray({_ds.nlyr + 1}, _ds_out.rad);
-    py::array_t<double> ndarray;
+    py::array_t<double> ndarray({_ds.nlyr + 1, 8}, &_ds_out.rad[0].rfldir);
+    //auto all = py::slice(0, py::none(), 1);
+    //py::array_t<double> cols = ndarray(py::make_tuple(1,2,4));*/
 
     return ndarray;
 }
 
-py::array_t<double> DisortWrapper::RunRTIntensity() {
-   runDisort();
+py::array_t<double> DisortWrapper::GetIntensity() const {
    py::array_t<double> ndarray(
         {_ds.nphi, _ds.ntau, _ds.numu}, _ds_out.uu
         );
    return ndarray;
 }
 
-void DisortWrapper::runDisort() {
+DisortWrapper* DisortWrapper::Run() {
     if (!_is_finalized) {
         // LOG(ERROR) << "Disort is not finalized.";
-        return;
+        return this;
     }
 
     // LOG(INFO) << "Set Disort boundary condition";
@@ -318,6 +311,8 @@ void DisortWrapper::runDisort() {
     //printDisortState();
     c_disort(&_ds, &_ds_out);
     // LOG(INFO) << "Disort is finished. ds_out = ";
+
+    return this;
 }
 
 void DisortWrapper::printDisortState() {

@@ -97,9 +97,10 @@ class DisortWrapper {
     // with nlyr being the number of layers and nmom the number of scattering moments
     void SetPhaseMoments(double *pmom, int nlyr, int nmom_p1);
 
-    py::array_t<double> RunRTFlux(std::string outputs);
-
-    py::array_t<double> RunRTIntensity();
+    DisortWrapper* Run();
+    // \todo how to make them actually constant ?
+    py::array_t<double> GetFlux(std::string outputs) const;
+    py::array_t<double> GetIntensity() const;
 
 protected:
     disort_state _ds;
@@ -121,7 +122,6 @@ protected:
     bool _is_finalized = false;
     static DisortWrapper *fromTomlTable(const toml::table &table);
 
-    void runDisort();
     void printDisortState();
     void printDisortFlags();
 };

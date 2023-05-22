@@ -8,6 +8,101 @@ namespace py = pybind11;
 
 // TODO(CLI): most function should support double, flat and int types
 
+void setDisortArraysFromDict(DisortWrapper &disort, py::dict &kwargs) {
+    // TODO(CLI): support more options
+    if (kwargs.contains("temp")) {
+        py::buffer_info info =
+            py::cast<py::buffer>(kwargs["temp"]).request();
+        if (info.format !=
+                py::format_descriptor<double>::format() ||
+            info.ndim != 1) {
+            throw std::runtime_error("Incompatible buffer format!");
+        }
+
+        disort.SetLevelTemperature((double *)info.ptr,
+                                   info.shape[0]);
+    }
+
+    if (kwargs.contains("ssa")) {
+        py::buffer_info info =
+            py::cast<py::buffer>(kwargs["ssa"]).request();
+        if (info.format !=
+                py::format_descriptor<double>::format() ||
+            info.ndim != 1) {
+            throw std::runtime_error("Incompatible buffer format!");
+        }
+
+        disort.SetSingleScatteringAlbedo((double *)info.ptr,
+                                         info.shape[0]);
+    }
+
+    if (kwargs.contains("tau")) {
+        py::buffer_info info =
+            py::cast<py::buffer>(kwargs["tau"]).request();
+        if (info.format !=
+                py::format_descriptor<double>::format() ||
+            info.ndim != 1) {
+            throw std::runtime_error("Incompatible buffer format!");
+        }
+        disort.SetOpticalDepth((double *)info.ptr,
+                                info.shape[0]);
+    }
+
+    if (kwargs.contains("pmom")) {
+        py::buffer_info info =
+            py::cast<py::buffer>(kwargs["pmom"]).request();
+        if (info.format != py::format_descriptor<double>::format()) {
+            throw std::runtime_error("Incompatible buffer format!");
+        } else {
+            if (info.ndim == 1) {
+                disort.SetPhaseMoments((double *)info.ptr,
+                                       1, info.shape[0]);
+            } else if (info.ndim == 2) {
+                disort.SetPhaseMoments((double *)info.ptr,
+                        info.shape[0], info.shape[1]);
+            } else {
+                throw std::runtime_error("Incompatible buffer format!");
+            }
+        }
+    }
+
+    if (kwargs.contains("utau")) {
+        py::buffer_info info =
+            py::cast<py::buffer>(kwargs["utau"]).request();
+        if (info.format !=
+                py::format_descriptor<double>::format() ||
+            info.ndim != 1) {
+            throw std::runtime_error("Incompatible buffer format!");
+        }
+        disort.SetUserOpticalDepth((double *)info.ptr,
+                info.shape[0]);
+    }
+
+    if (kwargs.contains("umu")) {
+        py::buffer_info info =
+            py::cast<py::buffer>(kwargs["umu"]).request();
+        if (info.format !=
+                py::format_descriptor<double>::format() ||
+            info.ndim != 1) {
+            throw std::runtime_error("Incompatible buffer format!");
+        }
+        disort.SetUserCosinePolarAngle((double *)info.ptr,
+                info.shape[0]);
+    }
+
+    if (kwargs.contains("uphi")) {
+        py::buffer_info info =
+            py::cast<py::buffer>(kwargs["uphi"]).request();
+        if (info.format !=
+                py::format_descriptor<double>::format() ||
+            info.ndim != 1) {
+            throw std::runtime_error("Incompatible buffer format!");
+        }
+        disort.SetUserAzimuthalAngle((double *)info.ptr,
+                info.shape[0]);
+    }
+}
+
 PYBIND11_MODULE(pydisort, m) {
     m.def("get_legendre_coefficients", &getLegendreCoefficients,
         py::arg("nmom"), py::arg("model"), py::arg("gg") = 0.);
@@ -113,152 +208,6 @@ PYBIND11_MODULE(pydisort, m) {
                                                    level_temperature.size());
              })
 
-        .def("run_rt_flux", &DisortWrapper::RunRTFlux)
-        .def("run_rt_flux",
-            [](DisortWrapper &disort, py::dict &kwargs) {
-                // TODO(CLI): support more options
-                if (kwargs.contains("temp")) {
-                    py::buffer_info info =
-                        py::cast<py::buffer>(kwargs["temp"]).request();
-                    if (info.format !=
-                            py::format_descriptor<double>::format() ||
-                        info.ndim != 1) {
-                        throw std::runtime_error("Incompatible buffer format!");
-                    }
-
-                    disort.SetLevelTemperature((double *)info.ptr,
-                                               info.shape[0]);
-                }
-
-                if (kwargs.contains("ssa")) {
-                    py::buffer_info info =
-                        py::cast<py::buffer>(kwargs["ssa"]).request();
-                    if (info.format !=
-                            py::format_descriptor<double>::format() ||
-                        info.ndim != 1) {
-                        throw std::runtime_error("Incompatible buffer format!");
-                    }
-
-                    disort.SetSingleScatteringAlbedo((double *)info.ptr,
-                                                     info.shape[0]);
-                }
-
-                if (kwargs.contains("tau")) {
-                    py::buffer_info info =
-                        py::cast<py::buffer>(kwargs["tau"]).request();
-                    if (info.format !=
-                            py::format_descriptor<double>::format() ||
-                        info.ndim != 1) {
-                        throw std::runtime_error("Incompatible buffer format!");
-                    }
-                    disort.SetOpticalDepth((double *)info.ptr, info.shape[0]);
-                }
-
-                std::string outputs = "rfldir,rfldn,flup";
-                if (kwargs.contains("outputs")) {
-                    outputs = py::cast<std::string>(kwargs["outputs"]);
-                }
-
-                return disort.RunRTFlux(outputs);
-            })
-
-        .def("run_rt_intensity", &DisortWrapper::RunRTIntensity)
-        .def("run_rt_intensity",
-            [](DisortWrapper &disort, py::dict &kwargs) {
-                // TODO(CLI): support more options
-                if (kwargs.contains("temp")) {
-                    py::buffer_info info =
-                        py::cast<py::buffer>(kwargs["temp"]).request();
-                    if (info.format !=
-                            py::format_descriptor<double>::format() ||
-                        info.ndim != 1) {
-                        throw std::runtime_error("Incompatible buffer format!");
-                    }
-
-                    disort.SetLevelTemperature((double *)info.ptr,
-                                               info.shape[0]);
-                }
-
-                if (kwargs.contains("ssa")) {
-                    py::buffer_info info =
-                        py::cast<py::buffer>(kwargs["ssa"]).request();
-                    if (info.format !=
-                            py::format_descriptor<double>::format() ||
-                        info.ndim != 1) {
-                        throw std::runtime_error("Incompatible buffer format!");
-                    }
-
-                    disort.SetSingleScatteringAlbedo((double *)info.ptr,
-                                                     info.shape[0]);
-                }
-
-                if (kwargs.contains("tau")) {
-                    py::buffer_info info =
-                        py::cast<py::buffer>(kwargs["tau"]).request();
-                    if (info.format !=
-                            py::format_descriptor<double>::format() ||
-                        info.ndim != 1) {
-                        throw std::runtime_error("Incompatible buffer format!");
-                    }
-                    disort.SetOpticalDepth((double *)info.ptr, info.shape[0]);
-                }
-
-                if (kwargs.contains("pmom")) {
-                    py::buffer_info info =
-                        py::cast<py::buffer>(kwargs["pmom"]).request();
-                    if (info.format != py::format_descriptor<double>::format()) {
-                        throw std::runtime_error("Incompatible buffer format!");
-                    } else {
-                        if (info.ndim == 1) {
-                            disort.SetPhaseMoments((double *)info.ptr, 1, info.shape[0]);
-                        } else if (info.ndim == 2) {
-                            disort.SetPhaseMoments((double *)info.ptr,
-                                    info.shape[0], info.shape[1]);
-                        } else {
-                            throw std::runtime_error("Incompatible buffer format!");
-                        }
-                    }
-                }
-
-                if (kwargs.contains("utau")) {
-                    py::buffer_info info =
-                        py::cast<py::buffer>(kwargs["utau"]).request();
-                    if (info.format !=
-                            py::format_descriptor<double>::format() ||
-                        info.ndim != 1) {
-                        throw std::runtime_error("Incompatible buffer format!");
-                    }
-                    disort.SetUserOpticalDepth((double *)info.ptr,
-                            info.shape[0]);
-                }
-
-                if (kwargs.contains("umu")) {
-                    py::buffer_info info =
-                        py::cast<py::buffer>(kwargs["umu"]).request();
-                    if (info.format !=
-                            py::format_descriptor<double>::format() ||
-                        info.ndim != 1) {
-                        throw std::runtime_error("Incompatible buffer format!");
-                    }
-                    disort.SetUserCosinePolarAngle((double *)info.ptr,
-                            info.shape[0]);
-                }
-
-                if (kwargs.contains("uphi")) {
-                    py::buffer_info info =
-                        py::cast<py::buffer>(kwargs["uphi"]).request();
-                    if (info.format !=
-                            py::format_descriptor<double>::format() ||
-                        info.ndim != 1) {
-                        throw std::runtime_error("Incompatible buffer format!");
-                    }
-                    disort.SetUserAzimuthalAngle((double *)info.ptr,
-                            info.shape[0]);
-                }
-
-                return disort.RunRTIntensity();
-            })
-
         .def("set_wavenumber_range_invcm",
             &DisortWrapper::SetWavenumberRange_invcm,
             py::arg("wmin"), py::arg("wmax")
@@ -267,6 +216,15 @@ PYBIND11_MODULE(pydisort, m) {
         .def("set_wavenumber_invcm",
             &DisortWrapper::SetWavenumber_invcm
             )
+
+        .def("run", &DisortWrapper::Run)
+        .def("run_with",
+            [](DisortWrapper &disort, py::dict &kwargs) {
+                setDisortArraysFromDict(disort, kwargs);
+                return disort.Run();
+            })
+        .def("get_flux", &DisortWrapper::GetFlux)
+        .def("get_intensity", &DisortWrapper::GetIntensity)
 
         .def("get_nmom", &DisortWrapper::nMoments)
         .def("get_nstr", &DisortWrapper::nStreams)

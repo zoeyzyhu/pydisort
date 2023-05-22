@@ -39,20 +39,21 @@ class PyDisortTests(unittest.TestCase):
         ssa = array([0.2])
 
         tau = array([utau[-1]])
-        result = ds.run_rt_intensity({
+        result = ds.run_with({
             'tau':tau, 'ssa':ssa, 'pmom':pmom,
             'utau':utau, 'umu':umu, 'uphi':uphi
-            })
+            }).get_intensity()
 
         self.assertEqual(result.shape, (1, 2, 6))
         assert_allclose(result, array([
             [[0., 0., 0., 0.11777066, 0.02641704, 0.01340413],
              [0.01338263, 0.02633235, 0.11589789, 0., 0., 0.]]
             ]), atol = 1e-8, rtol = 1e-5)
+        print(ds.get_flux("fldir"))
 
         # case No.2
         ssa = array([1.])
-        result = ds.run_rt_intensity({'ssa':ssa})
+        result = ds.run_with({'ssa':ssa}).get_intensity()
         assert_allclose(result, array([
             [[0., 0., 0., 0.62288378, 0.13976294, 0.07091916],
              [0.07081093, 0.1393367, 0.61345786, 0., 0., 0.]]

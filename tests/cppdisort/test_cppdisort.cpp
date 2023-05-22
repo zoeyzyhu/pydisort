@@ -52,7 +52,7 @@ int main() {
     }
     std::cout << std::endl;*/
 
-    py::array_t<double> intensities = disort->RunRTIntensity();
+    py::array_t<double> intensities = disort->Run()->GetIntensity();
 
     // Access intensity data
     py::buffer_info info = intensities.request();
