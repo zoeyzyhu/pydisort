@@ -14,7 +14,7 @@
 namespace py = pybind11;
 
 // wraps c_getmom
-py::array_t<double> getLegendreCoefficients(double gg, int nmom, std::string method);
+py::array_t<double> getLegendreCoefficients(int nmom, std::string model, double gg = 0.);
 
 // wraps disort_state and disort_output
 class DisortWrapper {
@@ -33,6 +33,8 @@ class DisortWrapper {
     static DisortWrapper *FromFile(std::string_view filename) {
         return fromTomlTable(toml::parse_file(filename));
     }
+
+    void SetHeader(std::string header);
 
     DisortWrapper *SetAtmosphereDimension(int nlyr, int nstr, int nmom, int nphase);
 

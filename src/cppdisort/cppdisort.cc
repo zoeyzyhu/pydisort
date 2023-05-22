@@ -6,10 +6,11 @@
 #include <toml++/toml.h>
 #include "cppdisort.h"
 
-py::array_t<double> getLegendreCoefficients(double gg, int nmom, std::string model)
+py::array_t<double> getLegendreCoefficients(int nmom, std::string model, double gg)
 {
     py::array_t<double> py_pmom(1 + nmom);
     double *ptr = static_cast<double *>(py_pmom.request().ptr);
+    std::memset(ptr, 0, sizeof(double) * (1 + nmom));
 
     if (model == "isotropic") {
         c_getmom(ISOTROPIC, gg, nmom, ptr);
@@ -77,6 +78,10 @@ DisortWrapper *DisortWrapper::fromTomlTable(const toml::table &table) {
 
     //disort->Finalize();
     return disort;
+}
+
+void DisortWrapper::SetHeader(std::string header) {
+    snprintf(_ds.header, 1024, "%s", header.c_str());
 }
 
 DisortWrapper *DisortWrapper::SetAtmosphereDimension(

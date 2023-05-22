@@ -9,11 +9,18 @@ namespace py = pybind11;
 // TODO(CLI): most function should support double, flat and int types
 
 PYBIND11_MODULE(pydisort, m) {
+    m.def("get_legendre_coefficients", &getLegendreCoefficients,
+        py::arg("nmom"), py::arg("model"), py::arg("gg") = 0.);
+
     py::class_<DisortWrapper>(m, "disort")
         // No need to expose the constructor, since we have static factory
         // methods such as from_{file,string,...}.
         .def_static("from_file",
             &DisortWrapper::FromFile)
+
+        .def("set_header",
+            &DisortWrapper::SetHeader
+            )
 
         .def("set_atmosphere_dimension",
                 &DisortWrapper::SetAtmosphereDimension,
@@ -203,7 +210,7 @@ PYBIND11_MODULE(pydisort, m) {
                         throw std::runtime_error("Incompatible buffer format!");
                     } else {
                         if (info.ndim == 1) {
-                            disort.SetPhaseMoments((double *)info.ptr, 1, info.shape[1]);
+                            disort.SetPhaseMoments((double *)info.ptr, 1, info.shape[0]);
                         } else if (info.ndim == 2) {
                             disort.SetPhaseMoments((double *)info.ptr,
                                     info.shape[0], info.shape[1]);
@@ -261,6 +268,10 @@ PYBIND11_MODULE(pydisort, m) {
             &DisortWrapper::SetWavenumber_invcm
             )
 
+        .def("get_nmom", &DisortWrapper::nMoments)
+        .def("get_nstr", &DisortWrapper::nStreams)
+        .def("get_nlyr", &DisortWrapper::nLayers)
+
         .def_readwrite("btemp", &DisortWrapper::btemp)
         .def_readwrite("ttemp", &DisortWrapper::ttemp)
         .def_readwrite("fluor", &DisortWrapper::fluor)
@@ -270,7 +281,4 @@ PYBIND11_MODULE(pydisort, m) {
         .def_readwrite("temis", &DisortWrapper::temis)
         .def_readwrite("umu0", &DisortWrapper::umu0)
         .def_readwrite("phi0", &DisortWrapper::phi0);
-
-        m.def("get_legendre_coefficients", &getLegendreCoefficients,
-            py::arg("gg"), py::arg("nmom"), py::arg("model"));
 }
