@@ -85,3 +85,6 @@ Icon
 *.zip
 **/tests/bin/test_*
 doc/
+
+# junk
+z.junk
