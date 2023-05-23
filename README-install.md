@@ -1,10 +1,6 @@
+## How to install pydiosrt
 
-## Requirements
-- Python:
-```
-pip install --upgrade pip
-pip install -r requirements.txt
-```
+### Install system libraries
 - MacOS:
 ```
 brew update
@@ -34,4 +30,15 @@ This script will add the LLVM repo to your system.
 1. After adding the repositories, you can install clang-format:
 ```
 sudo yum install clang-format
+```
+
+### Install python libraries
+```
+pip install --upgrade pip
+pip install -r requirements.txt
+```
+
+### Install pre-commit
+```
+pre-commit install
 ```
