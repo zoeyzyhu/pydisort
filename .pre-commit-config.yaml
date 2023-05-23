@@ -1,0 +1,10 @@
+repos:
+  - repo: local
+    hooks:
+      - id: clang-format
+        name: clang-format
+        entry: clang-format
+        language: system
+        files: ^(src|python)/.*\.(c|cc|cpp|h|hpp)$
+        exclude: ^src/cdisort
+        args: ["-i", "-style=Google"]

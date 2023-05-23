@@ -1,6 +1,9 @@
 #!/bin/bash
+# This is an example script to run clang-format on all source files in specified
+# directories. This script is not used by the build system, but can be used to
+# format all source files for other purposes.
 
-# Directories where the source files are present
+# Specify directories where the source files are present
 dir_paths=(
     "src/cppdisort" 
     "python"
@@ -15,4 +18,3 @@ do
     clang-format -i -style=Google $f
   done
 done
-
