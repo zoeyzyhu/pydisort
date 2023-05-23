@@ -20,7 +20,7 @@ set_target_properties(${namel}_${buildl}
     )
 
 target_include_directories(${namel}_${buildl}
-    PRIVATE 
+    PRIVATE
     ${CMAKE_BINARY_DIR}
     ${TOMLPP_INCLUDE_DIR}
     ${CDISORT_INCLUDE_DIR}
@@ -34,6 +34,6 @@ target_link_libraries(${namel}_${buildl}
     )
 
 set(${nameu}_LIBRARY_${buildu} ${namel}_${buildl}
-    CACHE STRING 
+    CACHE STRING
     "${namel} library ${build}")
 mark_as_advanced(${nameu}_LIBRARY_${build})

@@ -6,7 +6,7 @@ You can find the detailed overview of the DISORT project, including information 
 
 ## Major Branches
 
-There are three formal branches in this repo: 
+There are three formal branches in this repo:
 - `cdisort_patches`
 - `cppdisort`
 - `pydisort`

@@ -14,7 +14,7 @@ pybind11_add_module(${namel}
 	)
 
 target_include_directories(${namel}
-	PRIVATE 
+	PRIVATE
 	${CPPDISORT_INCLUDE_DIR}
 	${CMAKE_BINARY_DIR}
 	${TOMLPP_INCLUDE_DIR}

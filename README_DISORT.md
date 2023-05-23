@@ -4,7 +4,7 @@
 
 DISORT (Discrete Ordinate Radiative Transfer) is a widely-used radiative transfer algorithm that computes the scattering and absorption of radiation in a medium. It is commonly employed in atmospheric and remote sensing studies to model the transfer of solar and thermal radiation through the Earth's atmosphere. The DISORT algorithm provides accurate and efficient calculations of radiative transfer in complex atmospheric conditions.
 
-DISORT solves the radiative transfer equation by discretizing the atmosphere into a set of layers and solving the equations for each layer independently. It considers multiple scattering effects and can handle various types of scattering particles, including molecules, aerosols, and clouds. DISORT is known for its versatility, enabling simulations for a wide range of atmospheric conditions and geometries. The DISORT library is originally written in Fortran. 
+DISORT solves the radiative transfer equation by discretizing the atmosphere into a set of layers and solving the equations for each layer independently. It considers multiple scattering effects and can handle various types of scattering particles, including molecules, aerosols, and clouds. DISORT is known for its versatility, enabling simulations for a wide range of atmospheric conditions and geometries. The DISORT library is originally written in Fortran.
 
 ## CDISORT
 

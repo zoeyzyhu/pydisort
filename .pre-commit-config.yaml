@@ -1,4 +1,14 @@
 repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.0.1
+    hooks:
+      - id: requirements-txt-fixer
+      - id: trailing-whitespace
+        exclude: ^src/cdisort
+      - id: end-of-file-fixer
+        exclude: ^src/cdisort
+      - id: check-yaml
+
   - repo: local
     hooks:
       - id: clang-format
@@ -10,14 +20,14 @@ repos:
         args: ["-i", "-style=Google"]
 
       - id: cmake-format
-        name: cmake-format
+        name: Fix *.c,*.cc,*.cpp,*.h,*.hpp
         entry: cmake-format
         language: system
         files: .*\.cmake$
         args: ["-i"]
 
       - id: black
-        name: black
+        name: Fix *.py
         entry: black
         language: system
         files: ^(tests/python)/.*\.(py)$

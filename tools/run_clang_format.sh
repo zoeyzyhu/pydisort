@@ -5,7 +5,7 @@
 
 # Specify directories where the source files are present
 dir_paths=(
-    "src/cppdisort" 
+    "src/cppdisort"
     "python"
 )
 

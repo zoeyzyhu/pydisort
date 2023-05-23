@@ -21,5 +21,3 @@ target_include_directories(test_cdisort.${buildl}
 	${CDISORT_INCLUDE_DIR}
 	${CMAKE_BINARY_DIR}
 	)
-
-

@@ -4,7 +4,7 @@
 
 /*
  *   Copyright (c) 2011 by Timothy E. Dowling
- *   
+ *
  *   This file is part of cdisort.
  *
  *   cdisort is free software: you can redistribute it and/or modify
@@ -20,7 +20,7 @@
  *   You should have received a copy of the GNU General Public License
  *   along with cdisort.  If not, see <http://www.gnu.org/licenses/>.
  */
- 
+
 /*
  * disotest()
  *
@@ -36,7 +36,7 @@
  * calls to disort(), rather than starting from scratch.  This will prevent mistakes
  * and ensure that every input argument gets a value.  Note in particular how getmom()
  * is sometimes called to fill an array section of PMOM(k,lc) (for one layer); several
- * people have done this incorrectly in attempting to write it ab initio. 
+ * people have done this incorrectly in attempting to write it ab initio.
  *
  * Routines called :
  *   c_disort():   The discrete ordinates radiative transfer program
@@ -46,7 +46,7 @@
  *
  *-----------------------REFERENCES (cited in code using the acronyms shown)------------------------------------
  *
- *    DGIS: Devaux C, Grandjean P, Ishiguro Y, Siewert CE, 1979, 
+ *    DGIS: Devaux C, Grandjean P, Ishiguro Y, Siewert CE, 1979,
  *              On Multi-Region Problems in Radiative Transfer, Astrophys. Space Sci. 62, 225-233
  *      GS: Garcia RDM, Siewert CE, 1985, Benchmark Results in Radiative Transfer,
  *              Transport Theory and Statistical Physics 14, 437-483
@@ -55,7 +55,7 @@
  *              approximation, J. Comp. Phys., 102, 265-276
  *       L: Lenoble J, ed, 1985:  Radiative Transfer in Absorbing
  *              and Scattering Atmospheres: Standard Computational Procedures, Deepak Publishing, Hampton, Virginia
- *      NT: Nakajima T, Tanaka M, 1988,  Algorithms for Radiative Intensity Calculations in 
+ *      NT: Nakajima T, Tanaka M, 1988,  Algorithms for Radiative Intensity Calculations in
  *              Moderately Thick Atmospheres Using a Truncation Approximation, J.Q.S.R.T. 40, 51-69
  *      OS: Ozisik M, Shouman S, 1980,  Source Function Expansion Method for Radiative Transfer in a Two-Layer
  *              Slab, J.Q.S.R.T. 24, 441-449
@@ -90,7 +90,7 @@
 // Change header file for cmake
 #include <cdisort/cdisort.h>
 
-/* 
+/*
  * Disort-specific shift macros.
  * Using unit-offset shift macros to match Fortran version
  */
@@ -129,18 +129,18 @@ int main(int argc, char* argv[])
   disort_test03();
   disort_test04();
   disort_test05();
-  disort_test06(); 
+  disort_test06();
   disort_test07();
   disort_test08();
-  disort_test09(); 
+  disort_test09();
   disort_test10();
   disort_test11();
   disort_test12();
-  disort_test13(); 
+  disort_test13();
   /*
    * Test 14 compares a 4-stream disort() to twostr(), and is not part of
    * the original Fortran distribution.
-   */ 
+   */
   disort_test14();
 
   return 0;
@@ -200,7 +200,7 @@ void disort_test01(void)
   /* Allocate memory */
   c_disort_state_alloc(&ds);
   c_disort_out_alloc(&ds,&good);
-  
+
   c_getmom(ISOTROPIC,0.,ds.nmom,ds.pmom);
 
   UTAU(1)   =  0.;
@@ -226,7 +226,7 @@ void disort_test01(void)
         ds.bc.fbeam = M_PI/ds.bc.umu0;
         ds.bc.fisot = 0.0;
 
-        /* Correct answers */ 
+        /* Correct answers */
         good.rad[0].rfldir=3.14159,    good.rad[1].rfldir=2.29844;
         good.rad[0].rfldn =0.,         good.rad[1].rfldn =7.94108E-02;
         good.rad[0].flup  =7.99451E-02,good.rad[1].flup  =0.;
@@ -301,7 +301,7 @@ void disort_test01(void)
         ds.bc.fbeam = 0.;
         ds.bc.fisot = 1.;
 
-        /* Correct answers */ 
+        /* Correct answers */
         good.rad[0].rfldir=0.,         good.rad[1].rfldir=0.;
         good.rad[0].rfldn =3.14159,    good.rad[1].rfldn =4.60048E-03;
         good.rad[0].flup  =2.49618,    good.rad[1].flup  =0.;
@@ -416,7 +416,7 @@ void disort_test02(void)
       else {
         SSALB(1) = 1.0;
       }
-                
+
       icas++;
 
       switch(icas) {
@@ -989,7 +989,7 @@ void disort_test06(void)
          */
         ds.flag.lamber = TRUE;
         ds.flag.planck = FALSE;
-	
+
         ds.ntau = 2;
 
         /* Allocate memory */
@@ -1337,7 +1337,7 @@ void disort_test06(void)
     c_disort_out_free(&ds,&out);
     c_disort_state_free(&ds);
   }
-  
+
   return;
 }
 
@@ -2124,7 +2124,7 @@ void disort_test10(void)
 
   ds_good.flag.brdf_type = BRDF_NONE;
 
-  /* 
+  /*
    * Case 1
    */
   ds_good.flag.prnt[1]= TRUE;
@@ -2162,7 +2162,7 @@ void disort_test10(void)
 
   c_disort(&ds_good,&good);
 
-  /* 
+  /*
    * Case 2
    */
   ds_out.flag.prnt[1] = FALSE;
@@ -2205,7 +2205,7 @@ void disort_test10(void)
   c_disort_out_free(&ds_out,&out);
   c_disort_state_free(&ds_good);
   c_disort_state_free(&ds_out);
-  
+
   return;
 }
 
@@ -2264,7 +2264,7 @@ void disort_test11(void)
 
   ds_good.flag.brdf_type = BRDF_NONE;
 
-  /* 
+  /*
    * Case 1
    */
   ds_good.flag.prnt[1] = TRUE, ds_good.flag.prnt[2] = TRUE;
@@ -2299,7 +2299,7 @@ void disort_test11(void)
 
   c_disort(&ds_good,&good);
 
-  /* 
+  /*
    * Case 2
    */
   ds_out.flag.prnt[1] = FALSE, ds_out.flag.prnt[2] = FALSE;
@@ -2326,7 +2326,7 @@ void disort_test11(void)
     ds_out.ssalb[lc-1] = 0.9;
     c_getmom(ISOTROPIC,0.,ds_out.nmom,&ds_out.pmom[0+(lc-1)*(ds_out.nmom_nstr+1)]);
   }
-  
+
   sprintf(ds_out.header,"Test Case No. 11b: Same as 11a but treated as multiple layers");
 
   c_disort(&ds_out,&out);
@@ -2338,7 +2338,7 @@ void disort_test11(void)
   c_disort_out_free(&ds_out,&out);
   c_disort_state_free(&ds_good);
   c_disort_state_free(&ds_out);
-  
+
   return;
 }
 
@@ -2476,7 +2476,7 @@ void disort_test12(void)
   c_disort_out_free(&ds_out,&out);
   c_disort_state_free(&ds_good);
   c_disort_state_free(&ds_out);
-  
+
   return;
 }
 
@@ -2741,7 +2741,7 @@ void disort_test14(void)
 
   ds_ds.flag.brdf_type = BRDF_NONE;
 
-  /* 
+  /*
    * Case 1: disort()
    */
   ds_ds.flag.usrang = FALSE;
@@ -2776,7 +2776,7 @@ void disort_test14(void)
 
   c_disort(&ds_ds,&ds_out);
 
-  /* 
+  /*
    * Case 2: twostr()
    */
   twostr_ds.flag.prnt[0] = TRUE;
@@ -2838,4 +2838,3 @@ void disort_test14(void)
 /*========================== end of disort_test14() ======================*/
 
 /* * * * * * * * * * * * * * end of disotest.c  * * * * * * * * * * * * * */
-

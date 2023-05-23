@@ -40,7 +40,7 @@ indicate what this branch is for. No content is needed.
 
 From now on, all subsequent commits and pushes to `<branch_name>` will be staged in this
 PR and when the PR is merged to the main branch. All commits in this PR will be
-squashed. Then, you will write a meaningful title and contents documenting the changes, 
+squashed. Then, you will write a meaningful title and contents documenting the changes,
 use cases and notes of this PR.
 
 ## Quick tips

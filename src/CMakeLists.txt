@@ -8,7 +8,7 @@
 add_subdirectory(cdisort)
 
 set(CDISORT_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}
-    CACHE PATH 
+    CACHE PATH
     "cdisort include directory")
 
 
@@ -17,5 +17,5 @@ set(CDISORT_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}
 add_subdirectory(cppdisort)
 
 set(CPPDISORT_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}
-    CACHE PATH 
+    CACHE PATH
     "cppdisort include directory")

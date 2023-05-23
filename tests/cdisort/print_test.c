@@ -4,7 +4,7 @@
 /*========================== print_test() ================================*/
 
 /*
- * Print DISORT results and, directly beneath them, their ratios to the 
+ * Print DISORT results and, directly beneath them, their ratios to the
  * correct answers, calc/good, or 1.+calc in the case good = 0.;
  * print number of non-unit ratios that occur but try
  * to count just the cases where there is a real disagreement and not
