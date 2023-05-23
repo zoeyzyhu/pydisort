@@ -14,3 +14,6 @@ The following hooks are installed
 - [pre-commit](https://pre-commit.com/)
 requirements-txt-fixer, trailing-whitespace, end-of-file-fixer, check-yaml
 - [black](https://github.com/psf/black)
+
+# Reference articles
+- https://www.the-analytics.club/python-code-formatting-git-pre-commit-hook
