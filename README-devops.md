@@ -7,3 +7,7 @@ This will install the `pre-commit` hooks in the local `.git` directory.
 The `pre-commit` hooks will run automatically when you try to commit code. 
 If the `pre-commit` hooks fail, the commit will be aborted. 
 To run the `pre-commit` hooks manually, run `pre-commit run --all-files` in the root directory of this repo.
+
+The following hooks are installed
+- [clang-format](https://clang.llvm.org/docs/ClangFormatStyleOptions.html)
+- [cmake-format](https://cmake-format.readthedocs.io/en/latest/index.html)
