@@ -8,3 +8,9 @@ repos:
         files: ^(src|python)/.*\.(c|cc|cpp|h|hpp)$
         exclude: ^src/cdisort
         args: ["-i", "-style=Google"]
+      - id: cmake-format
+        name: cmake-format
+        entry: cmake-format
+        language: system
+        files: .*\.cmake$
+        args: ["-i"]

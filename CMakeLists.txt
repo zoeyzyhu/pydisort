@@ -21,8 +21,8 @@ endif()
 
 ## 1. Set up compiler flags ##
 message(STATUS "1. Set up project compiler flags")
-message(STATUS "Include ${CMAKE_SOURCE_DIR}/cmake/setup_compiler_flags.cmake")
-include(${CMAKE_SOURCE_DIR}/cmake/setup_compiler_flags.cmake)
+message(STATUS "Include ${CMAKE_SOURCE_DIR}/cmake/compilers.cmake")
+include(${CMAKE_SOURCE_DIR}/cmake/compilers.cmake)
 
 
 ## 2. Set up project specific configuration ##
