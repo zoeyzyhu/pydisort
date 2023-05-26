@@ -39,30 +39,13 @@ repos:
 
   ## 2. Per language check ===================================================
 
-  - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.0.1
-    hooks:
-      - id: requirements-txt-fixer
-        name: Fix requirements.txt
-        language: python
-
-      - id: check-yaml
-        name: Fix yaml
-        entry: check-yaml
-        language: python
-
-      - id: check-toml
-        name: Fix toml
-        language: python
-
-      - id: check-shebang-scripts-are-executable
-        name: Check that executables have shebangs
-        description: ensures that (non-binary) executables have a shebang.
-        entry: check-executables-have-shebangs
-        types: [text, executable]
-        language: python
-
-  ## Python related ----------------------------------------------------------
+    - repo: https://github.com/pre-commit/pre-commit-hooks
+      rev: v4.0.1
+      hooks:
+          - id: requirements-txt-fixer
+          - id: check-yaml
+          - id: check-toml
+          - id: check-shebang-scripts-are-executable
 
   - repo: https://github.com/PyCQA/pydocstyle
     rev: 6.3.0
@@ -115,30 +98,26 @@ repos:
         language: python
         types: [cmake]
 
-  ## 3. Lints ================================================================
+    ## Lints =================================================================
 
-  - repo: https://github.com/pocc/pre-commit-hooks
-    rev: v1.3.5
-    hooks:
-      - id: cpplint
-        name: Find lints in C/C++
-        entry: cpplint-hook
-        description: Find warnings/errors in C/CPP code
-        types_or: [c, c++, c#, objective-c, cuda]
-        language: python
-        args: [
-            "--filter=-legal/copyright,
-            -build/include_subdir,
-            -runtime/references,
-            -build/include_order",
-          ]
-        exclude: ^(src/cdisort/.*|tests/cdisort/.*)$
+    - repo: https://github.com/pocc/pre-commit-hooks
+      rev: v1.3.5
+      hooks:
+          - id: cpplint
+            exclude: ^src/cdisort | *.c
 
-  - repo: local
-    hooks:
-      - id: pylint
-        name: Find lints in Python
-        entry: pylint
-        language: python
-        types: [python]
-        require_serial: true
+    - repo: local
+      hooks:
+          - id: yamllint
+            name: yamllint
+            description: This hook runs yamllint.
+            entry: yamllint
+            language: python
+            types: [file, yaml]
+
+          - id: pylint
+            name: pylint
+            entry: pylint
+            language: python
+            types: [python]
+            require_serial: true
