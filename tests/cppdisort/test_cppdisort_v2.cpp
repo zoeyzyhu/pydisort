@@ -1,5 +1,4 @@
-#include <cppdisort/cppdisort.h>
-
+#include <cppdisort/cppdisort.hpp>
 #include <iostream>
 #include <stdexcept>
 #include <string>

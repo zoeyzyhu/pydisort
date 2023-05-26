@@ -129,7 +129,8 @@ repos:
         args: [
             "--filter=-legal/copyright,
             -build/include_subdir,
-            -runtime/references",
+            -runtime/references,
+            -build/include_order",
           ]
         exclude: ^(src/cdisort/.*|tests/cdisort/.*)$
 

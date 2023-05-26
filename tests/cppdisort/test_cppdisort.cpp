@@ -1,6 +1,5 @@
-#include <cppdisort/cppdisort.h>
-
 #include <cassert>
+#include <cppdisort/cppdisort.hpp>
 #include <iostream>
 
 int main() {
