@@ -1,33 +1,44 @@
 #! python3
+""" Test isotropic scattering with pydisort."""
+# pylint: disable = no-name-in-module
+
+import os
+import unittest
+
 from numpy import array, pi
-from pydisort import disort, get_legendre_coefficients, Radiant
 from numpy.testing import assert_allclose
-import os, unittest
+
+from pydisort import disort, get_legendre_coefficients, Radiant
 
 
 # cdisort test01
 class PyDisortTests(unittest.TestCase):
+    """Test unit: isotropic scattering with pydisort."""
+
     def setUp(self):
+        """Set up the test."""
         self.toml_path = "isotropic_scattering.toml"
-        assert os.path.exists(self.toml_path), f"{self.toml_path} does not exist."
+        assert os.path.exists(
+            self.toml_path), f"{self.toml_path} does not exist."
 
     def test_isotropic_scattering(self):
-        ds = disort.from_file(self.toml_path)
-        ds.set_header("01. test isotropic scattering")
+        """Test isotropic scattering."""
+        disort_case = disort.from_file(self.toml_path)
+        disort_case.set_header("01. test isotropic scattering")
 
         # set dimension
-        ds.set_atmosphere_dimension(
+        disort_case.set_atmosphere_dimension(
             nlyr=1, nstr=16, nmom=16, nphase=16
         ).set_intensity_dimension(nuphi=1, nutau=2, numu=6).finalize()
 
         # get scattering moments
-        pmom = get_legendre_coefficients(ds.get_nmom(), "isotropic")
+        pmom = get_legendre_coefficients(disort_case.get_nmom(), "isotropic")
 
         # set boundary conditions
-        ds.umu0 = 0.1
-        ds.phi0 = 0.0
-        ds.albedo = 0.0
-        ds.fluor = 0.0
+        disort_case.umu0 = 0.1
+        disort_case.phi0 = 0.0
+        disort_case.albedo = 0.0
+        disort_case.fluor = 0.0
 
         # set output optical depth and polar angles
         umu = array([-1.0, -0.5, -0.1, 0.1, 0.5, 1.0])
@@ -35,13 +46,13 @@ class PyDisortTests(unittest.TestCase):
 
         # case No.1
         print("==== Case No.1 ====")
-        ds.fbeam = pi / ds.umu0
-        ds.fisot = 0.0
+        disort_case.fbeam = pi / disort_case.umu0
+        disort_case.fisot = 0.0
         utau = array([0.0, 0.03125])
         ssa = array([0.2])
 
         tau = array([utau[-1]])
-        result = ds.run_with(
+        result = disort_case.run_with(
             {
                 "tau": tau,
                 "ssa": ssa,
@@ -67,7 +78,8 @@ class PyDisortTests(unittest.TestCase):
             rtol=1e-5,
         )
 
-        result = ds.get_flux()[:, [Radiant.RFLDIR, Radiant.FLDN, Radiant.FLUP]]
+        result = disort_case.get_flux(
+        )[:, [Radiant.RFLDIR, Radiant.FLDN, Radiant.FLUP]]
         assert_allclose(
             result,
             array(
@@ -83,7 +95,7 @@ class PyDisortTests(unittest.TestCase):
         # case No.2
         print("==== Case No.2 ====")
         ssa = array([1.0])
-        result = ds.run_with({"ssa": ssa}).get_intensity()
+        result = disort_case.run_with({"ssa": ssa}).get_intensity()
         assert_allclose(
             result,
             array(
@@ -98,7 +110,8 @@ class PyDisortTests(unittest.TestCase):
             rtol=1e-5,
         )
 
-        result = ds.get_flux()[:, [Radiant.RFLDIR, Radiant.FLDN, Radiant.FLUP]]
+        result = disort_case.get_flux(
+        )[:, [Radiant.RFLDIR, Radiant.FLDN, Radiant.FLUP]]
         assert_allclose(
             result,
             array(

@@ -14,7 +14,6 @@ The CDISORT library encapsulates the complexity of the DISORT algorithm and prov
 
 The library is typically used by researchers and scientists working in fields such as atmospheric physics, climate modeling, remote sensing, and radiative transfer simulations. It facilitates the integration of the DISORT algorithm into existing software or the development of new applications that require radiative transfer calculations.
 
-
 ## CPPDISORT
 
 CPPDISORT is a C++ library that builds upon the CDISORT library and provides an object-oriented interface for utilizing the DISORT radiative transfer algorithm. It aims to simplify the usage of DISORT in C++ applications by providing a modern and intuitive interface.
