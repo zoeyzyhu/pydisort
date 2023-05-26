@@ -15,7 +15,8 @@ void setDisortArraysFromDict(DisortWrapper &disort, py::dict &kwargs) {
       throw std::runtime_error("Incompatible buffer format!");
     }
 
-    disort.SetLevelTemperature((double *)info.ptr, info.shape[0]);
+    disort.SetLevelTemperature(static_cast<double const *>(info.ptr),
+                               info.shape[0]);
   }
 
   if (kwargs.contains("ssa")) {
@@ -25,7 +26,8 @@ void setDisortArraysFromDict(DisortWrapper &disort, py::dict &kwargs) {
       throw std::runtime_error("Incompatible buffer format!");
     }
 
-    disort.SetSingleScatteringAlbedo((double *)info.ptr, info.shape[0]);
+    disort.SetSingleScatteringAlbedo(static_cast<double const *>(info.ptr),
+                                     info.shape[0]);
   }
 
   if (kwargs.contains("tau")) {
@@ -34,7 +36,8 @@ void setDisortArraysFromDict(DisortWrapper &disort, py::dict &kwargs) {
         info.ndim != 1) {
       throw std::runtime_error("Incompatible buffer format!");
     }
-    disort.SetOpticalDepth((double *)info.ptr, info.shape[0]);
+    disort.SetOpticalDepth(static_cast<double const *>(info.ptr),
+                           info.shape[0]);
   }
 
   if (kwargs.contains("pmom")) {
@@ -43,10 +46,11 @@ void setDisortArraysFromDict(DisortWrapper &disort, py::dict &kwargs) {
       throw std::runtime_error("Incompatible buffer format!");
     } else {
       if (info.ndim == 1) {
-        disort.SetPhaseMoments((double *)info.ptr, 1, info.shape[0]);
+        disort.SetPhaseMoments(static_cast<double const *>(info.ptr), 1,
+                               info.shape[0]);
       } else if (info.ndim == 2) {
-        disort.SetPhaseMoments((double *)info.ptr, info.shape[0],
-                               info.shape[1]);
+        disort.SetPhaseMoments(static_cast<double const *>(info.ptr),
+                               info.shape[0], info.shape[1]);
       } else {
         throw std::runtime_error("Incompatible buffer format!");
       }
@@ -59,7 +63,8 @@ void setDisortArraysFromDict(DisortWrapper &disort, py::dict &kwargs) {
         info.ndim != 1) {
       throw std::runtime_error("Incompatible buffer format!");
     }
-    disort.SetUserOpticalDepth((double *)info.ptr, info.shape[0]);
+    disort.SetUserOpticalDepth(static_cast<double const *>(info.ptr),
+                               info.shape[0]);
   }
 
   if (kwargs.contains("umu")) {
@@ -68,7 +73,8 @@ void setDisortArraysFromDict(DisortWrapper &disort, py::dict &kwargs) {
         info.ndim != 1) {
       throw std::runtime_error("Incompatible buffer format!");
     }
-    disort.SetUserCosinePolarAngle((double *)info.ptr, info.shape[0]);
+    disort.SetUserCosinePolarAngle(static_cast<double const *>(info.ptr),
+                                   info.shape[0]);
   }
 
   if (kwargs.contains("uphi")) {
@@ -77,7 +83,8 @@ void setDisortArraysFromDict(DisortWrapper &disort, py::dict &kwargs) {
         info.ndim != 1) {
       throw std::runtime_error("Incompatible buffer format!");
     }
-    disort.SetUserAzimuthalAngle((double *)info.ptr, info.shape[0]);
+    disort.SetUserAzimuthalAngle(static_cast<double const *>(info.ptr),
+                                 info.shape[0]);
   }
 }
 
@@ -113,15 +120,18 @@ PYBIND11_MODULE(pydisort, m) {
                throw std::runtime_error("Incompatible buffer format!");
              }
              // call the function
-             return disort.SetOpticalDepth((double *)info.ptr, info.shape[0]);
+             return disort.SetOpticalDepth(
+                 static_cast<double const *>(info.ptr), info.shape[0]);
            })
 
       .def("set_optical_depth",
            [](DisortWrapper &disort, py::list lst) {
              std::vector<double> optical_depth;
-             for (auto elem : lst) {
-               optical_depth.push_back(py::cast<double>(elem));
-             }
+             optical_depth.reserve(len(lst));  // Reserve space for efficiency
+
+             std::transform(
+                 lst.begin(), lst.end(), std::back_inserter(optical_depth),
+                 [](const py::handle &elem) { return py::cast<double>(elem); });
              // call the function
              return disort.SetOpticalDepth(optical_depth.data(),
                                            optical_depth.size());
@@ -135,16 +145,18 @@ PYBIND11_MODULE(pydisort, m) {
                throw std::runtime_error("Incompatible buffer format!");
              }
              // call the function
-             return disort.SetSingleScatteringAlbedo((double *)info.ptr,
-                                                     info.shape[0]);
+             return disort.SetSingleScatteringAlbedo(
+                 static_cast<double const *>(info.ptr), info.shape[0]);
            })
 
       .def("set_single_scattering_albedo",
            [](DisortWrapper &disort, py::list lst) {
              std::vector<double> ssa;
-             for (auto elem : lst) {
-               ssa.push_back(py::cast<double>(elem));
-             }
+             ssa.reserve(len(lst));  // Reserve space for efficiency
+
+             std::transform(
+                 lst.begin(), lst.end(), std::back_inserter(ssa),
+                 [](const py::handle &elem) { return py::cast<double>(elem); });
              // call the function
              return disort.SetSingleScatteringAlbedo(ssa.data(), ssa.size());
            })
@@ -157,16 +169,19 @@ PYBIND11_MODULE(pydisort, m) {
                throw std::runtime_error("Incompatible buffer format!");
              }
              // call the function
-             return disort.SetLevelTemperature((double *)info.ptr,
-                                               info.shape[0]);
+             return disort.SetLevelTemperature(
+                 static_cast<double const *>(info.ptr), info.shape[0]);
            })
 
       .def("set_level_temperature",
            [](DisortWrapper &disort, py::list lst) {
              std::vector<double> level_temperature;
-             for (auto elem : lst) {
-               level_temperature.push_back(py::cast<double>(elem));
-             }
+             level_temperature.reserve(
+                 len(lst));  // Reserve space for efficiency
+
+             std::transform(
+                 lst.begin(), lst.end(), std::back_inserter(level_temperature),
+                 [](const py::handle &elem) { return py::cast<double>(elem); });
              // call the function
              return disort.SetLevelTemperature(level_temperature.data(),
                                                level_temperature.size());

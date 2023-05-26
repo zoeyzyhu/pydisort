@@ -34,7 +34,7 @@ endif()
 # 1. Setup for ICC compiler (version >= 10):
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "Intel")
-  message(FATAL_ERROR "\n" "Intel complier not implemented.\n\n")
+  message(FATAL_ERROR "\n" "Intel compiler not implemented.\n\n")
 endif()
 
 # 1. Setup for MSVC compiler (version >= 2012):

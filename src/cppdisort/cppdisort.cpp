@@ -15,7 +15,7 @@ const int Radiant::UAVGDN;
 const int Radiant::UAVGUP;
 const int Radiant::UAVGSO;
 
-py::array_t<double> getLegendreCoefficients(int nmom, std::string model,
+py::array_t<double> getLegendreCoefficients(int nmom, std::string const &model,
                                             double gg) {
   py::array_t<double> py_pmom(1 + nmom);
   double *ptr = static_cast<double *>(py_pmom.request().ptr);
@@ -72,12 +72,12 @@ DisortWrapper *DisortWrapper::fromTomlTable(const toml::table &table) {
   return disort;
 }
 
-void DisortWrapper::SetHeader(std::string header) {
-  snprintf(_ds.header, 1024, "%s", header.c_str());
+void DisortWrapper::SetHeader(std::string const &header) {
+  snprintf(_ds.header, sizeof(_ds.header), "%s", header.c_str());
 }
 
-DisortWrapper *DisortWrapper::SetAtmosphereDimension(int nlyr, int nmom,
-                                                     int nstr, int nphase) {
+DisortWrapper *DisortWrapper::SetAtmosphereDimension(int nlyr, int nstr,
+                                                     int nmom, int nphase) {
   if (_is_finalized) {
     return this;
   }
@@ -202,25 +202,25 @@ DisortWrapper::~DisortWrapper() {
   }
 }
 
-void DisortWrapper::SetOpticalDepth(double *tau, int len) {
+void DisortWrapper::SetOpticalDepth(double const *tau, int len) {
   for (int i = 0; i < std::min(_ds.nlyr, len); ++i) {
     _ds.dtauc[i] = tau[i];
   }
 }
 
-void DisortWrapper::SetSingleScatteringAlbedo(double *ssa, int len) {
+void DisortWrapper::SetSingleScatteringAlbedo(double const *ssa, int len) {
   for (int i = 0; i < std::min(_ds.nlyr, len); ++i) {
     _ds.ssalb[i] = ssa[i];
   }
 }
 
-void DisortWrapper::SetLevelTemperature(double *temp, int len) {
+void DisortWrapper::SetLevelTemperature(double const *temp, int len) {
   for (int i = 0; i <= std::min(_ds.nlyr, len - 1); ++i) {
     _ds.temper[i] = temp[i];
   }
 }
 
-void DisortWrapper::SetUserOpticalDepth(double *usrtau, int len) {
+void DisortWrapper::SetUserOpticalDepth(double const *usrtau, int len) {
   if (_ds.flag.usrtau) {
     for (int i = 0; i < std::min(_ds.ntau, len); ++i) {
       _ds.utau[i] = usrtau[i];
@@ -228,7 +228,7 @@ void DisortWrapper::SetUserOpticalDepth(double *usrtau, int len) {
   }
 }
 
-void DisortWrapper::SetUserCosinePolarAngle(double *umu, int len) {
+void DisortWrapper::SetUserCosinePolarAngle(double const *umu, int len) {
   if (_ds.flag.usrang) {
     for (int i = 0; i < std::min(_ds.numu, len); ++i) {
       _ds.umu[i] = umu[i];
@@ -236,7 +236,7 @@ void DisortWrapper::SetUserCosinePolarAngle(double *umu, int len) {
   }
 }
 
-void DisortWrapper::SetUserAzimuthalAngle(double *phi, int len) {
+void DisortWrapper::SetUserAzimuthalAngle(double const *phi, int len) {
   if (_ds.flag.usrang) {
     for (int i = 0; i < std::min(_ds.nphi, len); ++i) {
       _ds.phi[i] = phi[i];
@@ -279,7 +279,7 @@ DisortWrapper *DisortWrapper::Run() {
 }
 
 void DisortWrapper::printDisortState() {
-  std::cout << "Leves = " << _ds.nlyr << std::endl;
+  std::cout << "Levels = " << _ds.nlyr << std::endl;
   std::cout << "Moments = " << _ds.nmom << std::endl;
   std::cout << "Streams = " << _ds.nstr << std::endl;
   std::cout << "Phase functions = " << _ds.nphase << std::endl;

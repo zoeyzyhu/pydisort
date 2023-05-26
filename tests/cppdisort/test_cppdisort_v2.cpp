@@ -1,9 +1,11 @@
 #include <cppdisort/cppdisort.h>
+
 #include <iostream>
 #include <stdexcept>
 #include <string>
 
-template <typename A> void assert_eq(std::string msg, A value1, A value2) {
+template <typename A>
+void assert_eq(std::string const &msg, A value1, A value2) {
   if (value1 != value2) {
     std::cerr << "- Failing \'" << msg << "\', "
               << "Expect " << value2 << ", Got " << value1 << std::endl;
@@ -37,20 +39,20 @@ int main() {
   // disort->RunRTFlux();
 
   /* Print the results
-  std::vector<double> flxup = std::get<0>(fluxes);
-  std::vector<double> flxdn = std::get<1>(fluxes);
+     std::vector<double> flxup = std::get<0>(fluxes);
+     std::vector<double> flxdn = std::get<1>(fluxes);
 
-  std::cout << "Flux Up:" << std::endl;
-  for (const double& flux : flxup) {
+     std::cout << "Flux Up:" << std::endl;
+     for (const double& flux : flxup) {
       std::cout << flux << " ";
-  }
-  std::cout << std::endl;
+     }
+     std::cout << std::endl;
 
-  std::cout << "Flux Down:" << std::endl;
-  for (const double& flux : flxdn) {
+     std::cout << "Flux Down:" << std::endl;
+     for (const double& flux : flxdn) {
       std::cout << flux << " ";
-  }
-  std::cout << std::endl;*/
+     }
+     std::cout << std::endl;*/
 
   py::array_t<double> intensities = disort->Run()->GetIntensity();
 
