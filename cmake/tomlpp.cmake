@@ -4,7 +4,8 @@ set(FETCHCONTENT_QUIET FALSE)
 
 FetchContent_Declare(
   tomlpp
-  DOWNLOAD_EXTRACT_TIMESTAMP TRUE
+  DOWNLOAD_EXTRACT_TIMESTAMP
+  TRUE
   URL https://github.com/marzer/tomlplusplus/archive/refs/tags/v3.3.0.tar.gz)
 
 FetchContent_GetProperties(tomlpp)

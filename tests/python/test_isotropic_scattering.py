@@ -1,6 +1,6 @@
 #! python3
 """ Test isotropic scattering with pydisort."""
-# pylint: disable = no-name-in-module
+# pylint: disable = no-name-in-module, invalid-name
 
 import os
 import unittest
@@ -23,22 +23,22 @@ class PyDisortTests(unittest.TestCase):
 
     def test_isotropic_scattering(self):
         """Test isotropic scattering."""
-        disort_case = disort.from_file(self.toml_path)
-        disort_case.set_header("01. test isotropic scattering")
+        ds = disort.from_file(self.toml_path)
+        ds.set_header("01. test isotropic scattering")
 
         # set dimension
-        disort_case.set_atmosphere_dimension(
+        ds.set_atmosphere_dimension(
             nlyr=1, nstr=16, nmom=16, nphase=16
         ).set_intensity_dimension(nuphi=1, nutau=2, numu=6).finalize()
 
         # get scattering moments
-        pmom = get_legendre_coefficients(disort_case.get_nmom(), "isotropic")
+        pmom = get_legendre_coefficients(ds.get_nmom(), "isotropic")
 
         # set boundary conditions
-        disort_case.umu0 = 0.1
-        disort_case.phi0 = 0.0
-        disort_case.albedo = 0.0
-        disort_case.fluor = 0.0
+        ds.umu0 = 0.1
+        ds.phi0 = 0.0
+        ds.albedo = 0.0
+        ds.fluor = 0.0
 
         # set output optical depth and polar angles
         umu = array([-1.0, -0.5, -0.1, 0.1, 0.5, 1.0])
@@ -46,13 +46,13 @@ class PyDisortTests(unittest.TestCase):
 
         # case No.1
         print("==== Case No.1 ====")
-        disort_case.fbeam = pi / disort_case.umu0
-        disort_case.fisot = 0.0
+        ds.fbeam = pi / ds.umu0
+        ds.fisot = 0.0
         utau = array([0.0, 0.03125])
         ssa = array([0.2])
 
         tau = array([utau[-1]])
-        result = disort_case.run_with(
+        result = ds.run_with(
             {
                 "tau": tau,
                 "ssa": ssa,
@@ -78,7 +78,7 @@ class PyDisortTests(unittest.TestCase):
             rtol=1e-5,
         )
 
-        result = disort_case.get_flux(
+        result = ds.get_flux(
         )[:, [Radiant.RFLDIR, Radiant.FLDN, Radiant.FLUP]]
         assert_allclose(
             result,
@@ -95,7 +95,7 @@ class PyDisortTests(unittest.TestCase):
         # case No.2
         print("==== Case No.2 ====")
         ssa = array([1.0])
-        result = disort_case.run_with({"ssa": ssa}).get_intensity()
+        result = ds.run_with({"ssa": ssa}).get_intensity()
         assert_allclose(
             result,
             array(
@@ -110,7 +110,7 @@ class PyDisortTests(unittest.TestCase):
             rtol=1e-5,
         )
 
-        result = disort_case.get_flux(
+        result = ds.get_flux(
         )[:, [Radiant.RFLDIR, Radiant.FLDN, Radiant.FLUP]]
         assert_allclose(
             result,

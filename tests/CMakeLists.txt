@@ -10,8 +10,6 @@ add_subdirectory(python)
 
 file(GLOB inputs *.toml)
 foreach(input ${inputs})
-	get_filename_component(name ${input} NAME)
-  	configure_file(${input}
-		${CMAKE_BINARY_DIR}/bin/${name} COPYONLY
-		)
+  get_filename_component(name ${input} NAME)
+  configure_file(${input} ${CMAKE_BINARY_DIR}/bin/${name} COPYONLY)
 endforeach()
