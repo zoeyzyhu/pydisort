@@ -85,6 +85,7 @@ jobs:
       - name: Run tests for C++ and Pybind
         run: |
           source env/bin/activate
+          cp /opt/hostedtoolcache/Python/3.10.11/x64/lib/python3.10/site-packages/pydisort.cpython-310-x86_64-linux-gnu.so env/lib/python3.10/site-packages/
           which python3
           cd ./build/bin
           ./test_cppdisort.release
