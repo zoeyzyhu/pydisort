@@ -1,6 +1,7 @@
-#include <cppdisort/cppdisort.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
+
+#include <cppdisort/cppdisort.hpp>
 
 namespace py = pybind11;
 
@@ -46,11 +47,11 @@ void setDisortArraysFromDict(DisortWrapper &disort, py::dict &kwargs) {
       throw std::runtime_error("Incompatible buffer format!");
     } else {
       if (info.ndim == 1) {
-        disort.SetPhaseMoments(static_cast<double const *>(info.ptr), 1,
+        disort.SetPhaseMoments(static_cast<double *>(info.ptr), 1,
                                info.shape[0]);
       } else if (info.ndim == 2) {
-        disort.SetPhaseMoments(static_cast<double const *>(info.ptr),
-                               info.shape[0], info.shape[1]);
+        disort.SetPhaseMoments(static_cast<double *>(info.ptr), info.shape[0],
+                               info.shape[1]);
       } else {
         throw std::runtime_error("Incompatible buffer format!");
       }

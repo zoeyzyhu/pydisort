@@ -5,7 +5,7 @@
 set(namel cppdisort)
 string(TOUPPER ${namel} nameu)
 
-file(GLOB src_files cppdisort.cc)
+file(GLOB src_files cppdisort.cpp)
 
 string(TOLOWER ${CMAKE_BUILD_TYPE} buildl)
 string(TOUPPER ${CMAKE_BUILD_TYPE} buildu)

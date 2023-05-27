@@ -1,4 +1,5 @@
-black
-cmakelang
+clang-format
+cpplint
 numpy
 pre-commit
+pylint

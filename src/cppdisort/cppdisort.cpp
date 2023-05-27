@@ -1,7 +1,8 @@
-#include "cppdisort.h"
+#include "cppdisort.hpp"
 
 #include <toml++/toml.h>
 
+#include <algorithm>
 #include <iostream>
 #include <memory>
 #include <sstream>

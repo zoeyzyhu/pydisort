@@ -67,7 +67,7 @@ class DisortWrapper {
 
   virtual ~DisortWrapper();
 
-  void SetHeader(std::string header);
+  void SetHeader(std::string const &header);
 
   DisortWrapper *SetAtmosphereDimension(int nlyr, int nstr, int nmom,
                                         int nphase);
@@ -100,18 +100,18 @@ class DisortWrapper {
     _ds.wvnmhi = wave;
   }
 
-  void SetOpticalDepth(double *tau, int len);
+  void SetOpticalDepth(double const *tau, int len);
 
-  void SetSingleScatteringAlbedo(double *ssa, int len);
+  void SetSingleScatteringAlbedo(double const *ssa, int len);
 
   // temperature array is defined on levels
-  void SetLevelTemperature(double *temp, int len);
+  void SetLevelTemperature(double const *temp, int len);
 
-  void SetUserOpticalDepth(double *usrtau, int len);
+  void SetUserOpticalDepth(double const *usrtau, int len);
 
-  void SetUserCosinePolarAngle(double *umu, int len);
+  void SetUserCosinePolarAngle(double const *umu, int len);
 
-  void SetUserAzimuthalAngle(double *phi, int len);
+  void SetUserAzimuthalAngle(double const *phi, int len);
 
   void SetPlanckSource(double *planck);
 
