@@ -59,7 +59,9 @@ jobs:
           which python3
 
       - name: Install Python packages and pre-commits
-        run: ./2.install.sh
+        run: |
+          which pip3
+          ./2.install.sh
 
       - name: Build lib
         run: ./3.build.sh

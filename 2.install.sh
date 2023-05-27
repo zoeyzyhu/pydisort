@@ -5,13 +5,13 @@
 # ====================================================
 
 # Upgrade pip and setuptools
-pip install --upgrade pip setuptools
+pip3 install --upgrade pip setuptools
 
 # Install necessary packages
-pip install -r requirements.txt
+pip3 install -r requirements.txt
 
 # Show the packages installed
-pip list
+pip3 list
 
 # Install the git hook scripts
 pre-commit install
