@@ -68,11 +68,27 @@ jobs:
           which pip3
           ./2.install.sh
 
-      - name: Build lib
+      - name: Create and enter directory
         run: |
           source env/bin/activate
           which python3
-          ./3.build.sh
+          DIR=build
+          if [ -d "$DIR" ]; then
+              rm -rf $DIR
+          fi
+
+          rm -rf $DIR
+          mkdir $DIR
+          cd $DIR
+
+      - name: Build the library and tests
+        run: |
+          cmake ..
+          make
+          make install
+
+      - name: Back to root dir
+        run: cd ..
 
       - name: Run tests for C++ and Pybind
         run: |
