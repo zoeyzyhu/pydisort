@@ -79,15 +79,6 @@ repos:
 
   ## Python related ----------------------------------------------------------
 
-  # Might remove
-  # - repo: local
-  #   hooks:
-  #     - id: pydocstyle
-  #       name: pydocstyle
-  #       entry: pydocstyle
-  #       language: python
-  #       types: [python]
-
   - repo: https://github.com/PyCQA/pydocstyle
     rev: 6.3.0
     hooks:
@@ -157,16 +148,6 @@ repos:
         language: python
         types: [cmake]
 
-  # Might disable
-  # - repo: local
-  #   hooks:
-  #     - id: cmake-format
-  #       name: Fix *.cmake
-  #       entry: cmake-format
-  #       language: system
-  #       files: .*\.cmake$
-  #       args: ["-i"]
-
   ## 3. Lints ================================================================
 
   - repo: https://github.com/pocc/pre-commit-hooks
@@ -201,13 +182,3 @@ repos:
         language: python
         types: [python]
         require_serial: true
-
-  # - repo: https://github.com/cheshirekow/cmake-format-precommit
-  #   rev: v0.6.10
-  #   hooks:
-  #     - id: cmake-lint
-  #       name: Check for style violations in cmake
-  #       description: Check for style violations, common mistakes, and anti-patterns.
-  #       entry: cmake-lint
-  #       language: python
-  #       types: [cmake]
