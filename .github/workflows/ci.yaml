@@ -84,10 +84,10 @@ jobs:
 
       - name: Run tests for C++ and Pybind
         run: |
+          source env/bin/activate
           which python3
           cd ./build/bin
           ./test_cppdisort.release
-          source env/bin/activate
           python3 test_isotropic_scattering.py
           cd ../..
 
