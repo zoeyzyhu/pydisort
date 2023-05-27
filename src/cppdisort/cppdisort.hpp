@@ -14,7 +14,7 @@
 namespace py = pybind11;
 
 // wraps c_getmom
-py::array_t<double> getLegendreCoefficients(int nmom, std::string model,
+py::array_t<double> getLegendreCoefficients(int nmom, std::string const &model,
                                             double gg = 0.);
 
 // flux index constants
