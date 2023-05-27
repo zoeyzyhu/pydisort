@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 jobs:
-  style-checker:
+  style-checker-cpp:
     runs-on: ubuntu-latest
     steps:
       - run: echo "🎉 Job triggered by a ${{ github.event_name }} event."
@@ -20,10 +20,52 @@ jobs:
       - name: Install cpplint
         run: sudo pip install cpplint
 
-      - name: Install pylint
-        run: sudo pip install pylint
+      - name: Install cppcheck
+        run: sudo apt-get install cppcheck
 
       - uses: actions/checkout@v3
 
-      - name: Run cpplint, pylint
-        run: ./tools/check_style.sh
+      - name: Add permission to style checker
+        run: chmod +x ./tools/check_style_cpp.sh
+
+      - name: Run cpplint
+        run: ./tools/check_style_cpp.sh
+
+  build-n-check-py:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macOS-latest]
+    steps:
+      - run: echo "🎉 Job triggered by a ${{ github.event_name }} event."
+      - run: echo "🐧 Job runs on ${{ runner.os }} by ${{runner.name}}"
+      - run: echo "🔎 Branch - ${{ github.ref }}; "
+          "repo - ${{ github.repository }}."
+      - run: echo "🖥️ The workspace, ${{ github.workspace }}, "
+          "is now ready to test your code on the runner."
+
+      - uses: actions/checkout@v3
+
+      - name: Add permission to shell scripts
+        run: chmod +x 1.setup.sh 2.install.sh 3.build.sh 4.test.sh
+
+      - name: Set up env for Python and pre-commit hooks
+        run: ./1.setup.sh
+
+      - name: Activate Python venv
+        run: source env/bin/activate
+
+      - name: Install Python packages and pre-commits
+        run: ./2.install.sh
+
+      - name: Build lib
+        run: ./3.build.sh
+
+      - name: Run tests for C++ and Pybind
+        run: ./4/test/sh
+
+      - name: Add permission to style checker
+        run: ./tools/check_style_cpp.sh
+
+      - name: Run pylint
+        run: ./tools/check_style_py.sh
