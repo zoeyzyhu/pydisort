@@ -78,7 +78,7 @@ jobs:
         run: |
           source env/bin/activate
           which python3
-          ./4.test/sh
+          ./4.test.sh
 
       - name: Add permission to style checker
         run: |
