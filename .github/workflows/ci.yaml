@@ -45,6 +45,9 @@ jobs:
           "is now ready to test your code on the runner."
 
       - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
 
       - name: Add permission to shell scripts
         run: chmod +x 1.setup.sh 2.install.sh 3.build.sh 4.test.sh
@@ -60,14 +63,19 @@ jobs:
 
       - name: Install Python packages and pre-commits
         run: |
+          which python3
           which pip3
           ./2.install.sh
 
       - name: Build lib
-        run: ./3.build.sh
+        run: |
+          which python3
+          ./3.build.sh
 
       - name: Run tests for C++ and Pybind
-        run: ./4/test/sh
+        run: |
+          which python3
+          ./4/test/sh
 
       - name: Add permission to style checker
         run: ./tools/check_style_cpp.sh
