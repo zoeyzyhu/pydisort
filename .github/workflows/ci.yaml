@@ -56,6 +56,9 @@ jobs:
       - name: Add permission to shell scripts
         run: chmod +x 1.setup.sh 2.install.sh 3.build.sh 4.test.sh
 
+      - name: Install python modules
+        run: pip install -r requirements.txt
+
       - name: Create build directory
         run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
 
