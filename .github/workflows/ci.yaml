@@ -1,24 +1,24 @@
 ---
 name:
 on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
+    push:
+        branches: [main]
+    pull_request:
+        branches: [main]
 
 jobs:
-  style-checker:
-    runs-on: ubuntu-latest
-    steps:
-      - run: echo "🎉 Job triggered by a ${{ github.event_name }} event."
-      - run: echo "🐧 Job runs on ${{ runner.os }} by ${{runner.name}}"
-      - run: echo "🔎 Branch - ${{ github.ref }}; "
-          "repo - ${{ github.repository }}."
-      - run: echo "🖥️ The workspace, ${{ github.workspace }}, "
-          "is now ready to test your code on the runner."
+    style-checker:
+        runs-on: ubuntu-latest
+        steps:
+            - run: echo "🎉 Job triggered by a ${{ github.event_name }} event."
+            - run: echo "🐧 Job runs on ${{ runner.os }} by ${{runner.name}}"
+            - run: echo "🔎 Branch - ${{ github.ref }}; "
+                  "repo - ${{ github.repository }}."
+            - run: echo "🖥️ The workspace, ${{ github.workspace }}, "
+                  "is now ready to test your code on the runner."
 
-      - name: Install cpplint
-        run: sudo pip install cpplint
+            - name: Install cpplint
+              run: sudo pip install cpplint
 
             - name: Install pylint
               run: sudo pip install pylint
