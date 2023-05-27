@@ -2,7 +2,7 @@
 
 # 1. Style checks for C++ ====================================================
 
-filters=-legal/copyright,-build/include_subdir,-runtime/references
+filters=-legal/copyright,-build/include_subdir,build/include_order,-runtime/references
 
 # cppdisort
 cpplint --filter=${filters} --recursive src/cppdisort
