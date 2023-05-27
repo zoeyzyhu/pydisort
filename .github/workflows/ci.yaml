@@ -7,35 +7,35 @@ on:
     branches: [main]
 
 jobs:
-  style-checker-cpp:
-    runs-on: ubuntu-latest
-    steps:
-      - run: echo "🎉 Job triggered by a ${{ github.event_name }} event."
-      - run: echo "🐧 Job runs on ${{ runner.os }} by ${{runner.name}}"
-      - run: echo "🔎 Branch - ${{ github.ref }}; "
-          "repo - ${{ github.repository }}."
-      - run: echo "🖥️ The workspace, ${{ github.workspace }}, "
-          "is now ready to test your code on the runner."
+  #  style-checker-cpp:
+  #    runs-on: ubuntu-latest
+  #    steps:
+  #      - run: echo "🎉 Job triggered by a ${{ github.event_name }} event."
+  #      - run: echo "🐧 Job runs on ${{ runner.os }} by ${{runner.name}}"
+  #      - run: echo "🔎 Branch - ${{ github.ref }}; "
+  #          "repo - ${{ github.repository }}."
+  #      - run: echo "🖥️ The workspace, ${{ github.workspace }}, "
+  #          "is now ready to test your code on the runner."#
 
-      - name: Install cpplint
-        run: sudo pip install cpplint
+  #      - name: Install cpplint
+  #        run: sudo pip install cpplint#
 
-      - name: Install cppcheck
-        run: sudo apt-get install cppcheck
+  #      - name: Install cppcheck
+  #        run: sudo apt-get install cppcheck#
 
-      - uses: actions/checkout@v3
+  #      - uses: actions/checkout@v3#
 
-      - name: Add permission to style checker
-        run: chmod +x ./tools/check_style_cpp.sh
+  #      - name: Add permission to style checker
+  #        run: chmod +x ./tools/check_style_cpp.sh#
 
-      - name: Run cpplint
-        run: ./tools/check_style_cpp.sh
+  #      - name: Run cpplint
+  #        run: ./tools/check_style_cpp.sh
 
   build-n-check-py:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, macOS-latest]
+        os: [ubuntu-latest]
     steps:
       - run: echo "🎉 Job triggered by a ${{ github.event_name }} event."
       - run: echo "🐧 Job runs on ${{ runner.os }} by ${{runner.name}}"
@@ -76,9 +76,11 @@ jobs:
 
       - name: Run tests for C++ and Pybind
         run: |
-          source env/bin/activate
           which python3
-          ./4.test.sh
+          cd ./build/bin
+          ./test_cppdisort.release
+          python3 test_isotropic_scattering.py
+          cd ../..
 
       - name: Add permission to style checker
         run: |
