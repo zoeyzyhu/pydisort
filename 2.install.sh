@@ -12,3 +12,6 @@ pip3 install -r requirements.txt
 
 # Show the packages installed
 pip3 list
+
+# Install the git hook scripts
+pre-commit install
