@@ -8,10 +8,10 @@
 pip install --upgrade pip setuptools
 
 # Install necessary packages
-pip3 install -r requirements.txt
+pip install -r requirements.txt
 
 # Show the packages installed
-pip3 list
+pip list
 
 # Install the git hook scripts
 pre-commit install
