@@ -53,7 +53,9 @@ jobs:
         run: ./1.setup.sh
 
       - name: Activate Python venv
-        run: source env/bin/activate
+        run: |
+          source env/bin/activate
+          echo "VIRTUAL ENV:" $VIRTUAL_ENV
 
       - name: Install Python packages and pre-commits
         run: ./2.install.sh
