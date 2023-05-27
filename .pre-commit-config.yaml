@@ -98,7 +98,7 @@ repos:
         language: python
         types: [cmake]
 
-    ## Lints =================================================================
+  ## 3. Lints ================================================================
 
     - repo: https://github.com/pocc/pre-commit-hooks
       rev: v1.3.5
@@ -106,18 +106,19 @@ repos:
           - id: cpplint
             exclude: ^src/cdisort | *.c
 
-    - repo: local
-      hooks:
-          - id: yamllint
-            name: yamllint
-            description: This hook runs yamllint.
-            entry: yamllint
-            language: python
-            types: [file, yaml]
+  - repo: local
+    hooks:
+      # - id: yamllint
+      #   name: yamllint
+      #   args: [--no-warnings]
+      #   description: This hook runs yamllint.
+      #   entry: yamllint
+      #   language: python
+      #   types: [file, yaml]
 
-          - id: pylint
-            name: pylint
-            entry: pylint
-            language: python
-            types: [python]
-            require_serial: true
+      - id: pylint
+        name: pylint
+        entry: pylint
+        language: python
+        types: [python]
+        require_serial: true
