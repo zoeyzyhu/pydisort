@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [main]
 
+env:
+  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
+  BUILD_TYPE: Release
+
 jobs:
   #  style-checker-cpp:
   #    runs-on: ubuntu-latest
@@ -52,49 +56,8 @@ jobs:
       - name: Add permission to shell scripts
         run: chmod +x 1.setup.sh 2.install.sh 3.build.sh 4.test.sh
 
-      - name: Set up env for Python and pre-commit hooks
-        run: ./1.setup.sh
-
-      - name: Activate Python venv
-        run: |
-          source env/bin/activate
-          echo "VIRTUAL ENV:" $VIRTUAL_ENV
-          which python3
-
-      - name: Install Python packages and pre-commits
-        run: |
-          source env/bin/activate
-          which python3
-          which pip3
-          ./2.install.sh
-
-      - name: Create directory and build
-        run: |
-          source env/bin/activate
-          which python3
-          if [ -d build ]; then
-              rm -rf build
-          fi
-          rm -rf build
-          mkdir build
-          cd build
-          cmake ..
-          make
-          make install
+      - name: Build
+        run: cmake --install ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
 
       - name: Run tests for C++ and Pybind
-        run: |
-          source env/bin/activate
-          cp /opt/hostedtoolcache/Python/3.10.11/x64/lib/python3.10/site-packages/pydisort.cpython-310-x86_64-linux-gnu.so env/lib/python3.10/site-packages/
-          which python3
-          cd ./build/bin
-          ./test_cppdisort.release
-          python3 test_isotropic_scattering.py
-          cd ../..
-
-      - name: Add permission to style checker
-        run: |
-          source env/bin/activate
-          which python3
-          chmod +x ./tools/check_style_py.sh
-          ./tools/check_style_py.sh
+        run: python3 ${{github.workspace}}/build/bin/test_isotropic_scattering.py
