@@ -9,9 +9,16 @@ repos:
         name: Trim Trailing Whitespace
         entry: trailing-whitespace-fixer
         language: python
+        name: Trim Trailing Whitespace
+        entry: trailing-whitespace-fixer
+        language: python
         exclude: ^(src/cdisort/.*|tests/cdisort/.*)$
 
+
       - id: end-of-file-fixer
+        name: Fix End of Files
+        entry: mixed-line-ending
+        language: python
         name: Fix End of Files
         entry: mixed-line-ending
         language: python
@@ -26,6 +33,11 @@ repos:
           Less/HTML/Vue/Angular/GraphQL/Markdown/YAML"
         entry: prettier --write --list-different --ignore-unknown
         language: node
+        name: Prettier
+        description: "Checks JavaScript/TypeScript/Flow/JSX/JSON/CSS/SCSS/
+          Less/HTML/Vue/Angular/GraphQL/Markdown/YAML"
+        entry: prettier --write --list-different --ignore-unknown
+        language: node
         exclude: ^(src/cdisort/.*|tests/cdisort/.*)$
 
   - repo: https://github.com/codespell-project/codespell
@@ -35,17 +47,46 @@ repos:
         name: Check Misspellings
         language: python
         description: It looks for a set of common misspellings
+        name: Check Misspellings
+        language: python
+        description: It looks for a set of common misspellings
         exclude: ^(src/cdisort/.*|tests/cdisort/.*)$
 
   ## 2. Per language check ===================================================
 
-    - repo: https://github.com/pre-commit/pre-commit-hooks
-      rev: v4.0.1
-      hooks:
-          - id: requirements-txt-fixer
-          - id: check-yaml
-          - id: check-toml
-          - id: check-shebang-scripts-are-executable
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.0.1
+    hooks:
+      - id: requirements-txt-fixer
+        name: Fix requirements.txt
+        language: python
+
+      - id: check-yaml
+        name: Fix yaml
+        entry: check-yaml
+        language: python
+
+      - id: check-toml
+        name: Fix toml
+        language: python
+
+      - id: check-shebang-scripts-are-executable
+        name: Check that executables have shebangs
+        description: ensures that (non-binary) executables have a shebang.
+        entry: check-executables-have-shebangs
+        types: [text, executable]
+        language: python
+
+  ## Python related ----------------------------------------------------------
+
+  # Might remove
+  # - repo: local
+  #   hooks:
+  #     - id: pydocstyle
+  #       name: pydocstyle
+  #       entry: pydocstyle
+  #       language: python
+  #       types: [python]
 
   - repo: https://github.com/PyCQA/pydocstyle
     rev: 6.3.0
@@ -54,6 +95,7 @@ repos:
         name: pydocstyle
         entry: pydocstyle
         description: Check compliance with Python docstring conventions.
+        description: Check compliance with Python docstring conventions.
         language: python
         types: [python]
 
@@ -61,6 +103,10 @@ repos:
     rev: v2.0.0
     hooks:
       - id: autopep8
+        name: Autopep8 Python
+        description: Formats Python code to conform to the PEP 8 style guide
+        language: python
+        args: [-i]
         name: Autopep8 Python
         description: Formats Python code to conform to the PEP 8 style guide
         language: python
@@ -77,10 +123,21 @@ repos:
         description: Formats C, C++, Objective-C, and Java code
         types_or: [c, c++, c#, objective-c, java]
         language: python
+        name: Fix C, C++, Objective-C, Java
+        entry: clang-format-hook
+        description: Formats C, C++, Objective-C, and Java code
+        types_or: [c, c++, c#, objective-c, java]
+        language: python
         args: [--style=Google, -i, --no-diff]
         exclude: ^(src/cdisort/.*|tests/cdisort/.*)$
 
+
       - id: cppcheck
+        name: Find warnings/errors in C, C++, and Objective-C
+        entry: cppcheck-hook
+        description: Find warnings/errors in C, C++, and Objective-C code
+        types_or: [c, c++, c#, objective-c]
+        language: python
         name: Find warnings/errors in C, C++, and Objective-C
         entry: cppcheck-hook
         description: Find warnings/errors in C, C++, and Objective-C code
@@ -91,6 +148,8 @@ repos:
 
   - repo: https://github.com/cheshirekow/cmake-format-precommit
     rev: v0.6.10
+  - repo: https://github.com/cheshirekow/cmake-format-precommit
+    rev: v0.6.10
     hooks:
       - id: cmake-format
         name: Fix cmake
@@ -98,13 +157,33 @@ repos:
         language: python
         types: [cmake]
 
+  # Might disable
+  # - repo: local
+  #   hooks:
+  #     - id: cmake-format
+  #       name: Fix *.cmake
+  #       entry: cmake-format
+  #       language: system
+  #       files: .*\.cmake$
+  #       args: ["-i"]
+
   ## 3. Lints ================================================================
 
-    - repo: https://github.com/pocc/pre-commit-hooks
-      rev: v1.3.5
-      hooks:
-          - id: cpplint
-            exclude: ^src/cdisort | *.c
+  - repo: https://github.com/pocc/pre-commit-hooks
+    rev: v1.3.5
+    hooks:
+      - id: cpplint
+        name: Find lints in C/C++
+        entry: cpplint-hook
+        description: Find warnings/errors in C/CPP code
+        types_or: [c, c++, c#, objective-c, cuda]
+        language: python
+        args: [
+            "--filter=-legal/copyright,
+            -build/include_subdir,
+            -runtime/references",
+          ]
+        exclude: ^(src/cdisort/.*|tests/cdisort/.*)$
 
   - repo: local
     hooks:
@@ -117,8 +196,18 @@ repos:
       #   types: [file, yaml]
 
       - id: pylint
-        name: pylint
+        name: Find lints in Python
         entry: pylint
         language: python
         types: [python]
         require_serial: true
+
+  # - repo: https://github.com/cheshirekow/cmake-format-precommit
+  #   rev: v0.6.10
+  #   hooks:
+  #     - id: cmake-lint
+  #       name: Check for style violations in cmake
+  #       description: Check for style violations, common mistakes, and anti-patterns.
+  #       entry: cmake-lint
+  #       language: python
+  #       types: [cmake]
