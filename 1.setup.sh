@@ -22,7 +22,7 @@ python3 -m venv $DIR
 # 2. Setup packages for pre-commit hooks -------------
 if ! which cppcheck > /dev/null; then
     if command -v apt-get >/dev/null; then
-      sudo apt-get cppcheck
+      sudo apt-get install cppcheck
     elif command -v yum >/dev/null; then
       sudo yum install cppcheck
     elif command -v brew; then
