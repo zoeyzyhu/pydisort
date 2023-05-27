@@ -20,17 +20,10 @@ jobs:
       - name: Install cpplint
         run: sudo pip install cpplint
 
+      - name: Install pylint
+        run: sudo pip install pylint
+
       - uses: actions/checkout@v3
 
-      - name: Run cpplint
-        #- run: echo "Okkkkk!"
+      - name: Run cpplint, pylint
         run: ./tools/check_style.sh
-#  build:
-#    runs-on: ubuntu-latest
-#    needs: style-checker
-#
-#    steps:
-#      - uses: actions/checkout@v3
-#
-#      - name: create build directory
-#        run:
