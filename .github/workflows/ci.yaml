@@ -75,7 +75,7 @@ jobs:
       - name: Run tests for C++ and Pybind
         run: |
           which python3
-          ./4/test/sh
+          ./4.test/sh
 
       - name: Add permission to style checker
         run: ./tools/check_style_cpp.sh
