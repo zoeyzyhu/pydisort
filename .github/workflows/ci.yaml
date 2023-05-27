@@ -87,6 +87,7 @@ jobs:
           which python3
           cd ./build/bin
           ./test_cppdisort.release
+          source env/bin/activate
           python3 test_isotropic_scattering.py
           cd ../..
 
