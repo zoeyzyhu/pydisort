@@ -36,6 +36,7 @@ jobs:
         run: ./tools/check_style.sh
 
   build:
+    needs: style-checker
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
