@@ -11,7 +11,7 @@ env:
   BUILD_TYPE: Release
 
 jobs:
-  style-checker-cpp:
+  style-checker:
     runs-on: ubuntu-latest
     steps:
       - run: echo "🎉 Job triggered by a ${{ github.event_name }} event."
