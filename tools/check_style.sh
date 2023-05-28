@@ -12,3 +12,7 @@ cpplint --filter=${filters} --recursive python/*.cpp
 
 # test_cppdisort
 cpplint --filter=${filters} --recursive tests/cppdisort
+
+# Style checks for Python =================================================
+
+pylint --recursive=y tests/python
