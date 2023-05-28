@@ -1,3 +1,13 @@
+<h1 align="center">
+    <img src="img/logo.png" alt="Pydisort" width="200">
+</h1>
+
+<p align="center">
+  <i align="center">Empower Discrete Ordinates Radiative Transfer (DISORT) with Python 🚀</i>
+</p>
+
+[![build](https://github.com/zoeyzyhu/pydisort/actions/workflows/main.yaml/badge.svg)](https://github.com/zoeyzyhu/actions/workflows/main.yaml)
+
 # 1. Overview of the Project
 
 ## DISORT in Fortran, C, C++, Python
