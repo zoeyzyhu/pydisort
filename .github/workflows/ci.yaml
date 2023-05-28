@@ -21,8 +21,8 @@ jobs:
       - run: echo "🖥️ The workspace, ${{ github.workspace }}, "
           "is now ready to test your code on the runner."
 
-      - name: Install cpplint
-        run: sudo pip install cpplint
+      - name: Install cpplint, pylint
+        run: sudo pip install cpplint pylint
 
       - name: Install cppcheck
         run: sudo apt-get install cppcheck
@@ -39,7 +39,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest]
+        os: [ubuntu-latest, macOS-latest]
     steps:
       - run: echo "🎉 Job triggered by a ${{ github.event_name }} event."
       - run: echo "🐧 Job runs on ${{ runner.os }} by ${{runner.name}}"
