@@ -56,16 +56,6 @@ The `pydisort` builds a Python library that provides a Pythonic interface to the
 - [Introduction](#introduction)
 - [Usage](#usage)
 
-<details open="open">
-  <summary>Table of Contents</summary>
-  <ol>
-    <li><a href="#introduction"> Introduction</a></li>
-    <li><a href="#usage"> Usage</a></li>
-    <li><a href="#contribution"> Contribution</a></li>
-    <li><a href="#issues"> Issues?</a></li>
-  </ol>
-</details>
-
 ---
 
 ## Usage
@@ -131,7 +121,7 @@ int main() {
 
 ---
 
-# Contribution
+## Contribution
 
 <div align="right"><a href="#table-of-contents"><img align="right" src="img/top.png" width="34" ></a></div>
 
