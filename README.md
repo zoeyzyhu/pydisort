@@ -86,6 +86,8 @@ Building upon the aforementioned work, we have developed a `C++` wrapper for the
 
 ## Usage
 
+<!-- For Python users-------------------------------->
+
 ### <a id='for-python-users'><picture><img src="img/python.svg" alt="Python" align=left width=24></picture> For Python users</a>
 
 We provide the `pydisort` library for Python users. The package can be installed using `pip`:
@@ -147,11 +149,15 @@ intensity = disort_instance.get_intensity()
 
 Please note that this is a generic tutorial and you would need to adapt this to your specific use-case. For example, you might need to provide your own data file in `from_file` function or fill the numpy arrays `optical_depth`, `single_scattering_albedo`, and `level_temperature` according to your requirements.
 
-> 💡 One important point to note is that the pydisort library assumes that the provided arrays (optical depth, single scattering albedo, etc.) are in the numpy format and it throws exceptions if incompatible data types are provided. So, ensure that you are providing data in the right format to avoid any runtime errors.
+> 💡 One important point to note is that the `pydisort` library assumes that the provided arrays (optical depth, single scattering albedo, etc.) are in the numpy format and it throws exceptions if incompatible data types are provided. So, ensure that you are providing data in the right format to avoid any runtime errors.
 
-[//]: <> (Do not remove the following line, which is used for dividing the content)
+<div align="right"><a href="#table-of-contents"><img src="img/top.png" width="32"></div>
+
+[//]: <> (!!Do not remove the following line, which is used for dividing the content)
 
 #
+
+<!-- For C++ developers------------------------------>
 
 ### <a id='for-c++-users'><picture><img src="img/cpp.svg" alt="C++" align=left width=24></picture> For C++ developers</a>
 
