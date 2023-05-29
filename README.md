@@ -117,13 +117,13 @@ int main() {
 }
 ```
 
-<div align="right">[ <a href="#table-of-contents">↑ Back to top ↑</a> ]</div>
+<div align="right"><a href="#table-of-contents"><img src="img/top.png" width="32"></div>
 
 ![-----------------------------------------------------](img/rainbow.png)
 
 ## Contribution
 
-<div align="right"><a href="#table-of-contents"><img src="img/top.png" width="28"></div>
+<div align="right"><a href="#table-of-contents"><img src="img/top.png" width="32"></div>
 
 ![-----------------------------------------------------](img/rainbow.png)
 
