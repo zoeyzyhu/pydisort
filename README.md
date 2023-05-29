@@ -71,7 +71,7 @@
 
 DISORT (Discrete Ordinate Radiative Transfer) is a widely-used algorithm that calculates the scattering and absorption of radiation in a medium. The original DISORT algorithm was developed by Stamnes et al. in 1988 and was implemented in `FORTRAN`. Later, Timothy E. Dowling (1999) ported the algorithm to `C`, resulting in the widely-used implementation known as `cdisort`. The `cdisort` library is extensively utilized in atmospheric and remote sensing applications. Notably, it is an integral component of the `libRadtran` radiative transfer model, widely employed in atmospheric and remote sensing studies.
 
-Building upon the aforementioned work, we have developed a `C++` wrapper for the `cdisort` library and subsequently created a `Python` package. The C++ wrapper serves two primary purposes: (1) providing a modern C++ interface for the cdisort library to facilitate future development involving DISORT, and (2) establishing the foundation for the Python package's bindings. The Python package is designed to be user-friendly, making it easy to install and integrate into a diverse range of applications.
+Building upon the aforementioned work, we have developed a `C++` wrapper for the `cdisort` library and subsequently created a `Python` package. The C++ wrapper serves two primary purposes: (1) providing a modern C++ interface for the `cdisort` library to facilitate future development involving DISORT, and (2) establishing the foundation for the Python package's bindings. The Python package, which is binded upon the C++ wrapper via `pybind11`, is designed to be user-friendly, making it easy to install and integrate into a diverse range of applications.
 
 ![-----------------------------------------------------](img/rainbow.png)
 
@@ -80,7 +80,7 @@ Building upon the aforementioned work, we have developed a `C++` wrapper for the
 - [Introduction](#introduction)
 - [Usage](#usage)
   - [For Python users](#for-python-users)
-  - [For C++ users](#for-c++-users)
+  - [For C++ developers](#for-c++-users)
 
 ![-----------------------------------------------------](img/rainbow.png)
 
@@ -88,23 +88,69 @@ Building upon the aforementioned work, we have developed a `C++` wrapper for the
 
 ### <a id='for-python-users'><picture><img src="img/python.svg" alt="Python" align=left width=24></picture> For Python users</a>
 
-We provide a Python package for the `pydisort` library. The package can be installed using `pip`:
+We provide the `pydisort` library for Python users. The package can be installed using `pip`:
 
 ```bash
 pip install pydisort
 ```
 
-The package provides a Pythonic interface to the `cppdisort` library. It serves as a bridge between the C++ implementation of `cppdisort` and the Python programming language, enabling users to leverage the power of `cppdisort` within their Python applications.
+Here is a step-by-step tutorial of how to use the pydisort package:
 
-To run the example, you can use the following command:
+- Step 1. Importing the module:
 
 ```python
-from pydisort import disort, get_legendre_coefficients, Radiant
-
-ds = disort.from_file(self.toml_path)
-pmom = get_legendre_coefficients(ds.get_nmom(), "isotropic")
-
+import pydisort
+import numpy as np
 ```
+
+- Step 2. Create an instance of the disort class:
+
+```python
+# Let's assume you have a file named 'input.toml' which has the required data for initializing the 'disort' class.
+disort_instance = pydisort.disort.from_file('input.toml')
+```
+
+- Step 3. Set the properties of your disort model:
+
+```python
+# Let's assume you have the following arrays for setting the disort properties
+optical_depth = np.array([1.0, 2.0, 3.0])
+single_scattering_albedo = np.array([0.7, 0.8, 0.9])
+level_temperature = np.array([300.0, 200.0, 100.0])
+
+disort_instance.set_optical_depth(optical_depth)
+disort_instance.set_single_scattering_albedo(single_scattering_albedo)
+disort_instance.set_level_temperature(level_temperature)
+```
+
+- Step 4. Set more specific options, such as flags or intensity dimensions:
+
+```python
+flags = {"flag_1": True, "flag_2": False}
+disort_instance.set_flags(flags)
+disort_instance.set_intensity_dimension(1, 1, 1)
+```
+
+- Step 5. Run the disort computation:
+
+```python
+disort_instance.run()
+```
+
+- Step 6. After running the disort computation, you can get the computed flux and intensity:
+
+```python
+flux = disort_instance.get_flux()
+intensity = disort_instance.get_intensity()
+```
+
+Please note that this is a generic tutorial and you would need to adapt this to your specific use-case. For example, you might need to provide your own data file in from_file function or fill the numpy arrays `optical_depth`, `single_scattering_albedo`, and `level_temperature` according to your requirements.
+
+> 💡 One important point to note is that the pydisort library assumes that the provided arrays (optical depth, single scattering albedo, etc.) are in the numpy format and it throws exceptions if incompatible data types are provided. So, ensure that you are providing data in the right format to avoid any runtime errors.
+
+[//]: <> (Do not remove the following line, which is used for dividing the content)
+
+#
 
 ### <a id='for-c++-users'><picture><img src="img/cpp.svg" alt="C++" align=left width=24></picture> For C++ developers</a>
 
@@ -188,6 +234,8 @@ Not sure where to start? Join our discord and we will help you get started!
 <a href="https://discord.gg/ZKBZg5K2"><img src="img/discord.png" width="150"/></a> &nbsp;&nbsp; <a target="_blank" href="https://bmc.link/zoeyzyhu"><img src="img/bmc.png" alt="Buy me a coffee" width="150"/></a>
 
 ---
+
+## Extra Information
 
 There are three formal components in this repo:
 
