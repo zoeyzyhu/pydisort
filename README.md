@@ -217,16 +217,22 @@ cd bin
 
 #### 🔻 Build and run the Python package
 
-If you follow the steps in the previous section, you will have a C++ wrapper that can be used by Python, and a Python packaged called `pydisort`, which has been binded via `pybind11`. You could simply test the Python package using the following command:
+If you follow the steps in the previous section, you will have a C++ wrapper that can be used by Python, and a Python packaged called `pydisort`, which has been binded via `pybind11`. You could simply install and test the Python package using the following command:
 
 ```bash
 # Assume that you are still in the build/bin/ directory
+# Install the Python package
+cd ..
+make install
+
+# Run the test cases
+cd bin
 python3 test_isotropic_scattering.py
 ```
 
-However, the above steps will put `pydisort` in the system path of Python, which might be inaccessible especially if you are working on a shared server. We recommend that you use a virtual environment for Python to install the `pydisort` package, which will also keep your system path clean even if you have access to it.
+❗However, the above steps will put `pydisort` in the system path of Python, which might be inaccessible especially if you are working on a shared server. We recommend that you use a virtual environment for Python to install the `pydisort` package, which will also keep your system path clean even if you have access to it.
 
-In this recommended approach, we need to set up the virtual environment before the building process. You could use the following commands to create a virtual environment and install the `pydisort` package:
+In this recommended approach, we need to set up the virtual environment before the building process. You could use the following commands to create a virtual environment, build and install the `pydisort` package in it:
 
 ```bash
 # Set up Python virtual environment and cppcheck
