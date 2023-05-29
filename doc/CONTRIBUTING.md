@@ -13,8 +13,22 @@ We welcome contributions to this repository! If you would like to contribute, pl
 ## Table of Contents
 
 - [Git Philosophy](#git-philosophy)
-- [Getting Started](#getting-started)
-- [Making Changes](#making-changes)
+- [Git Workflow](#git-workflow)
+  - [Step 1. Submit an issue on the GitHub website](#step1)
+  - [Step 2. Fork and clone the repository](#step2)
+  - [Step 3. Update the .gitignore file](#step3)
+  - [Step 4. Add changed files to git](#step4)
+  - [Step 5. Commit your changes locally](#step5)
+  - [Step 6. Upload your branch to GitHub](#step6)
+  - [Step 7. Submit a pull request (PR)](#step7)
+  - [Step 8. Squash and merge](#step8)
+  - [Step 9. Update your local branch](#step9)
+- [Testing](#testing)
+- [Naming Conventions](#naming-conventions)
+  - [Folder and file naming](#folder-and-file-naming)
+  - [Variable and class naming](#variable-and-class-naming)
+  - [Functions naming](#functions-naming)
+  - [Converting from C to C++](#converting-from-c-to-c)
 
 ## Git Philosophy
 
@@ -24,7 +38,7 @@ This workflow differs from some individual workflows where the smallest unit is 
 
 ## Git Workflow
 
-### 📍 Step 1. Submit an issue on the GitHub website:
+### <a id='step1'>📍 Step 1. Submit an issue on the GitHub website:</a>
 
 Before starting any work, create an issue ticket on GitHub to describe the problem or task you want to address.
 
@@ -33,7 +47,7 @@ Before starting any work, create an issue ticket on GitHub to describe the probl
 
 We will review the issue and provide feedback such as compatibility with the project or if someone is already working on it. If the issue is approved, we will assign it to you by asking you to create a pull request to this repository, so that the issue will be automatically linked to the pull request. Through this design, we ensure that the development is issue-driven.
 
-### 📍 Step 2. Fork and clone the repository
+### <a id='step2'>📍 Step 2. Fork and clone the repository </a>
 
 Before contributing to the repository, please ensure you have the necessary dependencies installed. Also, please refer to the [README.md](../README.md) file for instructions on setting up the build environment.
 
@@ -45,11 +59,11 @@ git clone https://github.com/your-username/repository-name.git
 
 Replace your-username with your GitHub username and repository-name with the name of the repository.
 
-### 📍 Step 3. Update the .gitignore file
+### <a id='step3'>📍 Step 3. Update the .gitignore file </a>
 
 The `.gitignore` file helps keep your working directory clean. Each folder can have its own `.gitignore` file, which lists files that should not be tracked by the git system. For example, model output files should not be added to git. Ideally, when you run `git status`, there should be no untracked files in your working directory.
 
-### 📍 Step 4. Add changed files to git
+### <a id='step4'>📍 Step 4. Add changed files to git </a>
 
 When you want to pause your work on the issue, add your changes to git using the command:
 
@@ -59,7 +73,7 @@ git add .
 
 This command adds all the modified files to git, excluding the files listed in the `.gitignore` file.
 
-### 📍 Step 5. Commit your changes locally
+### <a id='step5'>📍 Step 5. Commit your changes locally </a>
 
 After adding the changed files, use `git status` to review the modifications. If you accidentally added files that you don't want to include, you can undo the add by `git reset <file>`. Then, commit your changes locally with a descriptive message:
 
@@ -69,7 +83,7 @@ git commit -m "<message>"
 
 The content of the message is not crucial at this stage since all the commits within a PR will be squashed later into a single message that you'll write later. You can use a meaningful message like "Work on XXX" or "Working XXX," or a generic message like "WIP" (work in progress).
 
-### 📍 Step 6. Upload your branch to GitHub
+### <a id='step6'>📍 Step 6. Upload your branch to GitHub </a>
 
 The previous command only commits the changes locally. To push your changes to GitHub, use:
 
@@ -79,19 +93,19 @@ git push origin <branch_name>
 
 This command pushes your branch to the remote repository on GitHub. You should be able to see the commit message and if it has passed the building tests under the PR page associated with the issue in this repository.
 
-### 📍 Step 7. Submit a pull request (PR)
+### <a id='step7'>📍 Step 7. Submit a pull request (PR) </a>
 
 This step is performed on the GitHub site. At this stage, only provide a title for the PR to indicate the purpose of the branch. No additional content is required.
 
 All subsequent commits and pushes to `main` will be included in this PR. When the PR is merged into the `main` branch, all the commits in the PR will be squashed. At that point, you can write a meaningful title and description that document the changes, use cases, and any additional notes related to the PR.
 
-### 📍 Step 8. Merge the PR
+### <a id='step8'>📍 Step 8. Squash and Merge </a>
 
-Once all the work related to this issue is done, you can merge the PR by requesting reviews. Add the GitHub username of the person who will review your PR. Before merging, please ensure that the PR has passed all the building tests. If the PR has conflicts with the `main` branch, please resolve the conflicts locally and push the changes to GitHub. Then, you can merge the PR on GitHub.
+After the last step, you can continue working on the issue. When you are ready to merge the PR, please ensure that all the changes are committed and pushed to GitHub. Before merging, please also ensure that the PR has passed all the building tests. If the PR has conflicts with the `main` branch, please resolve the conflicts locally and push the changes to GitHub. Then, you can merge the PR on GitHub.
 
-We will review your changes and provide feedback. If requested changes are necessary, make the required updates and push the changes to your branch. The pull request will be updated automatically. If no changes are required, we will merge the PR into the `main` branch.
+Then, you can merge the PR by requesting reviews. Add the GitHub username of the person who will review your PR. We will review your changes and provide feedback. If requested changes are necessary, make the required updates and push the changes to your branch. The pull request will be updated automatically. If no changes are required, squash and merge the PR on this repository. This will squash all the commits in the PR into a single commit with a message that you can write. Please ensure that the commit message is meaningful and descriptive.
 
-### 📍 Step 9. Update your branch
+### <a id='step9'>📍 Step 9. Update your local branch </a>
 
 You may want to update your branch with the latest changes from the `main` branch of this repository to facilitate future work. Switch to your local `main` branch, fetch the latest changes from this remote repository, and rebase them into your local `main` branch.
 
@@ -101,24 +115,26 @@ Following this workflow ensures a systematic approach to contributions, promotes
 
 For more information and resources to assist your development, please refer to the `doc/` folder in this repository. It contains relevant documentation and guides to help you understand the codebase and contribute effectively.
 
+<div align="right"><a href="#table-of-contents"><img src="img/top.png" width="32"></a></div>
+
 ## Testing
 
 Ensure that your changes do not break any existing functionality and include appropriate test cases in the corresponding folder under the `tests/` directory for new features or bug fixes. Run the existing tests to verify the integrity of the code.
 
 ## Naming conventions
 
-**Folder and file naming**
+### Folder and file naming
 
 - Use a one-word noun for **folder** names, avoid compound nouns. For example, `src`.
 - You can use compound nouns or phrases for **file** names, connecting with underscores (_snake case_). For example, `file_name.cpp`.
 
-**Variable and class naming**
+### Variable and class naming
 
 - Use low case letters for **variables**. You can use the snake case on compound nouns or phrases. For example, `variable_name`.
 - Use upper case letters for **classes**. You can capitalize each word (_upper camel case_) on compound nouns or phrases. For example, `ClassName`.
 - If a variable is a **private member** of a class, append the variable name with an underscore. For example, `private_variable_`.
 
-**Functions naming**
+### Functions naming
 
 - **Function** names are usually **_verbal_** phrases.
 - C++ function naming:
@@ -126,9 +142,11 @@ Ensure that your changes do not break any existing functionality and include app
   - For private functions, use lower camel case. For example, `privateFunction()`.
 - Python function naming: use snake case. For example, `public_function()`.
 
-**Converting from C to C++**
+### Converting from C to C++
 
 - Use full path name starting from the `src` folder for include guard. For example, `#ifndef CDISORT_SRC_FILE_NAME_H_`.
 - Use `snprintf` instead of `sprintf`.
 - Use `rand_r` instead of `rand`.
 - Use `strtok_r` instead of `strtok`.
+
+<div align="right"><a href="#table-of-contents"><img src="img/top.png" width="32"></a></div>

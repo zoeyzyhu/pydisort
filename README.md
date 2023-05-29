@@ -284,7 +284,7 @@ pre-commit run --all-files
 
 Pull-Requests are welcomed. Fork repository, make changes, send us a pull request. We will review your changes and apply them to the main branch shortly, provided they don't violate our quality standards. Please read the [contribution guide](doc/CONTRIBUTING.md) for details on the workflow, conventions, etc.
 
-If you need to make changes to the `cdisort` library, please use patches to record your modification. We keep a sole branch called `cidosrt_patches`, which contains the cmake-built version of the `cdisort` library (v2.1.3) and all the patches that we have applied to it. Please refer to the [patching guide](doc/PATCHES.md) for more information.
+If you need to make changes to the `cdisort` library, please use patches to record your modification. We keep a sole branch called `cidosrt_patches`, which contains the cmake-built version of the `cdisort` library (v2.1.3) and all the patches that we have applied to it. Please refer to the [patching guide](doc/README-patches.md) for more information.
 
 If you need to include more libraries to the `cppdisrot` wrapper, please use the `CMakeLists.txt` file to add them. You could find more information about the cmake build system [here](https://cmake.org/cmake/help/latest/guide/tutorial/index.html).
 
