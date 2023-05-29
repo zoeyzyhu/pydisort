@@ -431,7 +431,7 @@ void c_disort(disort_state  *ds,
   if (!ds->flag.usrtau) {
     ds->ntau = ds->nlyr+1;
   }
-  if ( (!ds->flag.usrang || ds->flag.onlyfl)  && ( !ds->flag.ibcnd == SPECIAL_BC)) {
+  if ( ((!ds->flag.usrang) || ds->flag.onlyfl)  && ( (!ds->flag.ibcnd) == SPECIAL_BC)) {
     ds->numu = ds->nstr;
   }
   if (ds->flag.usrang && ds->flag.ibcnd == SPECIAL_BC) {
