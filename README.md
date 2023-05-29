@@ -1,29 +1,61 @@
+<!-- Logo ------------------------------------------->
 <h4 align="center">
     <img src="img/logo.png" alt="Pydisort" width="300" style="display: block; margin: 0 auto">
 </h4>
 
+<!-- Subtitle --------------------------------------->
 <p align="center">
   <i align="center">Empower Discrete Ordinates Radiative Transfer (DISORT) with Python 🚀</i>
 </p>
 
+<!-- primary badges --------------------------------->
 <p align="center">
-<a target="_blank" href="https://github.com/zoeyzyhu/actions/workflows/main.yml"><img alt="GitHub Workflow Status" src="https://img.shields.io/github/actions/workflow/status/zoeyzyhu/pydisort/main.yml?style=flat-square&logo=github"></a>
-<a target="_blank" href="https://www.codacy.com/gh/ankitwasankar/mftool-java/dashboard?utm_source=github.com&utm_medium=referral&utm_content=ankitwasankar/mftool-java&utm_campaign=Badge_Coverage"><img src="https://app.codacy.com/project/badge/Coverage/0054db87ea0f426599c3a30b39291388?style=flat-square" /></a>
-<a target="_blank" href="https://codecov.io/gh/{{REPOSITORY}}"><img src="https://codecov.io/gh/{{REPOSITORY}}/branch/main/graph/badge.svg?style=flat-square?style=flat-square" /></a>
+<a href="https://github.com/zoeyzyhu/actions/workflows/main.yml">
+  <img alt="GitHub Workflow Status"
+    src="https://img.shields.io/github/actions/workflow/status/zoeyzyhu/pydisort/main.yml?style=flat-square&logo=github">
+</a>
+<a href="https://www.codacy.com/gh/ankitwasankar/mftool-java/dashboard?utm_source=github.com&utm_medium=referral&utm_content=ankitwasankar/mftool-java&utm_campaign=Badge_Coverage">
+  <img alt="Tests coverage"
+    src="https://app.codacy.com/project/badge/Coverage/0054db87ea0f426599c3a30b39291388?style=flat-square" />
+</a>
+<a href="https://codecov.io/gh/{{REPOSITORY}}">
+  <img alt="Tests coverage"
+    src="https://codecov.io/gh/{{REPOSITORY}}/branch/main/graph/badge.svg?style=flat-square?style=flat-square" />
+</a>
 <a href="https://github.com/zoeyzyhu/pydisort/issues">
-<img alt="GitHub issues" src="https://img.shields.io/github/issues/zoeyzyhu/pydisort?style=flat-square&logo=git""></a>
-<a target="_blank" href="https://github.com/zoeyzyhu/pydisort/releases"><img alt="GitHub release (latest by date)" src="https://img.shields.io/github/v/release/zoeyzyhu/pydisort?style=flat-square&logo=buffer"></a>
+  <img alt="GitHub issues"
+    src="https://img.shields.io/github/issues/zoeyzyhu/pydisort?style=flat-square&logo=git"">
+</a>
+<a href="https://github.com/zoeyzyhu/pydisort/releases">
+  <img alt="GitHub release (latest by date)"
+    src="https://img.shields.io/github/v/release/zoeyzyhu/pydisort?style=flat-square&logo=buffer">
+</a>
 <br>
-<a href="https://github.com/pre-commit/pre-commit"><img src="https://img.shields.io/badge/pre--commit-enabled-brightgreen?style=flat-square&logo=pre-commit" alt="pre-commit" style="max-width:100%;"></a>
-<a href="http://makeapullrequest.com"><img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square&logo=git" alt="pre-commit" style="max-width:100%;"></a>
-<a target="_blank" href="https://opensource.org/licenses/"><img src="https://img.shields.io/badge/License-GPL-yellow.svg?style=flat-square&logo=gnu" /></a>
-<a target="_blank" href="https://img.shields.io/badge/OS-Linux%2C%20MacOS-orange"><img src="https://img.shields.io/badge/OS-linux%2C%20mac-orange?style=flat-square&logo=linux" /></a>
-
+<a href="https://github.com/pre-commit/pre-commit">
+  <img alt="pre-commit"
+    src="https://img.shields.io/badge/pre--commit-enabled-brightgreen?style=flat-square&logo=pre-commit">
+</a>
+<a href="http://makeapullrequest.com">
+  <img alt="pre-commit"
+    src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square&logo=git">
+</a>
+<a href="https://opensource.org/licenses/">
+  <img alt="license"
+    src="https://img.shields.io/badge/License-GPL-yellow.svg?style=flat-square&logo=gnu" />
+</a>
+<a href="https://img.shields.io/badge/OS-Linux%2C%20MacOS-orange">
+  <img alt="os"
+    src="https://img.shields.io/badge/OS-linux%2C%20mac-orange?style=flat-square&logo=linux" />
+</a>
 </p>
+
+<!-- description ------------------------------------>
+
 <p align="center">
   This repository contains a Python package and a C++ wrapper for the <code>cdisort</code> library, which is a C implementation of the DISORT radiative transfer model.
 </p>
 
+<!-- Navigation-------------------------------------->
 <p align="center">
 <a href="#introduction">Introduction</a> &nbsp;&bull;&nbsp;
 <a href="#usage">Usage</a> &nbsp;&bull;&nbsp;
@@ -32,6 +64,8 @@
 </p>
 
 <br/><br/>
+
+<!-- Body ------------------------------------------->
 
 ## Introduction
 
