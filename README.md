@@ -7,13 +7,18 @@
 </p>
 
 <p align="center">
-<a target="_blank" href="https://github.com/zoeyzyhu/actions/workflows/main.yml"><img src="https://github.com/zoeyzyhu/pydisort/actions/workflows/main.yml/badge.svg"/></a>
-<a target="_blank" href="https://www.codacy.com/gh/ankitwasankar/mftool-java/dashboard?utm_source=github.com&utm_medium=referral&utm_content=ankitwasankar/mftool-java&utm_campaign=Badge_Coverage"><img src="https://app.codacy.com/project/badge/Coverage/0054db87ea0f426599c3a30b39291388" /></a>
-<a href="https://github.com/pre-commit/pre-commit"><img src="https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit" alt="pre-commit" style="max-width:100%;"></a>
+<a target="_blank" href="https://github.com/zoeyzyhu/actions/workflows/main.yml"><img alt="GitHub Workflow Status" src="https://img.shields.io/github/actions/workflow/status/zoeyzyhu/pydisort/main.yml?style=flat-square&logo=github"></a>
+<a target="_blank" href="https://www.codacy.com/gh/ankitwasankar/mftool-java/dashboard?utm_source=github.com&utm_medium=referral&utm_content=ankitwasankar/mftool-java&utm_campaign=Badge_Coverage"><img src="https://app.codacy.com/project/badge/Coverage/0054db87ea0f426599c3a30b39291388?style=flat-square" /></a>
+<a target="_blank" href="https://codecov.io/gh/{{REPOSITORY}}"><img src="https://codecov.io/gh/{{REPOSITORY}}/branch/main/graph/badge.svg?style=flat-square?style=flat-square" /></a>
+<a href="https://github.com/zoeyzyhu/pydisort/issues">
+<img alt="GitHub issues" src="https://img.shields.io/github/issues/zoeyzyhu/pydisort?style=flat-square&logo=git""></a>
+<a target="_blank" href="https://github.com/zoeyzyhu/pydisort/releases"><img alt="GitHub release (latest by date)" src="https://img.shields.io/github/v/release/zoeyzyhu/pydisort?style=flat-square&logo=buffer"></a>
 <br>
-<a target="_blank" href="https://opensource.org/licenses/"><img src="https://img.shields.io/badge/License-GPL%20v3-yellow.svg" /></a>
-<a target="_blank" href="https://github.com/zoeyzyhu/pydisort/issues"><img height="20" src="https://img.shields.io/github/issues/{username}/{repo-name}.svg" /></a>
-<a target="_blank" href="https://github.com/zoeyzyhu/pydisort/releases"><img height="20" src="https://img.shields.io/github/realese/{username}/{repo-name}.svg" /></a>
+<a href="https://github.com/pre-commit/pre-commit"><img src="https://img.shields.io/badge/pre--commit-enabled-brightgreen?style=flat-square&logo=pre-commit" alt="pre-commit" style="max-width:100%;"></a>
+<a href="http://makeapullrequest.com"><img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square&logo=pre-commit" alt="pre-commit" style="max-width:100%;"></a>
+<a target="_blank" href="https://opensource.org/licenses/"><img src="https://img.shields.io/badge/License-GPL-yellow.svg?style=flat-square&logo=gnu" /></a>
+<a target="_blank" href="https://img.shields.io/badge/OS-Linux%2C%20MacOS-orange"><img src="https://img.shields.io/badge/OS-linux%2C%20mac-orange?style=flat-square&logo=linux" /></a>
+
 </p>
 <p align="center">
   This repository contains a Python package and a C++ wrapper for the <code>cdisort</code> library, which is a C implementation of the DISORT radiative transfer model.
@@ -26,9 +31,11 @@
 <a href="#issues">Issues?</a> &nbsp;&bull;&nbsp;
 </p>
 
-# Introduction
+![-----------------------------------------------------](img/rainbow.png)
 
-## Placeholder
+## Introduction
+
+### Placeholder
 
 There are three formal components in this repo:
 
@@ -42,21 +49,40 @@ The `cppdisort` provides a C++ wrapper for the "cdisort" library, allowing easy 
 
 The `pydisort` builds a Python library that provides a Pythonic interface to the cppdisort library. It serves as a bridge between the C++ implementation of cppdisort and the Python programming language, enabling users to leverage the power of cppdisort within their Python applications. For detailed changes, please see the `README.md` file in the `pydisort` .
 
-# Usage
+![-----------------------------------------------------](img/rainbow.png)
 
-## For Python users
+## Table of Contents
 
-## For developers: The C++ Wrapper for `cdisort`
+- [Introduction](#introduction)
+- [Usage](#usage)
+
+<details open="open">
+  <summary>Table of Contents</summary>
+  <ol>
+    <li><a href="#introduction"> Introduction</a></li>
+    <li><a href="#usage"> Usage</a></li>
+    <li><a href="#contribution"> Contribution</a></li>
+    <li><a href="#issues"> Issues?</a></li>
+  </ol>
+</details>
+
+![-----------------------------------------------------](img/rainbow.png)
+
+## Usage
+
+### For Python users
+
+### For developers: The C++ Wrapper for `cdisort`
 
 This branch provides a wrapper for the "cdisort" library which is implemented in C++. The wrapper allows accessing the functionality of the "cdisort" library from C++ code. The wrapper consists of two files: "cppdisort.h" and "cppdisort.cc".
 
-### Files
+#### Files
 
 The "cppdisort.h" file includes the necessary headers and defines the DisortWrapper class. This class provides a C++ interface to interact with the "cdisort" library. It includes member variables and functions that correspond to the parameters and functions of the "cdisort" library. Some of the important member variables include `btemp`, `ttemp`, `fluor`, `albedo`, `fisot`, `fbeam`, `temis`, `umu0`, and `phi0`, which represent accessible boundary conditions. The class also provides functions for setting various parameters, such as atmosphere dimensions, flags, intensity dimensions, optical depth, single scattering albedo, level temperature, wavenumber range, output optical depth, and outgoing ray. The class also includes functions for running the radiative transfer calculations and retrieving the results.
 
 The "cppdisort.cc" file implements the member functions of the DisortWrapper class. The functions in this file handle the initialization, parameter setting, and execution of the "cdisort" library functions. It also includes a function fromTomlTable that converts a TOML table into a DisortWrapper object.
 
-### Build
+#### Build
 
 ```bash
 mkdir build
@@ -65,7 +91,7 @@ cmake ..
 make
 ```
 
-### Usage
+#### Usage
 
 To use the wrapper, include the cppdisort.h header file in your C++ code. You can then create an instance of the DisortWrapper class and set the desired parameters using the provided methods. Finally, call the RunRTFlux method to run the radiative transfer calculations and obtain the calculated flux values.
 
@@ -101,10 +127,23 @@ int main() {
 }
 ```
 
-# Issues?
+<div align="right"><a href="#table-of-contents"><img align="right" src="img/top.png" width="22" ></a></div>
+
+![-----------------------------------------------------](img/rainbow.png)
+
+# Contribution
+
+<div align="right"><a href="#table-of-contents"><img align="right" src="img/top.png" width="22" ></a></div>
+<div align="right">[ <a href="#table-of-contents">↑ Back to top ↑</a> ]</div>
+
+![-----------------------------------------------------](img/rainbow.png)
+
+## Issues?
 
 This repository is maintained actively, so if you face any issue please <a href="https://github.com/zoeyzyhu/pydisort/issues">raise an issue</a>.
 
 Not sure where to start? Join our discord and we will help you get started!
 
 <a href="https://discord.gg/ZKBZg5K2"><img src="img/discord.png" width="150"/></a>
+
+<a target="_blank" href="https://bmc.link/zoeyzyhu"><img src="img/bmc.png" alt="Buy me a coffee" width="150"/></a>
