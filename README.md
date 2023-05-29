@@ -31,7 +31,7 @@
 <a href="#issues">Issues?</a>
 </p>
 
-![-----------------------------------------------------](img/rainbow.png)
+---
 
 ## Introduction
 
@@ -151,6 +151,4 @@ This repository is maintained actively, so if you face any issue please <a href=
 
 Not sure where to start? Join our discord and we will help you get started!
 
-<a href="https://discord.gg/ZKBZg5K2"><img src="img/discord.png" width="150"/></a>
-
-<a target="_blank" href="https://bmc.link/zoeyzyhu"><img src="img/bmc.png" alt="Buy me a coffee" width="150"/></a>
+<a href="https://discord.gg/ZKBZg5K2"><img src="img/discord.png" width="150"/></a> &nbsp;&nbsp; <a target="_blank" href="https://bmc.link/zoeyzyhu"><img src="img/bmc.png" alt="Buy me a coffee" width="150"/></a>
