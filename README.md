@@ -28,10 +28,10 @@
 <a href="#introduction">Introduction</a> &nbsp;&bull;&nbsp;
 <a href="#usage">Usage</a> &nbsp;&bull;&nbsp;
 <a href="#contribution">Contribution</a> &nbsp;&bull;&nbsp;
-<a href="#issues">Issues?</a> &nbsp;&bull;&nbsp;
+<a href="#issues">Issues?</a>
 </p>
 
-![-----------------------------------------------------](img/rainbow.png)
+---
 
 ## Introduction
 
@@ -49,7 +49,7 @@ The `cppdisort` provides a C++ wrapper for the "cdisort" library, allowing easy 
 
 The `pydisort` builds a Python library that provides a Pythonic interface to the cppdisort library. It serves as a bridge between the C++ implementation of cppdisort and the Python programming language, enabling users to leverage the power of cppdisort within their Python applications. For detailed changes, please see the `README.md` file in the `pydisort` .
 
-![-----------------------------------------------------](img/rainbow.png)
+---
 
 ## Table of Contents
 
@@ -66,7 +66,7 @@ The `pydisort` builds a Python library that provides a Pythonic interface to the
   </ol>
 </details>
 
-![-----------------------------------------------------](img/rainbow.png)
+---
 
 ## Usage
 
@@ -127,16 +127,15 @@ int main() {
 }
 ```
 
-<div align="right"><a href="#table-of-contents"><img align="right" src="img/top.png" width="22" ></a></div>
+<div align="right"><a href="#table-of-contents"><img align="right" src="img/top.png" width="34" ></a></div>
 
-![-----------------------------------------------------](img/rainbow.png)
+---
 
 # Contribution
 
-<div align="right"><a href="#table-of-contents"><img align="right" src="img/top.png" width="22" ></a></div>
-<div align="right">[ <a href="#table-of-contents">↑ Back to top ↑</a> ]</div>
+<div align="right"><a href="#table-of-contents"><img align="right" src="img/top.png" width="34" ></a></div>
 
-![-----------------------------------------------------](img/rainbow.png)
+---
 
 ## Issues?
 
