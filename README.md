@@ -161,7 +161,139 @@ Please note that this is a generic tutorial and you would need to adapt this to 
 
 ### <a id='for-c++-users'><picture><img src="img/cpp.svg" alt="C++" align=left width=24></picture> For C++ developers</a>
 
-This branch provides a wrapper for the "cdisort" library which is implemented in C++. The wrapper allows accessing the functionality of the "cdisort" library from C++ code. The wrapper consists of two files: "cppdisort.h" and "cppdisort.cc".
+#### 🔻 Check dependences
+
+This repository supports both the Linux and MacOS operating systems. The following dependencies are required for building the C++ wrapper:
+
+- `cmake` (version >= 3.20)
+- `g++` (version >= 7.5.0)
+- `python3` (version >= 3.6)
+
+You could check the versions of these dependencies using the following commands:
+
+```bash
+ cmake --version
+ g++ --version
+ python3 --version
+```
+
+If you need to install these dependencies, use the following commands (replacing `apt-get` with your package manager if you are not using Ubuntu):
+
+```bash
+ sudo apt-get install cmake
+ sudo apt-get install g++
+ sudo apt-get install python3
+```
+
+#### 🔻 Build and run the C++ wrapper
+
+You could fork or clone this repository to your local machine.
+
+```bash
+git clone https://github.com/zoeyzyhu/pydisort.git
+```
+
+If you have no interest in using or adding features to the `pydisort` package, and just want to quickly build and run the C++ wrapper to your own use, you can follow the commands below:
+
+```bash
+mkdir build
+cd build
+cmake ..
+make
+```
+
+After the build is complete, you can run the C++ wrapper using the following commands:
+
+```bash
+# Assume that you are still in the build/ directory
+cd bin
+
+# Run the C++ wrapper
+./test_cppdisort.release
+
+# If you're interested in `cdisort`, run the test provided by Dowling
+./test_cdisort.release
+```
+
+#### 🔻 Build and run the Python package
+
+If you follow the steps in the previous section, you will have a C++ wrapper that can be used by Python, and a Python packaged called `pydisort`, which has been binded via `pybind11`. You could simply test the Python package using the following command:
+
+```bash
+# Assume that you are still in the build/bin/ directory
+python3 test_isotropic_scattering.py
+```
+
+However, the above steps will put `pydisort` in the system path of Python, which might be inaccessible especially if you are working on a shared server. We recommend that you use a virtual environment for Python to install the `pydisort` package, which will also keep your system path clean even if you have access to it.
+
+In this recommended approach, we need to set up the virtual environment before the building process. You could use the following commands to create a virtual environment and install the `pydisort` package:
+
+```bash
+# Set up Python virtual environment and cppcheck
+./1.setup.sh
+
+# Activate the virtual environment
+source env/bin/activate
+
+# Install dependencies for `pydisort` and pre-commit hooks
+./2.install.sh
+
+# Build the C++ wrapper and Python package
+./3.build.sh
+
+# Run test cases for C++ wrapper and Python package
+./4.test.sh
+```
+
+The steps above will also install packages for the `pre-commit` hooks, which are very helpful if you'd like to make changes to the repository cloned. You could run the checks and lints manually using the following command to ensure that your changes are compliant with the industry standards:
+
+```bash
+pre-commit run --all-files
+```
+
+> 💡 Please feel free to add more checks and lints that suit your need to the `pre-commit` hooks. You could find more information about `pre-commit` [here](https://pre-commit.com/).
+
+<div align="right"><a href="#table-of-contents"><img src="img/top.png" width="32"></div>
+
+![-----------------------------------------------------](img/rainbow.png)
+
+## Contribution
+
+### Contribution Guide
+
+### Contribution Workflow
+
+### Acknowledgement
+
+### Citations
+
+<div align="right"><a href="#table-of-contents"><img src="img/top.png" width="32"></div>
+
+![-----------------------------------------------------](img/rainbow.png)
+
+## Issues?
+
+This repository is maintained actively, so if you face any issue please <a href="https://github.com/zoeyzyhu/pydisort/issues">raise an issue</a>.
+
+Not sure where to start? Join our discord and we will help you get started!
+
+<a href="https://discord.gg/ZKBZg5K2"><img src="img/discord.png" width="150"/></a> &nbsp;&nbsp; <a target="_blank" href="https://bmc.link/zoeyzyhu"><img src="img/bmc.png" alt="Buy me a coffee" width="150"/></a>
+
+---
+
+## Extra Information
+
+There are three formal components in this repo:
+
+- `cdisort_patches`
+- `cppdisort`
+- `pydisort`
+
+The `cdisort_patches` contains the original `cdisort` library (v2.1.3) by Timothy E. Dowling, plus some patch files containing modifications made by [Cheng Li](https://chengcli.io/). Different from `cdisort`, which uses `Makefile` to build the library, we modified the configuration and adapted a `CMake`-built approach. For detailed changes, please see the `README.md` file in the `cdisort_patches` .
+
+The `cppdisort` provides a C++ wrapper for the "cdisort" library, allowing easy access to its functionality from C++ code. We use toml++ for configuration management, allowing users to specify various parameters in the TOML configuration file. The updated implementation ensures compatibility with modern C++ standards and incorporates bug fixes and enhancements compared to the original cdisort library. For detailed changes, please see the `README.md` file in the `cppdisort` .
+
+The `pydisort` builds a Python library that provides a Pythonic interface to the cppdisort library. It serves as a bridge between the C++ implementation of cppdisort and the Python programming language, enabling users to leverage the power of cppdisort within their Python applications. For detailed changes, please see the `README.md` file in the `pydisort` .
 
 #### Files
 
@@ -213,45 +345,3 @@ int main() {
     return 0;
 }
 ```
-
-<div align="right"><a href="#table-of-contents"><img src="img/top.png" width="32"></div>
-
-![-----------------------------------------------------](img/rainbow.png)
-
-## Contribution
-
-### Contribution Guide
-
-### Contribution Workflow
-
-### Acknowledgement
-
-### Citations
-
-<div align="right"><a href="#table-of-contents"><img src="img/top.png" width="32"></div>
-
-![-----------------------------------------------------](img/rainbow.png)
-
-## Issues?
-
-This repository is maintained actively, so if you face any issue please <a href="https://github.com/zoeyzyhu/pydisort/issues">raise an issue</a>.
-
-Not sure where to start? Join our discord and we will help you get started!
-
-<a href="https://discord.gg/ZKBZg5K2"><img src="img/discord.png" width="150"/></a> &nbsp;&nbsp; <a target="_blank" href="https://bmc.link/zoeyzyhu"><img src="img/bmc.png" alt="Buy me a coffee" width="150"/></a>
-
----
-
-## Extra Information
-
-There are three formal components in this repo:
-
-- `cdisort_patches`
-- `cppdisort`
-- `pydisort`
-
-The `cdisort_patches` contains the original `cdisort` library (v2.1.3) by Timothy E. Dowling, plus some patch files containing modifications made by [Cheng Li](https://chengcli.io/). Different from `cdisort`, which uses `Makefile` to build the library, we modified the configuration and adapted a `CMake`-built approach. For detailed changes, please see the `README.md` file in the `cdisort_patches` .
-
-The `cppdisort` provides a C++ wrapper for the "cdisort" library, allowing easy access to its functionality from C++ code. We use toml++ for configuration management, allowing users to specify various parameters in the TOML configuration file. The updated implementation ensures compatibility with modern C++ standards and incorporates bug fixes and enhancements compared to the original cdisort library. For detailed changes, please see the `README.md` file in the `cppdisort` .
-
-The `pydisort` builds a Python library that provides a Pythonic interface to the cppdisort library. It serves as a bridge between the C++ implementation of cppdisort and the Python programming language, enabling users to leverage the power of cppdisort within their Python applications. For detailed changes, please see the `README.md` file in the `pydisort` .
