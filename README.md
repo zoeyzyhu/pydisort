@@ -10,47 +10,48 @@
 
 <!-- primary badges --------------------------------->
 <p align="center">
+<!---
 <a href="https://www.codacy.com/gh/ankitwasankar/mftool-java/dashboard?utm_source=github.com&utm_medium=referral&utm_content=ankitwasankar/mftool-java&utm_campaign=Badge_Coverage">
   <img alt="Tests coverage"
-    src="https://app.codacy.com/project/badge/Coverage/0054db87ea0f426599c3a30b39291388?style=for-the-badge"/>
+    src="https://app.codacy.com/project/badge/Coverage/0054db87ea0f426599c3a30b39291388?style=flat-square"/>
 </a>
 <a href="https://codecov.io/gh/{{REPOSITORY}}">
   <img alt="Tests coverage"
-    src="https://codecov.io/gh/{{REPOSITORY}}/branch/main/graph/badge.svg?style=for-the-badge?"/>
+    src="https://codecov.io/gh/{{REPOSITORY}}/branch/main/graph/badge.svg?style=flat-square?"/>
+</a>
+-->
+<a href="https://github.com/zoeyzyhu/actions/workflows/main.yml">
+  <img alt="GitHub Workflow Status"
+    src="https://img.shields.io/github/actions/workflow/status/zoeyzyhu/pydisort/main.yml?style=flat-square&logo=github"/>
 </a>
 <a href="https://codecov.io/gh/{{REPOSITORY}}">
   <img alt="Codacy coverage"
-    src="https://img.shields.io/codacy/coverage/pydisort?style=for-the-badge&logo=codecov"/>
-</a>
-<br>
-<a href="https://github.com/zoeyzyhu/actions/workflows/main.yml">
-  <img alt="GitHub Workflow Status"
-    src="https://img.shields.io/github/actions/workflow/status/zoeyzyhu/pydisort/main.yml?style=for-the-badge&logo=github"/>
+    src="https://img.shields.io/codacy/coverage/pydisort?style=flat-square&logo=codecov"/>
 </a>
 <a href="https://github.com/zoeyzyhu/pydisort/issues">
   <img alt="GitHub issues"
-    src="https://img.shields.io/github/issues/zoeyzyhu/pydisort?style=for-the-badge&logo=git"/>
+    src="https://img.shields.io/github/issues/zoeyzyhu/pydisort?style=flat-square&logo=git"/>
 </a>
 <a href="https://github.com/zoeyzyhu/pydisort/releases">
   <img alt="GitHub release (latest by date)"
-    src="https://img.shields.io/github/v/release/zoeyzyhu/pydisort?style=for-the-badge&logo=buffer"/>
+    src="https://img.shields.io/github/v/release/zoeyzyhu/pydisort?style=flat-square&logo=buffer"/>
 </a>
 <br>
 <a href="https://github.com/pre-commit/pre-commit">
   <img alt="pre-commit"
-    src="https://img.shields.io/badge/pre--commit-enabled-brightgreen?style=for-the-badge&logo=pre-commit"/>
+    src="https://img.shields.io/badge/pre--commit-enabled-brightgreen?style=flat-square&logo=pre-commit"/>
 </a>
 <a href="http://makeapullrequest.com">
   <img alt="pre-commit"
-    src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=for-the-badge&logo=git"/>
+    src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square&logo=git"/>
 </a>
 <a href="https://opensource.org/licenses/">
   <img alt="license"
-    src="https://img.shields.io/badge/License-GPL-yellow.svg?style=for-the-badge&logo=gnu"/>
+    src="https://img.shields.io/badge/License-GPL-yellow.svg?style=flat-square&logo=gnu"/>
 </a>
 <a href="https://img.shields.io/badge/OS-Linux%2C%20MacOS-orange">
   <img alt="os"
-    src="https://img.shields.io/badge/OS-linux%2C%20mac-orange?style=for-the-badge&logo=linux"/>
+    src="https://img.shields.io/badge/OS-linux%2C%20mac-orange?style=flat-square&logo=linux"/>
 </a>
 </p>
 
@@ -279,7 +280,7 @@ pre-commit run --all-files
 
 ## Contributing
 
-[![Good first issues open](https://img.shields.io/github/issues/zoeyzyhu/pydisort/good%20first%20issue?label=good%20first%20issues&logo=git&logoColor=white&style=for-the-badge)](https://github.com/zoeyzyhu/pydisort/labels/good%20first%20issue)
+[![Good first issues open](https://img.shields.io/github/issues/zoeyzyhu/pydisort/good%20first%20issue?label=good%20first%20issues&logo=git&logoColor=white&style=flat-square)](https://github.com/zoeyzyhu/pydisort/labels/good%20first%20issue)
 
 Pull-Requests are welcomed. Fork repository, make changes, send us a pull request. We will review your changes and apply them to the main branch shortly, provided they don't violate our quality standards. Please read the [contribution guide](doc/CONTRIBUTING.md) for details on the workflow, conventions, etc.
 
