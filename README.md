@@ -106,7 +106,8 @@ import numpy as np
 - Step 2. Create an instance of the disort class:
 
 ```python
-# Let's assume you have a file named 'input.toml' which has the required data for initializing the 'disort' class.
+# Let's assume you have a file named 'input.toml' which has the
+# required data for initializing the 'disort' class.
 disort_instance = pydisort.disort.from_file('input.toml')
 ```
 
@@ -144,7 +145,7 @@ flux = disort_instance.get_flux()
 intensity = disort_instance.get_intensity()
 ```
 
-Please note that this is a generic tutorial and you would need to adapt this to your specific use-case. For example, you might need to provide your own data file in from_file function or fill the numpy arrays `optical_depth`, `single_scattering_albedo`, and `level_temperature` according to your requirements.
+Please note that this is a generic tutorial and you would need to adapt this to your specific use-case. For example, you might need to provide your own data file in `from_file` function or fill the numpy arrays `optical_depth`, `single_scattering_albedo`, and `level_temperature` according to your requirements.
 
 > 💡 One important point to note is that the pydisort library assumes that the provided arrays (optical depth, single scattering albedo, etc.) are in the numpy format and it throws exceptions if incompatible data types are provided. So, ensure that you are providing data in the right format to avoid any runtime errors.
 
