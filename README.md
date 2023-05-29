@@ -69,19 +69,9 @@
 
 ## Introduction
 
-### Placeholder
+DISORT (Discrete Ordinate Radiative Transfer) is a widely-used algorithm that calculates the scattering and absorption of radiation in a medium. The original DISORT algorithm was developed by Stamnes et al. in 1988 and was implemented in `FORTRAN`. Later, Timothy E. Dowling (1999) ported the algorithm to `C`, resulting in the widely-used implementation known as `cdisort`. The `cdisort` library is extensively utilized in atmospheric and remote sensing applications. Notably, it is an integral component of the `libRadtran` radiative transfer model, widely employed in atmospheric and remote sensing studies.
 
-There are three formal components in this repo:
-
-- `cdisort_patches`
-- `cppdisort`
-- `pydisort`
-
-The `cdisort_patches` contains the original `cdisort` library (v2.1.3) by Timothy E. Dowling, plus some patch files containing modifications made by [Cheng Li](https://chengcli.io/). Different from `cdisort`, which uses `Makefile` to build the library, we modified the configuration and adapted a `CMake`-built approach. For detailed changes, please see the `README.md` file in the `cdisort_patches` .
-
-The `cppdisort` provides a C++ wrapper for the "cdisort" library, allowing easy access to its functionality from C++ code. We use toml++ for configuration management, allowing users to specify various parameters in the TOML configuration file. The updated implementation ensures compatibility with modern C++ standards and incorporates bug fixes and enhancements compared to the original cdisort library. For detailed changes, please see the `README.md` file in the `cppdisort` .
-
-The `pydisort` builds a Python library that provides a Pythonic interface to the cppdisort library. It serves as a bridge between the C++ implementation of cppdisort and the Python programming language, enabling users to leverage the power of cppdisort within their Python applications. For detailed changes, please see the `README.md` file in the `pydisort` .
+Building upon the aforementioned work, we have developed a `C++` wrapper for the `cdisort` library and subsequently created a `Python` package. The C++ wrapper serves two primary purposes: (1) providing a modern C++ interface for the cdisort library to facilitate future development involving DISORT, and (2) establishing the foundation for the Python package's bindings. The Python package is designed to be user-friendly, making it easy to install and integrate into a diverse range of applications.
 
 ![-----------------------------------------------------](img/rainbow.png)
 
@@ -89,12 +79,14 @@ The `pydisort` builds a Python library that provides a Pythonic interface to the
 
 - [Introduction](#introduction)
 - [Usage](#usage)
+  - [For Python users](#for-python-users)
+  - [For C++ users](#for-c++-users)
 
 ![-----------------------------------------------------](img/rainbow.png)
 
 ## Usage
 
-### <picture><img src="img/python.svg" alt="Python" align=left width=24></picture> For Python users
+### <a id='for-python-users'><picture><img src="img/python.svg" alt="Python" align=left width=24></picture> For Python users</a>
 
 We provide a Python package for the `pydisort` library. The package can be installed using `pip`:
 
@@ -114,7 +106,7 @@ pmom = get_legendre_coefficients(ds.get_nmom(), "isotropic")
 
 ```
 
-### <picture><img src="img/cpp.svg" alt="C++" align=left width=24></picture>For developers: The C++ Wrapper for `cdisort`
+### <a id='for-c++-users'><picture><img src="img/cpp.svg" alt="C++" align=left width=24></picture> For C++ developers</a>
 
 This branch provides a wrapper for the "cdisort" library which is implemented in C++. The wrapper allows accessing the functionality of the "cdisort" library from C++ code. The wrapper consists of two files: "cppdisort.h" and "cppdisort.cc".
 
@@ -175,6 +167,14 @@ int main() {
 
 ## Contribution
 
+### Contribution Guide
+
+### Contribution Workflow
+
+### Acknowledgement
+
+### Citations
+
 <div align="right"><a href="#table-of-contents"><img src="img/top.png" width="32"></div>
 
 ![-----------------------------------------------------](img/rainbow.png)
@@ -186,3 +186,17 @@ This repository is maintained actively, so if you face any issue please <a href=
 Not sure where to start? Join our discord and we will help you get started!
 
 <a href="https://discord.gg/ZKBZg5K2"><img src="img/discord.png" width="150"/></a> &nbsp;&nbsp; <a target="_blank" href="https://bmc.link/zoeyzyhu"><img src="img/bmc.png" alt="Buy me a coffee" width="150"/></a>
+
+---
+
+There are three formal components in this repo:
+
+- `cdisort_patches`
+- `cppdisort`
+- `pydisort`
+
+The `cdisort_patches` contains the original `cdisort` library (v2.1.3) by Timothy E. Dowling, plus some patch files containing modifications made by [Cheng Li](https://chengcli.io/). Different from `cdisort`, which uses `Makefile` to build the library, we modified the configuration and adapted a `CMake`-built approach. For detailed changes, please see the `README.md` file in the `cdisort_patches` .
+
+The `cppdisort` provides a C++ wrapper for the "cdisort" library, allowing easy access to its functionality from C++ code. We use toml++ for configuration management, allowing users to specify various parameters in the TOML configuration file. The updated implementation ensures compatibility with modern C++ standards and incorporates bug fixes and enhancements compared to the original cdisort library. For detailed changes, please see the `README.md` file in the `cppdisort` .
+
+The `pydisort` builds a Python library that provides a Pythonic interface to the cppdisort library. It serves as a bridge between the C++ implementation of cppdisort and the Python programming language, enabling users to leverage the power of cppdisort within their Python applications. For detailed changes, please see the `README.md` file in the `pydisort` .
