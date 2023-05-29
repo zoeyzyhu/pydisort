@@ -15,7 +15,7 @@
 <a target="_blank" href="https://github.com/zoeyzyhu/pydisort/releases"><img alt="GitHub release (latest by date)" src="https://img.shields.io/github/v/release/zoeyzyhu/pydisort?style=flat-square&logo=buffer"></a>
 <br>
 <a href="https://github.com/pre-commit/pre-commit"><img src="https://img.shields.io/badge/pre--commit-enabled-brightgreen?style=flat-square&logo=pre-commit" alt="pre-commit" style="max-width:100%;"></a>
-<a href="http://makeapullrequest.com"><img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square&logo=pre-commit" alt="pre-commit" style="max-width:100%;"></a>
+<a href="http://makeapullrequest.com"><img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square&logo=git" alt="pre-commit" style="max-width:100%;"></a>
 <a target="_blank" href="https://opensource.org/licenses/"><img src="https://img.shields.io/badge/License-GPL-yellow.svg?style=flat-square&logo=gnu" /></a>
 <a target="_blank" href="https://img.shields.io/badge/OS-Linux%2C%20MacOS-orange"><img src="https://img.shields.io/badge/OS-linux%2C%20mac-orange?style=flat-square&logo=linux" /></a>
 
@@ -60,9 +60,27 @@ The `pydisort` builds a Python library that provides a Pythonic interface to the
 
 ## Usage
 
-### For Python users
+### <picture><img src="img/python.svg" alt="Python" align=left width=24></picture> For Python users
 
-### For developers: The C++ Wrapper for `cdisort`
+We provide a Python package for the `pydisort` library. The package can be installed using `pip`:
+
+```bash
+pip install pydisort
+```
+
+The package provides a Pythonic interface to the `cppdisort` library. It serves as a bridge between the C++ implementation of `cppdisort` and the Python programming language, enabling users to leverage the power of `cppdisort` within their Python applications.
+
+To run the example, you can use the following command:
+
+```python
+from pydisort import disort, get_legendre_coefficients, Radiant
+
+ds = disort.from_file(self.toml_path)
+pmom = get_legendre_coefficients(ds.get_nmom(), "isotropic")
+
+```
+
+### <picture><img src="img/cpp.svg" alt="C++" align=left width=24></picture>For developers: The C++ Wrapper for `cdisort`
 
 This branch provides a wrapper for the "cdisort" library which is implemented in C++. The wrapper allows accessing the functionality of the "cdisort" library from C++ code. The wrapper consists of two files: "cppdisort.h" and "cppdisort.cc".
 
