@@ -58,8 +58,8 @@
 <!-- Navigation-------------------------------------->
 <p align="center">
 <a href="#introduction">Introduction</a> &nbsp;&bull;&nbsp;
-<a href="#usage">Usage</a> &nbsp;&bull;&nbsp;
-<a href="#contribution">Contribution</a> &nbsp;&bull;&nbsp;
+<a href="#usage">How to use</a> &nbsp;&bull;&nbsp;
+<a href="#contribution">Contributing</a> &nbsp;&bull;&nbsp;
 <a href="#issues">Issues?</a>
 </p>
 
@@ -78,13 +78,18 @@ Building upon the aforementioned work, we have developed a `C++` wrapper for the
 ## Table of Contents
 
 - [Introduction](#introduction)
-- [Usage](#usage)
+- [How to use](#usage)
   - [For Python users](#for-python-users)
   - [For C++ developers](#for-c++-users)
+    - [Check dependencies](#check-dependencies)
+    - [Build and run the C++ wrapper](#build-and-run-the-c++-wrapper)
+    - [Build and run the Python package](#build-and-run-the-python-package)
+- [Contributing](#contributing)
+- [Issues?](#issues)
 
 ![-----------------------------------------------------](img/rainbow.png)
 
-## Usage
+## How to use
 
 <!-- For Python users-------------------------------->
 
@@ -147,7 +152,11 @@ flux = disort_instance.get_flux()
 intensity = disort_instance.get_intensity()
 ```
 
-Please note that this is a generic tutorial and you would need to adapt this to your specific use-case. For example, you might need to provide your own data file in `from_file` function or fill the numpy arrays `optical_depth`, `single_scattering_albedo`, and `level_temperature` according to your requirements.
+Please note that this is a generic tutorial and you would need to adapt this to your specific use-case.
+
+> 💡 We keep the parameters consistent to the original `DISORT` library, so you can refer to the [DISORT documentation](src/cdisort/DISORT2.doc) for more information such as input/out variables, flags, model usage and caveats.
+
+For example, you might need to provide your own data file in `from_file` function or fill the numpy arrays `optical_depth`, `single_scattering_albedo`, and `level_temperature` according to your requirements.
 
 > 💡 One important point to note is that the `pydisort` library assumes that the provided arrays (optical depth, single scattering albedo, etc.) are in the numpy format and it throws exceptions if incompatible data types are provided. So, ensure that you are providing data in the right format to avoid any runtime errors.
 
@@ -161,7 +170,7 @@ Please note that this is a generic tutorial and you would need to adapt this to 
 
 ### <a id='for-c++-users'><picture><img src="img/cpp.svg" alt="C++" align=left width=24></picture> For C++ developers</a>
 
-#### 🔻 Check dependences
+#### <a id='check-dependencies'> 🔻 Check dependences</a>
 
 This repository supports both the Linux and MacOS operating systems. The following dependencies are required for building the C++ wrapper:
 
@@ -185,7 +194,7 @@ If you need to install these dependencies, use the following commands (replacing
  sudo apt-get install python3
 ```
 
-#### 🔻 Build and run the C++ wrapper
+#### <a id='build-and-run-the-c++-wrapper'> 🔻 Build and run the C++ wrapper</a>
 
 You could fork or clone this repository to your local machine.
 
@@ -193,7 +202,7 @@ You could fork or clone this repository to your local machine.
 git clone https://github.com/zoeyzyhu/pydisort.git
 ```
 
-If you have no interest in using or adding features to the `pydisort` package, and just want to quickly build and run the C++ wrapper to your own use, you can follow the commands below:
+If you have no interest in adding or modifying features to the `pydisort` package, and just want to quickly build and run the C++ wrapper to your own use, you can follow the commands below:
 
 ```bash
 mkdir build
@@ -215,7 +224,7 @@ cd bin
 ./test_cdisort.release
 ```
 
-#### 🔻 Build and run the Python package
+#### <a id='build-and-run-the-python-package'> 🔻 Build and run the Python package</a>
 
 If you follow the steps in the previous section, you will have a C++ wrapper that can be used by Python, and a Python packaged called `pydisort`, which has been binded via `pybind11`. You could simply install and test the Python package using the following command:
 
@@ -263,15 +272,17 @@ pre-commit run --all-files
 
 ![-----------------------------------------------------](img/rainbow.png)
 
-## Contribution
+## Contributing
 
-### Contribution Guide
+[![Good first issues open](https://img.shields.io/github/issues/zoeyzyhu/pydisort/good%20first%20issue?label=good%20first%20issues&logo=git&logoColor=white&style=for-the-badge)](https://github.com/zoeyzyhu/pydisort/labels/good%20first%20issue)
 
-### Contribution Workflow
+Pull-Requests are welcomed. Fork repository, make changes, send us a pull request. We will review your changes and apply them to the main branch shortly, provided they don't violate our quality standards. Please read the [contribution guide](doc/CONTRIBUTING.md) for details on the workflow, conventions, etc.
 
-### Acknowledgement
+If you need to make changes to the `cdisort` library, please use patches to record your modification. We keep a sole branch called `cidosrt_patches`, which contains the cmake-built version of the `cdisort` library (v2.1.3) and all the patches that we have applied to it. Please refer to the [patching guide](doc/PATCHES.md) for more information.
 
-### Citations
+If you need to include more libraries to the `cppdisrot` wrapper, please use the `CMakeLists.txt` file to add them. You could find more information about the cmake build system [here](https://cmake.org/cmake/help/latest/guide/tutorial/index.html).
+
+If you need to make changes to the `pydisort` package, please use the `pybind11` library to bind the C++ wrapper to Python, expose the functions and classes to Python, and add more test cases to the `pydisort` package. You could find more information about the `pybind11` library [here](https://pybind11.readthedocs.io/en/stable/).
 
 <div align="right"><a href="#table-of-contents"><img src="img/top.png" width="32"></div>
 
@@ -284,70 +295,3 @@ This repository is maintained actively, so if you face any issue please <a href=
 Not sure where to start? Join our discord and we will help you get started!
 
 <a href="https://discord.gg/ZKBZg5K2"><img src="img/discord.png" width="150"/></a> &nbsp;&nbsp; <a target="_blank" href="https://bmc.link/zoeyzyhu"><img src="img/bmc.png" alt="Buy me a coffee" width="150"/></a>
-
----
-
-## Extra Information
-
-There are three formal components in this repo:
-
-- `cdisort_patches`
-- `cppdisort`
-- `pydisort`
-
-The `cdisort_patches` contains the original `cdisort` library (v2.1.3) by Timothy E. Dowling, plus some patch files containing modifications made by [Cheng Li](https://chengcli.io/). Different from `cdisort`, which uses `Makefile` to build the library, we modified the configuration and adapted a `CMake`-built approach. For detailed changes, please see the `README.md` file in the `cdisort_patches` .
-
-The `cppdisort` provides a C++ wrapper for the "cdisort" library, allowing easy access to its functionality from C++ code. We use toml++ for configuration management, allowing users to specify various parameters in the TOML configuration file. The updated implementation ensures compatibility with modern C++ standards and incorporates bug fixes and enhancements compared to the original cdisort library. For detailed changes, please see the `README.md` file in the `cppdisort` .
-
-The `pydisort` builds a Python library that provides a Pythonic interface to the cppdisort library. It serves as a bridge between the C++ implementation of cppdisort and the Python programming language, enabling users to leverage the power of cppdisort within their Python applications. For detailed changes, please see the `README.md` file in the `pydisort` .
-
-#### Files
-
-The "cppdisort.h" file includes the necessary headers and defines the DisortWrapper class. This class provides a C++ interface to interact with the "cdisort" library. It includes member variables and functions that correspond to the parameters and functions of the "cdisort" library. Some of the important member variables include `btemp`, `ttemp`, `fluor`, `albedo`, `fisot`, `fbeam`, `temis`, `umu0`, and `phi0`, which represent accessible boundary conditions. The class also provides functions for setting various parameters, such as atmosphere dimensions, flags, intensity dimensions, optical depth, single scattering albedo, level temperature, wavenumber range, output optical depth, and outgoing ray. The class also includes functions for running the radiative transfer calculations and retrieving the results.
-
-The "cppdisort.cc" file implements the member functions of the DisortWrapper class. The functions in this file handle the initialization, parameter setting, and execution of the "cdisort" library functions. It also includes a function fromTomlTable that converts a TOML table into a DisortWrapper object.
-
-#### Build
-
-```bash
-mkdir build
-cd build
-cmake ..
-make
-```
-
-#### Usage
-
-To use the wrapper, include the cppdisort.h header file in your C++ code. You can then create an instance of the DisortWrapper class and set the desired parameters using the provided methods. Finally, call the RunRTFlux method to run the radiative transfer calculations and obtain the calculated flux values.
-
-Here's a basic example:
-
-```c++
-#include "cppdisort.h"
-
-int main() {
-    // Create an instance of DisortWrapper
-    DisortWrapper disort;
-
-    // Set atmosphere and intensity dimensions
-    disort.SetAtmosphereDimension(10, 4, 16, 2)
-          .SetIntensityDimension(8, 10, 20);
-
-    // Set other parameters
-    disort.SetAccuracy(1e-5)
-          .SetOpticalDepth(tau, 10)
-          .SetSingleScatteringAlbedo(ssa, 10)
-          .SetLevelTemperature(temp, 11)
-          .SetWavenumberRange_invcm(1000.0, 2000.0)
-          .SetOutputOpticalDepth(usrtau, 10)
-          .SetOutgoingRay(umu, phi);
-
-    // Run radiative transfer calculations and get flux values
-    auto [flxup, flxdn] = disort.RunRTFlux();
-
-    // Process the results
-    // ...
-
-    return 0;
-}
-```
