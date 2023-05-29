@@ -1,6 +1,6 @@
 <!-- Logo ------------------------------------------->
 <h4 align="center">
-    <img src="img/logo.png" alt="Pydisort" width="300" style="display: block; margin: 0 auto">
+    <img src="doc/img/logo.png" alt="Pydisort" width="300" style="display: block; margin: 0 auto">
 </h4>
 
 <!-- Subtitle --------------------------------------->
@@ -10,42 +10,47 @@
 
 <!-- primary badges --------------------------------->
 <p align="center">
-<a href="https://github.com/zoeyzyhu/actions/workflows/main.yml">
-  <img alt="GitHub Workflow Status"
-    src="https://img.shields.io/github/actions/workflow/status/zoeyzyhu/pydisort/main.yml?style=flat-square&logo=github">
-</a>
 <a href="https://www.codacy.com/gh/ankitwasankar/mftool-java/dashboard?utm_source=github.com&utm_medium=referral&utm_content=ankitwasankar/mftool-java&utm_campaign=Badge_Coverage">
   <img alt="Tests coverage"
-    src="https://app.codacy.com/project/badge/Coverage/0054db87ea0f426599c3a30b39291388?style=flat-square" />
+    src="https://app.codacy.com/project/badge/Coverage/0054db87ea0f426599c3a30b39291388?style=for-the-badge"/>
 </a>
 <a href="https://codecov.io/gh/{{REPOSITORY}}">
   <img alt="Tests coverage"
-    src="https://codecov.io/gh/{{REPOSITORY}}/branch/main/graph/badge.svg?style=flat-square?style=flat-square" />
+    src="https://codecov.io/gh/{{REPOSITORY}}/branch/main/graph/badge.svg?style=for-the-badge?"/>
+</a>
+<a href="https://codecov.io/gh/{{REPOSITORY}}">
+  <img alt="Codacy coverage"
+    src="https://img.shields.io/codacy/coverage/pydisort?style=for-the-badge&logo=codecov"/>
+</a>
+<br>
+<a href="https://github.com/zoeyzyhu/actions/workflows/main.yml">
+  <img alt="GitHub Workflow Status"
+    src="https://img.shields.io/github/actions/workflow/status/zoeyzyhu/pydisort/main.yml?style=for-the-badge&logo=github"/>
 </a>
 <a href="https://github.com/zoeyzyhu/pydisort/issues">
   <img alt="GitHub issues"
-    src="https://img.shields.io/github/issues/zoeyzyhu/pydisort?style=flat-square&logo=git"">
+    src="https://img.shields.io/github/issues/zoeyzyhu/pydisort?style=for-the-badge&logo=git"/>
 </a>
 <a href="https://github.com/zoeyzyhu/pydisort/releases">
   <img alt="GitHub release (latest by date)"
-    src="https://img.shields.io/github/v/release/zoeyzyhu/pydisort?style=flat-square&logo=buffer">
+    src="https://img.shields.io/github/v/release/zoeyzyhu/pydisort?style=for-the-badge&logo=buffer"/>
 </a>
 <br>
 <a href="https://github.com/pre-commit/pre-commit">
   <img alt="pre-commit"
-    src="https://img.shields.io/badge/pre--commit-enabled-brightgreen?style=flat-square&logo=pre-commit">
+    src="https://img.shields.io/badge/pre--commit-enabled-brightgreen?style=for-the-badge&logo=pre-commit"/>
 </a>
 <a href="http://makeapullrequest.com">
   <img alt="pre-commit"
-    src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square&logo=git">
+    src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=for-the-badge&logo=git"/>
 </a>
 <a href="https://opensource.org/licenses/">
   <img alt="license"
-    src="https://img.shields.io/badge/License-GPL-yellow.svg?style=flat-square&logo=gnu" />
+    src="https://img.shields.io/badge/License-GPL-yellow.svg?style=for-the-badge&logo=gnu"/>
 </a>
 <a href="https://img.shields.io/badge/OS-Linux%2C%20MacOS-orange">
   <img alt="os"
-    src="https://img.shields.io/badge/OS-linux%2C%20mac-orange?style=flat-square&logo=linux" />
+    src="https://img.shields.io/badge/OS-linux%2C%20mac-orange?style=for-the-badge&logo=linux"/>
 </a>
 </p>
 
@@ -58,8 +63,8 @@
 <!-- Navigation-------------------------------------->
 <p align="center">
 <a href="#introduction">Introduction</a> &nbsp;&bull;&nbsp;
-<a href="#usage">How to use</a> &nbsp;&bull;&nbsp;
-<a href="#contribution">Contributing</a> &nbsp;&bull;&nbsp;
+<a href="#how-to-use">How to use</a> &nbsp;&bull;&nbsp;
+<a href="#contributing">Contributing</a> &nbsp;&bull;&nbsp;
 <a href="#issues">Issues?</a>
 </p>
 
@@ -73,7 +78,7 @@ DISORT (Discrete Ordinate Radiative Transfer) is a widely-used algorithm that ca
 
 Building upon the aforementioned work, we have developed a `C++` wrapper for the `cdisort` library and subsequently created a `Python` package. The C++ wrapper serves two primary purposes: (1) providing a modern C++ interface for the `cdisort` library to facilitate future development involving DISORT, and (2) establishing the foundation for the Python package's bindings. The Python package, which is binded upon the C++ wrapper via `pybind11`, is designed to be user-friendly, making it easy to install and integrate into a diverse range of applications.
 
-![-----------------------------------------------------](img/rainbow.png)
+![-----------------------------------------------------](doc/img/rainbow.png)
 
 ## Table of Contents
 
@@ -87,13 +92,13 @@ Building upon the aforementioned work, we have developed a `C++` wrapper for the
 - [Contributing](#contributing)
 - [Issues?](#issues)
 
-![-----------------------------------------------------](img/rainbow.png)
+![-----------------------------------------------------](doc/img/rainbow.png)
 
 ## How to use
 
 <!-- For Python users-------------------------------->
 
-### <a id='for-python-users'><picture><img src="img/python.svg" alt="Python" align=left width=24></picture> For Python users</a>
+### <a id='for-python-users'><picture><img src="doc/img/python.svg" alt="Python" align=left width=24></picture> For Python users</a>
 
 We provide the `pydisort` library for Python users. The package can be installed using `pip`:
 
@@ -160,7 +165,7 @@ For example, you might need to provide your own data file in `from_file` functio
 
 > 💡 One important point to note is that the `pydisort` library assumes that the provided arrays (optical depth, single scattering albedo, etc.) are in the numpy format and it throws exceptions if incompatible data types are provided. So, ensure that you are providing data in the right format to avoid any runtime errors.
 
-<div align="right"><a href="#table-of-contents"><img src="img/top.png" width="32"></div>
+<div align="right"><a href="#table-of-contents"><img src="doc/img/top.png" width="32"></div>
 
 [//]: <> (!!Do not remove the following line, which is used for dividing the content)
 
@@ -168,7 +173,7 @@ For example, you might need to provide your own data file in `from_file` functio
 
 <!-- For C++ developers------------------------------>
 
-### <a id='for-c++-users'><picture><img src="img/cpp.svg" alt="C++" align=left width=24></picture> For C++ developers</a>
+### <a id='for-c++-users'><picture><img src="doc/img/cpp.svg" alt="C++" align=left width=24></picture> For C++ developers</a>
 
 #### <a id='check-dependencies'> 🔻 Check dependences</a>
 
@@ -268,9 +273,9 @@ pre-commit run --all-files
 
 > 💡 Please feel free to add more checks and lints that suit your need to the `pre-commit` hooks. You could find more information about `pre-commit` [here](https://pre-commit.com/).
 
-<div align="right"><a href="#table-of-contents"><img src="img/top.png" width="32"></div>
+<div align="right"><a href="#table-of-contents"><img src="doc/img/top.png" width="32"></div>
 
-![-----------------------------------------------------](img/rainbow.png)
+![-----------------------------------------------------](doc/img/rainbow.png)
 
 ## Contributing
 
@@ -284,9 +289,11 @@ If you need to include more libraries to the `cppdisrot` wrapper, please use the
 
 If you need to make changes to the `pydisort` package, please use the `pybind11` library to bind the C++ wrapper to Python, expose the functions and classes to Python, and add more test cases to the `pydisort` package. You could find more information about the `pybind11` library [here](https://pybind11.readthedocs.io/en/stable/).
 
-<div align="right"><a href="#table-of-contents"><img src="img/top.png" width="32"></div>
+For more information to assist your development, please refer to the `doc/` folder in this repository.
 
-![-----------------------------------------------------](img/rainbow.png)
+<div align="right"><a href="#table-of-contents"><img src="doc/img/top.png" width="32"></div>
+
+![-----------------------------------------------------](doc/img/rainbow.png)
 
 ## Issues?
 
@@ -294,4 +301,4 @@ This repository is maintained actively, so if you face any issue please <a href=
 
 Not sure where to start? Join our discord and we will help you get started!
 
-<a href="https://discord.gg/ZKBZg5K2"><img src="img/discord.png" width="150"/></a> &nbsp;&nbsp; <a target="_blank" href="https://bmc.link/zoeyzyhu"><img src="img/bmc.png" alt="Buy me a coffee" width="150"/></a>
+<a href="https://discord.gg/ZKBZg5K2"><img src="doc/img/discord.png" width="150"/></a> &nbsp;&nbsp; <a target="_blank" href="https://bmc.link/zoeyzyhu"><img src="doc/img/bmc.png" alt="Buy me a coffee" width="150"/></a>
