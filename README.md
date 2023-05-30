@@ -1,6 +1,6 @@
 <!-- Logo ------------------------------------------->
 <h4 align="center">
-    <img src="doc/img/logo.png" alt="Pydisort" width="300" style="display: block; margin: 0 auto">
+    <img src="doc/img/logo_tr_git.png" alt="Pydisort" width="300" style="display: block; margin: 0 auto">
 </h4>
 
 <!-- Subtitle --------------------------------------->
@@ -99,7 +99,7 @@ Building upon the aforementioned work, we have developed a `C++` wrapper for the
 
 <!-- For Python users-------------------------------->
 
-### <a id='for-python-users'><picture><img src="doc/img/python.svg" alt="Python" align=left width=24></picture> For Python users</a>
+### <a id='for-python-users'><picture><img src="doc/img/python.png" alt="Python" align=left width=24></picture> For Python users</a>
 
 We provide the `pydisort` library for Python users. The package can be installed using `pip`:
 
@@ -166,7 +166,7 @@ For example, you might need to provide your own data file in `from_file` functio
 
 > 💡 One important point to note is that the `pydisort` library assumes that the provided arrays (optical depth, single scattering albedo, etc.) are in the numpy format and it throws exceptions if incompatible data types are provided. So, ensure that you are providing data in the right format to avoid any runtime errors.
 
-<div align="right"><a href="#table-of-contents"><img src="doc/img/top.png" width="32px"></div>
+<div align="right"><a href="#table-of-contents"><img src="doc/img/top_green_small.png" width="32px"></div>
 
 [//]: <> (!!Do not remove the following line, which is used for dividing the content)
 
@@ -174,7 +174,7 @@ For example, you might need to provide your own data file in `from_file` functio
 
 <!-- For C++ developers------------------------------>
 
-### <a id='for-c++-users'><picture><img src="doc/img/cpp.svg" alt="C++" align=left width=24></picture> For C++ developers</a>
+### <a id='for-c++-users'><picture><img src="doc/img/cpp.png" alt="C++" align=left width=24></picture> For C++ developers</a>
 
 #### <a id='check-dependencies'> 🔻 Check dependences</a>
 
@@ -274,7 +274,7 @@ pre-commit run --all-files
 
 > 💡 Please feel free to add more checks and lints that suit your need to the `pre-commit` hooks. You could find more information about `pre-commit` [here](https://pre-commit.com/).
 
-<div align="right"><a href="#table-of-contents"><img src="doc/img/top.png" width="32px"></div>
+<div align="right"><a href="#table-of-contents"><img src="doc/img/top_green_small.png" width="32px"></div>
 
 ![](doc/img/rainbow.png)
 
@@ -292,7 +292,7 @@ If you need to make changes to the `pydisort` package, please use the `pybind11`
 
 For more information to assist your development, please refer to the `doc/` folder in this repository.
 
-<div align="right"><a href="#table-of-contents"><img src="doc/img/top.png" width="32px"></div>
+<div align="right"><a href="#table-of-contents"><img src="doc/img/top_green_small.png" width="32px"></div>
 
 ![](doc/img/rainbow.png)
 
@@ -302,4 +302,4 @@ This repository is maintained actively, so if you face any issue please <a href=
 
 Not sure where to start? Join our discord and we will help you get started!
 
-<a href="https://discord.gg/ZKBZg5K2"><img src="doc/img/discord.png" width="150"/></a> &nbsp;&nbsp; <a target="_blank" href="https://bmc.link/zoeyzyhu"><img src="doc/img/bmc.png" alt="Buy me a coffee" width="150"/></a>
+<a href="https://discord.gg/ZKBZg5K2"><img src="doc/img/discord.png" width="150"/></a> &nbsp;&nbsp; <a target="_blank" href="https://bmc.link/zoeyzyhu"><img src="doc/img/bmc_white.png" alt="Buy me a coffee" width="170"/></a>
