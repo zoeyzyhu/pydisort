@@ -115,7 +115,7 @@ Following this workflow ensures a systematic approach to contributions, promotes
 
 For more information and resources to assist your development, please refer to the `doc/` folder in this repository. It contains relevant documentation and guides to help you understand the codebase and contribute effectively.
 
-<div align="right"><a href="#table-of-contents"><img src="img/top.png" width="32"></a></div>
+<div align="right"><a href="#table-of-contents"><img src="img/top.png" width="32px"></a></div>
 
 ## Testing
 
@@ -149,4 +149,4 @@ Ensure that your changes do not break any existing functionality and include app
 - Use `rand_r` instead of `rand`.
 - Use `strtok_r` instead of `strtok`.
 
-<div align="right"><a href="#table-of-contents"><img src="img/top.png" width="32"></a></div>
+<div align="right"><a href="#table-of-contents"><img src="img/top.png" width="32px"></a></div>
