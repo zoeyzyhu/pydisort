@@ -20,7 +20,7 @@
     src="https://codecov.io/gh/{{REPOSITORY}}/branch/main/graph/badge.svg?style=flat-square?"/>
 </a>
 -->
-<a href="https://github.com/zoeyzyhu/actions/workflows/main.yml">
+<a href="https://github.com/zoeyzyhu/pydisort/actions">
   <img alt="GitHub Workflow Status"
     src="https://img.shields.io/github/actions/workflow/status/zoeyzyhu/pydisort/main.yml?style=flat-square&logo=github"/>
 </a>
@@ -42,7 +42,7 @@
     src="https://img.shields.io/badge/pre--commit-enabled-brightgreen?style=flat-square&logo=pre-commit"/>
 </a>
 <a href="http://makeapullrequest.com">
-  <img alt="pre-commit"
+  <img alt="pull-request"
     src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square&logo=git"/>
 </a>
 <a href="https://opensource.org/licenses/">
@@ -79,7 +79,7 @@ DISORT (Discrete Ordinate Radiative Transfer) is a widely-used algorithm that ca
 
 Building upon the aforementioned work, we have developed a `C++` wrapper for the `cdisort` library and subsequently created a `Python` package. The C++ wrapper serves two primary purposes: (1) providing a modern C++ interface for the `cdisort` library to facilitate future development involving DISORT, and (2) establishing the foundation for the Python package's bindings. The Python package, which is binded upon the C++ wrapper via `pybind11`, is designed to be user-friendly, making it easy to install and integrate into a diverse range of applications.
 
-![-----------------------------------------------------](doc/img/rainbow.png)
+![](doc/img/rainbow.png)
 
 ## Table of Contents
 
@@ -93,7 +93,7 @@ Building upon the aforementioned work, we have developed a `C++` wrapper for the
 - [Contributing](#contributing)
 - [Issues?](#issues)
 
-![-----------------------------------------------------](doc/img/rainbow.png)
+![](doc/img/rainbow.png)
 
 ## How to use
 
@@ -166,7 +166,7 @@ For example, you might need to provide your own data file in `from_file` functio
 
 > 💡 One important point to note is that the `pydisort` library assumes that the provided arrays (optical depth, single scattering albedo, etc.) are in the numpy format and it throws exceptions if incompatible data types are provided. So, ensure that you are providing data in the right format to avoid any runtime errors.
 
-<div align="right"><a href="#table-of-contents"><img src="doc/img/top.png" width="32"></div>
+<div align="right"><a href="#table-of-contents"><img src="doc/img/top.png" width="32px"></div>
 
 [//]: <> (!!Do not remove the following line, which is used for dividing the content)
 
@@ -274,9 +274,9 @@ pre-commit run --all-files
 
 > 💡 Please feel free to add more checks and lints that suit your need to the `pre-commit` hooks. You could find more information about `pre-commit` [here](https://pre-commit.com/).
 
-<div align="right"><a href="#table-of-contents"><img src="doc/img/top.png" width="32"></div>
+<div align="right"><a href="#table-of-contents"><img src="doc/img/top.png" width="32px"></div>
 
-![-----------------------------------------------------](doc/img/rainbow.png)
+![](doc/img/rainbow.png)
 
 ## Contributing
 
@@ -292,9 +292,9 @@ If you need to make changes to the `pydisort` package, please use the `pybind11`
 
 For more information to assist your development, please refer to the `doc/` folder in this repository.
 
-<div align="right"><a href="#table-of-contents"><img src="doc/img/top.png" width="32"></div>
+<div align="right"><a href="#table-of-contents"><img src="doc/img/top.png" width="32px"></div>
 
-![-----------------------------------------------------](doc/img/rainbow.png)
+![](doc/img/rainbow.png)
 
 ## Issues?
 
