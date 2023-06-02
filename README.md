@@ -119,43 +119,58 @@ import numpy as np
 - Step 2. Create an instance of the disort class:
 
 ```python
-# Let's assume you have a file named 'input.toml' which has the
-# required data for initializing the 'disort' class.
-disort_instance = pydisort.disort.from_file('input.toml')
+# Let's assume you have a file named 'isotropic_scatering.toml' which has the required data for setting up generic radiation flags
+ds = pydisort.disort.from_file('isotropic_scattering.toml')
 ```
 
-- Step 3. Set the properties of your disort model:
+- Step 3. Set up the model dimension
 
 ```python
-# Let's assume you have the following arrays for setting the disort properties
-optical_depth = np.array([1.0, 2.0, 3.0])
-single_scattering_albedo = np.array([0.7, 0.8, 0.9])
-level_temperature = np.array([300.0, 200.0, 100.0])
-
-disort_instance.set_optical_depth(optical_depth)
-disort_instance.set_single_scattering_albedo(single_scattering_albedo)
-disort_instance.set_level_temperature(level_temperature)
+ds.set_atmosphere_dimension(
+  nlyr=1, nstr=16, nmom=16, nphase=16
+).set_intensity_dimension(nuphi=1, nutau=2, numu=6).finalize()
 ```
 
-- Step 4. Set more specific options, such as flags or intensity dimensions:
+This sets up a one layer of atmosphere with 16 streams for calculating radiation.
+
+- Step 4. Calculate scattering moments
 
 ```python
-flags = {"flag_1": True, "flag_2": False}
-disort_instance.set_flags(flags)
-disort_instance.set_intensity_dimension(1, 1, 1)
+pmom = get_legendre_coefficients(ds.get_nmom(), "isotropic")
 ```
 
-- Step 5. Run the disort computation:
+- Step 4. Set up radiation boundary condition
 
 ```python
-disort_instance.run()
+ds.umu0 = 0.1
+ds.phi0 = 0.0
+ds.albedo = 0.0
+ds.fluor = 0.0
+ds.fbeam = pi / ds.umu0
+ds.fisot = 0.0
 ```
 
-- Step 6. After running the disort computation, you can get the computed flux and intensity:
+- Step 5. Set up output optical depth and polar angles
 
 ```python
-flux = disort_instance.get_flux()
-intensity = disort_instance.get_intensity()
+utau = array([0.0, 0.03125])
+umu = array([-1.0, -0.5, -0.1, 0.1, 0.5, 1.0])
+uphi = array([0.0])
+```
+
+- Step 6. Run radiative transfer and get intensity result
+
+```python
+result = ds.run_with(
+	{
+        	"tau": [0.03125],
+                "ssa": [0.2],
+                "pmom": pmom,
+                "utau": utau,
+                "umu": umu,
+                "uphi": uphi,
+            }
+        ).get_intensity()
 ```
 
 Please note that this is a generic tutorial and you would need to adapt this to your specific use-case.
