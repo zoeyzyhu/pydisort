@@ -12,8 +12,8 @@ set(CDISORT_INCLUDE_DIR
 
 # Add cppdisort
 
-add_subdirectory(cppdisort)
+add_subdirectory(pydisort)
 
-set(CPPDISORT_INCLUDE_DIR
+set(PYDISORT_INCLUDE_DIR
     ${CMAKE_CURRENT_SOURCE_DIR}
-    CACHE PATH "cppdisort include directory")
+    CACHE PATH "pydisort include directory")

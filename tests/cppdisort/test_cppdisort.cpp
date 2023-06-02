@@ -1,6 +1,6 @@
 #include <cassert>
-#include <cppdisort/cppdisort.hpp>
 #include <iostream>
+#include <pydisort/cppdisort.hpp>
 
 int main() {
   // Test case for DisortWrapper::FromFile method

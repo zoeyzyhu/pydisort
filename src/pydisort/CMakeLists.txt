@@ -2,7 +2,7 @@
 # Create the cppdisort library
 # =============================
 
-set(namel cppdisort)
+set(namel pydisort)
 string(TOUPPER ${namel} nameu)
 
 file(GLOB src_files cppdisort.cpp)
