@@ -1,5 +1,5 @@
-#ifndef SRC_CPPDISORT_CPPDISORT_HPP_
-#define SRC_CPPDISORT_CPPDISORT_HPP_
+#ifndef SRC_PYDISORT_CPPDISORT_HPP_
+#define SRC_PYDISORT_CPPDISORT_HPP_
 
 #include <cdisort/cdisort.h>
 #include <pybind11/numpy.h>
@@ -160,4 +160,4 @@ class DisortWrapperTestOnly : public DisortWrapper {
   disort_output *GetDisortOutput() { return &_ds_out; }
 };
 
-#endif  // SRC_CPPDISORT_CPPDISORT_HPP_
+#endif  // SRC_PYDISORT_CPPDISORT_HPP_

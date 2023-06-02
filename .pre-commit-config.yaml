@@ -64,15 +64,15 @@ repos:
 
   ## Python related ----------------------------------------------------------
 
-  - repo: https://github.com/PyCQA/pydocstyle
-    rev: 6.3.0
-    hooks:
-      - id: pydocstyle
-        name: pydocstyle
-        entry: pydocstyle
-        description: Check compliance with Python docstring conventions.
-        language: python
-        types: [python]
+  #  - repo: https://github.com/PyCQA/pydocstyle
+  #    rev: 6.3.0
+  #    hooks:
+  #      - id: pydocstyle
+  #        name: pydocstyle
+  #        entry: pydocstyle
+  #        description: Check compliance with Python docstring conventions.
+  #        language: python
+  #        types: [python]
 
   - repo: https://github.com/pre-commit/mirrors-autopep8
     rev: v2.0.0

@@ -16,7 +16,10 @@ target_include_directories(
 target_link_libraries(${namel} PRIVATE ${CPPDISORT_LIBRARY_${buildu}}
                                        ${PYTHON_LIBRARY_RELEASE})
 
+set_target_properties(${namel} PROPERTIES PREFIX "${PYTHON_MODULE_PREFIX}"
+                                          SUFFIX "${PYTHON_MODULE_EXTENSION}")
+
 install(
   TARGETS ${namel}
   COMPONENT python
-  LIBRARY DESTINATION "${PYTHON_SITE_PACKAGES}")
+  LIBRARY DESTINATION ${namel})
