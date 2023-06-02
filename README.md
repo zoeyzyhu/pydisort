@@ -109,21 +109,22 @@ pip install pydisort
 
 Here is a step-by-step tutorial of how to use the pydisort package:
 
-- Step 1. Importing the module:
+- Step 1. Importing the module.
 
 ```python
 import pydisort
 import numpy as np
 ```
 
-- Step 2. Create an instance of the disort class:
+- Step 2. Create an instance of the disort class.
 
 ```python
-# Let's assume you have a file named 'isotropic_scatering.toml' which has the required data for setting up generic radiation flags
+# Let's assume you have a file named 'isotropic_scatering.toml' which 
+# has the required data for setting up generic radiation flags
 ds = pydisort.disort.from_file('isotropic_scattering.toml')
 ```
 
-- Step 3. Set up the model dimension
+- Step 3. Set up the model dimension.
 
 ```python
 ds.set_atmosphere_dimension(
@@ -133,13 +134,13 @@ ds.set_atmosphere_dimension(
 
 This sets up a one layer of atmosphere with 16 streams for calculating radiation.
 
-- Step 4. Calculate scattering moments
+- Step 4. Calculate scattering moments.
 
 ```python
 pmom = get_legendre_coefficients(ds.get_nmom(), "isotropic")
 ```
 
-- Step 4. Set up radiation boundary condition
+- Step 4. Set up radiation boundary condition.
 
 ```python
 ds.umu0 = 0.1
@@ -150,7 +151,7 @@ ds.fbeam = pi / ds.umu0
 ds.fisot = 0.0
 ```
 
-- Step 5. Set up output optical depth and polar angles
+- Step 5. Set up output optical depth and polar angles.
 
 ```python
 utau = array([0.0, 0.03125])
@@ -158,19 +159,19 @@ umu = array([-1.0, -0.5, -0.1, 0.1, 0.5, 1.0])
 uphi = array([0.0])
 ```
 
-- Step 6. Run radiative transfer and get intensity result
+- Step 6. Run radiative transfer and get intensity result.
 
 ```python
 result = ds.run_with(
 	{
-        	"tau": [0.03125],
-                "ssa": [0.2],
-                "pmom": pmom,
-                "utau": utau,
-                "umu": umu,
-                "uphi": uphi,
-            }
-        ).get_intensity()
+		"tau": [0.03125],
+		"ssa": [0.2],
+		"pmom": pmom,
+		"utau": utau,
+		"umu": umu,
+		"uphi": uphi,
+	}
+).get_intensity()
 ```
 
 Please note that this is a generic tutorial and you would need to adapt this to your specific use-case.
