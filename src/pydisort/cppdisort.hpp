@@ -145,8 +145,9 @@ class DisortWrapper {
   bool _is_finalized = false;
   static DisortWrapper *fromTomlTable(const toml::table &table);
 
-  void printDisortState();
-  void printDisortFlags();
+  void printDisortState() const;
+  void printDisortFlags() const;
+  std::string toString() const;
 };
 
 // exposing private members for testing
