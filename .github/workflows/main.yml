@@ -64,6 +64,7 @@ jobs:
 
       - name: Install
         run: |
+          python3 -m venv env
           source env/bin/activate
           cmake --install ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
 
