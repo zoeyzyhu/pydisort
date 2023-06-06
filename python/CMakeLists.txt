@@ -6,6 +6,16 @@ set(namel pydisort)
 file(GLOB src_files pybind_cppdisort.cpp)
 string(TOUPPER ${CMAKE_BUILD_TYPE} buildu)
 
+# Copy input files to run directory
+
+file(GLOB inputs *.toml)
+foreach(input ${inputs})
+  get_filename_component(name ${input} NAME)
+  configure_file(${input} ${CMAKE_BINARY_DIR}/bin/${name} COPYONLY)
+endforeach()
+
+# Set module targets
+
 pybind11_add_module(${namel} MODULE ${src_files})
 
 target_include_directories(
@@ -18,6 +28,8 @@ target_link_libraries(${namel} PRIVATE ${PYDISORT_LIBRARY_${buildu}}
 
 set_target_properties(${namel} PROPERTIES PREFIX "${PYTHON_MODULE_PREFIX}"
                                           SUFFIX "${PYTHON_MODULE_EXTENSION}")
+
+# Install configuration
 
 install(
   TARGETS ${namel}

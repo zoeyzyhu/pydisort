@@ -1,14 +1,14 @@
 #! python3
 """ Test isotropic scattering with pydisort."""
-# pylint: disable = no-name-in-module, invalid-name, import-error
-
-import os
-import unittest
-
-from numpy import array, pi
-from numpy.testing import assert_allclose
+# pylint: disable = no-name-in-module, invalid-name, import-error, wrong-import-order
 
 from pydisort import disort, get_legendre_coefficients, Radiant
+from numpy.testing import assert_allclose
+from numpy import array, pi
+import unittest
+import os
+import sys
+sys.path.insert(0, '../../install/pydisort')
 
 
 # cdisort test01
@@ -17,7 +17,7 @@ class PyDisortTests(unittest.TestCase):
 
     def setUp(self):
         """Set up the test."""
-        self.toml_path = "isotropic_scattering.toml"
+        self.toml_path = "input.toml"
         assert os.path.exists(
             self.toml_path), f"{self.toml_path} does not exist."
 
