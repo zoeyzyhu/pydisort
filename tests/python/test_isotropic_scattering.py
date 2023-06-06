@@ -1,14 +1,15 @@
 #! python3
 """ Test isotropic scattering with pydisort."""
-# pylint: disable = no-name-in-module, invalid-name, import-error, wrong-import-order
-
+# pylint: disable = no-name-in-module, invalid-name, import-error, wrong-import-order, wrong-import-position
+import sys
+sys.path.insert(0, '../../install/pydisort')
 from pydisort import disort, get_legendre_coefficients, Radiant
+
 from numpy.testing import assert_allclose
 from numpy import array, pi
 import unittest
 import os
-import sys
-sys.path.insert(0, '../../install/pydisort')
+
 
 
 # cdisort test01

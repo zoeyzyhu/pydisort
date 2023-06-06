@@ -82,6 +82,7 @@ repos:
         description: Formats Python code to conform to the PEP 8 style guide
         language: python
         args: [-i]
+        exclude: tests/python/
 
   ## C/C++ related -----------------------------------------------------------
 
