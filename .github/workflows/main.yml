@@ -58,12 +58,14 @@ jobs:
 
       - name: Build
         run: |
-          python3 -m venv ${{github.workspace}}env
+          python3 -m venv ${{github.workspace}}/env
           source ${{github.workspace}}/env/bin/activate
           LIB=$(python3 -c 'import sysconfig; print(sysconfig.get_paths()["purelib"])')
-          echo ${{ LIB }}
-          cmake -B ${{ github.workspace }}/build -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
-          --DCMAKE_INSTALL_PREFIX=${{ LIB }}
+          echo $LIB
+          env:
+            LIB: ${{ steps.get_lib_path.outputs.LIB }}
+          run: cmake -B ${{ github.workspace }}/build -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
+            -DCMAKE_INSTALL_PREFIX=${{ env.LIB }}
 
       - name: Install
         run: cmake --install ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
