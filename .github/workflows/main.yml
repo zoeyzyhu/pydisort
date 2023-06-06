@@ -61,11 +61,10 @@ jobs:
         run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
 
       - name: Build
-        run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
+        run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}} --target install
 
-      - name: Install
-        run: cmake --install ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
-
+      #- name: Install
+      #  run: cmake --install ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
       - name: Run tests for C++ and Pybind
         run: cd ${{github.workspace}}/build/bin && python3 test_isotropic_scattering.py
 
