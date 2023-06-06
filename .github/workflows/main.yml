@@ -56,14 +56,12 @@ jobs:
         with:
           python-version: "3.10"
 
-      - name: Install python modules
+      - name: Build
         run: |
           python3 -m venv env
           source env/bin/activate
           pip install -r requirements.txt
-
-      - name: Build
-        run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+          cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} --DCMAKE_INSTALL_PREFIX=${{github.workspace}}/env/lib/python3.10/site-packages
 
       - name: Install
         run: cmake --install ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
