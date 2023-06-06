@@ -1,10 +1,31 @@
 # pylint: disable=invalid-name, undefined-all-variable, deprecated-module, consider-using-f-string, unspecified-encoding, exec-used, missing-module-docstring
-import distutils.command.build as _build  # pylint: disable=deprecated-module
 import os
 import sys
+import platform
+import distutils.command.build as _build  # pylint: disable=deprecated-module
 from distutils import spawn
 from distutils.sysconfig import get_python_lib
 from setuptools import setup
+
+
+def check_requirements():
+    """Check if the system requirements are met."""
+    # Check the operating system
+    os_name = platform.system()
+    if os_name not in ['Darwin', 'Linux']:
+        print("Unsupported operating system. Please use MacOS or Linux.")
+        return False
+
+    # Check the Python version
+    python_version = platform.python_version()
+    if python_version < (3, 6):
+        print("Python 3.6 or higher is required.")
+        return False
+
+    if python_version < (3, 8) and os_name == 'Darwin':
+        print("Python 3.8 or higher is required. ")
+
+    return True
 
 
 def extend_build():
@@ -18,7 +39,7 @@ def extend_build():
             if spawn.find_executable('cmake') is None:
                 sys.stderr.write("CMake is required to build this package.\n")
                 sys.exit(-1)
-            _source_dir = os.path.split(__file__)[0]
+            _source_dir = os.path.split(os.path.abspath(__file__))[0]
             _build_dir = os.path.join(_source_dir, 'build_setup_py')
             _prefix = get_python_lib()
             try:
@@ -43,6 +64,10 @@ def extend_build():
     return build
 
 
+# If the system does not meet requirement, exit.
+if not check_requirements():
+    sys.exit(1)
+
 _here = os.path.abspath(os.path.dirname(__file__))
 
 _this_package = 'src/pydisort'
@@ -66,4 +91,5 @@ setup(
         'Intended Audience :: Science/Research',
         'Programming Language :: Python :: 3.6'
     ],
+    python_requires=">=3.6",
     cmdclass={'build': extend_build()})

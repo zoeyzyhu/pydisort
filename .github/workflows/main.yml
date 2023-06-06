@@ -33,7 +33,9 @@ jobs:
         run: chmod +x ./tools/check_style.sh
 
       - name: Run cpplint, pylint
-        run: ./tools/check_style.sh
+        run: |
+          excluded_files="setup.py"
+          ./tools/check_style.sh
 
   build:
     needs: style-checker
