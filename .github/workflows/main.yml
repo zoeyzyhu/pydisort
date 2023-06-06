@@ -61,7 +61,7 @@ jobs:
           python3 -m venv env
           source env/bin/activate
           pip install -r requirements.txt
-          cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} --DCMAKE_INSTALL_PREFIX=${{github.workspace}}/env/lib/python3.10/site-packages
+          cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} --DCMAKE_INSTALL_PREFIX=env/lib/python3.10/site-packages
 
       - name: Install
         run: cmake --install ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
