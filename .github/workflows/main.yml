@@ -57,16 +57,16 @@ jobs:
           python-version: "3.10"
 
       - name: Install python modules
-        run: pip install -r requirements.txt
+        run: |
+          python3 -m venv env
+          source env/bin/activate
+          pip install -r requirements.txt
 
       - name: Build
         run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
 
       - name: Install
-        run: |
-          python3 -m venv env
-          source env/bin/activate
-          cmake --install ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
+        run: cmake --install ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
 
       - name: Run tests for C++ and Pybind
         run: cd ${{github.workspace}}/build/bin && python3 test_isotropic_scattering.py
