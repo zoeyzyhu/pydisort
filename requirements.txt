@@ -3,3 +3,4 @@ cpplint
 numpy
 pre-commit
 pylint
+wheel
