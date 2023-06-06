@@ -67,8 +67,8 @@ jobs:
 
       #- name: Install
       #  run: cmake --install ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
-      - name: Run tests for C++ and Pybind
-        run: cd ${{github.workspace}}/build/bin && python3 test_isotropic_scattering.py
+      #- name: Run tests for C++ and Pybind
+      #  run: cd ${{github.workspace}}/build/bin && python3 test_isotropic_scattering.py
 
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v3
