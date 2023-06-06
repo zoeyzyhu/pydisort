@@ -22,4 +22,4 @@ set_target_properties(${namel} PROPERTIES PREFIX "${PYTHON_MODULE_PREFIX}"
 install(
   TARGETS ${namel}
   COMPONENT python
-  LIBRARY DESTINATION "${PYTHON_SITE_PACKAGES}")
+  LIBRARY DESTINATION ${namel})

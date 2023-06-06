@@ -58,10 +58,12 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Create build directory
-        run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+        run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_INSTALL_PREFIX=install
+        # cmake -B build -DCMAKE_BUILD_TYPE='release' -DCMAKE_INSTALL_PREFIX=install
 
       - name: Build
-        run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}} --target install
+        run: cmake --build ${{github.workspace}}/build -- prefix install --config ${{env.BUILD_TYPE}} --target install
+        # cmake --build build --prefix install --config 'release' --target install
 
       #- name: Install
       #  run: cmake --install ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
