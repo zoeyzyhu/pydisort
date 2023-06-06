@@ -294,69 +294,71 @@ void DisortWrapper::printDisortOutput(std::ostream &os) const {
 
 void DisortWrapper::printDisortFlags(std::ostream &os) const {
   if (_ds.flag.ibcnd) {
-    os << "- Spectral boundary condition = True" << std::endl;
+    os << "- Spectral boundary condition (ibcnd) = True" << std::endl;
   } else {
-    os << "- Spectral boundary condition = False" << std::endl;
+    os << "- Spectral boundary condition (ibcnd) = False" << std::endl;
   }
 
   if (_ds.flag.usrtau) {
-    os << "- User optical depth = True" << std::endl;
+    os << "- User optical depth (usrtau) = True" << std::endl;
   } else {
-    os << "- User optical depth = False" << std::endl;
+    os << "- User optical depth (usrtau) = False" << std::endl;
   }
 
   if (_ds.flag.usrang) {
-    os << "- User angles = True" << std::endl;
+    os << "- User angles (usrang) = True" << std::endl;
   } else {
-    os << "- User angles = False" << std::endl;
+    os << "- User angles (usrang) = False" << std::endl;
   }
 
   if (_ds.flag.lamber) {
-    os << "- Lambertian surface = True" << std::endl;
+    os << "- Lambertian surface (lamber) = True" << std::endl;
   } else {
-    os << "- Lambertian surface = False" << std::endl;
+    os << "- Lambertian surface (lamber) = False" << std::endl;
   }
 
   if (_ds.flag.planck) {
-    os << "- Planck function = True" << std::endl;
+    os << "- Planck function (planck) = True" << std::endl;
   } else {
-    os << "- Planck function = False" << std::endl;
+    os << "- Planck function (planck) = False" << std::endl;
   }
 
   if (_ds.flag.spher) {
-    os << "- Spherical correction = True" << std::endl;
+    os << "- Spherical correction (spher) = True" << std::endl;
   } else {
-    os << "- Spherical correction = False" << std::endl;
+    os << "- Spherical correction (spher) = False" << std::endl;
   }
 
   if (_ds.flag.onlyfl) {
-    os << "- Only calculate fluxes = True" << std::endl;
+    os << "- Only calculate fluxes (onlyfl) = True" << std::endl;
   } else {
-    os << "- Only calculate fluxes = False" << std::endl;
+    os << "- Only calculate fluxes (onlyfl) = False" << std::endl;
   }
 
   if (_ds.flag.intensity_correction) {
-    os << "- Intensity correction = True" << std::endl;
+    os << "- Intensity correction (intensity_correction) = True" << std::endl;
   } else {
-    os << "- Intensity correction = False" << std::endl;
+    os << "- Intensity correction (intensity_correction) = False" << std::endl;
   }
 
   if (_ds.flag.old_intensity_correction) {
-    os << "- Old intensity correction = True" << std::endl;
+    os << "- Old intensity correction (old_intensity_correction) = True"
+       << std::endl;
   } else {
-    os << "- Old intensity correction = False" << std::endl;
+    os << "- Old intensity correction (old_intensity_correction) = False"
+       << std::endl;
   }
 
   if (_ds.flag.general_source) {
-    os << "- General source function = True" << std::endl;
+    os << "- General source function (general_source) = True" << std::endl;
   } else {
-    os << "- General source function = False" << std::endl;
+    os << "- General source function (general_source) = False" << std::endl;
   }
 
   if (_ds.flag.output_uum) {
-    os << "- Output uum = True" << std::endl;
+    os << "- Output uum (output_uum) = True" << std::endl;
   } else {
-    os << "- Output uum = False" << std::endl;
+    os << "- Output uum (output_uum) = False" << std::endl;
   }
 }
 

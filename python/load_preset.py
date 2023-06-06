@@ -10,8 +10,7 @@ This module contains the following functions:
 from pydisort import disort
 
 PRESETS = [
-    "isotropic_scattering",
-    "rayleigh_scattering",
+    "scattering",
     "jupiter_infrared",
     "earth_infrared"
 ]

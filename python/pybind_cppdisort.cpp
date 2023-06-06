@@ -98,6 +98,22 @@ PYBIND11_MODULE(pydisort, m) {
       // methods such as from_{file,string,...}.
       .def_static("from_file", &DisortWrapper::FromFile)
 
+      .def(py::init())
+
+      .def(py::init([](py::dict &kwargs) {
+        DisortWrapper disort;
+        std::map<std::string, bool> dict;
+
+        for (auto item : kwargs) {
+          std::string key = item.first.cast<std::string>();
+          int value = item.second.cast<bool>();
+          dict[key] = value;
+        }
+
+        disort.SetFlags(dict);
+        return disort;
+      }))
+
       .def("set_header", &DisortWrapper::SetHeader)
 
       .def("__str__", &DisortWrapper::ToString)

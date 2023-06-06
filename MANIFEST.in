@@ -1,6 +1,0 @@
-include CMakeLists.txt configure.hpp.in
-recursive-include cmake *.cmake
-recursive-include python *.cpp *.hpp CMakeLists.txt
-recursive-include src *c *h *.cpp *.hpp CMakeLists.txt
-recursive-include tests *c *.cpp *.py *.toml CMakeLists.txt
-
