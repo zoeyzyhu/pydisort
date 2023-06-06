@@ -62,8 +62,8 @@ jobs:
         # cmake -B build -DCMAKE_BUILD_TYPE='release' -DCMAKE_INSTALL_PREFIX=install
 
       - name: Build
-        run: cmake --build ${{github.workspace}}/build -- prefix install --config ${{env.BUILD_TYPE}} --target install
-        # cmake --build build --prefix install --config 'release' --target install
+        run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}} --target install
+        # cmake --build build --config 'release' --target install
 
       #- name: Install
       #  run: cmake --install ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
