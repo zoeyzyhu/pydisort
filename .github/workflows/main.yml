@@ -56,16 +56,18 @@ jobs:
         with:
           python-version: "3.10"
 
-      - name: Build
+      - name: Set virtual environment
         run: |
           python3 -m venv ${{github.workspace}}/env
           source ${{github.workspace}}/env/bin/activate
           LIB=$(python3 -c 'import sysconfig; print(sysconfig.get_paths()["purelib"])')
           echo $LIB
-          env:
-            LIB: ${{ steps.get_lib_path.outputs.LIB }}
-          run: cmake -B ${{ github.workspace }}/build -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
-            -DCMAKE_INSTALL_PREFIX=${{ env.LIB }}
+        env:
+          LIB: ${{ steps.get_lib_path.outputs.LIB }}
+      - name: Run CMake
+        run:
+          cmake -B ${{ github.workspace }}/build -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
+          -DCMAKE_INSTALL_PREFIX=${{ env.LIB }}
 
       - name: Install
         run: cmake --install ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
