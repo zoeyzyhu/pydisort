@@ -56,23 +56,16 @@ jobs:
         with:
           python-version: "3.10"
 
-      - name: Set up virtual environment
-        run: python3 -m venv env
-
-      - name: Activate virtual environment
-        run: source env/bin/activate
-
       - name: Install python modules
         run: pip install -r requirements.txt
 
-      - name: Create build directory
+      - name: Build
         run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
 
-      - name: Build
-        run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
-
       - name: Install
-        run: cmake --install ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
+        run: |
+          source env/bin/activate
+          cmake --install ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
 
       - name: Run tests for C++ and Pybind
         run: cd ${{github.workspace}}/build/bin && python3 test_isotropic_scattering.py
