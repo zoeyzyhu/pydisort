@@ -33,9 +33,7 @@ jobs:
         run: chmod +x ./tools/check_style.sh
 
       - name: Run cpplint, pylint
-        run: |
-          excluded_files="setup.py"
-          ./tools/check_style.sh
+        run: ./tools/check_style.sh
 
   build:
     needs: style-checker
@@ -56,18 +54,14 @@ jobs:
         with:
           python-version: "3.10"
 
-      - name: Set virtual environment
-        run: |
-          python3 -m venv ${{github.workspace}}/env
-          source ${{github.workspace}}/env/bin/activate
-          LIB=$(python3 -c 'import sysconfig; print(sysconfig.get_paths()["purelib"])')
-          echo $LIB
-        env:
-          LIB: ${{ steps.get_lib_path.outputs.LIB }}
-      - name: Run CMake
-        run:
-          cmake -B ${{ github.workspace }}/build -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
-          -DCMAKE_INSTALL_PREFIX=${{ env.LIB }}
+      - name: Install python modules
+        run: pip install -r requirements.txt
+
+      - name: Create build directory
+        run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+
+      - name: Build
+        run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
 
       - name: Install
         run: cmake --install ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}

@@ -17,12 +17,11 @@ def check_requirements():
         return False
 
     # Check the Python version
-    python_version = platform.python_version()
-    if python_version < (3, 6):
+    if sys.version_info < (3, 6):
         print("Python 3.6 or higher is required.")
         return False
 
-    if python_version < (3, 8) and os_name == 'Darwin':
+    if sys.version_info < (3, 6) and os_name == 'Darwin':
         print("Python 3.8 or higher is required. ")
 
     return True
