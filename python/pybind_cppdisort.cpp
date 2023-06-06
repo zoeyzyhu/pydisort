@@ -100,7 +100,7 @@ PYBIND11_MODULE(pydisort, m) {
 
       .def("set_header", &DisortWrapper::SetHeader)
 
-      .def("__str__", &DisortWrapper::toString)
+      .def("__str__", &DisortWrapper::ToString)
 
       .def("set_atmosphere_dimension", &DisortWrapper::SetAtmosphereDimension,
            py::arg("nlyr"), py::arg("nmom"), py::arg("nstr"), py::arg("nphase"))

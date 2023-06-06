@@ -7,6 +7,7 @@
 #include <pybind11/stl.h>
 #include <toml++/toml.h>
 
+#include <iostream>
 #include <map>
 #include <string>
 #include <tuple>
@@ -64,6 +65,8 @@ class DisortWrapper {
   static DisortWrapper *FromFile(std::string_view filename) {
     return fromTomlTable(toml::parse_file(filename));
   }
+
+  std::string ToString() const;
 
   virtual ~DisortWrapper();
 
@@ -145,9 +148,9 @@ class DisortWrapper {
   bool _is_finalized = false;
   static DisortWrapper *fromTomlTable(const toml::table &table);
 
-  void printDisortState() const;
-  void printDisortFlags() const;
-  std::string toString() const;
+  void printDisortAtmosphere(std::ostream &os) const;
+  void printDisortOutput(std::ostream &os) const;
+  void printDisortFlags(std::ostream &os) const;
 };
 
 // exposing private members for testing
