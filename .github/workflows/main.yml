@@ -76,6 +76,10 @@ jobs:
       - name: Install
         run: cmake --install ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
 
+      - name: Add __init__.py
+        run: |
+          echo "from .pydisort import *" > ${{ steps.get_site_packages.outputs.site_packages_path }}/pydisort/__init__.py
+
       - name: Run tests for C++ and Pybind
         run: cd ${{github.workspace}}/build/bin && python3 test_isotropic_scattering.py
 
