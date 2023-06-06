@@ -59,7 +59,10 @@ jobs:
 
       - name: Get Python site-packages path
         id: get_site_packages
-        run: echo "::set-output name=site_packages_path::$(python -c 'import site; print(site.getsitepackages()[0])')"
+        run: echo "site_packages_path=$(python -c 'import site; print(site.getsitepackages()[0])')" >> $GITHUB_OUTPUT
+
+      - name: Verify site package path
+        run: echo ${{ steps.get_site_packages.outputs.site_packages_path }}
 
       - name: Configure CMake
         run: |
