@@ -58,10 +58,12 @@ jobs:
 
       - name: Build
         run: |
-          python3 -m venv env
-          source env/bin/activate
-          pip install -r requirements.txt
-          cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} --DCMAKE_INSTALL_PREFIX=env/lib/python3.10/site-packages
+          python3 -m venv ${{github.workspace}}env
+          source ${{github.workspace}}/env/bin/activate
+          LIB=$(python3 -c 'import sysconfig; print(sysconfig.get_paths()["purelib"])')
+          echo ${{ LIB }}
+          cmake -B ${{ github.workspace }}/build -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
+          --DCMAKE_INSTALL_PREFIX=${{ LIB }}
 
       - name: Install
         run: cmake --install ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
