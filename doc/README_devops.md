@@ -13,15 +13,15 @@ To run the `pre-commit` hooks manually, run `pre-commit run --all-files` in the 
 ### CI/CD
 
 Starting from v0.5, This repo enables continuous deployment (CD). The main resource we consult for configuring CD
-is the cantera repo: https://github.com/Cantera/cantera.
+is the `cantera` repo: https://github.com/Cantera/cantera.
 
-The cantera repo has three workflows:
+The `cantera` repo has three workflows:
 
 - `main.yml`
 - `packaging.yml`
 - `post-merge-tests.yml`
 
-In the cantera repo, the `main.yml` workflow is triggered by
+In the `cantera` repo, the `main.yml` workflow is triggered by
 
 1. push to the `main` branch.
 2. pull request to the `main` branch.
@@ -47,7 +47,7 @@ on:
 
 #### The `main.yml` workflow
 
-The `main.yml` workflow builds multiple cantera libraries (`.so` files) and Python wheels using the CI-based matrix runner.
+The `main.yml` workflow builds multiple `cantera` libraries (`.so` files) and Python wheels using the CI-based matrix runner.
 For example, the following code snippet shows how to build the library for different python versions:
 
 ```yaml
