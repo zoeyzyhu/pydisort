@@ -93,7 +93,7 @@ For example, the following code downloads libraries and wheels for testing:
           path: build/lib
 ```
 
-#### The packaging.yml workflow
+#### The `packaging.yml` workflow
 
 The packaging.yml workflow builds the python/conda packages and upload them to pypi automatically.
 Specifically, we can use the `gh` command to trigger a manual run of github actions.
