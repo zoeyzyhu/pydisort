@@ -78,12 +78,15 @@ _here = os.path.abspath(os.path.dirname(__file__))
 version = {}
 with open(os.path.join(_here, 'src/pydisort', 'version.py'), encoding='utf-8') as f:
     exec(f.read(), version)
+with open(os.path.join(_here, 'doc/README_pypi.md'), encoding='utf-8') as f:
+    long_description = f.read()
 
 # Setup configuration
 setup(
     name='pydisort',
     version=version['__version__'],
     description='Modern Python interfece of DISORT.',
+    long_description=long_description,
     author='Zoey Hu',
     author_email='zoey.zyhu@gmail.com',
     license='GPL',
