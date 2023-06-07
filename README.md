@@ -84,7 +84,7 @@ Building upon the aforementioned work, we have developed a `C++` wrapper for the
 ## Table of Contents
 
 - [Introduction](#introduction)
-- [How to use](#usage)
+- [How to use](#how-to-use)
   - [For Python users](#for-python-users)
   - [For C++ developers](#for-c++-users)
     - [Check dependencies](#check-dependencies)
@@ -99,7 +99,7 @@ Building upon the aforementioned work, we have developed a `C++` wrapper for the
 
 <!-- For Python users-------------------------------->
 
-### <a id='for-python-users'><picture><img src="doc/img/python.png" alt="Python" align=left width=24></picture> For Python users</a>
+### <a id='for-python-users'><img src="doc/img/python.png" alt="Python" align=left width=24> For Python users</a>
 
 We provide the `pydisort` library for Python users. The package can be installed using `pip`:
 
@@ -119,7 +119,7 @@ import numpy as np
 - Step 2. Create an instance of the disort class.
 
 ```python
-# Let's assume you have a file named 'isotropic_scatering.toml' which 
+# Let's assume you have a file named 'isotropic_scatering.toml' which
 # has the required data for setting up generic radiation flags
 ds = pydisort.disort.from_file('isotropic_scattering.toml')
 ```
@@ -140,7 +140,7 @@ This sets up a one layer of atmosphere with 16 streams for calculating radiation
 pmom = get_legendre_coefficients(ds.get_nmom(), "isotropic")
 ```
 
-- Step 4. Set up radiation boundary condition.
+- Step 5. Set up radiation boundary condition.
 
 ```python
 ds.umu0 = 0.1
@@ -151,7 +151,7 @@ ds.fbeam = pi / ds.umu0
 ds.fisot = 0.0
 ```
 
-- Step 5. Set up output optical depth and polar angles.
+- Step 6. Set up output optical depth and polar angles.
 
 ```python
 utau = array([0.0, 0.03125])
@@ -159,7 +159,7 @@ umu = array([-1.0, -0.5, -0.1, 0.1, 0.5, 1.0])
 uphi = array([0.0])
 ```
 
-- Step 6. Run radiative transfer and get intensity result.
+- Step 7. Run radiative transfer and get intensity result.
 
 ```python
 result = ds.run_with(
@@ -190,13 +190,13 @@ For example, you might need to provide your own data file in `from_file` functio
 
 <!-- For C++ developers------------------------------>
 
-### <a id='for-c++-users'><picture><img src="doc/img/cpp.png" alt="C++" align=left width=24></picture> For C++ developers</a>
+### <a id='for-c++-users'><img src="doc/img/cpp.png" alt="C++" align=left width=24> For C++ developers</a>
 
 #### <a id='check-dependencies'> 🔻 Check dependences</a>
 
 This repository supports both the Linux and MacOS operating systems. The following dependencies are required for building the C++ wrapper:
 
-- `cmake` (version >= 3.20)
+- `cmake` (version >= 3.16)
 - `g++` (version >= 7.5.0)
 - `python3` (version >= 3.6)
 
@@ -266,23 +266,28 @@ python3 test_isotropic_scattering.py
 In this recommended approach, we need to set up the virtual environment before the building process. You could use the following commands to create a virtual environment, build and install the `pydisort` package in it:
 
 ```bash
-# Set up Python virtual environment and cppcheck
-./1.setup.sh
-
-# Activate the virtual environment
+# Set up Python virtual environment and activate
+python3 -m venv env
 source env/bin/activate
 
 # Install dependencies for `pydisort` and pre-commit hooks
-./2.install.sh
+pip3 install -r requirements.txt
+pre-commit install
 
 # Build the C++ wrapper and Python package
-./3.build.sh
+mkdir build
+cd build
+cmake ..
+make
+make install
 
 # Run test cases for C++ wrapper and Python package
-./4.test.sh
+cd bin
+./test_cppdisort.release
+python3 test_isotropic_scattering.py
 ```
 
-The steps above will also install packages for the `pre-commit` hooks, which are very helpful if you'd like to make changes to the repository cloned. You could run the checks and lints manually using the following command to ensure that your changes are compliant with the industry standards:
+Installing `requirements.txt` also covers packages for the `pre-commit` hooks, which are very helpful if you'd like to make changes to the repository cloned. You could run the checks and lints manually using the following command to ensure that your changes are compliant with the industry standards:
 
 ```bash
 pre-commit run --all-files
@@ -298,9 +303,9 @@ pre-commit run --all-files
 
 [![Good first issues open](https://img.shields.io/github/issues/zoeyzyhu/pydisort/good%20first%20issue?label=good%20first%20issues&logo=git&logoColor=white&style=flat-square)](https://github.com/zoeyzyhu/pydisort/labels/good%20first%20issue)
 
-Pull-Requests are welcomed. Fork repository, make changes, send us a pull request. We will review your changes and apply them to the main branch shortly, provided they don't violate our quality standards. Please read the [contribution guide](doc/CONTRIBUTING.md) for details on the workflow, conventions, etc.
+Pull-Requests are welcomed. Fork repository, make changes, send us a pull request. We will review your changes and apply them to the main branch shortly, provided they don't violate our quality standards. Please read the [contribution guide](CONTRIBUTING.md) for details on the workflow, conventions, etc.
 
-If you need to make changes to the `cdisort` library, please use patches to record your modification. We keep a sole branch called `cidosrt_patches`, which contains the cmake-built version of the `cdisort` library (v2.1.3) and all the patches that we have applied to it. Please refer to the [patching guide](doc/README-patches.md) for more information.
+If you need to make changes to the `cdisort` library, please use patches to record your modification. We keep a sole branch called `cidosrt_patches`, which contains the cmake-built version of the `cdisort` library (v2.1.3) and all the patches that we have applied to it. Please refer to the [patching guide](doc/README_patches.md) for more information.
 
 If you need to include more libraries to the `cppdisrot` wrapper, please use the `CMakeLists.txt` file to add them. You could find more information about the cmake build system [here](https://cmake.org/cmake/help/latest/guide/tutorial/index.html).
 

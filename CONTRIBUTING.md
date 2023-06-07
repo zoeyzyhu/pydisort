@@ -1,5 +1,5 @@
 <h4 align="center">
-    <img src="img/team.jpg" alt="Pydisort"  style="display: block; margin: 0 auto">
+    <img src="doc/img/team.jpg" alt="Pydisort"  style="display: block; margin: 0 auto">
 </h4>
 
 We welcome contributions to this repository! If you would like to contribute, please follow the guidelines outlined below to ensure a smooth workflow and maintain code quality. This repository is configured to run automated tests, including pre-commit hooks and language lints such as `cpplint`.
@@ -115,7 +115,7 @@ Following this workflow ensures a systematic approach to contributions, promotes
 
 For more information and resources to assist your development, please refer to the `doc/` folder in this repository. It contains relevant documentation and guides to help you understand the codebase and contribute effectively.
 
-<div align="right"><a href="#table-of-contents"><img src="img/top.png" width="32px"></a></div>
+<div align="right"><a href="#table-of-contents"><img src="doc/img/top_green.png" width="32px"></a></div>
 
 ## Testing
 
@@ -149,4 +149,4 @@ Ensure that your changes do not break any existing functionality and include app
 - Use `rand_r` instead of `rand`.
 - Use `strtok_r` instead of `strtok`.
 
-<div align="right"><a href="#table-of-contents"><img src="img/top.png" width="32px"></a></div>
+<div align="right"><a href="#table-of-contents"><img src="doc/img/top_green.png" width="32px"></a></div>
