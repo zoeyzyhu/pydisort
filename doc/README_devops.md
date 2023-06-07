@@ -17,9 +17,9 @@ is the cantera repo: https://github.com/Cantera/cantera.
 
 The cantera repo has three workflows:
 
-- main.yml
-- packaging.yml
-- post-merge-tests.yml
+- `main.yml`
+- `packaging.yml`
+- `post-merge-tests.yml`
 
 In the cantera repo, the `main.yml` workflow is triggered by
 
@@ -45,9 +45,9 @@ on:
       - main
 ```
 
-#### The main.yml workflow
+#### The `main.yml` workflow
 
-The main.yml workflow builds multiple cantera libraries (.so files) and the python wheels using CI-based matrix runner.
+The `main.yml` workflow builds multiple cantera libraries (`.so` files) and Python wheels using the CI-based matrix runner.
 For example, the following code snippet shows how to build the library for different python versions:
 
 ```yaml
@@ -75,7 +75,7 @@ We can use the following code snippet to upload the wheels:
     if-no-files-found: error
 ```
 
-Similarly, multiple python versions are built with clang and/or on MacOS.
+Similarly, multiple python versions are built with clang on MacOS.
 
 During the test phase, these libraries and wheels are downloaded and installed for testing.
 For example, the following code downloads libraries and wheels for testing:
@@ -116,7 +116,7 @@ You can install `gh` on a mac using `brew install gh`. With `gh`, a dispatch wor
         default: "false"
 ```
 
-The action steps that builds and uploads the pypi packages are here:
+The action steps that build and upload the pypi packages are here:
 
 ```
       - name: Trigger PyPI/Wheel builds
@@ -129,9 +129,8 @@ The action steps that builds and uploads the pypi packages are here:
           GITHUB_TOKEN: ${{ secrets.PYPI_PACKAGE_PAT }}
 ```
 
-Note that, in the code above, `cantera/pypi-packages` is another repository that contains the workflow for building
-a python package and uploading it to pypi.
-The url is https://github.com/Cantera/pypi-packages
+Note that, in the code above, `cantera/pypi-packages` is **another repository** that contains the workflow for building
+a python package and uploading it to pypi (see https://github.com/Cantera/pypi-packages).
 
 Inspecting the `pypi-packages` repo, we can find the workflow file `python-package.yml` that builds the python package
 The most important part is the `linux-wheel` step. Here is a simple illustration
@@ -158,7 +157,7 @@ The most important part is the `linux-wheel` step. Here is a simple illustration
           ...
 ```
 
-This builds a matrix combining different python versions, architectures, and libc.
+This builds a matrix combining different Python versions, architectures, and libc.
 The building steps include downloading the pre-built libraries (in this case, sdist):
 
 ```
@@ -169,7 +168,7 @@ The building steps include downloading the pre-built libraries (in this case, sd
           name: sdist
 ```
 
-and build the wheels using `cibuildwheel`:
+and building the wheels using `cibuildwheel`:
 
 ```
       - name: Set up QEMU
@@ -180,7 +179,7 @@ and build the wheels using `cibuildwheel`:
         uses: pypa/cibuildwheel@v2.12.3
 ```
 
-and archive (upload) them:
+and archiving (uploading) them:
 
 ```
       - name: Archive the built wheels
@@ -190,8 +189,8 @@ and archive (upload) them:
           name: wheels
 ```
 
-The major difference between pydisort and cantera is that pydisort is built with pybind11 and cmake,
-while cantera is built with cython and scons.
+The major difference between `pydisort` and `cantera` is that `pydisort` is built with `pybind11` and `cmake`,
+while `cantera` is built with `cython` and `scons`.
 
 ### cmake
 
