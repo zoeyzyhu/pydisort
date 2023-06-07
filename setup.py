@@ -92,6 +92,7 @@ setup(
     license='GPL',
     packages=['pydisort'],
     package_dir={'': 'src'},
+    package_data={'pydisort': ['*.toml']},
     include_package_data=True,
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',

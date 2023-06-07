@@ -1,126 +1,24 @@
-<!-- Logo ------------------------------------------->
-<h4 align="center">
-    <img src="https://github.com/zoeyzyhu/pybind_cmake_simple/raw/main/logo_tr_git.png" alt="Pydisort" width="300" style="display: block; margin: 0 auto">
-</h4>
-
-<!-- Subtitle --------------------------------------->
-<p align="center">
-  <i align="center">Empower Discrete Ordinates Radiative Transfer (DISORT) with Python 🚀</i>
-</p>
-
-## About Pydisort
-
-DISORT (Discrete Ordinate Radiative Transfer) is a widely-used algorithm that calculates the scattering and absorption of radiation in a medium. The original DISORT algorithm was developed by Stamnes et al. in 1988 and was implemented in `FORTRAN`. `pydisort` is a Python wrapper for the DISORT algorithm in `C`. The wrapper is designed to be simple and easy to use. It is also designed to be flexible and extensible.
-
-> ❗ We only support Python 3.6+ on Linux and Python 3.8+ on MacOS. Anaconda is not fully supported at the moment, only working if the Python path and `conda` environment are set correctly. For the current stage, we strongly recommend using `python3.11 -m venv env` (you Python version might differ) to create a virtual environment and install `pydisort` in this clean environment (guide provided [here](#set-up-python-virtual-environment)).
-
-## Get started
-
-We provide the `pydisort` library for Python users. The package can be installed using `pip`:
-
-```bash
-pip install pydisort
-```
-
-Here is a step-by-step tutorial of how to use the pydisort package:
-
-- Step 1. Importing the module.
-
-```python
-import pydisort
-import numpy as np
-```
-
-- Step 2. Create an instance of the disort class.
-
-```python
-# Let's assume you have a file named 'isotropic_scatering.toml' which
-# has the required data for setting up generic radiation flags
-ds = pydisort.disort.from_file('isotropic_scattering.toml')
-```
-
-- Step 3. Set up the model dimension.
-
-```python
-ds.set_atmosphere_dimension(
-  nlyr=1, nstr=16, nmom=16, nphase=16
-).set_intensity_dimension(nuphi=1, nutau=2, numu=6).finalize()
-```
-
-This sets up a one layer of atmosphere with 16 streams for calculating radiation.
-
-- Step 4. Calculate scattering moments.
-
-```python
-pmom = get_legendre_coefficients(ds.get_nmom(), "isotropic")
-```
-
-- Step 5. Set up radiation boundary condition.
-
-```python
-ds.umu0 = 0.1
-ds.phi0 = 0.0
-ds.albedo = 0.0
-ds.fluor = 0.0
-ds.fbeam = pi / ds.umu0
-ds.fisot = 0.0
-```
-
-- Step 6. Set up output optical depth and polar angles.
-
-```python
-utau = array([0.0, 0.03125])
-umu = array([-1.0, -0.5, -0.1, 0.1, 0.5, 1.0])
-uphi = array([0.0])
-```
-
-- Step 7. Run radiative transfer and get intensity result.
-
-```python
-result = ds.run_with(
-	{
-		"tau": [0.03125],
-		"ssa": [0.2],
-		"pmom": pmom,
-		"utau": utau,
-		"umu": umu,
-		"uphi": uphi,
-	}
-).get_intensity()
-```
-
-Please note that this is a generic tutorial and you would need to adapt this to your specific use-case.
-
-For example, you might need to provide your own data file in `from_file` function or fill the numpy arrays `optical_depth`, `single_scattering_albedo`, and `level_temperature` according to your requirements.
-
-> 💡 One important point to note is that the `pydisort` library assumes that the provided arrays (optical depth, single scattering albedo, etc.) are in the numpy format and it throws exceptions if incompatible data types are provided. So, ensure that you are providing data in the right format to avoid any runtime errors.
-
-<div align="right">[ <a href="#table-of-contents">↑ Back to top ↑</a> ]</div>
+## How to set up Python virtual environment 📌
 
 ## Table of Contents
 
-- [About Pydisort](#about-pydisort)
-- [Get started](#get-started)
-- [Set up Python virtual environment](#set-up-python-virtual-environment)
-  - [🔻 Prerequisites](#prerequisites)
-  - [🔻 Restarting this guide](#restarting-this-guide)
-  - [🔻 Install Python](#install-python)
-    - [MacOS](#macos)
-    - [WSL or Linux](#wsl-or-linux)
-  - [🔻 Create a Python virtual environment](#create-a-python-virtual-environment)
-  - [🔻 Understanding virtual environments](#understanding-virtual-environments)
-    - [Environment](#environment)
-    - [Environment variables inside a Python program](#environment-variables-inside-a-python-program)
-    - [Virtual environment](#virtual-environment)
-    - [Why virtual environments?](#why-virtual-environments)
-    - [Activate a virtual environment](#activate-a-virtual-environment)
-    - [Replicate a virtual environment](#replicate-a-virtual-environment)
-    - [Deactivate a virtual environment](#deactivate-a-virtual-environment)
-  - [🔻 Summary](#summary)
+- [🔻 Prerequisites](#prerequisites)
+- [🔻 Restarting this guide](#restarting-this-guide)
+- [🔻 Install Python](#install-python)
+  - [macOS](#macos)
+  - [WSL or Linux](#wsl-or-linux)
+- [🔻 Create a Python virtual environment](#create-a-python-virtual-environment)
+- [🔻 Understanding virtual environments](#understanding-virtual-environments)
+  - [Environment](#environment)
+  - [Environment variables inside a Python program](#environment-variables-inside-a-python-program)
+  - [Virtual environment](#virtual-environment)
+  - [Why virtual environments?](#why-virtual-environments)
+  - [Activate a virtual environment](#activate-a-virtual-environment)
+  - [Replicate a virtual environment](#replicate-a-virtual-environment)
+  - [Deactivate a virtual environment](#deactivate-a-virtual-environment)
+- [🔻 Summary](#summary)
 
-## Set up Python virtual environment
-
-### <a id='prerequisites'>🔻 Prerequisites </a>
+## <a id='prerequisites'>🔻 Prerequisites </a>
 
 At this point, you should already have a folder for your project. Your folder location might be different.
 
@@ -129,7 +27,7 @@ $ pwd
 /Users/zoeyzyhu/projects/pydisort
 ```
 
-### <a id='restarting-this-guide'>🔻 Restarting this guide </a>
+## <a id='restarting-this-guide'>🔻 Restarting this guide </a>
 
 If you made a mistake with these Python instructions, here’s how to start over. First, close your shell and reopen it to ensure that environment variables are reset. Then, delete the virtual environment.
 
@@ -139,11 +37,11 @@ $ pwd
 $ rm -rf env
 ```
 
-### <a id='install-python'>🔻 Install Python </a>
+## <a id='install-python'>🔻 Install Python </a>
 
 Install a recent version of Python.
 
-#### macOS
+### macOS
 
 You might already have Python installed. Your version might be different.
 
@@ -160,7 +58,7 @@ $ python3 --version
 Python 3.11.3
 ```
 
-#### WSL or Linux
+### WSL or Linux
 
 ```
 $ sudo apt-get update
@@ -169,7 +67,7 @@ $ sudo apt-get install python3 python3-pip python3-venv
 
 <div align="right">[ <a href="#table-of-contents">↑ Back to top ↑</a> ]</div>
 
-### <a id='create-a-python-virtual-environment'>🔻 Create a Python virtual environment </a>
+## <a id='create-a-python-virtual-environment'>🔻 Create a Python virtual environment </a>
 
 This section will help you install the Python tools and packages locally, which won’t affect Python tools and packages installed elsewhere on your computer.
 
@@ -356,11 +254,11 @@ $ pip install --upgrade pip setuptools
 
 <div align="right">[ <a href="#table-of-contents">↑ Back to top ↑</a> ]</div>
 
-### <a id='understanding-virtual-environments'>🔻 Understanding Virtual Environments </a>
+## <a id='understanding-virtual-environments'>🔻 Understanding Virtual Environments </a>
 
 This section will give more detail about virtual environments and how they work. Simply put, a virtual environment is a bunch of files (located in `env/` in this tutorial) used by Python.
 
-#### Environment
+### Environment
 
 An environment is a collection of environment variables that are inputs to your shell and your programs.
 
@@ -398,7 +296,7 @@ python3
 ...
 ```
 
-#### Environment variables inside a Python program
+### Environment variables inside a Python program
 
 You can set any environment variable you want.
 
@@ -426,7 +324,7 @@ hello world
 
 This example shows that environment variables are simply another way to provide input to a running program.
 
-#### Virtual environment
+### Virtual environment
 
 A virtual environment is a self-contained directory that contains a Python installation and a number of additional Python packages.
 
@@ -472,11 +370,11 @@ $ ./env/bin/python
 
 <div align="right">[ <a href="#table-of-contents">↑ Back to top ↑</a> ]</div>
 
-#### Why virtual environments?
+### Why virtual environments?
 
 Virtual environments are useful when you want to install different Python programs that have different third party package dependencies. For example, you might have a virtual environment for a `pydisort` project, and a different one for your machine learning project. The two projects have different third party packages and different versions of those packages.
 
-#### Activate a virtual environment
+### Activate a virtual environment
 
 In the previous example, we used the virtual environment by calling its Python executable explicitly (e.g., `./env/bin/python`). As a convenience, we can temporarily make this version the default.
 
@@ -511,7 +409,7 @@ $ echo $VIRTUAL_ENV
 /Users/zoeyzyhu/projects/pydisort/env
 ```
 
-#### Replicate a virtual environment
+### Replicate a virtual environment
 
 In the previous section, we created a Python virtual environment, activated it, and upgraded the Python installer tools (`pip`, `setuptools`). We have not yet installed any new third party Python packages.
 
@@ -557,7 +455,7 @@ tomli 2.0.1
 zipp 3.15.0
 ```
 
-#### Deactivate a virtual environment
+### Deactivate a virtual environment
 
 The deactivate command simply modifies two environment variables, `PATH` and `VIRTUAL_ENV`. First, it unsets `VIRTUAL_ENV`.
 
@@ -575,7 +473,7 @@ $ echo $PATH | tr ':' '\n'
 /bin
 ```
 
-### <a id='summary'>🔻 Summary </a>
+## <a id='summary'>🔻 Summary </a>
 
 A Python virtual environment helps you manage third party packages. A pre-configured python executable in `./env/bin/` uses the third party packages in `./env/lib/` (the name of `env/` is your choice).
 

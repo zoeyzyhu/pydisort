@@ -27,3 +27,10 @@ set(${nameu}_LIBRARY_${buildu}
     ${namel}_${buildl}
     CACHE STRING "${namel} library ${build}")
 mark_as_advanced(${nameu}_LIBRARY_${build})
+
+# Copy input files to run directory
+file(GLOB inputs *.toml)
+foreach(input ${inputs})
+  get_filename_component(name ${input} NAME)
+  configure_file(${input} ${CMAKE_BINARY_DIR}/bin/${name} COPYONLY)
+endforeach()

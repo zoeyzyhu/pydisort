@@ -1,0 +1,2 @@
+include doc/README_pypi.md
+include python/isotropic_scattering.toml
