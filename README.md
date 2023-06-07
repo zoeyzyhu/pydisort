@@ -1,6 +1,6 @@
 <!-- Logo ------------------------------------------->
 <h4 align="center">
-    <img src="doc/img/logo_tr_git.png" alt="Pydisort" width="300" style="display: block; margin: 0 auto">
+    <img src="doc/img/logo_tr_git.png" alt="Pydisort" width="340" style="display: block; margin: 0 auto">
 </h4>
 
 <!-- Subtitle --------------------------------------->

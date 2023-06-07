@@ -76,6 +76,7 @@ Cargo.lock
 
 # macOS system files ---------------------------------------------------
 *.DS_Store
+Brewfile.lock.json
 
 # Google Drive and Dropbox ---------------------------------------------
 Icon
@@ -88,5 +89,6 @@ Icon
 # junk
 z.junk
 
-# homebrew
-Brewfile.lock.json
+# local helpers/tests
+[0-9]*.sh
+[0-9]*.py
