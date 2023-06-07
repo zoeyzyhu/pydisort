@@ -12,7 +12,7 @@
 
 DISORT (Discrete Ordinate Radiative Transfer) is a widely-used algorithm that calculates the scattering and absorption of radiation in a medium. The original DISORT algorithm was developed by Stamnes et al. in 1988 and was implemented in `FORTRAN`. `pydisort` is a Python wrapper for the DISORT algorithm in `C`. The wrapper is designed to be simple and easy to use. It is also designed to be flexible and extensible.
 
-> ❗ We only support Python 3.6+ on Linux and Python 3.8+ on MacOS. Anaconda is not fully supported at the moment, only working if the Python path and `conda` environment are set correctly. For the current stage, we strongly recommend using `python3.11 -m venv env` to create a virtual environment and install `pydisort` in this clean environment (guide provided [here](#set-up-python-virtual-environment)).
+> ❗ We only support Python 3.6+ on Linux and Python 3.8+ on MacOS. Anaconda is not fully supported at the moment, only working if the Python path and `conda` environment are set correctly. For the current stage, we strongly recommend using `python3.11 -m venv env` (you Python version might differ) to create a virtual environment and install `pydisort` in this clean environment (guide provided [here](#set-up-python-virtual-environment)).
 
 ## Get started
 
@@ -273,7 +273,7 @@ After finishing this section, you’ll have a folder called `env/` that contains
 >
 > ```
 > $ printenv PYTHONPATH # Output isn't blank, problem!
-> /Users/zoeyzyhu/local/lib/python3.9/site-packages/
+> /Users/zoeyzyhu/local/lib/python3.11/site-packages/
 > ```
 >
 > **Option 1 (recommended)**: Permanently remove the environment variable. Variables are usually set in your shell initialization file. Check these files to see if they set the offending variable: `.profile`, `.bashrc`, `.bash_profile`, `.zshrc`, `.zprofile`, `.cshrc`, `.tcshrc`, `.login`. Delete or comment out any line that contains `PYTHONPATH`.
@@ -351,7 +351,7 @@ setuptools
 Upgrade the Python tools in your virtual environment
 
 ```
-$ pip install --upgrade pip setuptools wheel
+$ pip install --upgrade pip setuptools
 ```
 
 <div align="right">[ <a href="#table-of-contents">↑ Back to top ↑</a> ]</div>
@@ -364,7 +364,7 @@ This section will give more detail about virtual environments and how they work.
 
 An environment is a collection of environment variables that are inputs to your shell and your programs.
 
-Print the names and values of all environment variables using the env command. You’ll see key/value pairs used by the shell and used by programs.
+Print the names and values of all environment variables using the `env` command. You’ll see `key/value` pairs used by the shell and used by programs.
 
 ```
 $ env
@@ -376,7 +376,7 @@ PATH=/usr/local/bin:/usr/bin:/bin
 ...
 ```
 
-An important example of an environment variable is `PATH`, which tells your shell where to look for commands like `ls`, `cd`, `python` and so on. It’s a colon-separated list (`:`). You can print the value of one variable using the dollar sign ‘`$`’.
+An important example of an environment variable is `PATH`, which tells your shell where to look for commands like `ls`, `cd`, `python` and so on. It’s a colon-separated list (`:`). You can print the value of one variable using the dollar sign `$` closely entailed by the variable.
 
 ```
 $ echo $PATH
@@ -447,16 +447,16 @@ pip
 python
 ...
 $ ls env/lib/python3.11/site-packages/ # Your version may be different
-**pycache** pip-19.2.3.dist-info setuptools-41.2.0.dist-info
+**pycache** pip-23.1.2.dist-info setuptools-65.6.3.dist-info
 easy_install.py pkg_resources pip setuptools
 ```
 
 A pre-configured `pip` executable installs third party packages to `lib/`. Your versions of Python and jinja2 may be different.
 
 ```
-$ ./env/bin/pip install jinja2
-Successfully installed jinja2-2.11.1
-$ ls env/lib/python3.11/site-packages/jinja2/ # Your version may be different
+$ ./env/bin/pip install tomli
+Successfully installed tomli-2.0.1
+$ ls env/lib/python3.11/site-packages/tomli/ # Your version may be different
 **init**.py
 ...
 ```
@@ -465,9 +465,9 @@ A pre-configured `python` executable in `bin/` uses the third party packages in 
 
 ```
 $ ./env/bin/python
->>> import jinja2
->>> jinja2.**version**
->>> '2.11.1'
+>>> import tomli
+>>> tomli.**version**
+>>> '2.0.1'
 ```
 
 <div align="right">[ <a href="#table-of-contents">↑ Back to top ↑</a> ]</div>
@@ -513,7 +513,7 @@ $ echo $VIRTUAL_ENV
 
 #### Replicate a virtual environment
 
-In the previous section, we created a Python virtual environment, activated it, and upgraded the Python installer tools (`pip`, `setuptools`, `wheel`). We have not yet installed any new third party Python packages.
+In the previous section, we created a Python virtual environment, activated it, and upgraded the Python installer tools (`pip`, `setuptools`). We have not yet installed any new third party Python packages.
 
 ```
 $ pwd
@@ -526,20 +526,19 @@ Package Version
 
 ---
 
-pip 20.1.1
-setuptools 47.3.1
-wheel 0.34.2
+pip 22.3.1
+setuptools 65.6.3
 ```
 
 A `requirements.txt` file lists the exact third party Python packages and their versions needed to replicate another virtual environment. This is useful for ensuring that developers and production servers have identical packages with identical versions. It’s also useful for ensuring that students and the autograder have identical packages with identical versions.
 
-See the list of package dependencies provided in a `requirements.txt` file. This `requirements.txt` file is bundled with project starter files, so please download the appropriate project starter files before proceeding. Your output might be different.
+See an example list of package dependencies provided in a `requirements.txt` file below.bei
 
 ```
 $ cat requirements.txt
 tomli==2.0.1
 ...
-zipp==3.1.0
+zipp==3.15.0
 ```
 
 Install the package dependencies. Your output might be different.
@@ -547,7 +546,7 @@ Install the package dependencies. Your output might be different.
 ```
 $ pip install -r requirements.txt
 ...
-Successfully installed tomli-2.0.1 ... zipp-3.1.0
+Successfully installed tomli-2.0.1 ... zipp-3.15.0
 $ pip list
 Package Version
 
@@ -555,7 +554,7 @@ Package Version
 
 tomli 2.0.1
 ...
-zipp 3.1.0
+zipp 3.15.0
 ```
 
 #### Deactivate a virtual environment
