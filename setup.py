@@ -94,9 +94,9 @@ setup(
     package_dir={'': 'src'},
     include_package_data=True,
     classifiers=[
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 2 - Pre-Alpha',
         'Intended Audience :: Science/Research',
-        'Programming Language :: Python :: 3.6'
+        'Programming Language :: Python :: 3 :: Only'
     ],
     python_requires=">=3.6",
     cmdclass={'build': extend_build()})
