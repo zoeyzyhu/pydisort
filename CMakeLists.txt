@@ -29,12 +29,9 @@ message(STATUS "----- Placeholder ----- ")
 
 # 1. Set up project system libraries ##
 message(STATUS "3. Set up project system libraries----------------")
-
-message(STATUS "Setup tomlpp ")
 include(${CMAKE_SOURCE_DIR}/cmake/tomlpp.cmake)
-
-message(STATUS "Setup pybind11")
 include(${CMAKE_SOURCE_DIR}/cmake/pybind11.cmake)
+include(${CMAKE_SOURCE_DIR}/cmake/application.cmake)
 
 # 1. Set up project configure file and library ##
 message(STATUS "4. Set up project libraries")
