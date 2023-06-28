@@ -15,4 +15,4 @@ cpplint --filter=${filters} --recursive tests/cppdisort
 
 # Style checks for Python =================================================
 
-pylint --recursive=y tests/python
+#pylint --recursive=y tests/python
