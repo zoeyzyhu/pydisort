@@ -66,10 +66,6 @@ DisortWrapper *DisortWrapper::fromTomlTable(const toml::table &table) {
     ds->flag.prnt[i] = table["flag"]["prnt"][i].value<bool>().value_or(false);
   }
 
-  ds->flag.usrtau = table["flag"]["usrtau"].value<bool>().value_or(false);
-
-  ds->flag.usrang = table["flag"]["usrang"].value<bool>().value_or(false);
-
   return disort;
 }
 
