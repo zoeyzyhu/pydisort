@@ -72,7 +72,7 @@ class DisortWrapper {
         temis(0.0),
         umu0(1.0),
         phi0(0.0) {
-    _ds.accur = 1.E-6;
+    ds.accur_ = 1.E-6;
   }
 
   static DisortWrapper *FromFile(std::string_view filename) {
@@ -94,24 +94,24 @@ class DisortWrapper {
 
   void Finalize();
 
-  bool IsFinalized() const { return _is_finalized; }
+  bool IsFinalized() const { return is_finalized_; }
 
-  int nLayers() const { return _ds.nlyr; }
+  int nLayers() const { return ds.nlyr_; }
 
-  int nMoments() const { return _ds.nmom; }
+  int nMoments() const { return ds.nmom_; }
 
-  int nStreams() const { return _ds.nstr; }
+  int nStreams() const { return ds.nstr_; }
 
-  void SetAccuracy(double accur) { _ds.accur = accur; }
+  void SetAccuracy(double accur) { ds.accur_ = accur; }
 
   void SetWavenumberRange_invcm(double wmin, double wmax) {
-    _ds.wvnmlo = wmin;
-    _ds.wvnmhi = wmax;
+    ds.wvnmlo_ = wmin;
+    ds.wvnmhi_ = wmax;
   }
 
   void SetWavenumber_invcm(double wave) {
-    _ds.wvnmlo = wave;
-    _ds.wvnmhi = wave;
+    ds.wvnmlo_ = wave;
+    ds.wvnmhi_ = wave;
   }
 
   void SetOpticalDepth(double const *tau, int len);
@@ -140,10 +140,10 @@ class DisortWrapper {
   py::array_t<double> GetIntensity() const;
 
  protected:
-  disort_state _ds;
-  disort_output _ds_out;
+  disort_state ds_;
+  disort_output ds_out_;
 
-  bool _is_finalized = false;
+  bool is_finalized_ = false;
   static DisortWrapper *fromTomlTable(const toml::table &table);
 
   void printDisortAtmosphere(std::ostream &os) const;
@@ -158,8 +158,8 @@ class DisortWrapperTestOnly : public DisortWrapper {
     return fromTomlTable(toml::parse(content));
   }
 
-  disort_state *GetDisortState() { return &_ds; }
-  disort_output *GetDisortOutput() { return &_ds_out; }
+  disort_state *GetDisortState() { return &ds_; }
+  disort_output *GetDisortOutput() { return &ds_out_; }
 };
 
 #endif  // SRC_PYDISORT_CPPDISORT_HPP_

@@ -24,14 +24,14 @@ pip install pydisort
 
 Here is a step-by-step tutorial of how to use the pydisort package:
 
--   Step 1. Importing the module.
+- Step 1. Importing the module.
 
 ```python
 import pydisort
 import numpy as np
 ```
 
--   Step 2. Create an instance of the disort class.
+- Step 2. Create an instance of the disort class.
 
 ```python
 # Let's assume you have a file named 'isotropic_scatering.toml' which
@@ -39,7 +39,7 @@ import numpy as np
 ds = pydisort.disort.from_file('isotropic_scattering.toml')
 ```
 
--   Step 3. Set up the model dimension.
+- Step 3. Set up the model dimension.
 
 ```python
 ds.set_atmosphere_dimension(
@@ -49,13 +49,13 @@ ds.set_atmosphere_dimension(
 
 This sets up a one layer of atmosphere with 16 streams for calculating radiation.
 
--   Step 4. Calculate scattering moments.
+- Step 4. Calculate scattering moments.
 
 ```python
 pmom = get_legendre_coefficients(ds.get_nmom(), "isotropic")
 ```
 
--   Step 5. Set up radiation boundary condition.
+- Step 5. Set up radiation boundary condition.
 
 ```python
 ds.umu0 = 0.1
@@ -66,7 +66,7 @@ ds.fbeam = pi / ds.umu0
 ds.fisot = 0.0
 ```
 
--   Step 6. Set up output optical depth and polar angles.
+- Step 6. Set up output optical depth and polar angles.
 
 ```python
 utau = array([0.0, 0.03125])
@@ -74,7 +74,7 @@ umu = array([-1.0, -0.5, -0.1, 0.1, 0.5, 1.0])
 uphi = array([0.0])
 ```
 
--   Step 7. Run radiative transfer and get intensity result.
+- Step 7. Run radiative transfer and get intensity result.
 
 ```python
 result = ds.run_with(
@@ -99,24 +99,24 @@ For example, you might need to provide your own data file in `from_file` functio
 
 ## <a id='table-of-contents'> Table of Contents </a>
 
--   [About Pydisort](#about-pydisort)
--   [Get started](#get-started)
--   [Set up Python virtual environment](#set-up-python-virtual-environment)
-    -   [🔻 Prerequisites](#prerequisites)
-    -   [🔻 Restarting this guide](#restarting-this-guide)
-    -   [🔻 Install Python](#install-python)
-        -   [MacOS](#macos)
-        -   [WSL or Linux](#wsl-or-linux)
-    -   [🔻 Create a Python virtual environment](#create-a-python-virtual-environment)
-    -   [🔻 Understanding virtual environments](#understanding-virtual-environments)
-        -   [Environment](#environment)
-        -   [Environment variables inside a Python program](#environment-variables-inside-a-python-program)
-        -   [Virtual environment](#virtual-environment)
-        -   [Why virtual environments?](#why-virtual-environments)
-        -   [Activate a virtual environment](#activate-a-virtual-environment)
-        -   [Replicate a virtual environment](#replicate-a-virtual-environment)
-        -   [Deactivate a virtual environment](#deactivate-a-virtual-environment)
-    -   [🔻 Summary](#summary)
+- [About Pydisort](#about-pydisort)
+- [Get started](#get-started)
+- [Set up Python virtual environment](#set-up-python-virtual-environment)
+  - [🔻 Prerequisites](#prerequisites)
+  - [🔻 Restarting this guide](#restarting-this-guide)
+  - [🔻 Install Python](#install-python)
+    - [MacOS](#macos)
+    - [WSL or Linux](#wsl-or-linux)
+  - [🔻 Create a Python virtual environment](#create-a-python-virtual-environment)
+  - [🔻 Understanding virtual environments](#understanding-virtual-environments)
+    - [Environment](#environment)
+    - [Environment variables inside a Python program](#environment-variables-inside-a-python-program)
+    - [Virtual environment](#virtual-environment)
+    - [Why virtual environments?](#why-virtual-environments)
+    - [Activate a virtual environment](#activate-a-virtual-environment)
+    - [Replicate a virtual environment](#replicate-a-virtual-environment)
+    - [Deactivate a virtual environment](#deactivate-a-virtual-environment)
+  - [🔻 Summary](#summary)
 
 ## <a id='set-up-python-virtual-environment'> Set up Python virtual environment </a>
 

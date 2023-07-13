@@ -1,5 +1,5 @@
 #! python3
-""" This script is part of the pydisort package and is used to load preset files.
+"""This script is part of the pydisort package and is used to load preset files.
 
 This module contains the following functions:
     * load_preset - loads a preset file and returns a disort object.
@@ -17,7 +17,7 @@ PRESETS = [
 
 
 def load_preset(name: str) -> disort:
-    """ Loads a preset file and returns a disort object.
+    """Load a preset file and returns a disort object.
 
     Parameters:
         name (str): The name of the preset file to be loaded.
@@ -36,14 +36,14 @@ def load_preset(name: str) -> disort:
 
 
 def print_available_presets():
-    """ Prints the names of the available preset files. """
+    """Print the names of the available preset files."""
     print('Available presets are:')
     for preset in PRESETS:
         print(preset)
 
 
 def test():
-    """ Executes a simple test of the script functionality. """
+    """Executes a simple test of the script functionality."""
     print_available_presets()
     try:
         disort_obj = load_preset(input("Enter preset name: "))

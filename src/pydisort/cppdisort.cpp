@@ -41,8 +41,8 @@ py::array_t<double> getLegendreCoefficients(int nmom, std::string const &model,
 
 DisortWrapper *DisortWrapper::fromTomlTable(const toml::table &table) {
   auto disort = new DisortWrapper();
-  auto ds = &disort->_ds;
-  auto ds_out = &disort->_ds_out;
+  auto ds = &disort->ds_;
+  auto ds_out = &disort->ds_out_;
 
   ds->flag.ibcnd = table["flag"]["ibcnd"].value<bool>().value_or(false);
   ds->flag.usrtau = table["flag"]["usrtau"].value<bool>().value_or(false);
@@ -74,12 +74,12 @@ DisortWrapper *DisortWrapper::fromTomlTable(const toml::table &table) {
 }
 
 void DisortWrapper::SetHeader(std::string const &header) {
-  snprintf(_ds.header, sizeof(_ds.header), "%s", header.c_str());
+  snprintf(ds.header_, sizeof(ds.header_), "%s", header.c_str());
 }
 
 DisortWrapper *DisortWrapper::SetAtmosphereDimension(int nlyr, int nstr,
                                                      int nmom, int nphase) {
-  if (_is_finalized) {
+  if (is_finalized_) {
     return this;
   }
 
@@ -99,10 +99,10 @@ DisortWrapper *DisortWrapper::SetAtmosphereDimension(int nlyr, int nstr,
     return this;
   }
 
-  _ds.nlyr = nlyr;
-  _ds.nmom = nmom;
-  _ds.nstr = nstr;
-  _ds.nphi = nphase;
+  ds.nlyr_ = nlyr;
+  ds.nmom_ = nmom;
+  ds.nstr_ = nstr;
+  ds.nphi_ = nphase;
 
   return this;
 }
@@ -110,51 +110,51 @@ DisortWrapper *DisortWrapper::SetAtmosphereDimension(int nlyr, int nstr,
 DisortWrapper *DisortWrapper::SetFlags(
     std::map<std::string, bool> const &dict) {
   if (dict.find("ibcnd") != dict.end()) {
-    _ds.flag.ibcnd = dict.at("ibcnd");
+    ds.flag.ibcnd_ = dict.at("ibcnd");
   }
 
   if (dict.find("usrtau") != dict.end()) {
-    _ds.flag.usrtau = dict.at("usrtau");
+    ds.flag.usrtau_ = dict.at("usrtau");
   }
 
   if (dict.find("usrang") != dict.end()) {
-    _ds.flag.usrang = dict.at("usrang");
+    ds.flag.usrang_ = dict.at("usrang");
   }
 
   if (dict.find("lamber") != dict.end()) {
-    _ds.flag.lamber = dict.at("lamber");
+    ds.flag.lamber_ = dict.at("lamber");
   }
 
   if (dict.find("planck") != dict.end()) {
-    _ds.flag.planck = dict.at("planck");
+    ds.flag.planck_ = dict.at("planck");
   }
 
   if (dict.find("spher") != dict.end()) {
-    _ds.flag.spher = dict.at("spher");
+    ds.flag.spher_ = dict.at("spher");
   }
 
   if (dict.find("onlyfl") != dict.end()) {
-    _ds.flag.onlyfl = dict.at("onlyfl");
+    ds.flag.onlyfl_ = dict.at("onlyfl");
   }
 
   if (dict.find("quiet") != dict.end()) {
-    _ds.flag.quiet = dict.at("quiet");
+    ds.flag.quiet_ = dict.at("quiet");
   }
 
   if (dict.find("intensity_correction") != dict.end()) {
-    _ds.flag.intensity_correction = dict.at("intensity_correction");
+    ds.flag.intensity_correction_ = dict.at("intensity_correction");
   }
 
   if (dict.find("old_intensity_correction") != dict.end()) {
-    _ds.flag.old_intensity_correction = dict.at("old_intensity_correction");
+    ds.flag.old_intensity_correction_ = dict.at("old_intensity_correction");
   }
 
   if (dict.find("general_source") != dict.end()) {
-    _ds.flag.general_source = dict.at("general_source");
+    ds.flag.general_source_ = dict.at("general_source");
   }
 
   if (dict.find("output_uum") != dict.end()) {
-    _ds.flag.output_uum = dict.at("output_uum");
+    ds.flag.output_uum_ = dict.at("output_uum");
   }
 
   return this;
@@ -162,7 +162,7 @@ DisortWrapper *DisortWrapper::SetFlags(
 
 DisortWrapper *DisortWrapper::SetIntensityDimension(int nuphi, int nutau,
                                                     int numu) {
-  if (_is_finalized) {
+  if (is_finalized_) {
     return this;
   }
 
@@ -178,170 +178,170 @@ DisortWrapper *DisortWrapper::SetIntensityDimension(int nuphi, int nutau,
     return this;
   }
 
-  if (_ds.flag.usrang) {
-    _ds.nphi = nuphi;
-    _ds.numu = numu;
+  if (ds.flag.usrang_) {
+    ds.nphi_ = nuphi;
+    ds.numu_ = numu;
   }
 
-  if (_ds.flag.usrtau) _ds.ntau = nutau;
+  if (ds.flag.usrtau_) ds.ntau_ = nutau;
   return this;
 }
 
 void DisortWrapper::Finalize() {
-  if (!_is_finalized) {
-    c_disort_state_alloc(&_ds);
-    c_disort_out_alloc(&_ds, &_ds_out);
-    _is_finalized = true;
+  if (!is_finalized_) {
+    c_disort_state_alloc(&ds_);
+    c_disort_out_alloc(&ds_, &ds_out_);
+    is_finalized_ = true;
   }
 }
 
 DisortWrapper::~DisortWrapper() {
-  if (_is_finalized) {
-    c_disort_state_free(&_ds);
-    c_disort_out_free(&_ds, &_ds_out);
-    _is_finalized = false;
+  if (is_finalized_) {
+    c_disort_state_free(&ds_);
+    c_disort_out_free(&ds_, &ds_out_);
+    is_finalized_ = false;
   }
 }
 
 void DisortWrapper::SetOpticalDepth(double const *tau, int len) {
-  for (int i = 0; i < std::min(_ds.nlyr, len); ++i) {
-    _ds.dtauc[i] = tau[i];
+  for (int i = 0; i < std::min(ds.nlyr_, len); ++i) {
+    ds.dtauc_[i] = tau[i];
   }
 }
 
 void DisortWrapper::SetSingleScatteringAlbedo(double const *ssa, int len) {
-  for (int i = 0; i < std::min(_ds.nlyr, len); ++i) {
-    _ds.ssalb[i] = ssa[i];
+  for (int i = 0; i < std::min(ds.nlyr_, len); ++i) {
+    ds.ssalb_[i] = ssa[i];
   }
 }
 
 void DisortWrapper::SetLevelTemperature(double const *temp, int len) {
-  for (int i = 0; i <= std::min(_ds.nlyr, len - 1); ++i) {
-    _ds.temper[i] = temp[i];
+  for (int i = 0; i <= std::min(ds.nlyr_, len - 1); ++i) {
+    ds.temper_[i] = temp[i];
   }
 }
 
 void DisortWrapper::SetUserOpticalDepth(double const *usrtau, int len) {
-  if (_ds.flag.usrtau) {
-    for (int i = 0; i < std::min(_ds.ntau, len); ++i) {
-      _ds.utau[i] = usrtau[i];
+  if (ds.flag.usrtau_) {
+    for (int i = 0; i < std::min(ds.ntau_, len); ++i) {
+      ds.utau_[i] = usrtau[i];
     }
   }
 }
 
 void DisortWrapper::SetUserCosinePolarAngle(double const *umu, int len) {
-  if (_ds.flag.usrang) {
-    for (int i = 0; i < std::min(_ds.numu, len); ++i) {
-      _ds.umu[i] = umu[i];
+  if (ds.flag.usrang_) {
+    for (int i = 0; i < std::min(ds.numu_, len); ++i) {
+      ds.umu_[i] = umu[i];
     }
   }
 }
 
 void DisortWrapper::SetUserAzimuthalAngle(double const *phi, int len) {
-  if (_ds.flag.usrang) {
-    for (int i = 0; i < std::min(_ds.nphi, len); ++i) {
-      _ds.phi[i] = phi[i];
+  if (ds.flag.usrang_) {
+    for (int i = 0; i < std::min(ds.nphi_, len); ++i) {
+      ds.phi_[i] = phi[i];
     }
   }
 }
 
 void DisortWrapper::SetPhaseMoments(double *pmom, int nlyr, int nmom_p1) {
-  std::memcpy(_ds.pmom, pmom, nlyr * nmom_p1 * sizeof(double));
+  std::memcpy(ds.pmom_, pmom, nlyr * nmom_p1 * sizeof(double));
 }
 
 py::array_t<double> DisortWrapper::GetFlux() const {
-  py::array_t<double> ndarray({_ds.nlyr + 1, 8}, &_ds_out.rad[0].rfldir);
+  py::array_t<double> ndarray({ds.nlyr_ + 1, 8}, &ds_out_.rad[0].rfldir);
   return ndarray;
 }
 
 py::array_t<double> DisortWrapper::GetIntensity() const {
-  py::array_t<double> ndarray({_ds.nphi, _ds.ntau, _ds.numu}, _ds_out.uu);
+  py::array_t<double> ndarray({ds.nphi_, ds.ntau_, ds.numu_}, ds_out_.uu);
   return ndarray;
 }
 
 DisortWrapper *DisortWrapper::Run() {
-  if (!_is_finalized) {
+  if (!is_finalized_) {
     return this;
   }
 
-  _ds.bc.btemp = btemp;
-  _ds.bc.ttemp = ttemp;
-  _ds.bc.fluor = fluor;
-  _ds.bc.albedo = albedo;
-  _ds.bc.fisot = fisot;
-  _ds.bc.fbeam = fbeam;
-  _ds.bc.temis = temis;
-  _ds.bc.umu0 = umu0;
-  _ds.bc.phi0 = phi0;
+  ds.bc.btemp_ = btemp;
+  ds.bc.ttemp_ = ttemp;
+  ds.bc.fluor_ = fluor;
+  ds.bc.albedo_ = albedo;
+  ds.bc.fisot_ = fisot;
+  ds.bc.fbeam_ = fbeam;
+  ds.bc.temis_ = temis;
+  ds.bc.umu0_ = umu0;
+  ds.bc.phi0_ = phi0;
 
-  c_disort(&_ds, &_ds_out);
+  c_disort(&ds_, &ds_out_);
 
   return this;
 }
 
 void DisortWrapper::printDisortAtmosphere(std::ostream &os) const {
-  os << "- Levels = " << _ds.nlyr << std::endl;
-  os << "- Moments = " << _ds.nmom << std::endl;
-  os << "- Streams = " << _ds.nstr << std::endl;
-  os << "- Phase functions = " << _ds.nphase << std::endl;
+  os << "- Levels = " << ds.nlyr_ << std::endl;
+  os << "- Moments = " << ds.nmom_ << std::endl;
+  os << "- Streams = " << ds.nstr_ << std::endl;
+  os << "- Phase functions = " << ds.nphase_ << std::endl;
 }
 
 void DisortWrapper::printDisortOutput(std::ostream &os) const {
-  os << "- User azimuthal angles = " << _ds.nphi << std::endl;
-  os << "- User polar angles = " << _ds.numu << std::endl;
-  os << "- User optical depths = " << _ds.ntau << std::endl;
+  os << "- User azimuthal angles = " << ds.nphi_ << std::endl;
+  os << "- User polar angles = " << ds.numu_ << std::endl;
+  os << "- User optical depths = " << ds.ntau_ << std::endl;
 }
 
 void DisortWrapper::printDisortFlags(std::ostream &os) const {
-  if (_ds.flag.ibcnd) {
+  if (ds.flag.ibcnd_) {
     os << "- Spectral boundary condition (ibcnd) = True" << std::endl;
   } else {
     os << "- Spectral boundary condition (ibcnd) = False" << std::endl;
   }
 
-  if (_ds.flag.usrtau) {
+  if (ds.flag.usrtau_) {
     os << "- User optical depth (usrtau) = True" << std::endl;
   } else {
     os << "- User optical depth (usrtau) = False" << std::endl;
   }
 
-  if (_ds.flag.usrang) {
+  if (ds.flag.usrang__) {
     os << "- User angles (usrang) = True" << std::endl;
   } else {
     os << "- User angles (usrang) = False" << std::endl;
   }
 
-  if (_ds.flag.lamber) {
+  if (ds.flag.lamber_) {
     os << "- Lambertian surface (lamber) = True" << std::endl;
   } else {
     os << "- Lambertian surface (lamber) = False" << std::endl;
   }
 
-  if (_ds.flag.planck) {
+  if (ds.flag.planck_) {
     os << "- Planck function (planck) = True" << std::endl;
   } else {
     os << "- Planck function (planck) = False" << std::endl;
   }
 
-  if (_ds.flag.spher) {
+  if (ds.flag.spher_) {
     os << "- Spherical correction (spher) = True" << std::endl;
   } else {
     os << "- Spherical correction (spher) = False" << std::endl;
   }
 
-  if (_ds.flag.onlyfl) {
+  if (ds.flag.onlyfl_) {
     os << "- Only calculate fluxes (onlyfl) = True" << std::endl;
   } else {
     os << "- Only calculate fluxes (onlyfl) = False" << std::endl;
   }
 
-  if (_ds.flag.intensity_correction) {
+  if (ds.flag.intensity_correction_) {
     os << "- Intensity correction (intensity_correction) = True" << std::endl;
   } else {
     os << "- Intensity correction (intensity_correction) = False" << std::endl;
   }
 
-  if (_ds.flag.old_intensity_correction) {
+  if (ds.flag.old_intensity_correction_) {
     os << "- Old intensity correction (old_intensity_correction) = True"
        << std::endl;
   } else {
@@ -349,13 +349,13 @@ void DisortWrapper::printDisortFlags(std::ostream &os) const {
        << std::endl;
   }
 
-  if (_ds.flag.general_source) {
+  if (ds.flag.general_source_) {
     os << "- General source function (general_source) = True" << std::endl;
   } else {
     os << "- General source function (general_source) = False" << std::endl;
   }
 
-  if (_ds.flag.output_uum) {
+  if (ds.flag.output_uum_) {
     os << "- Output uum (output_uum) = True" << std::endl;
   } else {
     os << "- Output uum (output_uum) = False" << std::endl;
@@ -367,9 +367,9 @@ std::string DisortWrapper::ToString() const {
 
   ss << "Disort is configured with:" << std::endl;
   printDisortFlags(ss);
-  ss << "- Accuracy = " << _ds.accur << std::endl;
+  ss << "- Accuracy = " << ds.accur_ << std::endl;
 
-  if (_is_finalized) {
+  if (is_finalized_) {
     printDisortAtmosphere(ss);
     printDisortOutput(ss);
     ss << "Disort is finalized." << std::endl;
