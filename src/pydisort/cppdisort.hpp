@@ -72,7 +72,7 @@ class DisortWrapper {
         temis(0.0),
         umu0(1.0),
         phi0(0.0) {
-    ds.accur_ = 1.E-6;
+    ds_.accur = 1.E-6;
   }
 
   static DisortWrapper *FromFile(std::string_view filename) {
@@ -96,22 +96,22 @@ class DisortWrapper {
 
   bool IsFinalized() const { return is_finalized_; }
 
-  int nLayers() const { return ds.nlyr_; }
+  int nLayers() const { return ds_.nlyr; }
 
-  int nMoments() const { return ds.nmom_; }
+  int nMoments() const { return ds_.nmom; }
 
-  int nStreams() const { return ds.nstr_; }
+  int nStreams() const { return ds_.nstr; }
 
-  void SetAccuracy(double accur) { ds.accur_ = accur; }
+  void SetAccuracy(double accur) { ds_.accur = accur; }
 
   void SetWavenumberRange_invcm(double wmin, double wmax) {
-    ds.wvnmlo_ = wmin;
-    ds.wvnmhi_ = wmax;
+    ds_.wvnmlo = wmin;
+    ds_.wvnmhi = wmax;
   }
 
   void SetWavenumber_invcm(double wave) {
-    ds.wvnmlo_ = wave;
-    ds.wvnmhi_ = wave;
+    ds_.wvnmlo = wave;
+    ds_.wvnmhi = wave;
   }
 
   void SetOpticalDepth(double const *tau, int len);
