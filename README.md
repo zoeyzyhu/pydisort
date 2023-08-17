@@ -24,10 +24,12 @@
   <img alt="GitHub Workflow Status"
     src="https://img.shields.io/github/actions/workflow/status/zoeyzyhu/pydisort/main.yml?style=flat-square&logo=github"/>
 </a>
+<!---
 <a href="https://codecov.io/gh/{{REPOSITORY}}">
   <img alt="Codacy coverage"
     src="https://img.shields.io/codacy/coverage/pydisort?style=flat-square&logo=codecov"/>
 </a>
+-->
 <a href="https://github.com/zoeyzyhu/pydisort/issues">
   <img alt="GitHub issues"
     src="https://img.shields.io/github/issues/zoeyzyhu/pydisort?style=flat-square&logo=git"/>
