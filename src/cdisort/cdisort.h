@@ -481,6 +481,15 @@ typedef struct {
 #  define M_SQRT1_2   0.70710678118654752440
 #endif
 
+#undef DEG
+#undef SQR
+#undef MIN
+#undef MAX
+#undef LIMIT_RANGE
+#undef IMIN
+#undef IMAX
+#undef F77_SIGN
+
 #define DEG (M_PI/180.)
 
 #define SQR(x) ({ \
