@@ -1,11 +1,15 @@
-#include "cppdisort.hpp"
-
+// toml
 #include <toml++/toml.h>
 
+// C/C++
 #include <algorithm>
 #include <iostream>
 #include <memory>
 #include <sstream>
+
+// pydisort
+#include <configure.hpp>
+#include "cppdisort.hpp"
 
 const int Radiant::RFLDIR;
 const int Radiant::FLDN;
@@ -16,6 +20,7 @@ const int Radiant::UAVGDN;
 const int Radiant::UAVGUP;
 const int Radiant::UAVGSO;
 
+#ifdef PYTHON_BINDINGS
 py::array_t<double> getLegendreCoefficients(int nmom, std::string const &model,
                                             double gg) {
   py::array_t<double> py_pmom(1 + nmom);
@@ -38,6 +43,7 @@ py::array_t<double> getLegendreCoefficients(int nmom, std::string const &model,
 
   return py_pmom;
 }
+#endif  // PYTHON_BINDINGS
 
 DisortWrapper *DisortWrapper::fromTomlTable(const toml::table &table) {
   auto disort = new DisortWrapper();
@@ -245,6 +251,7 @@ void DisortWrapper::SetPhaseMoments(double *pmom, int nlyr, int nmom_p1) {
   std::memcpy(ds_.pmom, pmom, nlyr * nmom_p1 * sizeof(double));
 }
 
+#ifdef PYTHON_BINDINGS
 py::array_t<double> DisortWrapper::GetFlux() const {
   py::array_t<double> ndarray({ds_.nlyr + 1, 8}, &ds_out_.rad[0].rfldir);
   return ndarray;
@@ -254,6 +261,7 @@ py::array_t<double> DisortWrapper::GetIntensity() const {
   py::array_t<double> ndarray({ds_.nphi, ds_.ntau, ds_.numu}, ds_out_.uu);
   return ndarray;
 }
+#endif  // PYTHON_BINDINGS
 
 DisortWrapper *DisortWrapper::Run() {
   if (!is_finalized_) {

@@ -12,7 +12,7 @@ set(CDISORT_INCLUDE_DIR
 
 # Add cppdisort
 
-add_subdirectory(pydisort)
+add_subdirectory(cppdisort)
 
 set(PYDISORT_INCLUDE_DIR
     ${CMAKE_CURRENT_SOURCE_DIR}

@@ -26,14 +26,17 @@ include(${CMAKE_SOURCE_DIR}/cmake/compilers.cmake)
 # 1. Set up project specific configuration ##
 message(STATUS "2. Set up project specific configuration")
 message(STATUS "----- Placeholder ----- ")
+option(PYTHON_BINDINGS "Build Python Bindings" ON)
+
+if (PYTHON_BINDINGS)
+  set(PYTHON_BINDINGS_OPTION "PYTHON_BINDINGS")
+else()
+  set(PYTHON_BINDINGS_OPTION "NO_PYTHON_BINDINGS")
+endif()
 
 # 1. Set up project system libraries ##
 message(STATUS "3. Set up project system libraries----------------")
-
-message(STATUS "Setup tomlpp ")
 include(${CMAKE_SOURCE_DIR}/cmake/tomlpp.cmake)
-
-message(STATUS "Setup pybind11")
 include(${CMAKE_SOURCE_DIR}/cmake/pybind11.cmake)
 
 # 1. Set up project configure file and library ##
@@ -41,10 +44,10 @@ message(STATUS "4. Set up project libraries")
 configure_file(${CMAKE_SOURCE_DIR}/configure.hpp.in configure.hpp @ONLY)
 add_subdirectory(src)
 
-# 1. Python binding
-message(STATUS "5. Set up python binding")
-add_subdirectory(python)
+if (PYTHON_BINDINGS)
+  add_subdirectory(python)
+endif()
 
 # 1. Set up unit tests
-message(STATUS "6. Set up unit tests")
+message(STATUS "5. Set up unit tests")
 add_subdirectory(tests)

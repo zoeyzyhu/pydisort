@@ -3,7 +3,7 @@
 # =============================================
 
 set(namel pydisort)
-file(GLOB src_files pybind_cppdisort.cpp)
+file(GLOB src_files pydisort.cpp)
 string(TOUPPER ${CMAKE_BUILD_TYPE} buildu)
 
 # Set module targets

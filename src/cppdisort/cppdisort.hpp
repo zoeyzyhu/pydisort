@@ -1,22 +1,31 @@
-#ifndef SRC_PYDISORT_CPPDISORT_HPP_
-#define SRC_PYDISORT_CPPDISORT_HPP_
+#ifndef SRC_CPPDISORT_CPPDISORT_HPP_
+#define SRC_CPPDISORT_CPPDISORT_HPP_
 
-#include <cdisort/cdisort.h>
-#include <pybind11/numpy.h>
-#include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
-#include <toml++/toml.h>
-
+// C/C++
 #include <iostream>
 #include <map>
 #include <string>
 #include <tuple>
+
+// cdisort
+#include <cdisort/cdisort.h>
+#include <toml++/toml.h>
+
+// pydisort
+#include <configure.hpp>
+
+#ifdef PYTHON_BINDINGS
+// pybind11
+#include <pybind11/numpy.h>
+#include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
 
 namespace py = pybind11;
 
 // wraps c_getmom
 py::array_t<double> getLegendreCoefficients(int nmom, std::string const &model,
                                             double gg = 0.);
+#endif  // PYTHON_BINDINGS
 
 // flux index constants
 struct Radiant {
@@ -135,9 +144,12 @@ class DisortWrapper {
   void SetPhaseMoments(double *pmom, int nlyr, int nmom_p1);
 
   DisortWrapper *Run();
+
+#ifdef PYTHON_BINDINGS
   // \todo how to make them actually constant ?
   py::array_t<double> GetFlux() const;
   py::array_t<double> GetIntensity() const;
+#endif  // PYTHON_BINDINGS
 
  protected:
   disort_state ds_;
@@ -162,4 +174,4 @@ class DisortWrapperTestOnly : public DisortWrapper {
   disort_output *GetDisortOutput() { return &ds_out_; }
 };
 
-#endif  // SRC_PYDISORT_CPPDISORT_HPP_
+#endif  // SRC_CPPDISORT_CPPDISORT_HPP_
