@@ -28,7 +28,7 @@ message(STATUS "2. Set up project specific configuration")
 message(STATUS "----- Placeholder ----- ")
 option(PYTHON_BINDINGS "Build Python Bindings" ON)
 
-if (PYTHON_BINDINGS)
+if(PYTHON_BINDINGS)
   set(PYTHON_BINDINGS_OPTION "PYTHON_BINDINGS")
 else()
   set(PYTHON_BINDINGS_OPTION "NO_PYTHON_BINDINGS")
@@ -44,7 +44,7 @@ message(STATUS "4. Set up project libraries")
 configure_file(${CMAKE_SOURCE_DIR}/configure.hpp.in configure.hpp @ONLY)
 add_subdirectory(src)
 
-if (PYTHON_BINDINGS)
+if(PYTHON_BINDINGS)
   add_subdirectory(python)
 endif()
 

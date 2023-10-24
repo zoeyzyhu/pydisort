@@ -9,6 +9,7 @@
 
 // pydisort
 #include <configure.hpp>
+
 #include "cppdisort.hpp"
 
 const int Radiant::RFLDIR;
