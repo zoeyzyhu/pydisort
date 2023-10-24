@@ -7,9 +7,19 @@
 #include <string>
 #include <tuple>
 
+// toml
+#include <toml++/toml.h>
+
 // cdisort
 #include <cdisort/cdisort.h>
-#include <toml++/toml.h>
+#undef DEG
+#undef SQR
+#undef MIN
+#undef MAX
+#undef LIMIT_RANGE
+#undef IMIN
+#undef IMAX
+#undef F77_SIGN
 
 // pydisort
 #include <configure.hpp>
