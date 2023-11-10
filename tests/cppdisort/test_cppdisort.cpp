@@ -34,11 +34,11 @@ int main() {
   // Test case for DisortWrapper::SetIntensityDimension method
   disort->SetIntensityDimension(7, 8, 9);
 
-  // Test case for DisortWrapper::Finalize method
-  disort->Finalize();
+  // Test case for DisortWrapper::Seal method
+  disort->Seal();
 
-  // Test case for DisortWrapper::IsFinalized method
-  assert(disort->IsFinalized());
+  // Test case for DisortWrapper::IsSealed method
+  assert(disort->IsSealed());
 
   // Test case for DisortWrapper::nLayers method
   int numLayers = disort->nLayers();

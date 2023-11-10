@@ -21,30 +21,26 @@ const int Radiant::UAVGDN;
 const int Radiant::UAVGUP;
 const int Radiant::UAVGSO;
 
-#ifdef PYTHON_BINDINGS
-py::array_t<double> getLegendreCoefficients(int nmom, std::string const &model,
+std::vector<double> getLegendreCoefficients(int nmom, std::string const &model,
                                             double gg) {
-  py::array_t<double> py_pmom(1 + nmom);
-  double *ptr = static_cast<double *>(py_pmom.request().ptr);
-  std::memset(ptr, 0, sizeof(double) * (1 + nmom));
+  std::vector<double> pmom(1 + nmom);
 
   if (model == "isotropic") {
-    c_getmom(ISOTROPIC, gg, nmom, ptr);
+    c_getmom(ISOTROPIC, gg, nmom, pmom.data());
   } else if (model == "rayleigh") {
-    c_getmom(RAYLEIGH, gg, nmom, ptr);
+    c_getmom(RAYLEIGH, gg, nmom, pmom.data());
   } else if (model == "henyey_greenstein") {
-    c_getmom(HENYEY_GREENSTEIN, gg, nmom, ptr);
+    c_getmom(HENYEY_GREENSTEIN, gg, nmom, pmom.data());
   } else if (model == "haze_garcia_siewert") {
-    c_getmom(HAZE_GARCIA_SIEWERT, gg, nmom, ptr);
+    c_getmom(HAZE_GARCIA_SIEWERT, gg, nmom, pmom.data());
   } else if (model == "cloud_garcia_siewart") {
-    c_getmom(CLOUD_GARCIA_SIEWERT, gg, nmom, ptr);
+    c_getmom(CLOUD_GARCIA_SIEWERT, gg, nmom, pmom.data());
   } else {
     throw std::invalid_argument("invalid scattering model");
   }
 
-  return py_pmom;
+  return pmom;
 }
-#endif  // PYTHON_BINDINGS
 
 DisortWrapper *DisortWrapper::fromTomlTable(const toml::table &table) {
   auto disort = new DisortWrapper();
@@ -82,7 +78,7 @@ void DisortWrapper::SetHeader(std::string const &header) {
 
 DisortWrapper *DisortWrapper::SetAtmosphereDimension(int nlyr, int nstr,
                                                      int nmom, int nphase) {
-  if (is_finalized_) {
+  if (is_sealed_) {
     return this;
   }
 
@@ -165,7 +161,7 @@ DisortWrapper *DisortWrapper::SetFlags(
 
 DisortWrapper *DisortWrapper::SetIntensityDimension(int nuphi, int nutau,
                                                     int numu) {
-  if (is_finalized_) {
+  if (is_sealed_) {
     return this;
   }
 
@@ -190,60 +186,68 @@ DisortWrapper *DisortWrapper::SetIntensityDimension(int nuphi, int nutau,
   return this;
 }
 
-void DisortWrapper::Finalize() {
-  if (!is_finalized_) {
+void DisortWrapper::Seal() {
+  if (!is_sealed_) {
     c_disort_state_alloc(&ds_);
     c_disort_out_alloc(&ds_, &ds_out_);
-    is_finalized_ = true;
+    is_sealed_ = true;
+  }
+}
+
+void DisortWrapper::Unseal() {
+  if (is_sealed_) {
+    c_disort_state_free(&ds_);
+    c_disort_out_free(&ds_, &ds_out_);
+    is_sealed_ = false;
   }
 }
 
 DisortWrapper::~DisortWrapper() {
-  if (is_finalized_) {
+  if (is_sealed_) {
     c_disort_state_free(&ds_);
     c_disort_out_free(&ds_, &ds_out_);
-    is_finalized_ = false;
+    is_sealed_ = false;
   }
 }
 
-void DisortWrapper::SetOpticalDepth(double const *tau, int len) {
-  for (int i = 0; i < std::min(ds_.nlyr, len); ++i) {
+void DisortWrapper::SetOpticalThickness(std::vector<double> const &tau) {
+  for (int i = 0; i < std::min((size_t)ds_.nlyr, tau.size()); ++i) {
     ds_.dtauc[i] = tau[i];
   }
 }
 
-void DisortWrapper::SetSingleScatteringAlbedo(double const *ssa, int len) {
-  for (int i = 0; i < std::min(ds_.nlyr, len); ++i) {
+void DisortWrapper::SetSingleScatteringAlbedo(std::vector<double> const &ssa) {
+  for (int i = 0; i < std::min((size_t)ds_.nlyr, ssa.size()); ++i) {
     ds_.ssalb[i] = ssa[i];
   }
 }
 
-void DisortWrapper::SetLevelTemperature(double const *temp, int len) {
-  for (int i = 0; i <= std::min(ds_.nlyr, len - 1); ++i) {
+void DisortWrapper::SetTemperatureOnLevel(std::vector<double> const &temp) {
+  for (int i = 0; i <= std::min((size_t)ds_.nlyr, temp.size() - 1); ++i) {
     ds_.temper[i] = temp[i];
   }
 }
 
-void DisortWrapper::SetUserOpticalDepth(double const *usrtau, int len) {
+void DisortWrapper::SetUserOpticalDepth(std::vector<double> const &utau) {
   if (ds_.flag.usrtau) {
-    for (int i = 0; i < std::min(ds_.ntau, len); ++i) {
-      ds_.utau[i] = usrtau[i];
+    for (int i = 0; i < std::min((size_t)ds_.ntau, utau.size()); ++i) {
+      ds_.utau[i] = utau[i];
     }
   }
 }
 
-void DisortWrapper::SetUserCosinePolarAngle(double const *umu, int len) {
+void DisortWrapper::SetUserCosinePolarAngle(std::vector<double> const &umu) {
   if (ds_.flag.usrang) {
-    for (int i = 0; i < std::min(ds_.numu, len); ++i) {
+    for (int i = 0; i < std::min((size_t)ds_.numu, umu.size()); ++i) {
       ds_.umu[i] = umu[i];
     }
   }
 }
 
-void DisortWrapper::SetUserAzimuthalAngle(double const *phi, int len) {
+void DisortWrapper::SetUserAzimuthalAngle(std::vector<double> const &uphi) {
   if (ds_.flag.usrang) {
-    for (int i = 0; i < std::min(ds_.nphi, len); ++i) {
-      ds_.phi[i] = phi[i];
+    for (int i = 0; i < std::min((size_t)ds_.nphi, uphi.size()); ++i) {
+      ds_.phi[i] = uphi[i];
     }
   }
 }
@@ -252,20 +256,8 @@ void DisortWrapper::SetPhaseMoments(double *pmom, int nlyr, int nmom_p1) {
   std::memcpy(ds_.pmom, pmom, nlyr * nmom_p1 * sizeof(double));
 }
 
-#ifdef PYTHON_BINDINGS
-py::array_t<double> DisortWrapper::GetFlux() const {
-  py::array_t<double> ndarray({ds_.nlyr + 1, 8}, &ds_out_.rad[0].rfldir);
-  return ndarray;
-}
-
-py::array_t<double> DisortWrapper::GetIntensity() const {
-  py::array_t<double> ndarray({ds_.nphi, ds_.ntau, ds_.numu}, ds_out_.uu);
-  return ndarray;
-}
-#endif  // PYTHON_BINDINGS
-
 DisortWrapper *DisortWrapper::Run() {
-  if (!is_finalized_) {
+  if (!is_sealed_) {
     return this;
   }
 
@@ -374,7 +366,7 @@ std::string DisortWrapper::ToString() const {
   printDisortFlags(ss);
   ss << "- Accuracy = " << ds_.accur << std::endl;
 
-  if (is_finalized_) {
+  if (is_sealed_) {
     printDisortAtmosphere(ss);
     printDisortOutput(ss);
     ss << "Disort is finalized." << std::endl;

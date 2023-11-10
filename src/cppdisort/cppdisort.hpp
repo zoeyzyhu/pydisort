@@ -6,6 +6,7 @@
 #include <map>
 #include <string>
 #include <tuple>
+#include <vector>
 
 // toml
 #include <toml++/toml.h>
@@ -24,18 +25,9 @@
 // pydisort
 #include <configure.hpp>
 
-#ifdef PYTHON_BINDINGS
-// pybind11
-#include <pybind11/numpy.h>
-#include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
-
-namespace py = pybind11;
-
 // wraps c_getmom
-py::array_t<double> getLegendreCoefficients(int nmom, std::string const &model,
+std::vector<double> getLegendreCoefficients(int nmom, std::string const &model,
                                             double gg = 0.);
-#endif  // PYTHON_BINDINGS
 
 // flux index constants
 struct Radiant {
@@ -69,8 +61,7 @@ struct Radiant {
 
 // wraps disort_state and disort_output
 class DisortWrapper {
- public:
-  // accessible boundary conditions
+ public: // accessible boundary conditions
   double btemp;
   double ttemp;
   double fluor;
@@ -81,6 +72,7 @@ class DisortWrapper {
   double umu0;
   double phi0;
 
+public: // constructor and destructor
   DisortWrapper()
       : btemp(0.0),
         ttemp(0.0),
@@ -91,81 +83,88 @@ class DisortWrapper {
         temis(0.0),
         umu0(1.0),
         phi0(0.0) {
-    ds_.accur = 1.E-6;
+    SetAccuracy(1.E-6);
   }
+  virtual ~DisortWrapper();
 
+  //! \todo will be removed
   static DisortWrapper *FromFile(std::string_view filename) {
     return fromTomlTable(toml::parse_file(filename));
   }
 
+ public:  // string method (used in python wrapper)
   std::string ToString() const;
 
-  virtual ~DisortWrapper();
-
+ public:  // setters and getters
   void SetHeader(std::string const &header);
+  DisortWrapper *SetFlags(std::map<std::string, bool> const &flags);
+  void SetAccuracy(double accur) { ds_.accur = accur; }
 
+  DisortWrapper *SetIntensityDimension(int nuphi, int nutau, int numu);
   DisortWrapper *SetAtmosphereDimension(int nlyr, int nstr, int nmom,
                                         int nphase);
 
-  DisortWrapper *SetFlags(std::map<std::string, bool> const &flags);
-
-  DisortWrapper *SetIntensityDimension(int nuphi, int nutau, int numu);
-
-  void Finalize();
-
-  bool IsFinalized() const { return is_finalized_; }
+  void Seal();
+  void Unseal();
+  bool IsSealed() const { return is_sealed_; }
 
   int nLayers() const { return ds_.nlyr; }
-
   int nMoments() const { return ds_.nmom; }
-
   int nStreams() const { return ds_.nstr; }
+  int nUserOpticalDepths() const { return ds_.ntau; }
+  int nUserPolarAngles() const { return ds_.numu; }
+  int nUserAzimuthalAngles() const { return ds_.nphi; }
 
-  void SetAccuracy(double accur) { ds_.accur = accur; }
-
+  //! \brief Set the wavenumber range
   void SetWavenumberRange_invcm(double wmin, double wmax) {
     ds_.wvnmlo = wmin;
     ds_.wvnmhi = wmax;
   }
 
+  //! \brief Set the wavenumber
   void SetWavenumber_invcm(double wave) {
     ds_.wvnmlo = wave;
     ds_.wvnmhi = wave;
   }
 
-  void SetOpticalDepth(double const *tau, int len);
+  //! \brief Set the optical thickness defined on layers
+  void SetOpticalThickness(std::vector<double> const &tau);
 
-  void SetSingleScatteringAlbedo(double const *ssa, int len);
+  //! \brief Set the single scattering albedo defined on layers
+  void SetSingleScatteringAlbedo(std::vector<double> const &ssa);
 
-  // temperature array is defined on levels
-  void SetLevelTemperature(double const *temp, int len);
+  //! \brief Set temperatures defined on levels
+  void SetTemperatureOnLevel(std::vector<double> const &temp);
 
-  void SetUserOpticalDepth(double const *usrtau, int len);
+  //! \brief Set the optical depth of the output radiance 
+  void SetUserOpticalDepth(std::vector<double> const &utau);
 
-  void SetUserCosinePolarAngle(double const *umu, int len);
+  //! \brief Set the cosine polar angle of the output radiance
+  void SetUserCosinePolarAngle(std::vector<double> const &umu);
 
-  void SetUserAzimuthalAngle(double const *phi, int len);
+  //! \brief Set the azimuthal angle of the output radiance
+  void SetUserAzimuthalAngle(std::vector<double> const &uphi);
 
   void SetPlanckSource(double *planck);
 
-  // pmom is a 1D array of length nlyr * (nmom + 1)
-  // with nlyr being the number of layers and nmom the number of scattering
-  // moments
+  //! \brief Set the phase function moments
+  //!
+  //! pmom is a 1D array of length nlyr * (nmom + 1)
+  //! with nlyr being the number of layers and nmom the number of scattering
+  //! moments
   void SetPhaseMoments(double *pmom, int nlyr, int nmom_p1);
 
+  //! \brief Run disort
   DisortWrapper *Run();
 
-#ifdef PYTHON_BINDINGS
-  // \todo how to make them actually constant ?
-  py::array_t<double> GetFlux() const;
-  py::array_t<double> GetIntensity() const;
-#endif  // PYTHON_BINDINGS
+  //! \brief Get disort run result
+  disort_output const *Result() const { return &ds_out_; }
 
  protected:
   disort_state ds_;
   disort_output ds_out_;
 
-  bool is_finalized_ = false;
+  bool is_sealed_ = false;
   static DisortWrapper *fromTomlTable(const toml::table &table);
 
   void printDisortAtmosphere(std::ostream &os) const;
