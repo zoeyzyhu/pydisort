@@ -59,14 +59,14 @@ PYBIND11_MODULE(pydisort, m) {
 
       .def("set_user_optical_depth", &DisortWrapper::SetUserOpticalDepth)
       .def("set_user_cosine_polar_angle", &DisortWrapper::SetUserCosinePolarAngle)
-      .def("set_user_azimuth_angle", &DisortWrapper::SetUserAzimuthalAngle)
+      .def("set_user_azimuthal_angle", &DisortWrapper::SetUserAzimuthalAngle)
 
       .def("set_wavenumber_invcm", &DisortWrapper::SetWavenumber_invcm)
       .def("set_wavenumber_range_invcm",
            &DisortWrapper::SetWavenumberRange_invcm, py::arg("wmin"),
            py::arg("wmax"))
 
-      .def("set_optical_thickenss", &DisortWrapper::SetOpticalThickness)
+      .def("set_optical_thickness", &DisortWrapper::SetOpticalThickness)
       .def("set_single_scattering_albedo", &DisortWrapper::SetSingleScatteringAlbedo)
       .def("set_temperature_on_level", &DisortWrapper::SetTemperatureOnLevel)
       .def("set_phase_moments", 
