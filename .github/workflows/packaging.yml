@@ -65,33 +65,11 @@ jobs:
     strategy:
       matrix:
         #py: ["38", "39", "310", "311"]
+        py: ["39"]
         #arch: ["x86_64", "i686"]
+        arch: ["x86_64"]
         #libc: ["many", "musl"]
-        include:
-          - py: "311"
-            arch: "aarch64"
-            libc: "many"
-        #  - py: "311"
-        #    arch: "ppc64le"
-        #    libc: "many"
-        #  - py: "311"
-        #    arch: "s390x"
-        #    libc: "many"
-        #  - py: "310"
-        #    arch: "aarch64"
-        #    libc: "many"
-        #  - py: "310"
-        #    arch: "ppc64le"
-        #    libc: "many"
-        #  - py: "310"
-        #    arch: "s390x"
-        #    libc: "many"
-        #  - py: "39"
-        #    arch: "aarch64"
-        #    libc: "many"
-        #  - py: "38"
-        #    arch: "aarch64"
-        #    libc: "many"
+        libc: ["many"]
       fail-fast: true
 
     steps:
