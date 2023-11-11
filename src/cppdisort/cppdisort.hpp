@@ -5,6 +5,7 @@
 #include <iostream>
 #include <map>
 #include <string>
+#include <string_view>
 #include <tuple>
 #include <vector>
 
@@ -26,38 +27,8 @@
 #include <configure.hpp>
 
 // wraps c_getmom
-std::vector<double> getLegendreCoefficients(int nmom, std::string const &model,
-                                            double gg = 0.);
-
-// flux index constants
-struct Radiant {
-  // Direct-beam flux (w/o delta-M scaling)
-  static const int RFLDIR = 0;
-
-  // Diffuse down-flux (tot.-direct-beam; w/o delta-M scaling)
-  static const int FLDN = 1;
-
-  // Diffuse up-flux
-  static const int FLUP = 2;
-
-  // Flux divergence, d(net flux)/d(optical depth)
-  static const int DFDT = 3;
-
-  // Mean intensity, incl. direct beam (not corr. for delta-M scaling)
-  static const int UAVG = 4;
-
-  // Mean diffuse downward intensity, not incl. direct beam
-  // (not corr. for delta-M scaling)
-  static const int UAVGDN = 5;
-
-  // Mean diffuse downward intensity, not incl. direct beam
-  // (not corr. for delta-M scaling)
-  static const int UAVGUP = 6;
-
-  // Mean diffuse direct solar, that is the direct beam
-  // (not corr. for delta-M scaling)
-  static const int UAVGSO = 7;
-};
+std::vector<double> get_phase_function(int nmom, std::string_view model,
+                                       double gg = 0.);
 
 // wraps disort_state and disort_output
 class DisortWrapper {

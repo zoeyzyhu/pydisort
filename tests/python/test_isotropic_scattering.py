@@ -5,7 +5,7 @@ import os
 import unittest
 from numpy import array, pi
 from numpy.testing import assert_allclose
-from pydisort import disort, get_legendre_coefficients, Radiant
+from pydisort import disort, get_phase_function, RFLDIR, FLDN, FLUP
 
 
 # cdisort test01
@@ -14,13 +14,29 @@ class PyDisortTests(unittest.TestCase):
 
     def setUp(self):
         """Set up the test."""
-        self.toml_path = "isotropic_scattering.toml"
-        assert os.path.exists(
-            self.toml_path), f"{self.toml_path} does not exist."
+        self.flags = {
+                "ibcnd": 0,
+                "usrtau": 1,
+                "usrang": 1,
+                "lamber": 1,
+                "planck": 0,
+                "spher": 0,
+                "onlyfl": 0,
+                "quiet": 1,
+                "intensity_correction": 1,
+                "old_intensity_correction": 1,
+                "general_source": 0,
+                "output_uum": 0,
+                "print-input": 1,
+                "print-fluxes": 0, 
+                "print-intensity": 0,
+                "print-transmissivity": 0,
+                "print-phase-function": 1,
+                }
 
     def test_isotropic_scattering(self):
         """Test isotropic scattering."""
-        ds = disort.from_file(self.toml_path)
+        ds = disort().set_flags(self.flags)
         ds.set_header("01. test isotropic scattering")
 
         # set dimension
@@ -29,7 +45,7 @@ class PyDisortTests(unittest.TestCase):
         ).set_intensity_dimension(nuphi=1, nutau=2, numu=6).seal()
 
         # get scattering moments
-        pmom = get_legendre_coefficients(ds.get_nmom(), "isotropic")
+        pmom = get_phase_function(ds.get_nmom(), "isotropic")
 
         # set boundary conditions
         ds.umu0 = 0.1
@@ -71,7 +87,7 @@ class PyDisortTests(unittest.TestCase):
             rtol=1e-5,
         )
 
-        result = ds.get_flux()[:, [Radiant.RFLDIR, Radiant.FLDN, Radiant.FLUP]]
+        result = ds.get_flux()[:, [RFLDIR, FLDN, FLUP]]
         assert_allclose(
             result,
             array(
@@ -102,7 +118,7 @@ class PyDisortTests(unittest.TestCase):
             rtol=1e-5,
         )
 
-        result = ds.get_flux()[:, [Radiant.RFLDIR, Radiant.FLDN, Radiant.FLUP]]
+        result = ds.get_flux()[:, [RFLDIR, FLDN, FLUP]]
         assert_allclose(
             result,
             array(

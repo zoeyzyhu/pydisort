@@ -9,7 +9,18 @@
 namespace py = pybind11;
 
 PYBIND11_MODULE(pydisort, m) {
-  m.def("get_legendre_coefficients", &getLegendreCoefficients, py::arg("nmom"),
+  m.doc() = "Python bindings for disort";
+
+  m.attr("RFLDIR") = 0;
+  m.attr("FLDN") = 1;
+  m.attr("FLUP") = 2;
+  m.attr("DFDT") = 3;
+  m.attr("UAVG") = 4;
+  m.attr("UAVGDN") = 5;
+  m.attr("UAVGUP") = 6;
+  m.attr("UAVGSO") = 7;
+
+  m.def("get_phase_function", &get_phase_function, py::arg("nmom"),
         py::arg("model"), py::arg("gg") = 0.);
 
   py::class_<DisortWrapper>(m, "disort")
@@ -106,16 +117,4 @@ PYBIND11_MODULE(pydisort, m) {
       .def("get_nmom", &DisortWrapper::nMoments)
       .def("get_nstr", &DisortWrapper::nStreams)
       .def("get_nlyr", &DisortWrapper::nLayers);
-
-  //! \todo will be removed
-  py::class_<Radiant>(m, "Radiant")
-      .def(py::init<>())
-      .def_readonly_static("RFLDIR", &Radiant::RFLDIR)
-      .def_readonly_static("FLUP", &Radiant::FLUP)
-      .def_readonly_static("FLDN", &Radiant::FLDN)
-      .def_readonly_static("DFDT", &Radiant::DFDT)
-      .def_readonly_static("UAVG", &Radiant::UAVG)
-      .def_readonly_static("UAVGDN", &Radiant::UAVGDN)
-      .def_readonly_static("UAVGUP", &Radiant::UAVGUP)
-      .def_readonly_static("UAVGSO", &Radiant::UAVGSO);
 }

@@ -12,17 +12,8 @@
 
 #include "cppdisort.hpp"
 
-const int Radiant::RFLDIR;
-const int Radiant::FLDN;
-const int Radiant::FLUP;
-const int Radiant::DFDT;
-const int Radiant::UAVG;
-const int Radiant::UAVGDN;
-const int Radiant::UAVGUP;
-const int Radiant::UAVGSO;
-
-std::vector<double> getLegendreCoefficients(int nmom, std::string const &model,
-                                            double gg) {
+std::vector<double> get_phase_function(int nmom, std::string_view model,
+                                       double gg) {
   std::vector<double> pmom(1 + nmom);
 
   if (model == "isotropic") {
@@ -154,6 +145,26 @@ DisortWrapper *DisortWrapper::SetFlags(
 
   if (dict.find("output_uum") != dict.end()) {
     ds_.flag.output_uum = dict.at("output_uum");
+  }
+
+  if (dict.find("print-input") != dict.end()) {
+    ds_.flag.prnt[0] = dict.at("print-input");
+  }
+
+  if (dict.find("print-fluxes") != dict.end()) {
+    ds_.flag.prnt[1] = dict.at("print-fluxes");
+  }
+
+  if (dict.find("print-intensity") != dict.end()) {
+    ds_.flag.prnt[2] = dict.at("print-intensity");
+  }
+
+  if (dict.find("print-transmissivity") != dict.end()) {
+    ds_.flag.prnt[3] = dict.at("print-transmissivity");
+  }
+
+  if (dict.find("print-phase-function") != dict.end()) {
+    ds_.flag.prnt[4] = dict.at("print-phase-function");
   }
 
   return this;
