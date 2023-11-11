@@ -16,16 +16,18 @@ jobs:
       job-status: ${{ job.status }}
     strategy:
       matrix:
-        py: ["39", "310", "311"]
-        arch: ["x86_64", "arm64"]
+        #py: ["39", "310", "311"]
+        py: ["311"]
+        #arch: ["x86_64", "arm64"]
+        arch: ["arm64"]
         deployment_target: ["11.0"]
-        include:
-          - py: "38"
-            deployment_target: "10.15"
-            arch: "x86_64"
-          - py: "38"
-            deployment_target: "10.15"
-            arch: "arm64"
+        #include:
+        #  - py: "38"
+        #    deployment_target: "10.15"
+        #    arch: "x86_64"
+        #  - py: "38"
+        #    deployment_target: "10.15"
+        #    arch: "arm64"
       fail-fast: true
     env:
       MACOSX_DEPLOYMENT_TARGET: ${{ matrix.deployment_target }}
