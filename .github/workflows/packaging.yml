@@ -14,8 +14,6 @@ jobs:
     runs-on: macos-12
     outputs:
       job-status: ${{ job.status }}
-    env:
-      MACOSX_DEPLOYMENT_TARGET: ${{ matrix.deployment_target }}
 
     steps:
       - uses: actions/checkout@v3
