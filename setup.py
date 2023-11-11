@@ -3,10 +3,9 @@
 import os
 import sys
 import platform
-import distutils.command.build as _build
 from distutils import spawn
-from distutils.sysconfig import get_python_lib
-from setuptools import setup
+from setuptools import setup, Extension
+from setuptools.command.build_ext import build_ext
 
 
 def check_requirements():
@@ -18,87 +17,65 @@ def check_requirements():
             "Unsupported operating system. Please use MacOS or Linux.\n")
         return False
 
-    # Check the Python version
-    if sys.version_info < (3, 6):
-        sys.stderr.write("Python 3.6 or higher is required.\n")
-        return False
-
-    # For Mac, min is Python3.8
-    if sys.version_info < (3, 8) and os_name == 'Darwin':
+    # Min python version is Python3.8
+    if sys.version_info < (3, 8):
         sys.stderr.write("Python 3.8 or higher is required.\n")
         return False
 
     return True
 
 
-def extend_build():
+class CMakeBuild(build_ext):
     """Define external build cmd for cmake."""
-    class Build(_build.build):
-        """Self-define build."""
+    def run(self):
+        """Self-define run."""
+        for ext in self.extensions:
+            self.build_extension(ext)
 
-        def run(self):
-            """Self-define run."""
-            # Check if cmake is installed.
-            cwd = os.getcwd()
-            if spawn.find_executable('cmake') is None:
-                sys.stderr.write("CMake is required to build this package.\n")
-                sys.exit(-1)
+        # Check if cmake is installed.
+        if spawn.find_executable('cmake') is None:
+            sys.stderr.write("CMake is required to build this package.\n")
+            sys.exit(-1)
 
-            # Set up cmake configuration
-            _source_dir = os.path.split(os.path.abspath(__file__))[0]
-            _build_dir = os.path.join(_source_dir, 'build_setup_py')
-            _prefix = get_python_lib()
-            try:
-                cmake_configure_command = [
-                    'cmake',
-                    f'-H{_source_dir}',
-                    f'-B{_build_dir}',
-                    f'-DCMAKE_INSTALL_PREFIX={_prefix}',
-                ]
-                _generator = os.getenv('CMAKE_GENERATOR')
-                if _generator is not None:
-                    cmake_configure_command.append(f'-G{_generator}')
-                spawn.spawn(cmake_configure_command)
-                spawn.spawn(
-                    ['cmake', '--build', _build_dir, '--target', 'install'])
-                os.chdir(cwd)
-            except spawn.DistutilsExecError:
-                sys.stderr.write("Error while building with CMake\n")
-                sys.exit(-1)
-            _build.build.run(self)
+    def build_extension(self, ext):
+        """Build project"""
+        print("ext.name: ", ext.name)
+        extdir = os.path.abspath(os.path.dirname(self.get_ext_fullpath(ext.name)))
+        print("extdir: ", extdir)
 
-    return Build
+        cfg = 'Debug' if self.debug else 'Release'
+        build_args = ['--config', cfg, '--', '-j2']
+
+        # Set up cmake configuration
+        _source_dir = os.path.split(os.path.abspath(__file__))[0]
+        _build_dir = os.path.join(_source_dir, 'build')
+        try:
+            cmake_configure_command = [
+                'cmake',
+                f'-H{_source_dir}',
+                f'-B{_build_dir}',
+                f'-DCMAKE_BUILD_TYPE={cfg}',
+                f'-DCMAKE_LIBRARY_OUTPUT_DIRECTORY={extdir}',
+            ]
+            spawn.spawn(cmake_configure_command)
+            spawn.spawn(['cmake', '--build', _build_dir])
+        except spawn.DistutilsExecError:
+            sys.stderr.write("Error while building with CMake\n")
+            sys.exit(-1)
+
+
+class CMakeExtension(Extension):
+    def __init__(self, name, sourcedir=''):
+        Extension.__init__(self, name, sources=[])
+        self.sourcedir = os.path.abspath(sourcedir)
 
 
 # If the system does not meet requirement, exit.
 if not check_requirements():
     sys.exit(1)
 
-# A few variables
-_here = os.path.abspath(os.path.dirname(__file__))
-version = {}
-with open(os.path.join(_here, 'src/pydisort', 'version.py'), encoding='utf-8') as f:
-    exec(f.read(), version)
-with open(os.path.join(_here, 'doc/README_pypi.md'), encoding='utf-8') as f:
-    long_description = f.read()
-
 # Setup configuration
 setup(
-    name='pydisort',
-    version=version['__version__'],
-    description='Modern Python interfece of DISORT.',
-    long_description=long_description,
-    author='Zoey Hu',
-    author_email='zoey.zyhu@gmail.com',
-    license='GPL',
-    packages=['pydisort'],
-    package_dir={'': 'src'},
-    package_data={'pydisort': ['*.toml']},
-    include_package_data=True,
-    classifiers=[
-        'Development Status :: 2 - Pre-Alpha',
-        'Intended Audience :: Science/Research',
-        'Programming Language :: Python :: 3 :: Only'
-    ],
-    python_requires=">=3.6",
-    cmdclass={'build': extend_build()})
+    ext_modules=[CMakeExtension('pydiosrt', 'python')],
+    cmdclass=dict(build_ext = CMakeBuild),
+    )

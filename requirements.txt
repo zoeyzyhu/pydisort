@@ -4,3 +4,4 @@ numpy
 pre-commit
 pylint
 wheel
+twine
