@@ -4,9 +4,6 @@ on:
     # Run on tags that look like releases
     tags:
       - v*
-    # Run when main is pushed to
-    branches:
-      - cli/distribute
 
 jobs:
   macos-wheel-x86:
