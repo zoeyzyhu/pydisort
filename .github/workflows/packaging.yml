@@ -9,24 +9,11 @@ on:
       - cli/distribute
 
 jobs:
-  macos-wheel:
+  macos-wheel-x86:
     name: Build ${{ matrix.arch }} macOS Wheels for py${{ matrix.py }}
     runs-on: macos-12
     outputs:
       job-status: ${{ job.status }}
-    strategy:
-      matrix:
-        py: ["39", "310", "311"]
-        arch: ["universal2"]
-        deployment_target: ["11.0"]
-        include:
-          - py: "38"
-            deployment_target: "10.15"
-            arch: "x86_64"
-          - py: "38"
-            deployment_target: "10.15"
-            arch: "arm64"
-      fail-fast: true
     env:
       MACOSX_DEPLOYMENT_TARGET: ${{ matrix.deployment_target }}
 
@@ -39,8 +26,32 @@ jobs:
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.16.2
         env:
-          CIBW_BUILD: cp${{ matrix.py }}-*
-          CIBW_ARCHS_MACOS: ${{ matrix.arch }}
+          CIBW_ARCHS_MACOS: "x86_64"
+
+      - name: Archive the built wheels
+        uses: actions/upload-artifact@v3
+        with:
+          path: ./wheelhouse/*.whl
+          name: wheels
+
+  macos-wheel-arm:
+    name: Build ${{ matrix.arch }} macOS Wheels for py${{ matrix.py }}
+    runs-on: macos-latest-xlarge
+    outputs:
+      job-status: ${{ job.status }}
+    env:
+      MACOSX_DEPLOYMENT_TARGET: ${{ matrix.deployment_target }}
+
+    steps:
+      - uses: actions/checkout@v3
+        name: Checkout the repository
+        with:
+          ref: ${{ github.event.inputs.incoming_ref }}
+
+      - name: Build wheels
+        uses: pypa/cibuildwheel@v2.16.2
+        env:
+          CIBW_ARCHS_MACOS: "arm64"
 
       - name: Archive the built wheels
         uses: actions/upload-artifact@v3
