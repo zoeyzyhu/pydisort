@@ -88,7 +88,8 @@ jobs:
       job-status: ${{ job.status }}
 
     needs:
-      - "macos-wheel"
+      - "macos-wheel-x86"
+      - "macos-wheel-arm"
       - "linux-wheel"
 
     steps:
