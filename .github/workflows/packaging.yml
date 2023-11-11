@@ -57,6 +57,59 @@ jobs:
           path: ./wheelhouse/*.whl
           name: wheels
 
+  linux-wheel:
+    name: Build ${{ matrix.libc }}linux_${{ matrix.arch }} for py${{ matrix.py }}
+    runs-on: ubuntu-20.04
+    outputs:
+      job-status: ${{ job.status }}
+    strategy:
+      matrix:
+        #py: ["38", "39", "310", "311"]
+        #arch: ["x86_64", "i686"]
+        #libc: ["many", "musl"]
+        include:
+          - py: "311"
+            arch: "aarch64"
+            libc: "many"
+        #  - py: "311"
+        #    arch: "ppc64le"
+        #    libc: "many"
+        #  - py: "311"
+        #    arch: "s390x"
+        #    libc: "many"
+        #  - py: "310"
+        #    arch: "aarch64"
+        #    libc: "many"
+        #  - py: "310"
+        #    arch: "ppc64le"
+        #    libc: "many"
+        #  - py: "310"
+        #    arch: "s390x"
+        #    libc: "many"
+        #  - py: "39"
+        #    arch: "aarch64"
+        #    libc: "many"
+        #  - py: "38"
+        #    arch: "aarch64"
+        #    libc: "many"
+      fail-fast: true
+
+    steps:
+      - name: Build wheels
+        uses: pypa/cibuildwheel@v2.12.3
+        env:
+          CIBW_BUILD: cp${{ matrix.py }}-${{ matrix.libc }}linux*
+          CIBW_ARCHS: ${{ matrix.arch }}
+          # cibuildwheel on Linux uses a Docker container to run the build, so
+          # runner.temp is not available. cibuildwheel also uses the /tmp folder, so
+          # we should be pretty safe to also use that.
+
+      - name: Archive the built wheels
+        uses: actions/upload-artifact@v3
+        with:
+          path: ./wheelhouse/*.whl
+          name: wheels
+
   publish-files-to-pypi:
     name: Publish distribution files to PyPI
     runs-on: ubuntu-22.04
@@ -66,6 +119,7 @@ jobs:
 
     needs:
       - "macos-wheel"
+      - "linux-wheel"
 
     steps:
       - name: Download pre-built wheels
