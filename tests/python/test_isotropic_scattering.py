@@ -1,7 +1,6 @@
 #! python3
 """ Test isotropic scattering with pydisort."""
 # pylint: disable = no-name-in-module, invalid-name, import-error
-import os
 import unittest
 from numpy import array, pi
 from numpy.testing import assert_allclose
