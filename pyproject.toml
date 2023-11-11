@@ -1,3 +1,11 @@
 [build-system]
 requires = ["setuptools", "wheel", "cmake", "pybind11"]
 build-backend = "setuptools.build_meta"
+
+[tool.cibuildwheel]
+before-build = "pip install -r requirements.txt"
+
+[tool.cibuildwheel.linux]
+# Build wheels for Linux only
+build = "cp38-manylinux* cp39-manylinux* cp310-manylinux* cp311-manylinux*"
+archs = ["x86_64"]
