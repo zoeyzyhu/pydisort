@@ -95,6 +95,9 @@ jobs:
       fail-fast: true
 
     steps:
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
       - uses: actions/checkout@v3
         name: Checkout the repository
         with:
@@ -107,9 +110,6 @@ jobs:
 
       - name: Install dependencies
         run: pip install -r requirements.txt
-
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
 
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.12.3
