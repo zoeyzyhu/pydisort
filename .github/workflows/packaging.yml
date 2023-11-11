@@ -22,7 +22,7 @@ jobs:
           ref: ${{ github.event.inputs.incoming_ref }}
 
       - name: Build wheels
-        uses: pypa/cibuildwheel@v2.12.3
+        uses: pypa/cibuildwheel@v2.16.2
 
       - name: Archive the built wheels
         uses: actions/upload-artifact@v3
