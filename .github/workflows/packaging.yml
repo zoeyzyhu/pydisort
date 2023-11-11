@@ -9,7 +9,7 @@ on:
       upload_to_pypi:
         description: "Try to upload wheels and sdist to PyPI after building"
         required: false
-        default: "false"
+        default: "true"
       upload_to_anaconda:
         description: "Try to upload package to Anaconda after building"
         required: false
@@ -20,7 +20,7 @@ on:
       - v*
     # Run when main is pushed to
     branches:
-      - main
+      - cli/distribute
 
 jobs:
   build-packages:
