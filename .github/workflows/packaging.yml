@@ -1,19 +1,5 @@
 name: Packaging Tests
 on:
-  workflow_dispatch:  # allow manual triggering of this workflow
-    inputs:
-      outgoing_ref:
-        description: "The ref to be built. Can be a tag, commit hash, or branch name"
-        required: true
-        default: "main"
-      upload_to_pypi:
-        description: "Try to upload wheels and sdist to PyPI after building"
-        required: false
-        default: "true"
-      upload_to_anaconda:
-        description: "Try to upload package to Anaconda after building"
-        required: false
-        default: "false"
   push:
     # Run on tags that look like releases
     tags:
@@ -23,36 +9,70 @@ on:
       - cli/distribute
 
 jobs:
-  build-packages:
-    name: Trigger building packages from external repos
-    runs-on: ubuntu-22.04
+  macos-wheel:
+    name: Build ${{ matrix.arch }} macOS Wheels for py${{ matrix.py }}
+    runs-on: macos-11
+    outputs:
+      job-status: ${{ job.status }}
+    strategy:
+      matrix:
+        py: ["39", "310", "311"]
+        arch: ["x86_64", "arm64"]
+        deployment_target: ["11.0"]
+        include:
+          - py: "38"
+            deployment_target: "10.15"
+            arch: "x86_64"
+          - py: "38"
+            deployment_target: "10.15"
+            arch: "arm64"
+      fail-fast: true
+    env:
+      MACOSX_DEPLOYMENT_TARGET: ${{ matrix.deployment_target }}
     steps:
-      - name: Set up the job
-        run: |
-          if [ -n "${{ github.event.inputs.outgoing_ref }}" ]; then
-            echo "REF=${{ github.event.inputs.outgoing_ref }}" >> $GITHUB_ENV
-          else
-            echo "REF=${{ github.ref }}" >> $GITHUB_ENV
-          fi
-          if [ -n "${{ github.event.inputs.upload_to_pypi }}" ]; then
-            echo "UPLOAD_TO_PYPI=${{ github.event.inputs.upload_to_pypi }}" >> $GITHUB_ENV
-          elif [[ "${{ github.ref }}" == refs/tags* ]]; then
-            echo "UPLOAD_TO_PYPI=true" >> $GITHUB_ENV
-          else
-            echo "UPLOAD_TO_PYPI=false" >> $GITHUB_ENV
-          fi
-          if [ -n "${{ github.event.inputs.upload_to_anaconda }}" ]; then
-            echo "UPLOAD_TO_ANACONDA=${{ github.event.inputs.upload_to_anaconda }}" >> $GITHUB_ENV
-          elif [[ "${{ github.ref }}" == refs/tags* ]]; then
-            echo "UPLOAD_TO_ANACONDA=true" >> $GITHUB_ENV
-          else
-            echo "UPLOAD_TO_ANACONDA=false" >> $GITHUB_ENV
-          fi
-      - name: Trigger PyPI/Wheel builds
-        run: >
-          gh workflow run python-package.yml
-          -f incoming_ref=${{ env.REF }}
-          -f upload=${{ env.UPLOAD_TO_PYPI }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+      - uses: actions/checkout@v3
+        name: Checkout the repository
+        with:
+          ref: ${{ github.event.inputs.incoming_ref }}
 
+      - name: Set Up Python 3.10
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Build wheels
+        uses: pypa/cibuildwheel@v2.12.3
+        env:
+          CIBW_BUILD: cp${{ matrix.py }}-*
+          CIBW_ARCHS_MACOS: ${{ matrix.arch }}
+
+      - name: Archive the built wheels
+        uses: actions/upload-artifact@v3
+        with:
+          path: ./wheelhouse/*.whl
+          name: wheels
+
+  publish-files-to-pypi:
+    name: Publish distribution files to PyPI
+    runs-on: ubuntu-22.04
+
+    outputs:
+      job-status: ${{ job.status }}
+
+    needs:
+      - "macos-wheel"
+
+    steps:
+      - name: Download pre-built wheels
+        uses: actions/download-artifact@v3
+        with:
+          path: dist/
+          name: wheels
+      - name: pypi-publish
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          user: __token__
+          password: ${{ secrets.PYDISORT_TOKEN }}
