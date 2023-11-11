@@ -10,10 +10,18 @@ on:
 
 jobs:
   macos-wheel-x86:
-    name: Build X86 macOS Wheels
+    name: Build ${{ matrix.arch }} macOS Wheels for py${{ matrix.py }}
     runs-on: macos-12
     outputs:
       job-status: ${{ job.status }}
+    strategy:
+      matrix:
+        py: ["38", "39", "310", "311"]
+        arch: ["x86_64"]
+        deployment_target: ["12.0"]
+      fail-fast: true
+    env:
+      MACOSX_DEPLOYMENT_TARGET: ${{ matrix.deployment_target }}
 
     steps:
       - uses: actions/checkout@v3
@@ -24,7 +32,8 @@ jobs:
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.16.2
         env:
-          CIBW_ARCHS_MACOS: "x86_64"
+          CIBW_BUILD: cp${{ matrix.py }}-*
+          CIBW_ARCHS_MACOS: ${{ matrix.arch }}
 
       - name: Archive the built wheels
         uses: actions/upload-artifact@v3
@@ -61,7 +70,6 @@ jobs:
       job-status: ${{ job.status }}
 
     needs:
-      #- "macos-wheel-arm"
       - "macos-wheel-x86"
       - "linux-wheel"
 
