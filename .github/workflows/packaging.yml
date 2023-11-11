@@ -10,7 +10,7 @@ on:
 
 jobs:
   macos-wheel-x86:
-    name: Build ${{ matrix.arch }} macOS Wheels for py${{ matrix.py }}
+    name: Build X86 macOS Wheels
     runs-on: macos-12
     outputs:
       job-status: ${{ job.status }}
@@ -27,31 +27,6 @@ jobs:
         uses: pypa/cibuildwheel@v2.16.2
         env:
           CIBW_ARCHS_MACOS: "x86_64"
-
-      - name: Archive the built wheels
-        uses: actions/upload-artifact@v3
-        with:
-          path: ./wheelhouse/*.whl
-          name: wheels
-
-  macos-wheel-arm:
-    name: Build ${{ matrix.arch }} macOS Wheels for py${{ matrix.py }}
-    runs-on: macos-latest-xlarge
-    outputs:
-      job-status: ${{ job.status }}
-    env:
-      MACOSX_DEPLOYMENT_TARGET: ${{ matrix.deployment_target }}
-
-    steps:
-      - uses: actions/checkout@v3
-        name: Checkout the repository
-        with:
-          ref: ${{ github.event.inputs.incoming_ref }}
-
-      - name: Build wheels
-        uses: pypa/cibuildwheel@v2.16.2
-        env:
-          CIBW_ARCHS_MACOS: "arm64"
 
       - name: Archive the built wheels
         uses: actions/upload-artifact@v3
@@ -88,8 +63,8 @@ jobs:
       job-status: ${{ job.status }}
 
     needs:
+      #- "macos-wheel-arm"
       - "macos-wheel-x86"
-      - "macos-wheel-arm"
       - "linux-wheel"
 
     steps:
