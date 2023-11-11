@@ -53,3 +53,6 @@ jobs:
           gh workflow run python-package.yml
           -f incoming_ref=${{ env.REF }}
           -f upload=${{ env.UPLOAD_TO_PYPI }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+
