@@ -95,30 +95,24 @@ jobs:
       fail-fast: true
 
     steps:
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
+      - name: Set Up Python 3.10
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
 
       - uses: actions/checkout@v3
         name: Checkout the repository
         with:
           ref: ${{ github.event.inputs.incoming_ref }}
 
-      - name: Set Up Python 3.10
-        uses: actions/setup-python@v4
-        with:
-          python-version: "3.10"
+      - name: Install cibuildwheel
+        run: python -m pip install cibuildwheel==2.16.2
 
       - name: Install dependencies
-        run: pip install -r requirements.txt
+        run: python -m pip install -r requirements.txt
 
       - name: Build wheels
-        uses: pypa/cibuildwheel@v2.12.3
-        env:
-          CIBW_BUILD: cp${{ matrix.py }}-${{ matrix.libc }}linux*
-          CIBW_ARCHS: ${{ matrix.arch }}
-          # cibuildwheel on Linux uses a Docker container to run the build, so
-          # runner.temp is not available. cibuildwheel also uses the /tmp folder, so
-          # we should be pretty safe to also use that.
+        run: python -m cibuildwheel --output-dir wheelhouse
 
       - name: Archive the built wheels
         uses: actions/upload-artifact@v3
