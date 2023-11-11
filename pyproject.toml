@@ -2,6 +2,9 @@
 requires = ["setuptools", "wheel", "cmake", "pybind11"]
 build-backend = "setuptools.build_meta"
 
+[tool.cibuildwheel]
+before-build = "pip install -r requirements.txt"
+
 [tool.cibuildwheel.macos]
 # Build wheels for Python 3.8, 3.9, 3.10, and 3.11
 build = "cp38-* cp39-* cp310-* cp311-*"
