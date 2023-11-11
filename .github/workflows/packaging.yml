@@ -10,10 +10,25 @@ on:
 
 jobs:
   macos-wheel:
-    name: Build macOS wheels
-    runs-on: macos-11
+    name: Build ${{ matrix.arch }} macOS Wheels for py${{ matrix.py }}
+    runs-on: macos-12
     outputs:
       job-status: ${{ job.status }}
+    strategy:
+      matrix:
+        py: ["39", "310", "311"]
+        arch: ["x86_64", "arm64"]
+        deployment_target: ["11.0"]
+        include:
+          - py: "38"
+            deployment_target: "10.15"
+            arch: "x86_64"
+          - py: "38"
+            deployment_target: "10.15"
+            arch: "arm64"
+      fail-fast: true
+    env:
+      MACOSX_DEPLOYMENT_TARGET: ${{ matrix.deployment_target }}
 
     steps:
       - uses: actions/checkout@v3
@@ -23,6 +38,8 @@ jobs:
 
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.16.2
+          CIBW_BUILD: cp${{ matrix.py }}-*
+          CIBW_ARCHS_MACOS: ${{ matrix.arch }}
 
       - name: Archive the built wheels
         uses: actions/upload-artifact@v3
@@ -32,7 +49,7 @@ jobs:
 
   linux-wheel:
     name: Build linux wheels
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     outputs:
       job-status: ${{ job.status }}
 
