@@ -44,7 +44,13 @@ class CMakeBuild(build_ext):
         print("extdir: ", extdir)
 
         cfg = 'Debug' if self.debug else 'Release'
-        build_args = ['--config', cfg, '--', '-j2']
+        python_version = f'{sys.version_info.major}.{sys.version_info.minor}'
+
+        # Adding CMake arguments set as environment variable
+        # (needed e.g. to build for ARM OSx on conda-forge)
+        build_args = []
+        if "CMAKE_ARGS" in os.environ:
+            build_args += [item for item in os.environ["CMAKE_ARGS"].split(" ") if item]
 
         # Set up cmake configuration
         _source_dir = os.path.split(os.path.abspath(__file__))[0]
@@ -56,13 +62,15 @@ class CMakeBuild(build_ext):
                 f'-B{_build_dir}',
                 f'-DCMAKE_BUILD_TYPE={cfg}',
                 f'-DCMAKE_LIBRARY_OUTPUT_DIRECTORY={extdir}',
+                f'-DPYTHON_VERSION={python_version}',
             ]
+            cmake_configure_command.extend(build_args)
+            print(cmake_configure_command)
             spawn.spawn(cmake_configure_command)
             spawn.spawn(['cmake', '--build', _build_dir])
         except spawn.DistutilsExecError:
             sys.stderr.write("Error while building with CMake\n")
             sys.exit(-1)
-
 
 class CMakeExtension(Extension):
     def __init__(self, name, sourcedir=''):

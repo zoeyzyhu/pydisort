@@ -3,6 +3,15 @@ include(FetchContent)
 set(FETCHCONTENT_QUIET FALSE)
 
 if(PYTHON_BINDINGS)
+  if(NOT DEFINED PYTHON_VERSION)
+    find_package(Python3 3.8 REQUIRED COMPONENTS Interpreter Development.Module)
+  else()
+    set(Python3_FIND_STRATEGY VERSION)
+    find_package(Python3 ${PYTHON_VERSION} EXACT REQUIRED COMPONENTS
+      Interpreter Development.Module)
+  endif()
+  set(PYTHON_BINDINGS_OPTION "PYTHON_BINDINGS")
+
   FetchContent_Declare(
     pybind11
     DOWNLOAD_EXTRACT_TIMESTAMP
@@ -19,4 +28,6 @@ if(PYTHON_BINDINGS)
   set(PYBIND11_INCLUDE_DIR
       pybind11::headers
       CACHE PATH "include directory of pybind11")
+else()
+  set(PYTHON_BINDINGS_OPTION "NO_PYTHON_BINDINGS")
 endif()

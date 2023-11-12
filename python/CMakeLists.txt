@@ -22,7 +22,7 @@ set_target_properties(${namel} PROPERTIES PREFIX "${PYTHON_MODULE_PREFIX}"
 
 # Execute a Python script to get the site-packages path
 execute_process(
-    COMMAND ${PYTHON_EXECUTABLE} -c "import site; print(site.getsitepackages()[0])"
+    COMMAND ${Python3_EXECUTABLE} -c "import site; print(site.getsitepackages()[0])"
     OUTPUT_VARIABLE PYTHON_SITE_PACKAGES
     OUTPUT_STRIP_TRAILING_WHITESPACE
 )
