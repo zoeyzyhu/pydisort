@@ -92,7 +92,7 @@ DisortWrapper *DisortWrapper::SetAtmosphereDimension(int nlyr, int nstr,
   ds_.nlyr = nlyr;
   ds_.nmom = nmom;
   ds_.nstr = nstr;
-  ds_.nphi = nphase;
+  ds_.nphase = nphase;
 
   return this;
 }
