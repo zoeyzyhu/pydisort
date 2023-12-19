@@ -393,7 +393,7 @@
 
 */ 
 
-void c_disort(disort_state  *ds,
+int c_disort(disort_state  *ds,
 	      disort_output *out)
 {
   static int
@@ -507,7 +507,11 @@ void c_disort(disort_state  *ds,
   }
 
   /* Check input dimensions and variables */
-  c_check_inputs(ds,scat_yes,deltam,corint,tauc,callnum);
+  int err = c_check_inputs(ds,scat_yes,deltam,corint,tauc,callnum);
+  if (err) {
+    free(tauc);
+    return err;
+  }
 
   /*-------------------------------------------------------------------------------------------*
    * Special case for getting albedo and transmissivity of medium for many beam angles at once *
@@ -585,7 +589,7 @@ void c_disort(disort_state  *ds,
     free(ll),    free(oprim),free(tauc),free(taucpr), free(utaupr),free(wk);
     free(ylmc),  free(ylmu), free(z),   free(ab);
 
-    return;
+    return 0;
   }
 
   /*--------------*
@@ -1015,7 +1019,7 @@ void c_disort(disort_state  *ds,
   free(zbeama),free(zbs),free(zj),free(zjg),free(zju),
   free(zgu),free(zz),free(zzg),free(zee),free(zu);
 
-  return;
+  return 0;
 }
 
 /*============================= end of c_disort() =======================*/
@@ -6021,7 +6025,7 @@ double c_xi_func(double umu1,
  * Called by- c_disort
  */
 
-void c_check_inputs(disort_state *ds,
+int c_check_inputs(disort_state *ds,
 		    int           scat_yes,
 		    int           deltam,
 		    int           corint,
@@ -6212,7 +6216,8 @@ void c_check_inputs(disort_state *ds,
   }
 
   if (inperr) {
-    c_errmsg("DISORT--input and/or dimension errors",DS_ERROR);
+    c_errmsg("DISORT--input and/or dimension errors",DS_WARNING);
+    return 1;
   }
 
   if (ds->flag.planck && ds->flag.quiet == VERBOSE) {
@@ -6226,7 +6231,7 @@ void c_check_inputs(disort_state *ds,
     c_errmsg("check_inputs--intensity correction is off;\nintensities may be less accurate",DS_WARNING);
   }
 
-  return;
+  return 0;
 }
 
 /*============================= end of c_check_inputs() =================*/

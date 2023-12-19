@@ -1,0 +1,3 @@
+sphinx
+sphinxcontrib-napoleon
+guzzle_sphinx_theme

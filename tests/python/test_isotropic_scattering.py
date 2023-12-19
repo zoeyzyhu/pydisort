@@ -44,7 +44,8 @@ class PyDisortTests(unittest.TestCase):
         ).set_intensity_dimension(nuphi=1, nutau=2, numu=6).seal()
 
         # get scattering moments
-        pmom = get_phase_function(ds.get_nmom(), "isotropic")
+        _, _, nmom = ds.dimensions()
+        pmom = get_phase_function(nmom, "isotropic")
 
         # set boundary conditions
         ds.umu0 = 0.1
@@ -69,11 +70,11 @@ class PyDisortTests(unittest.TestCase):
         ds.set_user_cosine_polar_angle(umu)
         ds.set_user_azimuthal_angle(uphi)
 
-        result = ds.run().get_intensity()
+        rad, flx = ds.run()
 
-        self.assertEqual(result.shape, (1, 2, 6))
+        self.assertEqual(rad.shape, (1, 2, 6))
         assert_allclose(
-            result,
+            rad,
             array(
                 [
                     [
@@ -86,9 +87,9 @@ class PyDisortTests(unittest.TestCase):
             rtol=1e-5,
         )
 
-        result = ds.get_flux()[:, [RFLDIR, FLDN, FLUP]]
+        flx = flx[:, [RFLDIR, FLDN, FLUP]]
         assert_allclose(
-            result,
+            flx,
             array(
                 [
                     [3.14159265e00, 0., 7.99450975e-02],
@@ -102,9 +103,9 @@ class PyDisortTests(unittest.TestCase):
         # case No.2
         print("==== Case No.2 ====")
         ds.set_single_scattering_albedo(array([1.0]))
-        result = ds.run().get_intensity()
+        rad, flx = ds.run()
         assert_allclose(
-            result,
+            rad,
             array(
                 [
                     [
@@ -117,9 +118,9 @@ class PyDisortTests(unittest.TestCase):
             rtol=1e-5,
         )
 
-        result = ds.get_flux()[:, [RFLDIR, FLDN, FLUP]]
+        flx = flx[:, [RFLDIR, FLDN, FLUP]]
         assert_allclose(
-            result,
+            flx,
             array(
                 [
                     [3.14159265e00, 0., 4.22921778e-01],

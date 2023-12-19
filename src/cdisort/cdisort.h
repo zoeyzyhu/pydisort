@@ -528,7 +528,7 @@ typedef struct {
  * Function prototypes *
  *---------------------*/
 
-void c_disort(disort_state  *ds,
+int c_disort(disort_state  *ds,
               disort_output *out);
 
 double c_bidir_reflectivity ( double       wvnmlo,
@@ -943,7 +943,7 @@ double c_xi_func(double umu1,
                  double umu2,
                  double tau);
 
-void c_check_inputs(disort_state *ds,
+int c_check_inputs(disort_state *ds,
                     int           scat_yes,
                     int           deltam,
                     int           corint,
