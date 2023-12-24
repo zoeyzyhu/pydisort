@@ -9,9 +9,6 @@
 #include <tuple>
 #include <vector>
 
-// toml
-#include <toml++/toml.h>
-
 // cdisort
 #include <cdisort/cdisort.h>
 #undef DEG
@@ -55,13 +52,10 @@ public: // constructor and destructor
         umu0(1.0),
         phi0(0.0) {
     SetAccuracy(1.E-6);
+    SetAtmosphereDimension(1, 4, 4, 4);
+    SetFlags({});
   }
   virtual ~DisortWrapper();
-
-  //! \todo will be removed
-  static DisortWrapper *FromFile(std::string_view filename) {
-    return fromTomlTable(toml::parse_file(filename));
-  }
 
  public:  // string method (used in python wrapper)
   std::string ToString() const;
@@ -136,7 +130,6 @@ public: // constructor and destructor
   disort_output ds_out_;
 
   bool is_sealed_ = false;
-  static DisortWrapper *fromTomlTable(const toml::table &table);
 
   void printDisortAtmosphere(std::ostream &os) const;
   void printDisortOutput(std::ostream &os) const;
@@ -146,10 +139,6 @@ public: // constructor and destructor
 // exposing private members for testing
 class DisortWrapperTestOnly : public DisortWrapper {
  public:
-  static DisortWrapper *FromString(std::string_view content) {
-    return fromTomlTable(toml::parse(content));
-  }
-
   disort_state *GetDisortState() { return &ds_; }
   disort_output *GetDisortOutput() { return &ds_out_; }
 };

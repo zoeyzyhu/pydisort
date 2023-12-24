@@ -6,8 +6,7 @@
 #include <cppdisort/cppdisort.hpp>
 
 int main() {
-  // Test case for DisortWrapper::FromFile method
-  DisortWrapper *disort = DisortWrapper::FromFile("isotropic_scattering.toml");
+  DisortWrapper *disort = new DisortWrapper();
   assert(disort != nullptr);
 
   // Test case for DisortWrapper::SetHeader method
