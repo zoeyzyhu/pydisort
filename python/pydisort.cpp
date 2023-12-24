@@ -9,7 +9,7 @@
 namespace py = pybind11;
 
 PYBIND11_MODULE(pydisort, m) {
-  m.doc() = "Python bindings for disort";
+  m.doc() = "Python bindings for disort.";
 
   m.attr("RFLDIR") = 0;
   m.attr("FLDN") = 1;
@@ -88,51 +88,51 @@ PYBIND11_MODULE(pydisort, m) {
           Parameters
           ----------
           arg0 : dict
-              Dictionary of radiation flags. The following flags are supported:
-              'ibcnd': [True, False], defaults to False
-                  False: General boundary conditions that allows:
-                    * beam illumination from the top (set fbeam)
-                    * isotropic illumination from the top (set fisot)
-                    * thermal emission from the top (set ttemp and temis)
-                    * interal thermal emission (use set_temperature_on_level)
-                    * reflection at the bottom (set lamber, albedo)
-                    * thermal emission from the bottom (set btemp)
-                  True: Special boundary condition that only returns only albedo and
-                    transmissivity of the entire medium.
-                    * pydisort has limited support for this option. Consult the
-                      documentation of DISORT for more details.
-              'usrtau': [True, False], defaults to True
-                  use user optical depths
-              'usrang': [True, False], defaults to True
-                  use user azimuthal angles
-              'lamber': [True, False], defaults to True
-                  turn on lambertian reflection surface
-              'plank': [True, False], defaults to True
-                  turn on plank source (thermal emission)
-              'spher': [True, False], defaults to False
-                  turn on spherical correction
-              'onlyfl': [True, False], defaults to False
-                  only compute radiative fluxes
-              'quiet': [True, False], defaults to True
-                  turn on disort internal printout
-              'intensity_correction': [True, False], defaults to True
-                  turn on intensity correction
-              'old_intensity_correction': [True, False], defaults to True
-                  turn on old intensity correction
-              'general_source': [True, False], defaults to False
-                  turn on general source
-              'output_uum': [True, False], defaults to False
-                  output azimuthal components of the intensity
-              'print-input': [True, False], defaults to False
-                  print input parameters
-              'print-fluxes': [True, False], defaults to False
-                  print fluxes
-              'print-intensity': [True, False], defaults to False
-                  print intensity
-              'print-transmissivity': [True, False], defaults to False
-                  print transmissivity
-              'print-phase-function': [True, False], defaults to False
-                  print phase function
+            Dictionary of radiation flags. The following flags are supported:
+            'ibcnd': [True, False], defaults to False
+                False: General boundary conditions that allows:
+                * beam illumination from the top (set fbeam)
+                * isotropic illumination from the top (set fisot)
+                * thermal emission from the top (set ttemp and temis)
+                * interal thermal emission (use set_temperature_on_level)
+                * reflection at the bottom (set lamber, albedo)
+                * thermal emission from the bottom (set btemp)
+                True: Special boundary condition that only returns only albedo and
+                transmissivity of the entire medium.
+                * pydisort has limited support for this option. Consult the
+                    documentation of DISORT for more details.
+            'usrtau': [True, False], defaults to True
+                use user optical depths
+            'usrang': [True, False], defaults to True
+                use user azimuthal angles
+            'lamber': [True, False], defaults to True
+                turn on lambertian reflection surface
+            'plank': [True, False], defaults to True
+                turn on plank source (thermal emission)
+            'spher': [True, False], defaults to False
+                turn on spherical correction
+            'onlyfl': [True, False], defaults to False
+                only compute radiative fluxes
+            'quiet': [True, False], defaults to True
+                turn on disort internal printout
+            'intensity_correction': [True, False], defaults to True
+                turn on intensity correction
+            'old_intensity_correction': [True, False], defaults to True
+                turn on old intensity correction
+            'general_source': [True, False], defaults to False
+                turn on general source
+            'output_uum': [True, False], defaults to False
+                output azimuthal components of the intensity
+            'print-input': [True, False], defaults to False
+                print input parameters
+            'print-fluxes': [True, False], defaults to False
+                print fluxes
+            'print-intensity': [True, False], defaults to False
+                print intensity
+            'print-transmissivity': [True, False], defaults to False
+                print transmissivity
+            'print-phase-function': [True, False], defaults to False
+                print phase function
 
           Returns
           -------

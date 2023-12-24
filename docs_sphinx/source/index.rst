@@ -3,7 +3,7 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to pydisort's documentation!
+Pydisort Documentation
 ====================================
 
 .. toctree::
@@ -12,9 +12,17 @@ Welcome to pydisort's documentation!
 
 
 
-Indices and tables
-==================
+.. Indices
+.. ==================
 
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+.. * :ref:`genindex`
+.. * :ref:`modindex`
+.. * :ref:`search`
+
+.. pydisort module
+.. ===============
+
+.. automodule:: pydisort
+   :members:
+   :undoc-members:
+   :show-inheritance:

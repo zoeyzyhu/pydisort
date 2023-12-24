@@ -6,3 +6,6 @@ pylint
 wheel
 twine
 cmake
+sphinx
+sphinxcontrib-napoleon
+guzzle_sphinx_theme
