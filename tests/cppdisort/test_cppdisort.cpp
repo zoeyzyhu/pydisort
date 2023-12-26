@@ -13,7 +13,7 @@ int main() {
   disort->SetHeader("Test header");
 
   // Test case for DisortWrapper::SetAtmosphereDimension method
-  disort->SetAtmosphereDimension(3, 4, 5, 6);
+  disort->SetAtmosphereDimension(3, 4, 5);
 
   // Test case for DisortWrapper::SetFlags method
   std::map<std::string, bool> flags = {{"ibcnd", true},

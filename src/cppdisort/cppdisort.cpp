@@ -36,7 +36,7 @@ void DisortWrapper::SetHeader(std::string const &header) {
 }
 
 DisortWrapper *DisortWrapper::SetAtmosphereDimension(int nlyr, int nstr,
-                                                     int nmom, int nphase) {
+                                                     int nmom) {
   if (is_sealed_) {
     throw std::runtime_error(
         "DisortWrapper::SetAtmosphereDimension: "
@@ -61,16 +61,12 @@ DisortWrapper *DisortWrapper::SetAtmosphereDimension(int nlyr, int nstr,
         "number of streams must be positive");
   }
 
-  if (nphase <= 0) {
-    throw std::invalid_argument(
-        "DisortWrapper::SetAtmosphereDimension: "
-        "number of phase functions must be positive");
-  }
-
   ds_.nlyr = nlyr;
   ds_.nmom = nmom;
   ds_.nstr = nstr;
-  ds_.nphase = nphase;
+
+  // needed for Delta-M scaling ?
+  ds_.nphase = nstr;
 
   return this;
 }
@@ -252,6 +248,11 @@ DisortWrapper::~DisortWrapper() {
 }
 
 void DisortWrapper::SetOpticalThickness(std::vector<double> const &tau) {
+  if (!is_sealed_) {
+    throw std::runtime_error("DisortWrapper::SetOpticalThickness: "
+                             "DisortWrapper is not sealed. Call seal() first.");
+  }
+
   for (int i = 0; i < std::min((size_t)ds_.nlyr, tau.size()); ++i) {
     if (tau[i] < 0) {
       throw std::runtime_error("DisortWrapper::SetOpticalThickness: "
@@ -262,6 +263,11 @@ void DisortWrapper::SetOpticalThickness(std::vector<double> const &tau) {
 }
 
 void DisortWrapper::SetSingleScatteringAlbedo(std::vector<double> const &ssa) {
+  if (!is_sealed_) {
+    throw std::runtime_error("DisortWrapper::SetSingleScatteringAlbedo: "
+                             "DisortWrapper is not sealed. Call seal() first.");
+  }
+
   for (int i = 0; i < std::min((size_t)ds_.nlyr, ssa.size()); ++i) {
     if (ssa[i] < 0 || ssa[i] > 1) {
       throw std::runtime_error("DisortWrapper::SetSingleScatteringAlbedo: "
@@ -272,6 +278,11 @@ void DisortWrapper::SetSingleScatteringAlbedo(std::vector<double> const &ssa) {
 }
 
 void DisortWrapper::SetTemperatureOnLevel(std::vector<double> const &temp) {
+  if (!is_sealed_) {
+    throw std::runtime_error("DisortWrapper::SetTemperatureOnLevel: "
+                             "DisortWrapper is not sealed. Call seal() first.");
+  }
+
   for (int i = 0; i <= std::min((size_t)ds_.nlyr, temp.size() - 1); ++i) {
     if (temp[i] < 0) {
       throw std::runtime_error("DisortWrapper::SetTemperatureOnLevel: "
@@ -299,6 +310,11 @@ void DisortWrapper::SetUserOpticalDepth(std::vector<double> const &utau) {
 }
 
 void DisortWrapper::SetUserCosinePolarAngle(std::vector<double> const &umu) {
+  if (!is_sealed_) {
+    throw std::runtime_error("DisortWrapper::SetUserCosinePolarAngle: "
+                             "DisortWrapper is not sealed. Call seal() first.");
+  }
+
   if (ds_.flag.usrang) {
     for (int i = 0; i < std::min((size_t)ds_.numu, umu.size()); ++i) {
       if (umu[i] < -1 || umu[i] > 1) {
@@ -311,6 +327,11 @@ void DisortWrapper::SetUserCosinePolarAngle(std::vector<double> const &umu) {
 }
 
 void DisortWrapper::SetUserAzimuthalAngle(std::vector<double> const &uphi) {
+  if (!is_sealed_) {
+    throw std::runtime_error("DisortWrapper::SetUserAzimuthalAngle: "
+                             "DisortWrapper is not sealed. Call seal() first.");
+  }
+
   if (ds_.flag.usrang) {
     for (int i = 0; i < std::min((size_t)ds_.nphi, uphi.size()); ++i) {
       ds_.phi[i] = uphi[i];
@@ -319,6 +340,11 @@ void DisortWrapper::SetUserAzimuthalAngle(std::vector<double> const &uphi) {
 }
 
 void DisortWrapper::SetPhaseMoments(double *pmom, int nlyr, int nmom_p1) {
+  if (!is_sealed_) {
+    throw std::runtime_error("DisortWrapper::SetPhaseMoments: "
+                             "DisortWrapper is not sealed. Call seal() first.");
+  }
+
   std::memcpy(ds_.pmom, pmom, nlyr * nmom_p1 * sizeof(double));
 }
 
@@ -349,9 +375,8 @@ DisortWrapper *DisortWrapper::Run() {
 
 void DisortWrapper::printDisortAtmosphere(std::ostream &os) const {
   os << "- Levels = " << ds_.nlyr << std::endl;
-  os << "- Moments = " << ds_.nmom << std::endl;
-  os << "- Streams = " << ds_.nstr << std::endl;
-  os << "- Phase functions = " << ds_.nphase << std::endl;
+  os << "- Radiation Streams = " << ds_.nstr << std::endl;
+  os << "- Phase function moments = " << ds_.nmom << std::endl;
 }
 
 void DisortWrapper::printDisortOutput(std::ostream &os) const {
@@ -370,6 +395,18 @@ void DisortWrapper::printDisortOutput(std::ostream &os) const {
     os << ds_.utau[i] << ", ";
   }
   os << std::endl;
+}
+
+void DisortWrapper::printBoundaryConditions(std::ostream &os) const {
+  os << "- Bottom temperature = " << ds_.bc.btemp << std::endl;
+  os << "- Albedo = " << ds_.bc.albedo << std::endl;
+  os << "- Top temperature = " << ds_.bc.ttemp << std::endl;
+  os << "- Top emissivity = " << ds_.bc.temis << std::endl;
+  os << "- Bottom isotropic illumination = " << ds_.bc.fluor << std::endl;
+  os << "- Top isotropic illumination = " << ds_.bc.fisot << std::endl;
+  os << "- Solar beam = " << ds_.bc.fbeam << std::endl;
+  os << "- Cosine of solar zenith angle = " << ds_.bc.umu0 << std::endl;
+  os << "- Solar azimuth angle = " << ds_.bc.phi0 << std::endl;
 }
 
 void DisortWrapper::printDisortFlags(std::ostream &os) const {
@@ -449,6 +486,10 @@ std::string DisortWrapper::ToString() const {
   printDisortFlags(ss);
   ss << "- Accuracy = " << ds_.accur << std::endl;
 
+  ss << "Boundary condition:" << std::endl;
+  printBoundaryConditions(ss);
+
+  ss << "Dimensions:" << std::endl;
   if (is_sealed_) {
     printDisortAtmosphere(ss);
     printDisortOutput(ss);

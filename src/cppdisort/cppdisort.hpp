@@ -52,7 +52,7 @@ public: // constructor and destructor
         umu0(1.0),
         phi0(0.0) {
     SetAccuracy(1.E-6);
-    SetAtmosphereDimension(1, 4, 4, 4);
+    SetAtmosphereDimension(1, 4, 4);
     SetFlags({});
   }
   virtual ~DisortWrapper();
@@ -66,8 +66,7 @@ public: // constructor and destructor
   void SetAccuracy(double accur) { ds_.accur = accur; }
 
   DisortWrapper *SetIntensityDimension(int nuphi, int nutau, int numu);
-  DisortWrapper *SetAtmosphereDimension(int nlyr, int nstr, int nmom,
-                                        int nphase);
+  DisortWrapper *SetAtmosphereDimension(int nlyr, int nstr, int nmom);
 
   void Seal();
   void Unseal();
@@ -135,6 +134,7 @@ public: // constructor and destructor
   void printDisortAtmosphere(std::ostream &os) const;
   void printDisortOutput(std::ostream &os) const;
   void printDisortFlags(std::ostream &os) const;
+  void printBoundaryConditions(std::ostream &os) const;
 };
 
 // exposing private members for testing

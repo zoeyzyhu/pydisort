@@ -39,9 +39,9 @@ class PyDisortTests(unittest.TestCase):
         ds.set_header("01. test isotropic scattering")
 
         # set dimension
-        ds.set_atmosphere_dimension(
-            nlyr=1, nstr=16, nmom=16, nphase=16
-        ).set_intensity_dimension(nuphi=1, nutau=2, numu=6).seal()
+        ds.set_atmosphere_dimension(nlyr=1, nstr=16, nmom=16
+         ).set_intensity_dimension(nuphi=1, nutau=2, numu=6
+         ).seal()
 
         # get scattering moments
         _, _, nmom = ds.dimensions()

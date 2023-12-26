@@ -29,13 +29,15 @@ PYBIND11_MODULE(pydisort, m) {
   - Memory management is handled by the C++ class. The user does not need to
     worry about memory allocation and deallocation.
   - Documentation is automated using sphinx and readthedocs.
+  - Safety guards are implemented to prevent the user from setting incorrect
+    values for arrays or calling methods in the wrong order.
 
   Note that the underlying calculation engine is still the same as the C-DISORT program. 
   So the speed of pydisort is the same as the origin C-DISORT program.
 
   Examples
   --------
-  - Example 1: Calculate radiative flux in a plane-parallel atmosphere
+  - Example 1: Calculate attenuation of radiative flux in a plane-parallel atmosphere
 
   >>> from pydisort import disort, RFLDIR, FLDN, FLUP
   >>> ds = disort()
@@ -43,33 +45,62 @@ PYBIND11_MODULE(pydisort, m) {
   >>> ds.set_flags(flags)
   >>> ds.set_atmosphere_dimension(nlyr = 4)
   >>> ds.seal()
-  >>> ds.set_optical_thickness([0., 0.1, 0.2, 0.3])
+  >>> ds.set_optical_thickness([0.1, 0.2, 0.3, 0.4])
   >>> ds.fbeam = 3.14159
   >>> _, flx = ds.run()
   >>> flx = flx[:, [RFLDIR, FLDN, FLUP]]
+  >>> flx
+  array([[3.14159   , 0.        , 0.        ],
+         [2.84262818, 0.        , 0.        ],
+         [2.32734711, 0.        , 0.        ],
+         [1.72414115, 0.        , 0.        ],
+         [1.15572637, 0.        , 0.        ]])
 
-  - Example 2: Calculate isotropic scattering in a plane-parallel atmosphere
+  In the example above, flx has two dimensions. The first dimension is number of atmosphere
+  levels (nlyr + 1 = 5), and the second dimension is number of extracted flux fields (3).
+  ``RFDLIR``, ``FLDN``, and ``FLUP`` are the indices representing the three flux fields:
+  direct flux, diffuse flux, and upward flux, respectively. 
+  Consult ``pydisort.run()`` method for more information on the indices of flux fields.
+  The attenuation of radiative flux is acoording to the Beer-Lambert law, i.e.,
+
+  .. math::
+
+    F(z) = F(0) \exp(-\tau(z)),
+
+  where :math:`F(z)` is the radiative flux at level :math:`z`, 
+  :math:`F(0)` is the radiative flux at the top of the atmosphere, and :math:`\tau(z)` is the
+  optical depth from the top of the atmosphere to level :math:`z`. The default direction of
+  radiative flux is nadir.
+
+  - Example 2: Calculate intensity from isotropic scattering in a plane-parallel atmosphere
 
   >>> from pydisort import disort, get_phase_function
   >>> ds = disort()
   >>> flags = {"planck": False}
   >>> ds.set_flags(flags)
-  >>> ds.set_atmosphere_dimension(nlyr = 1, nstr = 16, nmom = 16, nphase = 16)
+  >>> ds.set_atmosphere_dimension(nlyr = 1, nstr = 16, nmom = 16)
   >>> ds.set_intensity_dimension(nuphi = 1, nutau = 2, numu = 6)
   >>> ds.seal()
   >>> pmom = get_phase_function(nmom = 16, model = "isotropic")
-  >>> ds.set_optical_thickness([0.03125])
-  >>> ds.set_single_scattering_albedo([0.2])
+  >>> ds.set_optical_thickness([0.1])
+  >>> ds.set_single_scattering_albedo([1.0])
   >>> ds.set_phase_moments(pmom)
-  >>> ds.set_user_optical_depth([0.0, 0.03125])
-  >>> ds.set_user_cosine_polar_angle([0.0, 0.5, 1.0])
+  >>> ds.set_user_optical_depth([0.0, 0.1])
+  >>> ds.set_user_cosine_polar_angle([-1.0, -0.5, -0.1, 0.1, 0.5, 1.0])
   >>> ds.set_user_azimuthal_angle([0.0])
-  >>> ds.umu0 = 0.1
-  >>> ds.phi0 = 0.
-  >>> ds.albedo = 0.0
-  >>> ds.fluor = 0.0
-  >>> ds.fbeam = 3.14159 / ds.umu0
+  >>> ds.umu0 = 1.0
+  >>> ds.fbeam = 3.14159
   >>> rad, flx = ds.run()
+  >>> rad
+  array([[[0.        , 0.        , 0.        , 0.18095504, 0.0516168 , 0.02707849],
+          [0.02703935, 0.05146774, 0.17839685, 0.        , 0.        , 0.        ]]])
+
+  The intensity array ``rad`` has three dimensions. The first dimension is the 
+  azimuthal angles (1). The second dimension is optical depth (2). 
+  The third dimension is the polar angles (6). The result is interpreted as backsattering
+  at the top of the atmosphere (optical depth = 0.0) and forward scattering at the bottom
+  of the atmosphere (optical depth = 0.1). 
+  
 
   Troubleshooting
   ---------------
@@ -80,39 +111,43 @@ PYBIND11_MODULE(pydisort, m) {
     the cause of the error, you can fix the error by calling ``unseal()`` method,
     then setting the correct values, and then calling ``seal()`` method again.
 
-  - One common mistake that results in "RuntimeError: DisortWrapper::Run failed"
+  - One common issue that results in "RuntimeError: DisortWrapper::Run failed"
     is incompatible flags for flux or intensity calculations. For example, ``usrtau``
     and ``usrang`` flags should set to ``False`` when ``onlyfl`` flag is set to ``True``.
 
-  - Another common mistake is setting the wrong values for temperature, optical thickness,
+  - Another common issue is setting the wrong values for temperature, optical thickness,
     single scattering albedo, or phase function moments. All these values must be
     positive. If you set a negative value, you will get "RuntimeError: DisortWrapper::Run failed".
 
-  - If you encounter a segmentation fault, please check if you have set the
-    correct dimension of the atmosphere and intensity arrays. The dimension
-    of the arrays can be set using the set_atmosphere_dimension() and
-    set_intensity_dimension() methods. The dimension of the arrays must be
-    set before calling the seal() method. The seal() method must be called
-    before setting the values of the arrays.
+  - The program should not exit unexpectedly. If the program exits unexpectedly,
+    please report the issue to the author (zoey.zyhu@gmail.com).
 
-  Attributes
-  ----------
-  RFLDIR : int
-      index of direct beam flux
-  FLDN : int
-      index of diffuse flux downward
-  FLUP : int
-      index of diffuse flux upward
-  DFDT : int
-      index of flux divergence, d (net flux) / d (tau)
-  UAVG : int
-      index of mean intensity including direct beam
-  UAVGDN : int
-      index of downward mean intensity
-  UAVGUP : int
-      index of upward mean intensity
-  UAVGSO : int
-      index of mean direct beam
+  Important Dimensions
+  --------------------
+  nlyr
+      number of atmosphere layers
+  nstr
+      number of radiation streams
+  nmom
+      number of phase function moments in addition to the zeroth moment
+
+  Tips
+  ----
+  - Number of atmosphere levels is one more than the number of atmosphere layers.
+
+  - Temperature is defined on levels, not layers. Other properties such as
+    optical thickness, single scattering albedo, and phase function moments
+    are defined on layers.
+
+  - You can use ``print()`` method to print some of the DISORT internal states.
+
+  - You can chain methods such as ``set_flags``, ``set_atmosphere_dimension()``, 
+    ``set_intensity_dimension()``, and ``seal()`` together.
+
+  - If you want to have more insights into DISORT internal inputs,
+    you can set the ``print-input`` flag to ``True``.
+    The DISORT internal inputs will be printed to the standard output
+    when the ``run()`` method is called.
 
   References
   ----------
@@ -147,7 +182,7 @@ PYBIND11_MODULE(pydisort, m) {
 
       Returns
       -------
-      pmom : numpy.ndarray
+      pmom : List[float]
           Phase function moments, shape (1 + nmom,)
 
       Notes
@@ -349,8 +384,6 @@ PYBIND11_MODULE(pydisort, m) {
               Number of phase function moments
           nstr : int, optional, defaults to 4
               Number of streams (computational polar angles)
-          nphase : int, optional, defaults to 4
-              Number of angles (grid points)
 
           Returns
           -------
@@ -365,14 +398,14 @@ PYBIND11_MODULE(pydisort, m) {
 
           Notes
           -----
-          It is common to set nstr = nphase = nmom.
+          It is common to set nstr = nmom.
           Memory was not allocated until ``disort.seal()`` is called.
 
           See Also
           --------
           seal : allocate memory for disort
           )",
-           py::arg("nlyr"), py::arg("nmom") = 4, py::arg("nstr") = 4, py::arg("nphase") = 4)
+           py::arg("nlyr"), py::arg("nmom") = 4, py::arg("nstr") = 4)
 
       .def("set_intensity_dimension", &DisortWrapper::SetIntensityDimension, R"(
           Set intensity dimension for disort
@@ -483,7 +516,7 @@ PYBIND11_MODULE(pydisort, m) {
           Parameters
           ----------
           arg0 : array of floats
-              User azimuthal angle
+              User azimuthal angle in radians
 
           Returns
           -------
@@ -509,7 +542,8 @@ PYBIND11_MODULE(pydisort, m) {
           Notes
           -----
           This function sets both the minimum and maximum wavenumber to the same value.
-          Internal thermal emission requires setting a wavenumber or a wavenumber range.
+          Internal thermal emission is calculated as the planck function at the specified 
+          wavenumber.
 
           See Also
           --------
@@ -533,7 +567,9 @@ PYBIND11_MODULE(pydisort, m) {
 
           Notes
           -----
-          Internal thermal emission requires setting a wavenumber or a wavenumber range.
+          This function sets the range of wavenumbers for internal thermal emission.
+          Internal thermal emission is calculated as the integral of the planck function
+          over the specified wavenumber range.
 
           See Also
           --------
@@ -566,6 +602,11 @@ PYBIND11_MODULE(pydisort, m) {
           -------
           This function must be called after ``disort.set_atmosphere_dimension()`` and ``disort.seal()``.
 
+          Notes
+          -----
+          If the size of the input array is inconsistent with the atmosphere dimension,
+          the smaller size is used to set the internal array values.
+
           See Also
           --------
           set_atmosphere_dimension : set atmosphere dimension
@@ -591,11 +632,16 @@ PYBIND11_MODULE(pydisort, m) {
           >>> disort = pydisort.disort()
           >>> disort.set_atmosphere_dimension(4)
           >>> disort.seal()
-          >>> disort.set_single_scattering_albedo([1.0, 2.0, 3.0, 4.0])
+          >>> disort.set_single_scattering_albedo([0.1, 0.2, 0.3, 0.4])
 
           Warning
           -------
           This function must be called after ``disort.set_atmosphere_dimension()`` and ``disort.seal()``.
+
+          Notes
+          -----
+          If the size of the input array is inconsistent with the atmosphere dimension,
+          the smaller size is used to set the internal array values.
 
           See Also
           --------
@@ -621,7 +667,7 @@ PYBIND11_MODULE(pydisort, m) {
           >>> disort = pydisort.disort()
           >>> disort.set_atmosphere_dimension(4)
           >>> disort.seal()
-          >>> disort.set_temperature_on_level([1.0, 2.0, 3.0, 4.0, 5.0])
+          >>> disort.set_temperature_on_level([100.0, 200.0, 300.0, 400.0, 500.0])
 
           Notes
           -----
@@ -630,6 +676,11 @@ PYBIND11_MODULE(pydisort, m) {
           Warning
           -------
           This function must be called after ``disort.set_atmosphere_dimension()`` and ``disort.seal()``.
+
+          Notes
+          -----
+          If the size of the input array is inconsistent with the atmosphere dimension,
+          the smaller size is used to set the internal array values.
 
           See Also
           --------
@@ -668,7 +719,7 @@ PYBIND11_MODULE(pydisort, m) {
           -------
           >>> import pydisort
           >>> ds = pydisort.disort()
-          >>> ds.set_atmosphere_dimension(nlyr = 1, nstr = 16, nmom = 16, nphase = 16)
+          >>> ds.set_atmosphere_dimension(nlyr = 1, nstr = 16, nmom = 16)
           >>> ds.seal()
           >>> _, _, nmom = ds.dimensions()
           >>> pmom = get_phase_function(nmom, "isotropic")
@@ -678,9 +729,14 @@ PYBIND11_MODULE(pydisort, m) {
           -------
           This function must be called after ``disort.set_atmosphere_dimension()`` and ``disort.seal()``.
 
+          Notes
+          -----
+          If the size of the input array is inconsistent with the atmosphere dimension,
+          the smaller size is used to set the internal array values.
+
           See Also
           --------
-          dimensions : get disort dimensions
+          dimensions : get DISORT internal dimensions
           get_phase_function : get phase function moments
           set_single_scattering_albedo : set layer single scattering albedo
           )")
@@ -725,7 +781,7 @@ PYBIND11_MODULE(pydisort, m) {
           The returned array references the internal memory of the disort object.
           The first dimension is the number of "levels", which is one more than
           the number of layers. The second dimension is the number of flux fields.
-          There are 8 flux fields, named as follows:
+          There are 8 flux fields in total, named as follows:
           
           .. list-table::
             :widths: 10 20 30
@@ -768,7 +824,7 @@ PYBIND11_MODULE(pydisort, m) {
           >>> ds.seal()
           >>> rad, flx = ds.run()
 
-          In the example above, `rad` and `flx` references the internal memory of the
+          In the example above, ``rad`` and ``flx`` references the internal memory of the
           DISORT solver without copying the data. If you want to extract a subset of
           the flux fields, you can do the following:
 
@@ -776,10 +832,10 @@ PYBIND11_MODULE(pydisort, m) {
           >>> ds = pydisort.disort()
           >>> ds.seal()
           >>> _, flx = ds.run()
-          >> flx = flx[:, [RFLDIR, FLDN, FLUP]]
+          >>> flx = flx[:, [RFLDIR, FLDN, FLUP]]
 
           However, using a subset of the flux fields will create a copy of the
-          underlying memory. In the example above, `flx` is the variable that extracts 
+          underlying memory. In the example above, ``flx`` is the variable that extracts 
           the direct beam, diffuse downward, and diffuse upward fluxes.
           )")
 
@@ -790,7 +846,7 @@ PYBIND11_MODULE(pydisort, m) {
                                                disort.nMoments()};
             return shape;
           }, R"(
-          Get the dimension of the disort solver
+          Get the dimensions of the DISORT solver
 
           Parameters
           ----------
@@ -803,6 +859,6 @@ PYBIND11_MODULE(pydisort, m) {
           nstr : int
               Number of streams
           nmom : int
-              Number of phase function moments
+              Number of phase function moments in addition to the zeroth moment
           )");
 }
