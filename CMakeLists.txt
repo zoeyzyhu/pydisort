@@ -29,7 +29,7 @@ option(PYTHON_BINDINGS "Build Python Bindings" ON)
 
 # 1. Set up project system libraries ##
 message(STATUS "3. Set up project system libraries----------------")
-include(${CMAKE_SOURCE_DIR}/cmake/tomlpp.cmake)
+#include(${CMAKE_SOURCE_DIR}/cmake/tomlpp.cmake)
 include(${CMAKE_SOURCE_DIR}/cmake/pybind11.cmake)
 
 # 1. Set up project configure file and library ##
