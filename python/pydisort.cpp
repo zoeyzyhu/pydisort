@@ -39,7 +39,7 @@ PYBIND11_MODULE(pydisort, m) {
 
   >>> from pydisort import disort, RFLDIR, FLDN, FLUP
   >>> ds = disort()
-  >>> flags = {"onlyfl": True}
+  >>> flags = {"onlyfl": True, "usrtau": False, "usrang": False}
   >>> ds.set_flags(flags)
   >>> ds.set_atmosphere_dimension(nlyr = 4)
   >>> ds.seal()
@@ -70,6 +70,30 @@ PYBIND11_MODULE(pydisort, m) {
   >>> ds.fluor = 0.0
   >>> ds.fbeam = 3.14159 / ds.umu0
   >>> rad, flx = ds.run()
+
+  Troubleshooting
+  ---------------
+  - The most common error is "RuntimeError: DisortWrapper::Run failed". When
+    this error occurs, please check the error message printed before the
+    error message. The error message printed before the error message
+    usually provides more information on the cause of the error. Once you identify
+    the cause of the error, you can fix the error by calling ``unseal()`` method,
+    then setting the correct values, and then calling ``seal()`` method again.
+
+  - One common mistake that results in "RuntimeError: DisortWrapper::Run failed"
+    is incompatible flags for flux or intensity calculations. For example, ``usrtau``
+    and ``usrang`` flags should set to ``False`` when ``onlyfl`` flag is set to ``True``.
+
+  - Another common mistake is setting the wrong values for temperature, optical thickness,
+    single scattering albedo, or phase function moments. All these values must be
+    positive. If you set a negative value, you will get "RuntimeError: DisortWrapper::Run failed".
+
+  - If you encounter a segmentation fault, please check if you have set the
+    correct dimension of the atmosphere and intensity arrays. The dimension
+    of the arrays can be set using the set_atmosphere_dimension() and
+    set_intensity_dimension() methods. The dimension of the arrays must be
+    set before calling the seal() method. The seal() method must be called
+    before setting the values of the arrays.
 
   Attributes
   ----------
