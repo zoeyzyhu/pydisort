@@ -7,7 +7,7 @@ add_executable(test_cppdisort.${buildl} test_cppdisort.cpp)
 
 set_target_properties(
   test_cppdisort.${buildl}
-  PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
+  PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/tests"
              COMPILE_FLAGS ${CMAKE_CXX_FLAGS_${buildu}})
 
 target_link_libraries(test_cppdisort.${buildl} ${CPPDISORT_LIBRARY_${buildu}})
@@ -21,5 +21,5 @@ target_include_directories(
 file(GLOB inputs *.inp *.toml)
 foreach(input ${inputs})
   get_filename_component(name ${input} NAME)
-  configure_file(${input} ${CMAKE_BINARY_DIR}/bin/${name} COPYONLY)
+  configure_file(${input} ${CMAKE_BINARY_DIR}/tests/${name} COPYONLY)
 endforeach()

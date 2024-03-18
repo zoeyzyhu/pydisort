@@ -8,7 +8,7 @@ add_executable(test_cdisort.${buildl} test_cdisort.c print_test.c)
 set_target_properties(
   test_cdisort.${buildl}
   PROPERTIES 
-  RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
+  RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/tests"
   COMPILE_FLAGS ${CMAKE_C_FLAGS_${buildu}}
   LINK_OPTIONS "-O3"
   )
