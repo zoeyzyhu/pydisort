@@ -17,9 +17,9 @@ def check_requirements():
             "Unsupported operating system. Please use MacOS or Linux.\n")
         return False
 
-    # Min python version is Python3.8
-    if sys.version_info < (3, 8):
-        sys.stderr.write("Python 3.8 or higher is required.\n")
+    # Min python version is Python3.6
+    if sys.version_info < (3, 6):
+        sys.stderr.write("Python 3.6 or higher is required.\n")
         return False
 
     return True
@@ -27,6 +27,7 @@ def check_requirements():
 
 class CMakeBuild(build_ext):
     """Define external build cmd for cmake."""
+
     def run(self):
         """Self-define run."""
         for ext in self.extensions:
@@ -40,7 +41,8 @@ class CMakeBuild(build_ext):
     def build_extension(self, ext):
         """Build project"""
         print("ext.name: ", ext.name)
-        extdir = os.path.abspath(os.path.dirname(self.get_ext_fullpath(ext.name)))
+        extdir = os.path.abspath(os.path.dirname(
+            self.get_ext_fullpath(ext.name)))
         print("extdir: ", extdir)
 
         cfg = 'Debug' if self.debug else 'Release'
@@ -50,7 +52,8 @@ class CMakeBuild(build_ext):
         # (needed e.g. to build for ARM OSx on conda-forge)
         build_args = []
         if "CMAKE_ARGS" in os.environ:
-            build_args += [item for item in os.environ["CMAKE_ARGS"].split(" ") if item]
+            build_args += [
+                item for item in os.environ["CMAKE_ARGS"].split(" ") if item]
 
         # Set up cmake configuration
         _source_dir = os.path.split(os.path.abspath(__file__))[0]
@@ -72,6 +75,7 @@ class CMakeBuild(build_ext):
             sys.stderr.write("Error while building with CMake\n")
             sys.exit(-1)
 
+
 class CMakeExtension(Extension):
     def __init__(self, name, sourcedir=''):
         Extension.__init__(self, name, sources=[])
@@ -85,5 +89,5 @@ if not check_requirements():
 # Setup configuration
 setup(
     ext_modules=[CMakeExtension('pydiosrt', 'python')],
-    cmdclass=dict(build_ext = CMakeBuild),
-    )
+    cmdclass=dict(build_ext=CMakeBuild),
+)

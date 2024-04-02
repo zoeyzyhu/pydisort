@@ -14,7 +14,7 @@ jobs:
 
     strategy:
       matrix:
-        py: ["38", "39", "310", "311"]
+        py: ["38", "39", "310", "311", "312"]
         deployment_target: ["11.0"]
       fail-fast: true
     env:
@@ -49,7 +49,7 @@ jobs:
 
     strategy:
       matrix:
-        py: ["38", "39", "310", "311"]
+        py: ["36", "37", "38", "39", "310", "311", "312"]
         arch: ["x86_64"]
         libc: ["many"]
       fail-fast: true
