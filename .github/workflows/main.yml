@@ -57,28 +57,12 @@ jobs:
       - name: Install python modules
         run: pip install -r requirements.txt
 
-      #- name: Get Python site-packages path
-      #  id: get_site_packages
-      #  run: echo "site_packages_path=$(python -c 'import site; print(site.getsitepackages()[0])')" >> $GITHUB_OUTPUT
-
-      #- name: Verify site package path
-      #  run: echo ${{ steps.get_site_packages.outputs.site_packages_path }}
-
       - name: Configure CMake
         run: |
-          cmake -B ${{github.workspace}}/build \
-          -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} \
-          -DCMAKE_INSTALL_PREFIX=${{ steps.get_site_packages.outputs.site_packages_path }}
+          cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
 
       - name: Build
         run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
 
-      - name: Install
-        run: cmake --install ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
-
-      #- name: Add __init__.py
-      #  run: |
-      #    echo "from .pydisort import *" > ${{ steps.get_site_packages.outputs.site_packages_path }}/pydisort/__init__.py
-
       - name: Run tests for C++ and Pybind
-        run: cd ${{github.workspace}}/build/bin && python3 test_isotropic_scattering.py
+        run: cd ${{github.workspace}}/build/tests && ctest

@@ -1,4 +1,8 @@
 #! python3
+
+import sys
+sys.path.append('@CMAKE_BINARY_DIR@/python')
+
 """ Test isotropic scattering with pydisort."""
 # pylint: disable = no-name-in-module, invalid-name, import-error
 import unittest
@@ -35,7 +39,8 @@ class PyDisortTests(unittest.TestCase):
 
     def test_isotropic_scattering(self):
         """Test isotropic scattering."""
-        ds = disort().set_flags(self.flags)
+        ds = disort()
+        ds.set_flags(self.flags)
         ds.set_header("01. test isotropic scattering")
 
         # set dimension
