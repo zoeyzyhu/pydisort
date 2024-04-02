@@ -1,5 +1,5 @@
 
-#include <cdisort/cdisort.h>
+#include <cdisort.h>
 
 /*========================== print_test() ================================*/
 

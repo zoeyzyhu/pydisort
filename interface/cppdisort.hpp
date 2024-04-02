@@ -1,30 +1,17 @@
-#ifndef SRC_CPPDISORT_CPPDISORT_HPP_
-#define SRC_CPPDISORT_CPPDISORT_HPP_
+#ifndef INTERFACE_CPPDISORT_HPP_
+#define INTERFACE_CPPDISORT_HPP_
 
 // C/C++
 #include <iostream>
 #include <map>
 #include <string>
-#include <string_view>
-#include <tuple>
 #include <vector>
 
-// cdisort
-#include <cdisort/cdisort.h>
-#undef DEG
-#undef SQR
-#undef MIN
-#undef MAX
-#undef LIMIT_RANGE
-#undef IMIN
-#undef IMAX
-#undef F77_SIGN
-
-// pydisort
-#include <configure.hpp>
+struct disort_state;
+struct disort_output;
 
 // wraps c_getmom
-std::vector<double> get_phase_function(int nmom, std::string_view model,
+std::vector<double> get_phase_function(int nmom, std::string model,
                                        double gg = 0.);
 
 // wraps disort_state and disort_output
@@ -41,20 +28,7 @@ class DisortWrapper {
   double phi0;
 
 public: // constructor and destructor
-  DisortWrapper()
-      : btemp(0.0),
-        ttemp(0.0),
-        fluor(0.0),
-        albedo(0.0),
-        fisot(0.0),
-        fbeam(0.0),
-        temis(0.0),
-        umu0(1.0),
-        phi0(0.0) {
-    SetAccuracy(1.E-6);
-    SetAtmosphereDimension(1, 4, 4);
-    SetFlags({});
-  }
+  DisortWrapper();
   virtual ~DisortWrapper();
 
  public:  // string method (used in python wrapper)
@@ -62,35 +36,29 @@ public: // constructor and destructor
 
  public:  // setters and getters
   void SetHeader(std::string const &header);
-  DisortWrapper *SetFlags(std::map<std::string, bool> const &flags);
-  void SetAccuracy(double accur) { ds_.accur = accur; }
+  void SetFlags(std::map<std::string, bool> const &flags);
+  void SetAccuracy(double accur);
 
-  DisortWrapper *SetIntensityDimension(int nuphi, int nutau, int numu);
-  DisortWrapper *SetAtmosphereDimension(int nlyr, int nstr, int nmom);
+  void SetIntensityDimension(int nuphi, int nutau, int numu);
+  void SetAtmosphereDimension(int nlyr, int nstr, int nmom);
 
   void Seal();
   void Unseal();
   bool IsSealed() const { return is_sealed_; }
-  bool IsFluxOnly() const { return ds_.flag.onlyfl; }
+  bool IsFluxOnly() const;
 
-  int nLayers() const { return ds_.nlyr; }
-  int nMoments() const { return ds_.nmom; }
-  int nStreams() const { return ds_.nstr; }
-  int nUserOpticalDepths() const { return ds_.ntau; }
-  int nUserPolarAngles() const { return ds_.numu; }
-  int nUserAzimuthalAngles() const { return ds_.nphi; }
+  int nLayers() const;
+  int nMoments() const;
+  int nStreams() const;
+  int nUserOpticalDepths() const;
+  int nUserPolarAngles() const;
+  int nUserAzimuthalAngles() const;
 
   //! \brief Set the wavenumber range
-  void SetWavenumberRange_invcm(double wmin, double wmax) {
-    ds_.wvnmlo = wmin;
-    ds_.wvnmhi = wmax;
-  }
+  void SetWavenumberRange_invcm(double wmin, double wmax);
 
   //! \brief Set the wavenumber
-  void SetWavenumber_invcm(double wave) {
-    ds_.wvnmlo = wave;
-    ds_.wvnmhi = wave;
-  }
+  void SetWavenumber_invcm(double wave);
 
   //! \brief Set the optical thickness defined on layers
   void SetOpticalThickness(std::vector<double> const &tau);
@@ -120,14 +88,14 @@ public: // constructor and destructor
   void SetPhaseMoments(double *pmom, int nlyr, int nmom_p1);
 
   //! \brief Run disort
-  DisortWrapper *Run();
+  void Run();
 
   //! \brief Get disort run result
-  disort_output const *Result() const { return &ds_out_; }
+  disort_output const *Result() const;
 
  protected:
-  disort_state ds_;
-  disort_output ds_out_;
+  disort_state *ds_;
+  disort_output *ds_out_;
 
   bool is_sealed_ = false;
 
@@ -135,13 +103,6 @@ public: // constructor and destructor
   void printDisortOutput(std::ostream &os) const;
   void printDisortFlags(std::ostream &os) const;
   void printBoundaryConditions(std::ostream &os) const;
-};
-
-// exposing private members for testing
-class DisortWrapperTestOnly : public DisortWrapper {
- public:
-  disort_state *GetDisortState() { return &ds_; }
-  disort_output *GetDisortOutput() { return &ds_out_; }
 };
 
 #endif  // SRC_CPPDISORT_CPPDISORT_HPP_

@@ -113,8 +113,6 @@ repos:
       - id: cmake-format
         name: Fix cmake
         args: [--in-place]
-        language: python
-        types: [cmake]
 
   ## 3. Lints ================================================================
 

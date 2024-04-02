@@ -88,7 +88,7 @@
  */
 
 // Change header file for cmake
-#include <cdisort/cdisort.h>
+#include <cdisort.h>
 
 /*
  * Disort-specific shift macros.

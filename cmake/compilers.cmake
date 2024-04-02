@@ -1,52 +1,97 @@
-# ==================================================================
-# Checks for compiler features (such as C++14 support) and compiler specific
-# bugs that - usually set up further configuration (such as preprocessor
-# definitions) - disable a specific flag for a specific compiler version.
-# ==================================================================
-
-# 1. General setup for GCC and compilers sufficiently close to GCC:
-
+# Setup for GCC compiler:
+#
 if(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
-  set(CMAKE_CXX_FLAGS_RELEASE
-      "-O2 -funroll-loops -funroll-all-loops -fstrict-aliasing -fPIC")
+  if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    set(${PROJECT_NAME}_CXX_FLAGS "-g3"
+      CACHE INTERNAL "${PROJECT_NAME} CXX compiler flags")
+  elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
+    set(${PROJECT_NAME}_CXX_FLAGS "-O3"
+      CACHE INTERNAL "${PROJECT_NAME} CXX compiler flags")
+  else()
+    message(FATAL_ERROR "Unknown build type: ${CMAKE_BUILD_TYPE}")
+  endif()
 
-  set(CMAKE_CXX_FLAGS_DEBUG "-g3 -fPIC")
-  set(CMAKE_C_FLAGS_RELEASE
-      "-O2 -funroll-loops -funroll-all-loops -fstrict-aliasing -fPIC")
-
-  set(CMAKE_C_FLAGS_DEBUG "-g3 -fPIC")
-
-  set(KNOWN_COMPILER TRUE)
+  set(KNOWN_CXX_COMPILER TRUE)
 endif()
 
+if(CMAKE_C_COMPILER_ID MATCHES "GNU")
+  if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    set(${PROJECT_NAME}_C_FLAGS "-g3"
+      CACHE INTERNAL "${PROJECT_NAME} C compiler flags")
+  elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
+    set(${PROJECT_NAME}_C_FLAGS "-O3"
+      CACHE INTERNAL "${PROJECT_NAME} C compiler flags")
+  else()
+    message(FATAL_ERROR "Unknown build type: ${CMAKE_BUILD_TYPE}")
+  endif()
+
+  set(KNOWN_C_COMPILER TRUE)
+endif()
+
+# Setup for Clang compiler:
+#
 if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-  set(CMAKE_CXX_FLAGS_RELEASE "-O2 -funroll-loops -fstrict-aliasing")
+  if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    set(${PROJECT_NAME}_CXX_FLAGS "-g3"
+      CACHE INTERNAL "${PROJECT_NAME} CXX compiler flags")
+  elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
+    set(${PROJECT_NAME}_CXX_FLAGS "-O3"
+      CACHE INTERNAL "${PROJECT_NAME} CXX compiler flags")
+  else()
+    message(FATAL_ERROR "Unknown build type: ${CMAKE_BUILD_TYPE}")
+  endif()
 
-  set(CMAKE_CXX_FLAGS_DEBUG "-g3")
-
-  set(CMAKE_C_FLAGS_RELEASE "-O2 -funroll-loops -fstrict-aliasing")
-
-  set(CMAKE_C_FLAGS_DEBUG "-g3")
-
-  set(KNOWN_COMPILER TRUE)
+  set(KNOWN_CXX_COMPILER TRUE)
 endif()
 
-# 1. Setup for ICC compiler (version >= 10):
+if(CMAKE_C_COMPILER_ID MATCHES "Clang")
+  if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    set(${PROJECT_NAME}_C_FLAGS "-g3"
+      CACHE INTERNAL "${PROJECT_NAME} C compiler flags")
+  elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
+    set(${PROJECT_NAME}_C_FLAGS "-O3"
+      CACHE INTERNAL "${PROJECT_NAME} C compiler flags")
+  else()
+    message(FATAL_ERROR "Unknown build type: ${CMAKE_BUILD_TYPE}")
+  endif()
 
+  set(KNOWN_C_COMPILER TRUE)
+endif()
+
+# Setup for ICC compiler:
+#
 if(CMAKE_CXX_COMPILER_ID MATCHES "Intel")
-  message(FATAL_ERROR "\n" "Intel compiler not implemented.\n\n")
+  if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    set(${PROJECT_NAME}_CXX_FLAGS "-g3"
+      CACHE INTERNAL "${PROJECT_NAME} CXX compiler flags")
+  elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
+    set(${PROJECT_NAME}_CXX_FLAGS "-O3"
+      CACHE INTERNAL "${PROJECT_NAME} CXX compiler flags")
+  else()
+    message(FATAL_ERROR "Unknown build type: ${CMAKE_BUILD_TYPE}")
+  endif()
+
+  set(KNOWN_CXX_COMPILER TRUE)
 endif()
 
-# 1. Setup for MSVC compiler (version >= 2012):
+if(CMAKE_C_COMPILER_ID MATCHES "Intel")
+  if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    set(${PROJECT_NAME}_C_FLAGS "-g3"
+      CACHE INTERNAL "${PROJECT_NAME} C compiler flags")
+  elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
+    set(${PROJECT_NAME}_C_FLAGS "-O3"
+      CACHE INTERNAL "${PROJECT_NAME} C compiler flags")
+  else()
+    message(FATAL_ERROR "Unknown build type: ${CMAKE_BUILD_TYPE}")
+  endif()
 
-if(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
-  message(FATAL_ERROR "\n" "MSVC compiler not implemented.\n\n")
+  set(KNOWN_C_COMPILER TRUE)
 endif()
 
-if(NOT KNOWN_COMPILER)
-  message(
-    FATAL_ERROR
-      "\n" "Unknown compiler!\n"
-      "If you're serious about it, set SETUP_DEFAULT_COMPILER_FLAGS=OFF "
-      "and set the relevant compiler options by hand.\n\n")
+if (NOT KNOWN_CXX_COMPILER)
+  message(FATAL_ERROR "\nUnknown C++ compiler!\n")
+endif()
+
+if (NOT KNOWN_C_COMPILER)
+  message(FATAL_ERROR "\nUnknown C compiler!\n")
 endif()

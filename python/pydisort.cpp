@@ -4,6 +4,7 @@
 #include <pybind11/numpy.h>
 
 // pydisort
+#include <src/cdisort.h>
 #include <cppdisort/cppdisort.hpp>
 
 namespace py = pybind11;

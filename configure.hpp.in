@@ -1,2 +1,0 @@
-// python bindings (PYTHON_BINDINGS or NO_PYTHOND_BINDINGS)
-#define @PYTHON_BINDINGS_OPTION@
