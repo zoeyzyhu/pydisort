@@ -1,10 +1,11 @@
 // pybind11
+#include <pybind11/numpy.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
-#include <pybind11/numpy.h>
 
 // pydisort
 #include <src/cdisort.h>
+
 #include <cppdisort/cppdisort.hpp>
 
 namespace py = pybind11;
@@ -21,7 +22,7 @@ PYBIND11_MODULE(pydisort, m) {
 
   Small changes have been made to the C-DISORT program to make it compatible with python scripting.
   The C-DISORT program has been wrapped first in a C++ class (DisortWrapper), and the C++ class
-  has been bound to python using pybind11. 
+  has been bound to python using pybind11.
 
   Pydisort features the following benefits over the original C-DISORT program:
 
@@ -33,7 +34,7 @@ PYBIND11_MODULE(pydisort, m) {
   - Safety guards are implemented to prevent the user from setting incorrect
     values for arrays or calling methods in the wrong order.
 
-  Note that the underlying calculation engine is still the same as the C-DISORT program. 
+  Note that the underlying calculation engine is still the same as the C-DISORT program.
   So the speed of pydisort is the same as the origin C-DISORT program.
 
   Examples
@@ -60,15 +61,15 @@ PYBIND11_MODULE(pydisort, m) {
   In the example above, flx has two dimensions. The first dimension is number of atmosphere
   levels (nlyr + 1 = 5), and the second dimension is number of extracted flux fields (3).
   ``RFDLIR``, ``FLDN``, and ``FLUP`` are the indices representing the three flux fields:
-  direct flux, diffuse flux, and upward flux, respectively. 
+  direct flux, diffuse flux, and upward flux, respectively.
   Consult ``pydisort.run()`` method for more information on the indices of flux fields.
-  The attenuation of radiative flux is acoording to the Beer-Lambert law, i.e.,
+  The attenuation of radiative flux is according to the Beer-Lambert law, i.e.,
 
   .. math::
 
     F(z) = F(0) \exp(-\tau(z)),
 
-  where :math:`F(z)` is the radiative flux at level :math:`z`, 
+  where :math:`F(z)` is the radiative flux at level :math:`z`,
   :math:`F(0)` is the radiative flux at the top of the atmosphere, and :math:`\tau(z)` is the
   optical depth from the top of the atmosphere to level :math:`z`. The default direction of
   radiative flux is nadir.
@@ -96,12 +97,12 @@ PYBIND11_MODULE(pydisort, m) {
   array([[[0.        , 0.        , 0.        , 0.18095504, 0.0516168 , 0.02707849],
           [0.02703935, 0.05146774, 0.17839685, 0.        , 0.        , 0.        ]]])
 
-  The intensity array ``rad`` has three dimensions. The first dimension is the 
-  azimuthal angles (1). The second dimension is optical depth (2). 
+  The intensity array ``rad`` has three dimensions. The first dimension is the
+  azimuthal angles (1). The second dimension is optical depth (2).
   The third dimension is the polar angles (6). The result is interpreted as backsattering
   at the top of the atmosphere (optical depth = 0.0) and forward scattering at the bottom
-  of the atmosphere (optical depth = 0.1). 
-  
+  of the atmosphere (optical depth = 0.1).
+
 
   Troubleshooting
   ---------------
@@ -142,7 +143,7 @@ PYBIND11_MODULE(pydisort, m) {
 
   - You can use ``print()`` method to print some of the DISORT internal states.
 
-  - You can chain methods such as ``set_flags``, ``set_atmosphere_dimension()``, 
+  - You can chain methods such as ``set_flags``, ``set_atmosphere_dimension()``,
     ``set_intensity_dimension()``, and ``seal()`` together.
 
   - If you want to have more insights into DISORT internal inputs,
@@ -152,11 +153,11 @@ PYBIND11_MODULE(pydisort, m) {
 
   References
   ----------
-  .. [1] Stamnes, K., Tsay, S. C., Wiscombe, W., & Jayaweera, K. (1988). 
-         Numerically stable algorithm for discrete-ordinate-method radiative transfer in multiple scattering and emitting layered media. 
+  .. [1] Stamnes, K., Tsay, S. C., Wiscombe, W., & Jayaweera, K. (1988).
+         Numerically stable algorithm for discrete-ordinate-method radiative transfer in multiple scattering and emitting layered media.
          Applied Optics, 27(12), 2502-2509.
-  .. [2] Buras, R., & Dowling, T. (1996). 
-         Discrete-ordinate-method for radiative transfer in planetary atmospheres: Generalization of the doubling and adding method. 
+  .. [2] Buras, R., & Dowling, T. (1996).
+         Discrete-ordinate-method for radiative transfer in planetary atmospheres: Generalization of the doubling and adding method.
          Journal of Quantitative Spectroscopy and Radiative Transfer, 55(6), 761-779.
   )";
 
@@ -177,7 +178,7 @@ PYBIND11_MODULE(pydisort, m) {
       nmom : int
           Number of phase function moments
       model : str
-          Phase function model. 
+          Phase function model.
       gg : float
           Asymmetry factor for henyey-greenstein phase function
 
@@ -207,10 +208,10 @@ PYBIND11_MODULE(pydisort, m) {
           * - 'cloud_garcia_siewert'
             - Tabulated cloud phase function by Garcia/Siewert
       )",
-      py::arg("nmom"), py::arg("model"), py::arg("gg") = 0.);
+        py::arg("nmom"), py::arg("model"), py::arg("gg") = 0.);
 
-  py::class_<DisortWrapper>(m, "disort", 
-      R"(Wrapper class for the C-DISORT program)")
+  py::class_<DisortWrapper>(m, "disort",
+                            R"(Wrapper class for the C-DISORT program)")
       .def_readwrite("btemp", &DisortWrapper::btemp, R"(
           Bottom boundary temperature (K), defaults to 0
           )")
@@ -223,7 +224,7 @@ PYBIND11_MODULE(pydisort, m) {
       .def_readwrite("albedo", &DisortWrapper::albedo, R"(
           Surface albedo, defaults to 0. Needed if lamber = True
           )")
-      .def_readwrite("fisot", &DisortWrapper::fisot, R"( 
+      .def_readwrite("fisot", &DisortWrapper::fisot, R"(
           Intensity of top-boundary isotropic illumination, defaults to 0
           )")
       .def_readwrite("fbeam", &DisortWrapper::fbeam, R"(
@@ -232,10 +233,10 @@ PYBIND11_MODULE(pydisort, m) {
       .def_readwrite("temis", &DisortWrapper::temis, R"(
           Emissivity of top boundary. Needed if lamber = True, defaults to 0
           )")
-      .def_readwrite("umu0", &DisortWrapper::umu0, R"( 
+      .def_readwrite("umu0", &DisortWrapper::umu0, R"(
           Cosine of incident beam zenith angle (positive), defaults to 1.
           )")
-      .def_readwrite("phi0", &DisortWrapper::phi0, R"( 
+      .def_readwrite("phi0", &DisortWrapper::phi0, R"(
           Azimuthal angle of incident beam, defaults to 0.
           )")
 
@@ -273,7 +274,7 @@ PYBIND11_MODULE(pydisort, m) {
           Default accuracy is 1e-6
           )")
 
-      .def("set_flags", &DisortWrapper::SetFlags, R"( 
+      .def("set_flags", &DisortWrapper::SetFlags, R"(
           Set radiation flags for disort
 
           Parameters
@@ -362,19 +363,20 @@ PYBIND11_MODULE(pydisort, m) {
           - beam illumination from the top (set fbeam)
           - isotropic illumination from the top (set fisot)
           - thermal emission from the top (set ttemp and temis)
-          - interal thermal emission (use set_temperature_on_level)
+          - internal thermal emission (use set_temperature_on_level)
           - reflection at the bottom (set lamber, albedo)
           - thermal emission from the bottom (set btemp)
-          
-          A Special boundary condition is invoked when 'ibcnd' is set to True. 
-          Special boundary condition only returns albedo and transmissivity of 
+
+          A Special boundary condition is invoked when 'ibcnd' is set to True.
+          Special boundary condition only returns albedo and transmissivity of
           the entire medium.
 
           - current version of pydisort has limited support for this option.
           - consult the documentation of DISORT for more details on this option.
           )")
 
-      .def("set_atmosphere_dimension", &DisortWrapper::SetAtmosphereDimension, R"(
+      .def("set_atmosphere_dimension", &DisortWrapper::SetAtmosphereDimension,
+           R"(
           Set atmosphere dimension for disort
 
           Parameters
@@ -494,7 +496,8 @@ PYBIND11_MODULE(pydisort, m) {
           None
           )")
 
-      .def("set_user_cosine_polar_angle", &DisortWrapper::SetUserCosinePolarAngle, R"(
+      .def("set_user_cosine_polar_angle",
+           &DisortWrapper::SetUserCosinePolarAngle, R"(
           Set user cosine polar angle for disort
 
           Parameters
@@ -511,7 +514,8 @@ PYBIND11_MODULE(pydisort, m) {
           Must be called after ``disort.seal()``
           )")
 
-      .def("set_user_azimuthal_angle", &DisortWrapper::SetUserAzimuthalAngle, R"(
+      .def("set_user_azimuthal_angle", &DisortWrapper::SetUserAzimuthalAngle,
+           R"(
           Set user azimuthal angle for disort
 
           Parameters
@@ -543,7 +547,7 @@ PYBIND11_MODULE(pydisort, m) {
           Notes
           -----
           This function sets both the minimum and maximum wavenumber to the same value.
-          Internal thermal emission is calculated as the planck function at the specified 
+          Internal thermal emission is calculated as the planck function at the specified
           wavenumber.
 
           See Also
@@ -551,8 +555,9 @@ PYBIND11_MODULE(pydisort, m) {
           set_wavenumber_range_invcm : set a wavenumber range for internal thermal emission
           )")
 
-      .def("set_wavenumber_range_invcm", &DisortWrapper::SetWavenumberRange_invcm,
-          R"(
+      .def("set_wavenumber_range_invcm",
+           &DisortWrapper::SetWavenumberRange_invcm,
+           R"(
           Set a wavenumber range for disort
 
           Parameters
@@ -579,7 +584,7 @@ PYBIND11_MODULE(pydisort, m) {
            py::arg("wmin"), py::arg("wmax"))
 
       .def("set_optical_thickness", &DisortWrapper::SetOpticalThickness,
-          R"(
+           R"(
           Set layer optical thickness
 
           Parameters
@@ -614,8 +619,9 @@ PYBIND11_MODULE(pydisort, m) {
           seal : allocate memory for disort
           )")
 
-      .def("set_single_scattering_albedo", &DisortWrapper::SetSingleScatteringAlbedo,
-          R"(
+      .def("set_single_scattering_albedo",
+           &DisortWrapper::SetSingleScatteringAlbedo,
+           R"(
           Set layer single scattering albedo
 
           Parameters
@@ -650,7 +656,7 @@ PYBIND11_MODULE(pydisort, m) {
           )")
 
       .def("set_temperature_on_level", &DisortWrapper::SetTemperatureOnLevel,
-          R"(
+           R"(
           Set temperature (K) on levels (cell interfaces)
 
           Parameters
@@ -688,7 +694,8 @@ PYBIND11_MODULE(pydisort, m) {
           set_single_scattering_albedo : set layer single scattering albedo
           )")
 
-      .def("set_phase_moments", 
+      .def(
+          "set_phase_moments",
           [](DisortWrapper &disort, py::array_t<double> &pmom) {
             py::buffer_info info = pmom.request();
             if (info.format != py::format_descriptor<double>::format()) {
@@ -704,7 +711,8 @@ PYBIND11_MODULE(pydisort, m) {
                 throw std::runtime_error("Incompatible buffer format!");
               }
             }
-          }, R"(
+          },
+          R"(
           Set layer phase moments
 
           Parameters
@@ -742,28 +750,31 @@ PYBIND11_MODULE(pydisort, m) {
           set_single_scattering_albedo : set layer single scattering albedo
           )")
 
-      .def("run",
+      .def(
+          "run",
           [](DisortWrapper &disort) {
             disort.Run();
 
             py::array_t<double> rad_dummy;
 
-            py::capsule flx_capsule(&disort.Result()->rad[0].rfldir, [](void *) {});
-            py::array_t<double> flx({disort.nLayers() + 1, 8}, 
-                &disort.Result()->rad[0].rfldir, flx_capsule);
+            py::capsule flx_capsule(&disort.Result()->rad[0].rfldir,
+                                    [](void *) {});
+            py::array_t<double> flx({disort.nLayers() + 1, 8},
+                                    &disort.Result()->rad[0].rfldir,
+                                    flx_capsule);
 
             if (disort.IsFluxOnly()) {
               return std::make_tuple(rad_dummy, flx);
             }
 
             py::capsule rad_capsule(disort.Result()->uu, [](void *) {});
-            py::array_t<double> rad({disort.nUserAzimuthalAngles(), 
-                                     disort.nUserOpticalDepths(),
-                                     disort.nUserPolarAngles()}, 
-                                     disort.Result()->uu,
-                                     rad_capsule);
+            py::array_t<double> rad(
+                {disort.nUserAzimuthalAngles(), disort.nUserOpticalDepths(),
+                 disort.nUserPolarAngles()},
+                disort.Result()->uu, rad_capsule);
             return std::make_tuple(rad, flx);
-          }, R"(
+          },
+          R"(
           Run DISORT radiative transfer solver
 
           Parameters
@@ -783,7 +794,7 @@ PYBIND11_MODULE(pydisort, m) {
           The first dimension is the number of "levels", which is one more than
           the number of layers. The second dimension is the number of flux fields.
           There are 8 flux fields in total, named as follows:
-          
+
           .. list-table::
             :widths: 10 20 30
             :header-rows: 1
@@ -836,17 +847,18 @@ PYBIND11_MODULE(pydisort, m) {
           >>> flx = flx[:, [RFLDIR, FLDN, FLUP]]
 
           However, using a subset of the flux fields will create a copy of the
-          underlying memory. In the example above, ``flx`` is the variable that extracts 
+          underlying memory. In the example above, ``flx`` is the variable that extracts
           the direct beam, diffuse downward, and diffuse upward fluxes.
           )")
 
-      .def("dimensions",
+      .def(
+          "dimensions",
           [](DisortWrapper &disort) {
-            std::tuple<int, int, int> shape = {disort.nLayers(), 
-                                               disort.nStreams(),
-                                               disort.nMoments()};
+            std::tuple<int, int, int> shape = {
+                disort.nLayers(), disort.nStreams(), disort.nMoments()};
             return shape;
-          }, R"(
+          },
+          R"(
           Get the dimensions of the DISORT solver
 
           Parameters

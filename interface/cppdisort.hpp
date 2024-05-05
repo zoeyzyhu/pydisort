@@ -16,7 +16,7 @@ std::vector<double> get_phase_function(int nmom, std::string model,
 
 // wraps disort_state and disort_output
 class DisortWrapper {
- public: // accessible boundary conditions
+ public:  // accessible boundary conditions
   double btemp;
   double ttemp;
   double fluor;
@@ -27,7 +27,7 @@ class DisortWrapper {
   double umu0;
   double phi0;
 
-public: // constructor and destructor
+ public:  // constructor and destructor
   DisortWrapper();
   virtual ~DisortWrapper();
 
@@ -69,7 +69,7 @@ public: // constructor and destructor
   //! \brief Set temperatures defined on levels
   void SetTemperatureOnLevel(std::vector<double> const &temp);
 
-  //! \brief Set the optical depth of the output radiance 
+  //! \brief Set the optical depth of the output radiance
   void SetUserOpticalDepth(std::vector<double> const &utau);
 
   //! \brief Set the cosine polar angle of the output radiance
@@ -105,4 +105,4 @@ public: // constructor and destructor
   void printBoundaryConditions(std::ostream &os) const;
 };
 
-#endif  // SRC_CPPDISORT_CPPDISORT_HPP_
+#endif  // INTERFACE_CPPDISORT_HPP_

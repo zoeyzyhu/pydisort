@@ -9,13 +9,24 @@ repos:
         name: Trim Trailing Whitespace
         entry: trailing-whitespace-fixer
         language: python
-        exclude: ^(src/cdisort/.*|tests/cdisort/.*)$
+        exclude: &exclude_pattern |
+          (?x)^(
+            .*/cdisort\.(c|h)|             # cdisort.c, cdisort.h
+            .*/COPYING|                    # COPYING
+            .*/DISORT2\.doc|               # DISORT2.doc
+            .*/HOWTO_cdisort|              # HOWTO_cdisort
+            .*/Makefile_cdisort|           # Makefile_cdisort
+            .*/README_cdisort|             # README_cdisort
+            .*/locate\.(c|h)|              # locate.c, locate.h
+            .*/print_test\.c|              # print_test.c
+            .*/test_cdisort\.c             # test_cdisort.c
+          )$
 
       - id: end-of-file-fixer
         name: Fix End of Files
         entry: mixed-line-ending
         language: python
-        exclude: ^(src/cdisort/.*|tests/cdisort/.*)$
+        exclude: *exclude_pattern
 
   - repo: https://github.com/pre-commit/mirrors-prettier
     rev: v3.0.0-alpha.0
@@ -26,7 +37,7 @@ repos:
           Less/HTML/Vue/Angular/GraphQL/Markdown/YAML"
         entry: prettier --write --list-different --ignore-unknown
         language: node
-        exclude: ^(src/cdisort/.*|tests/cdisort/.*)$
+        exclude: *exclude_pattern
 
   - repo: https://github.com/codespell-project/codespell
     rev: v2.2.4
@@ -35,7 +46,7 @@ repos:
         name: Check Misspellings
         language: python
         description: It looks for a set of common misspellings
-        exclude: ^(src/cdisort/.*|tests/cdisort/.*)$
+        exclude: *exclude_pattern
 
   ## 2. Per language check ===================================================
 
@@ -64,17 +75,6 @@ repos:
 
   ## Python related ----------------------------------------------------------
 
-  - repo: https://github.com/PyCQA/pydocstyle
-    rev: 6.3.0
-    hooks:
-      - id: pydocstyle
-        name: pydocstyle
-        entry: pydocstyle
-        description: Check compliance with Python docstring conventions.
-        language: python
-        types: [python]
-        exclude: ^(src/pydisort/.*.py)$, ^(docs_sphinx/source/conf.py)$
-
   - repo: https://github.com/pre-commit/mirrors-autopep8
     rev: v2.0.0
     hooks:
@@ -82,7 +82,7 @@ repos:
         name: Autopep8 Python
         description: Formats Python code to conform to the PEP 8 style guide
         language: python
-        args: [-i]
+        args: ["-i", "--ignore=E4"]
 
   ## C/C++ related -----------------------------------------------------------
 
@@ -96,7 +96,7 @@ repos:
         types_or: [c, c++, c#, objective-c, java]
         language: python
         args: [--style=Google, -i, --no-diff]
-        exclude: ^(src/cdisort/.*|tests/cdisort/.*)$
+        exclude: *exclude_pattern
 
       - id: cppcheck
         name: Find warnings/errors in C, C++, and Objective-C
@@ -105,7 +105,7 @@ repos:
         types_or: [c, c++, c#, objective-c]
         language: python
         args: [--check-config]
-        exclude: ^(src/cdisort/.*|tests/cdisort/.*)$
+        exclude: *exclude_pattern
 
   - repo: https://github.com/cheshirekow/cmake-format-precommit
     rev: v0.6.10
@@ -131,7 +131,28 @@ repos:
             -runtime/references,
             -build/include_order",
           ]
-        exclude: ^(src/cdisort/.*|tests/cdisort/.*)$
+        exclude: |
+          (?x)^(
+            .*/cdisort\.(c|h)|             # cdisort.c, cdisort.h
+            .*/COPYING|                    # COPYING
+            .*/DISORT2\.doc|               # DISORT2.doc
+            .*/HOWTO_cdisort|              # HOWTO_cdisort
+            .*/Makefile_cdisort|           # Makefile_cdisort
+            .*/README_cdisort|             # README_cdisort
+            .*/locate\.(c|h)|              # locate.c, locate.h
+            .*/print_test\.c|              # print_test.c
+            .*/test_cdisort\.c|            # test_cdisort.c
+            .*/pydisort.cpp                # pydisort.cpp
+          )$
+      - id: cpplint
+        name: Find lints in pydisort.cpp
+        entry: cpplint-hook
+        description: pydisort.cpp excluded previously; add with different args
+        types_or: [c++]
+        language: python
+        args: ["--filter=-readability/fn_size", "--filter=-legal/copyright"]
+        files: ^(.*/pydisort\.cpp)$
+        pass_filenames: false
 
   - repo: local
     hooks:

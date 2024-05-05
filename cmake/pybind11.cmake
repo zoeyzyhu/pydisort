@@ -7,8 +7,8 @@ if(PYTHON_BINDINGS)
     find_package(Python3 3.8 REQUIRED COMPONENTS Interpreter Development.Module)
   else()
     set(Python3_FIND_STRATEGY VERSION)
-    find_package(Python3 ${PYTHON_VERSION} EXACT REQUIRED COMPONENTS
-      Interpreter Development.Module)
+    find_package(Python3 ${PYTHON_VERSION} EXACT REQUIRED
+                 COMPONENTS Interpreter Development.Module)
   endif()
   set(PYTHON_BINDINGS_OPTION "PYTHON_BINDINGS")
 

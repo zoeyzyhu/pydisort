@@ -6,13 +6,15 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
+import guzzle_sphinx_theme
+import sys
+import os
 project = 'pydisort'
 copyright = '2023, Zoey Hu'
 author = 'Zoey Hu'
 
-import os
-import sys
-sys.path.insert(0, os.path.abspath('../../python'))  # Adjust the path accordingly
+# Adjust the path accordingly
+sys.path.insert(0, os.path.abspath('../../python'))
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
@@ -39,7 +41,6 @@ napoleon_numpy_docstring = True
 # -- Options for HTML output -------------------------------------------------
 # https://github.com/guzzle/guzzle_sphinx_theme
 
-import guzzle_sphinx_theme
 
 html_theme_path = guzzle_sphinx_theme.html_theme_path()
 html_theme = 'guzzle_sphinx_theme'

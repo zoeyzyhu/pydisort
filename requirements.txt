@@ -1,11 +1,11 @@
 clang-format
+cmake
 cpplint
+guzzle_sphinx_theme
 numpy
 pre-commit
 pylint
-wheel
-twine
-cmake
 sphinx
 sphinxcontrib-napoleon
-guzzle_sphinx_theme
+twine
+wheel

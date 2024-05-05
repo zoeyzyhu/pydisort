@@ -1,41 +1,44 @@
 #! python3
 
-import sys
-sys.path.append('@CMAKE_BINARY_DIR@/python')
-
 """ Test isotropic scattering with pydisort."""
-# pylint: disable = no-name-in-module, invalid-name, import-error
+# pylint: disable = no-name-in-module, invalid-name, import-error, wrong-import-position
+
+
+import sys
 import unittest
 from numpy import array, pi
 from numpy.testing import assert_allclose
+
+sys.path.append('@CMAKE_BINARY_DIR@/python')
 from pydisort import disort, get_phase_function, RFLDIR, FLDN, FLUP
 
-
 # cdisort test01
+
+
 class PyDisortTests(unittest.TestCase):
     """Test unit: isotropic scattering with pydisort."""
 
     def setUp(self):
         """Set up the test."""
         self.flags = {
-                "ibcnd": 0,
-                "usrtau": 1,
-                "usrang": 1,
-                "lamber": 1,
-                "planck": 0,
-                "spher": 0,
-                "onlyfl": 0,
-                "quiet": 1,
-                "intensity_correction": 1,
-                "old_intensity_correction": 1,
-                "general_source": 0,
-                "output_uum": 0,
-                "print-input": 1,
-                "print-fluxes": 0, 
-                "print-intensity": 0,
-                "print-transmissivity": 0,
-                "print-phase-function": 1,
-                }
+            "ibcnd": 0,
+            "usrtau": 1,
+            "usrang": 1,
+            "lamber": 1,
+            "planck": 0,
+            "spher": 0,
+            "onlyfl": 0,
+            "quiet": 1,
+            "intensity_correction": 1,
+            "old_intensity_correction": 1,
+            "general_source": 0,
+            "output_uum": 0,
+            "print-input": 1,
+            "print-fluxes": 0,
+            "print-intensity": 0,
+            "print-transmissivity": 0,
+            "print-phase-function": 1,
+        }
 
     def test_isotropic_scattering(self):
         """Test isotropic scattering."""

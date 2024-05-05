@@ -439,8 +439,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.CANTERA_REPO_STATUS }}
 
-
-## I can do this when I have money
+  ## I can do this when I have money
   macos-wheel-arm:
     name: Build ARM macOS Wheels
     runs-on: macos-latest-xlarge

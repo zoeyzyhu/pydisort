@@ -75,11 +75,16 @@ class CMakeBuild(build_ext):
             sys.stderr.write("Error while building with CMake\n")
             sys.exit(-1)
 
+# pylint: disable=too-few-public-methods
+
 
 class CMakeExtension(Extension):
+    """Define CMake extension."""
+
     def __init__(self, name, sourcedir=''):
         Extension.__init__(self, name, sources=[])
         self.sourcedir = os.path.abspath(sourcedir)
+# pylint: enable=too-few-public-methods
 
 
 # If the system does not meet requirement, exit.
@@ -89,5 +94,5 @@ if not check_requirements():
 # Setup configuration
 setup(
     ext_modules=[CMakeExtension('pydiosrt', 'python')],
-    cmdclass=dict(build_ext=CMakeBuild),
+    cmdclass={'build_ext': CMakeBuild},
 )

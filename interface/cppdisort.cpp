@@ -1,16 +1,16 @@
 // C/C++
 #include <algorithm>
+#include <cstring>
 #include <iostream>
 #include <memory>
 #include <sstream>
-#include <cstring>
 
 // cdisort
 #include <cdisort.h>
+
 #include "cppdisort.hpp"
 
-std::vector<double> get_phase_function(int nmom, std::string model,
-                                       double gg) {
+std::vector<double> get_phase_function(int nmom, std::string model, double gg) {
   std::vector<double> pmom(1 + nmom);
 
   if (model == "isotropic") {
@@ -58,13 +58,9 @@ DisortWrapper::~DisortWrapper() {
   delete ds_out_;
 }
 
-void DisortWrapper::SetAccuracy(double accur) { 
-  ds_->accur = accur; 
-}
+void DisortWrapper::SetAccuracy(double accur) { ds_->accur = accur; }
 
-bool DisortWrapper::IsFluxOnly() const { 
-  return ds_->flag.onlyfl; 
-}
+bool DisortWrapper::IsFluxOnly() const { return ds_->flag.onlyfl; }
 
 int DisortWrapper::nLayers() const { return ds_->nlyr; }
 int DisortWrapper::nMoments() const { return ds_->nmom; }
@@ -87,8 +83,7 @@ void DisortWrapper::SetHeader(std::string const &header) {
   snprintf(ds_->header, sizeof(ds_->header), "%s", header.c_str());
 }
 
-void DisortWrapper::SetAtmosphereDimension(int nlyr, int nstr,
-                                           int nmom) {
+void DisortWrapper::SetAtmosphereDimension(int nlyr, int nstr, int nmom) {
   if (is_sealed_) {
     throw std::runtime_error(
         "DisortWrapper::SetAtmosphereDimension: "
@@ -121,8 +116,7 @@ void DisortWrapper::SetAtmosphereDimension(int nlyr, int nstr,
   ds_->nphase = nstr;
 }
 
-void DisortWrapper::SetFlags(
-    std::map<std::string, bool> const &dict) {
+void DisortWrapper::SetFlags(std::map<std::string, bool> const &dict) {
   if (dict.find("ibcnd") != dict.end()) {
     ds_->flag.ibcnd = dict.at("ibcnd");
   } else {
@@ -235,8 +229,7 @@ void DisortWrapper::SetFlags(
   }
 }
 
-void DisortWrapper::SetIntensityDimension(int nuphi, int nutau,
-                                          int numu) {
+void DisortWrapper::SetIntensityDimension(int nuphi, int nutau, int numu) {
   if (is_sealed_) {
     throw std::runtime_error(
         "DisortWrapper::SetIntensityDimension: "
@@ -286,17 +279,19 @@ void DisortWrapper::Unseal() {
   }
 }
 
-
 void DisortWrapper::SetOpticalThickness(std::vector<double> const &tau) {
   if (!is_sealed_) {
-    throw std::runtime_error("DisortWrapper::SetOpticalThickness: "
-                             "DisortWrapper is not sealed. Call seal() first.");
+    throw std::runtime_error(
+        "DisortWrapper::SetOpticalThickness: "
+        "DisortWrapper is not sealed. Call seal() first.");
   }
 
-  for (int i = 0; i < std::min((size_t)ds_->nlyr, tau.size()); ++i) {
+  for (int i = 0; i < std::min(static_cast<size_t>(ds_->nlyr), tau.size());
+       ++i) {
     if (tau[i] < 0) {
-      throw std::runtime_error("DisortWrapper::SetOpticalThickness: "
-                               "Optical thickness must be non-negative.");
+      throw std::runtime_error(
+          "DisortWrapper::SetOpticalThickness: "
+          "Optical thickness must be non-negative.");
     }
     ds_->dtauc[i] = tau[i];
   }
@@ -304,14 +299,17 @@ void DisortWrapper::SetOpticalThickness(std::vector<double> const &tau) {
 
 void DisortWrapper::SetSingleScatteringAlbedo(std::vector<double> const &ssa) {
   if (!is_sealed_) {
-    throw std::runtime_error("DisortWrapper::SetSingleScatteringAlbedo: "
-                             "DisortWrapper is not sealed. Call seal() first.");
+    throw std::runtime_error(
+        "DisortWrapper::SetSingleScatteringAlbedo: "
+        "DisortWrapper is not sealed. Call seal() first.");
   }
 
-  for (int i = 0; i < std::min((size_t)ds_->nlyr, ssa.size()); ++i) {
+  for (int i = 0; i < std::min(static_cast<size_t>(ds_->nlyr), ssa.size());
+       ++i) {
     if (ssa[i] < 0 || ssa[i] > 1) {
-      throw std::runtime_error("DisortWrapper::SetSingleScatteringAlbedo: "
-                               "Single scattering albedo must be in [0, 1].");
+      throw std::runtime_error(
+          "DisortWrapper::SetSingleScatteringAlbedo: "
+          "Single scattering albedo must be in [0, 1].");
     }
     ds_->ssalb[i] = ssa[i];
   }
@@ -319,14 +317,17 @@ void DisortWrapper::SetSingleScatteringAlbedo(std::vector<double> const &ssa) {
 
 void DisortWrapper::SetTemperatureOnLevel(std::vector<double> const &temp) {
   if (!is_sealed_) {
-    throw std::runtime_error("DisortWrapper::SetTemperatureOnLevel: "
-                             "DisortWrapper is not sealed. Call seal() first.");
+    throw std::runtime_error(
+        "DisortWrapper::SetTemperatureOnLevel: "
+        "DisortWrapper is not sealed. Call seal() first.");
   }
 
-  for (int i = 0; i <= std::min((size_t)ds_->nlyr, temp.size() - 1); ++i) {
+  for (int i = 0;
+       i <= std::min(static_cast<size_t>(ds_->nlyr), temp.size() - 1); ++i) {
     if (temp[i] < 0) {
-      throw std::runtime_error("DisortWrapper::SetTemperatureOnLevel: "
-                               "Temperature must be positive.");
+      throw std::runtime_error(
+          "DisortWrapper::SetTemperatureOnLevel: "
+          "Temperature must be positive.");
     }
     ds_->temper[i] = temp[i];
   }
@@ -334,15 +335,18 @@ void DisortWrapper::SetTemperatureOnLevel(std::vector<double> const &temp) {
 
 void DisortWrapper::SetUserOpticalDepth(std::vector<double> const &utau) {
   if (!is_sealed_) {
-    throw std::runtime_error("DisortWrapper::SetUserOpticalDepth: "
-                             "DisortWrapper is not sealed. Call seal() first.");
+    throw std::runtime_error(
+        "DisortWrapper::SetUserOpticalDepth: "
+        "DisortWrapper is not sealed. Call seal() first.");
   }
 
   if (ds_->flag.usrtau) {
-    for (int i = 0; i < std::min((size_t)ds_->ntau, utau.size()); ++i) {
+    for (int i = 0; i < std::min(static_cast<size_t>(ds_->ntau), utau.size());
+         ++i) {
       if (utau[i] < 0) {
-        throw std::runtime_error("DisortWrapper::SetUserOpticalDepth: "
-                                 "Optical depth must be non-negative.");
+        throw std::runtime_error(
+            "DisortWrapper::SetUserOpticalDepth: "
+            "Optical depth must be non-negative.");
       }
       ds_->utau[i] = utau[i];
     }
@@ -351,15 +355,18 @@ void DisortWrapper::SetUserOpticalDepth(std::vector<double> const &utau) {
 
 void DisortWrapper::SetUserCosinePolarAngle(std::vector<double> const &umu) {
   if (!is_sealed_) {
-    throw std::runtime_error("DisortWrapper::SetUserCosinePolarAngle: "
-                             "DisortWrapper is not sealed. Call seal() first.");
+    throw std::runtime_error(
+        "DisortWrapper::SetUserCosinePolarAngle: "
+        "DisortWrapper is not sealed. Call seal() first.");
   }
 
   if (ds_->flag.usrang) {
-    for (int i = 0; i < std::min((size_t)ds_->numu, umu.size()); ++i) {
+    for (int i = 0; i < std::min(static_cast<size_t>(ds_->numu), umu.size());
+         ++i) {
       if (umu[i] < -1 || umu[i] > 1) {
-        throw std::runtime_error("DisortWrapper::SetUserCosinePolarAngle: "
-                                 "Cosine of polar angle must be in [-1, 1].");
+        throw std::runtime_error(
+            "DisortWrapper::SetUserCosinePolarAngle: "
+            "Cosine of polar angle must be in [-1, 1].");
       }
       ds_->umu[i] = umu[i];
     }
@@ -368,12 +375,14 @@ void DisortWrapper::SetUserCosinePolarAngle(std::vector<double> const &umu) {
 
 void DisortWrapper::SetUserAzimuthalAngle(std::vector<double> const &uphi) {
   if (!is_sealed_) {
-    throw std::runtime_error("DisortWrapper::SetUserAzimuthalAngle: "
-                             "DisortWrapper is not sealed. Call seal() first.");
+    throw std::runtime_error(
+        "DisortWrapper::SetUserAzimuthalAngle: "
+        "DisortWrapper is not sealed. Call seal() first.");
   }
 
   if (ds_->flag.usrang) {
-    for (int i = 0; i < std::min((size_t)ds_->nphi, uphi.size()); ++i) {
+    for (int i = 0; i < std::min(static_cast<size_t>(ds_->nphi), uphi.size());
+         ++i) {
       ds_->phi[i] = uphi[i];
     }
   }
@@ -381,8 +390,9 @@ void DisortWrapper::SetUserAzimuthalAngle(std::vector<double> const &uphi) {
 
 void DisortWrapper::SetPhaseMoments(double *pmom, int nlyr, int nmom_p1) {
   if (!is_sealed_) {
-    throw std::runtime_error("DisortWrapper::SetPhaseMoments: "
-                             "DisortWrapper is not sealed. Call seal() first.");
+    throw std::runtime_error(
+        "DisortWrapper::SetPhaseMoments: "
+        "DisortWrapper is not sealed. Call seal() first.");
   }
 
   std::memcpy(ds_->pmom, pmom, nlyr * nmom_p1 * sizeof(double));
@@ -390,8 +400,9 @@ void DisortWrapper::SetPhaseMoments(double *pmom, int nlyr, int nmom_p1) {
 
 void DisortWrapper::Run() {
   if (!is_sealed_) {
-    throw std::runtime_error("DisortWrapper::Run: "
-                             "DisortWrapper is not sealed. Call seal() first.");
+    throw std::runtime_error(
+        "DisortWrapper::Run: "
+        "DisortWrapper is not sealed. Call seal() first.");
   }
 
   ds_->bc.btemp = btemp;
@@ -539,7 +550,4 @@ std::string DisortWrapper::ToString() const {
   return ss.str();
 }
 
-disort_output const * DisortWrapper::Result() const
-{ 
-  return ds_out_; 
-}
+disort_output const *DisortWrapper::Result() const { return ds_out_; }
