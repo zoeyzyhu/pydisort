@@ -93,3 +93,6 @@ z.junk
 # local helpers/tests
 [0-9]*.sh
 [0-9]*.py
+
+# cache
+.cache

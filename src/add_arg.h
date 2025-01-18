@@ -3,7 +3,7 @@
 // C/C++
 #include <utility>
 
-#include "./dispatch_macro.h"
+#include "dispatch_macro.h"
 
 #define ADD_ARG(T, name)                                                       \
  public:                                                                       \

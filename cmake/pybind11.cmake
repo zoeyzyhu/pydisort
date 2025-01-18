@@ -6,5 +6,3 @@ set(REPO_URL "https://github.com/pybind/pybind11")
 set(REPO_TAG "v2.11.1")
 
 add_package(${PACKAGE_NAME} ${REPO_URL} ${REPO_TAG} "" ON)
-
-set(FETCHCONTENT_QUIET FALSE)

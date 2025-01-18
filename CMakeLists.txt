@@ -61,6 +61,7 @@ if(PYTHON_BINDINGS)
 endif()
 find_package(Torch REQUIRED)
 include(${CMAKE_SOURCE_DIR}/cmake/pybind11.cmake)
+include(${CMAKE_SOURCE_DIR}/cmake/fmt.cmake)
 
 message(STATUS "${Blue}${PROJECT_NAME}-3. Setting up project libraries ...${ColorReset}")
 add_subdirectory(src)

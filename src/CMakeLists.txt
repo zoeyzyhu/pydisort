@@ -40,6 +40,7 @@ set_target_properties(${namel}_${buildl}
     )
 
 target_include_directories(${namel}_${buildl}
+    PRIVATE "${FMT_INCLUDE_DIR}"
     PRIVATE "${CDISORT_INCLUDE_DIR}"
     )
 

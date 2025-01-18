@@ -48,6 +48,7 @@ class DisortImpl : public torch::nn::Cloneable<DisortImpl> {
   explicit DisortImpl(DisortOptions const& options);
   virtual ~DisortImpl();
   void reset() override;
+  void pretty_print(std::ostream& stream) const override;
 
   disort_state const& ds(int n = 0, int j = 0) const {
     return ds_[n * options.ncol() + j];
@@ -77,5 +78,10 @@ class DisortImpl : public torch::nn::Cloneable<DisortImpl> {
   bool allocated_ = false;
 };
 TORCH_MODULE(Disort);
+
+void print_ds_flags(std::ostream& os, disort_state const& ds);
+void print_ds_atm(std::ostream& os, disort_state const& ds);
+void print_ds_out(std::ostream& os, disort_state const& ds);
+void print_ds_bc(std::ostream& os, disort_state const& ds);
 
 }  // namespace disort
