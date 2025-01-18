@@ -4,9 +4,9 @@
 #include <pybind11/stl.h>
 
 // pydisort
-#include <src/cdisort.h>
+#include <cdisort.h>
 
-#include <cppdisort/cppdisort.hpp>
+#include <cppdisort.hpp>
 
 namespace py = pybind11;
 

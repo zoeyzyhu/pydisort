@@ -3,7 +3,8 @@
 import os
 import sys
 import platform
-from distutils import spawn
+import subprocess
+import shutil
 from setuptools import setup, Extension
 from setuptools.command.build_ext import build_ext
 
@@ -34,16 +35,16 @@ class CMakeBuild(build_ext):
             self.build_extension(ext)
 
         # Check if cmake is installed.
-        if spawn.find_executable('cmake') is None:
+        if shutil.which('cmake'):
             sys.stderr.write("CMake is required to build this package.\n")
             sys.exit(-1)
 
     def build_extension(self, ext):
         """Build project"""
-        print("ext.name: ", ext.name)
+        #print("ext.name: ", ext.name)
         extdir = os.path.abspath(os.path.dirname(
             self.get_ext_fullpath(ext.name)))
-        print("extdir: ", extdir)
+        #print("extdir: ", extdir)
 
         cfg = 'Debug' if self.debug else 'Release'
         python_version = f'{sys.version_info.major}.{sys.version_info.minor}'
@@ -68,15 +69,14 @@ class CMakeBuild(build_ext):
                 f'-DPYTHON_VERSION={python_version}',
             ]
             cmake_configure_command.extend(build_args)
-            print(cmake_configure_command)
-            spawn.spawn(cmake_configure_command)
-            spawn.spawn(['cmake', '--build', _build_dir])
-        except spawn.DistutilsExecError:
-            sys.stderr.write("Error while building with CMake\n")
+            #print(cmake_configure_command)
+            subprocess.run(cmake_configure_command, check = True)
+            subprocess.run(['cmake', '--build', _build_dir], check = True)
+        except subprocess.CalledProcessError as e:
+            sys.stderr.write(f"Error while building with CMake: {e.returncode}\n")
             sys.exit(-1)
 
 # pylint: disable=too-few-public-methods
-
 
 class CMakeExtension(Extension):
     """Define CMake extension."""
@@ -93,6 +93,6 @@ if not check_requirements():
 
 # Setup configuration
 setup(
-    ext_modules=[CMakeExtension('pydiosrt', 'python')],
+    ext_modules=[CMakeExtension('pydisort', 'python')],
     cmdclass={'build_ext': CMakeBuild},
 )

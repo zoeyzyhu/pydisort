@@ -28,17 +28,6 @@ repos:
         language: python
         exclude: *exclude_pattern
 
-  - repo: https://github.com/pre-commit/mirrors-prettier
-    rev: v3.0.0-alpha.0
-    hooks:
-      - id: prettier
-        name: Prettier
-        description: "Checks JavaScript/TypeScript/Flow/JSX/JSON/CSS/SCSS/
-          Less/HTML/Vue/Angular/GraphQL/Markdown/YAML"
-        entry: prettier --write --list-different --ignore-unknown
-        language: node
-        exclude: *exclude_pattern
-
   - repo: https://github.com/codespell-project/codespell
     rev: v2.2.4
     hooks:
@@ -73,17 +62,6 @@ repos:
         types: [text, executable]
         language: python
 
-  ## Python related ----------------------------------------------------------
-
-  - repo: https://github.com/pre-commit/mirrors-autopep8
-    rev: v2.0.0
-    hooks:
-      - id: autopep8
-        name: Autopep8 Python
-        description: Formats Python code to conform to the PEP 8 style guide
-        language: python
-        args: ["-i", "--ignore=E4"]
-
   ## C/C++ related -----------------------------------------------------------
 
   - repo: https://github.com/pocc/pre-commit-hooks
@@ -107,13 +85,6 @@ repos:
         args: [--check-config]
         exclude: *exclude_pattern
 
-  - repo: https://github.com/cheshirekow/cmake-format-precommit
-    rev: v0.6.10
-    hooks:
-      - id: cmake-format
-        name: Fix cmake
-        args: [--in-place]
-
   ## 3. Lints ================================================================
 
   - repo: https://github.com/pocc/pre-commit-hooks
@@ -126,11 +97,8 @@ repos:
         types_or: [c, c++, c#, objective-c, cuda]
         language: python
         args: [
-            "--filter=-legal/copyright,
-            -build/include_subdir,
-            -runtime/references,
-            -build/include_order",
-          ]
+          "--filter=-legal/copyright,-build/include_subdir,-runtime/references,-build/include_order"
+        ]
         exclude: |
           (?x)^(
             .*/cdisort\.(c|h)|             # cdisort.c, cdisort.h
@@ -144,15 +112,6 @@ repos:
             .*/test_cdisort\.c|            # test_cdisort.c
             .*/pydisort.cpp                # pydisort.cpp
           )$
-      - id: cpplint
-        name: Find lints in pydisort.cpp
-        entry: cpplint-hook
-        description: pydisort.cpp excluded previously; add with different args
-        types_or: [c++]
-        language: python
-        args: ["--filter=-readability/fn_size", "--filter=-legal/copyright"]
-        files: ^(.*/pydisort\.cpp)$
-        pass_filenames: false
 
   - repo: local
     hooks:

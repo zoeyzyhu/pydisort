@@ -3,9 +3,11 @@ cmake
 cpplint
 guzzle_sphinx_theme
 numpy
+numpy
 pre-commit
 pylint
 sphinx
 sphinxcontrib-napoleon
+torch
 twine
 wheel

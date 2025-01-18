@@ -1,5 +1,4 @@
-#ifndef INTERFACE_CPPDISORT_HPP_
-#define INTERFACE_CPPDISORT_HPP_
+#pragma once
 
 // C/C++
 #include <iostream>
@@ -104,5 +103,3 @@ class DisortWrapper {
   void printDisortFlags(std::ostream &os) const;
   void printBoundaryConditions(std::ostream &os) const;
 };
-
-#endif  // INTERFACE_CPPDISORT_HPP_

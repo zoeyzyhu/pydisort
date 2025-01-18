@@ -9,9 +9,12 @@ file(GLOB src_files pydisort.cpp)
 
 pybind11_add_module(${namel} MODULE ${src_files})
 
-target_include_directories(${namel} PRIVATE ${PYDISORT_INCLUDE_DIR})
+target_include_directories(${namel}
+  PRIVATE ${DISORT_INCLUDE_DIR}
+  PRIVATE ${CDISORT_INCLUDE_DIR}
+  )
 
-target_link_libraries(${namel} PRIVATE pydisort::disort++ pybind11::module)
+target_link_libraries(${namel} PRIVATE pydisort::disort pybind11::module)
 
 set_target_properties(${namel} PROPERTIES PREFIX "${PYTHON_MODULE_PREFIX}"
                                           SUFFIX "${PYTHON_MODULE_EXTENSION}")
