@@ -60,6 +60,7 @@ if(PYTHON_BINDINGS)
                COMPONENTS Interpreter Development.Module)
 endif()
 find_package(Torch REQUIRED)
+find_package(CUDAToolkit)
 include(${CMAKE_SOURCE_DIR}/cmake/pybind11.cmake)
 include(${CMAKE_SOURCE_DIR}/cmake/fmt.cmake)
 
@@ -68,11 +69,11 @@ add_subdirectory(src)
 add_subdirectory(cdisort213)
 
 if(PYTHON_BINDINGS)
-  add_subdirectory(python)
+  #add_subdirectory(python)
 endif()
 
 message(STATUS "${Blue}${PROJECT_NAME}-4. Setting up unit tests ...${ColorReset}")
-#add_subdirectory(tests)
+add_subdirectory(tests)
 
 #message(STATUS "${Blue}${PROJECT_NAME}-6. Setting up examples ...${ColorReset}")
 #add_subdirectory(examples)

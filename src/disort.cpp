@@ -9,12 +9,10 @@
 namespace disort {
 
 void call_disort_cpu(at::TensorIterator& iter, int rank_in_column,
-                     std::vector<disort_state>& ds,
-                     std::vector<disort_output>& ds_out);
+                     disort_state* ds, disort_output* ds_out);
 
 void call_disort_cuda(at::TensorIterator& iter, int rank_in_column,
-                      std::vector<disort_state>& ds,
-                      std::vector<disort_output>& ds_out);
+                      disort_state* ds, disort_output* ds_out);
 
 DisortOptions::DisortOptions() {
   // flags
@@ -202,9 +200,9 @@ torch::Tensor DisortImpl::forward(torch::Tensor prop, torch::Tensor ftoa,
           .build();
 
   if (prop.is_cpu()) {
-    call_disort_cpu(iter, rank_in_column, ds_, ds_out_);
+    call_disort_cpu(iter, rank_in_column, ds_.data(), ds_out_.data());
   } else if (prop.is_cuda()) {
-    call_disort_cuda(iter, rank_in_column, ds_, ds_out_);
+    call_disort_cuda(iter, rank_in_column, ds_.data(), ds_out_.data());
   } else {
     TORCH_CHECK(false, "DisortImpl::forward: unsupported device");
   }

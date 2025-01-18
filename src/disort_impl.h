@@ -3,12 +3,14 @@
 // disort
 #include <cdisort213/cdisort.h>
 
+#include "common.h"
+
 #define FLX(i, m) flx[(i) * 2 + (m)]
 #define PROP(i, m) prop[(i) * nprop + (m)]
 #define FTOA (*ftoa)
 #define TEMF(i) temf[i]
 
-namespace harp {
+namespace disort {
 
 template <typename T>
 void disort_impl(T* flx, T* prop, T* ftoa, T* temf, int rank_in_column,
@@ -25,16 +27,16 @@ void disort_impl(T* flx, T* prop, T* ftoa, T* temf, int rank_in_column,
 
   for (int i = 0; i < ds.nlyr; ++i) {
     // absorption
-    ds.dtauc[ds.nlyr - 1 - i] = PROP(i, IAB);
+    ds.dtauc[ds.nlyr - 1 - i] = PROP(i, index::IAB);
 
     // single scatering albedo
-    ds.ssalb[ds.nlyr - 1 - i] = PROP(i, ISS);
+    ds.ssalb[ds.nlyr - 1 - i] = PROP(i, index::ISS);
 
     // Legendre coefficients
     ds.pmom[(ds.nlyr - 1 - i) * (ds.nmom_nstr + 1)] = 1.;
     for (int m = 0; m < nprop - 2; ++m) {
       ds.pmom[(ds.nlyr - 1 - i) * (ds.nmom_nstr + 1) + m + 1] =
-          PROP(i, IPM + m);
+          PROP(i, index::IPM + m);
     }
 
     for (int m = nprop - 2; m < ds.nmom; ++m) {
@@ -46,12 +48,12 @@ void disort_impl(T* flx, T* prop, T* ftoa, T* temf, int rank_in_column,
 
   for (int i = 0; i <= ds.nlyr; ++i) {
     int i1 = ds.nlyr - (rank_in_column * (ds.nlyr - 1) + i);
-    FLX(i, /*up=*/0) = ds_out.rad[i1].flup;
-    FLX(i, /*donw=*/1) = ds_out.rad[i1].rfldir + ds_out.rad[i1].rfldn;
+    FLX(i, index::IUP) = ds_out.rad[i1].flup;
+    FLX(i, index::IDN) = ds_out.rad[i1].rfldir + ds_out.rad[i1].rfldn;
   }
 }
 
-}  // namespace harp
+}  // namespace disort
 
 #undef FLX
 #undef PROP

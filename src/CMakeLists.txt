@@ -15,7 +15,7 @@
 
 
 include_directories(
-  ${CMAKE_CURRENT_SOURCE_DIR}
+  "${CMAKE_CURRENT_SOURCE_DIR}/.."
   ${CMAKE_BINARY_DIR}
   SYSTEM ${TORCH_API_INCLUDE_DIR}
   SYSTEM ${TORCH_INCLUDE_DIR}
@@ -30,7 +30,7 @@ string(TOUPPER ${namel} nameu)
 file(GLOB src_files *.cpp)
 
 add_library(${namel}_${buildl}
-    OBJECT
+    STATIC
     ${src_files}
     )
 
@@ -41,13 +41,31 @@ set_target_properties(${namel}_${buildl}
 
 target_include_directories(${namel}_${buildl}
     PRIVATE "${FMT_INCLUDE_DIR}"
-    PRIVATE "${CDISORT_INCLUDE_DIR}"
     )
 
-target_link_libraries(${namel}_${buildl} pydisort::cdisort)
+target_link_libraries(${namel}_${buildl} pydisort::cdisort fmt::fmt)
+
+# CUDA source codes
+file(GLOB cu_src_files *.cu)
+
+add_library(${namel}_cuda_${buildl}
+    STATIC
+    ${cu_src_files}
+    )
+
+set_target_properties(${namel}_cuda_${buildl}
+    PROPERTIES
+    CUDA_SEPARABLE_COMPILATION ON
+    )
+
+target_link_libraries(${namel}_cuda_${buildl}
+		PRIVATE
+    CUDA::cudart
+    )
 
 add_library(pydisort::disort ALIAS ${namel}_${buildl})
+add_library(pydisort::disort_cu ALIAS ${namel}_cuda_${buildl})
 
 set(DISORT_INCLUDE_DIR
-  "${CMAKE_CURRENT_SOURCE_DIR}"
+  "${CMAKE_CURRENT_SOURCE_DIR}/.."
   CACHE INTERNAL "disort include directory")

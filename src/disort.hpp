@@ -13,7 +13,7 @@
 #include <torch/nn/modules/container/any.h>
 
 // disort
-#include <cdisort.h>
+#include <cdisort213/cdisort.h>
 
 #include "add_arg.h"
 

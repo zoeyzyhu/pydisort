@@ -4,6 +4,8 @@
 
 enable_testing()
 
-add_subdirectory(src)
-add_subdirectory(interface)
-add_subdirectory(python)
+setup_test(test_disort)
+
+#add_subdirectory(src)
+#add_subdirectory(interface)
+#add_subdirectory(python)
