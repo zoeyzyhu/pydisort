@@ -33,15 +33,15 @@ DisortOptions::DisortOptions() {
   }
 
   // bc
+  ds().bc.umu0 = 1.;
+  ds().bc.phi0 = 0.;
+  ds().bc.albedo = 0.;
   ds().bc.btemp = 0.;
   ds().bc.ttemp = 0.;
   ds().bc.fluor = 0.;
-  ds().bc.albedo = 0.;
   ds().bc.fisot = 0.;
   ds().bc.fbeam = 0.;
   ds().bc.temis = 0.;
-  ds().bc.umu0 = 1.;
-  ds().bc.phi0 = 0.;
   ds().accur = 1.E-6;
 }
 
@@ -103,13 +103,14 @@ void DisortImpl::reset() {
   options.set_header(options.header());
   options.set_flags(options.flags());
 
+  options.ds().nphi = options.user_phi.size();
+  options.ds().numu = options.user_mu.size();
+  options.ds().ntau = options.user_tau.size();
+
   TORCH_CHECK(options.ds().nlyr > 0, "DisortImpl: ds.nlyr <= 0");
   TORCH_CHECK(options.ds().nstr > 0, "DisortImpl: ds.nstr <= 0");
   TORCH_CHECK(options.ds().nmom >= options.ds().nstr,
               "DisortImpl: ds.nmom < ds.nstr");
-  TORCH_CHECK(options.ds().nphi > 0, "DisortImpl: ds.nphi <= 0");
-  TORCH_CHECK(options.ds().numu > 0, "DisortImpl: ds.numu <= 0");
-  TORCH_CHECK(options.ds().ntau > 0, "DisortImpl: ds.ntau <= 0");
 
   if (allocated_) {
     for (int i = 0; i < options.nwave() * options.ncol(); ++i) {
@@ -125,6 +126,19 @@ void DisortImpl::reset() {
     ds_[i] = options.ds();
     c_disort_state_alloc(&ds_[i]);
     c_disort_out_alloc(&ds_[i], &ds_out_[i]);
+
+    if (ds.flag.usrtau) {
+      for (int j = 0; j < options.user_tau.size(); ++j)
+        ds_[i].utau[j] = options.user_tau[j];
+    }
+
+    if (ds_s[i].flag.usrang) {
+      for (int j = 0; j < options.user_mu.size(); ++j)
+        ds_[i].umu[j] = options.user_mu[j];
+
+      for (int j = 0; j < options.user_phi.size(); ++j)
+        ds_[i].phi[j] = options.user_phi[j];
+    }
   }
 
   allocated_ = true;
@@ -153,15 +167,32 @@ DisortImpl::~DisortImpl() {
 //! block r = 1 gets, 4 - 3 - 2
 //! block r = 2 gets, 2 - 1 - 0
 torch::Tensor DisortImpl::forward(torch::Tensor prop, torch::Tensor ftoa,
+                                  torch::Tensor bc,
                                   torch::optional<torch::Tensor> temf) {
   TORCH_CHECK(options.ds().flag.ibcnd == 0,
               "DisortImpl::forward: ds.ibcnd != 0");
+
+  // check dimensions
   TORCH_CHECK(prop.dim() == 4, "DisortImpl::forward: prop.dim() != 4");
+  TORCH_CHECK(ftoa.dim() == 2, "DisortImpl::forward: ftoa.dim() != 2");
+  TORCH_CHECK(bc.dim() == 3, "DisortImpl::forward: bc.dim() != 3");
 
   int nwave = prop.size(0);
   int ncol = prop.size(1);
   int nlyr = prop.size(2);
 
+  // check ftoa
+  TORCH_CHECK(ftoa.size(0) == nwave,
+              "DisortImpl::forward: ftoa.size(0) != nwave");
+  TORCH_CHECK(ftoa.size(1) == ncol,
+              "DisortImpl::forward: ftoa.size(1) != ncol");
+
+  // check bc
+  TORCH_CHECK(bc.size(0) == nwave, "DisortImpl::forward: bc.size(0) != nwave");
+  TORCH_CHECK(bc.size(1) == ncol, "DisortImpl::forward: bc.size(1) != ncol");
+  TORCH_CHECK(bc.size(2) == 5, "DisortImpl::forward: bc.size(2) != 5");
+
+  // check ds
   TORCH_CHECK(options.ds().nlyr == nlyr,
               "DisortImpl::forward: ds.nlyr != nlyr");
 
@@ -194,6 +225,7 @@ torch::Tensor DisortImpl::forward(torch::Tensor prop, torch::Tensor ftoa,
           .add_output(flx)
           .add_input(prop)
           .add_owned_const_input(ftoa.unsqueeze(-1).unsqueeze(-1))
+          .add_owned_const_input(bc.unsqueeze(2))
           .add_owned_const_input(
               tem.unsqueeze(0).expand({nwave, ncol, nlyr + 1}).unsqueeze(-1))
           .add_input(index)

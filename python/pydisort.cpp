@@ -41,16 +41,15 @@ PYBIND11_MODULE(pydisort, m) {
   --------
   - Example 1: Calculate attenuation of radiative flux in a plane-parallel atmosphere
 
-  >>> from pydisort import disort, RFLDIR, FLDN, FLUP
-  >>> ds = disort()
-  >>> flags = {"onlyfl": True, "usrtau": False, "usrang": False}
-  >>> ds.set_flags(flags)
-  >>> ds.set_atmosphere_dimension(nlyr = 4)
-  >>> ds.seal()
-  >>> ds.set_optical_thickness([0.1, 0.2, 0.3, 0.4])
-  >>> ds.fbeam = 3.14159
-  >>> _, flx = ds.run()
-  >>> flx = flx[:, [RFLDIR, FLDN, FLUP]]
+  >>> import torch
+  >>> from pydisort import DisortOptions, Disort, kRFLDIR, kFLDN, kFLUP
+  >>> op = DisortOptions().header("running disort test").flags("onlyfl")
+  >>> op.ds().nlyr(4).nstr(4).nmom(4)
+  >>> ds = Disort(op)
+  >>> tau = torch.tensor([0.1, 0.2, 0.3, 0.4], dtype=torch.float64)
+  >>> ftoa = torch.tensor([3.14159], dtype=torch.float64)
+  >>> result = ds.forward(tau, ftoa, bc)
+  >>> flx = flx[:, [kRFLDIR, kFLDN, kFLUP]]
   >>> flx
   array([[3.14159   , 0.        , 0.        ],
          [2.84262818, 0.        , 0.        ],
@@ -76,23 +75,17 @@ PYBIND11_MODULE(pydisort, m) {
 
   - Example 2: Calculate intensity from isotropic scattering in a plane-parallel atmosphere
 
-  >>> from pydisort import disort, get_phase_function
-  >>> ds = disort()
-  >>> flags = {"planck": False}
-  >>> ds.set_flags(flags)
-  >>> ds.set_atmosphere_dimension(nlyr = 1, nstr = 16, nmom = 16)
-  >>> ds.set_intensity_dimension(nuphi = 1, nutau = 2, numu = 6)
-  >>> ds.seal()
-  >>> pmom = get_phase_function(nmom = 16, model = "isotropic")
-  >>> ds.set_optical_thickness([0.1])
-  >>> ds.set_single_scattering_albedo([1.0])
-  >>> ds.set_phase_moments(pmom)
-  >>> ds.set_user_optical_depth([0.0, 0.1])
-  >>> ds.set_user_cosine_polar_angle([-1.0, -0.5, -0.1, 0.1, 0.5, 1.0])
-  >>> ds.set_user_azimuthal_angle([0.0])
-  >>> ds.umu0 = 1.0
-  >>> ds.fbeam = 3.14159
-  >>> rad, flx = ds.run()
+  >>> import torch
+  >>> from pydisort import DisortOptions, Disort
+  >>> op = DisortOptions().flags("usrtau,usrang").output_rad(True)
+  >>> op.ds().nlyr(1).nstr(16).nmom(16)
+  >>> op.user_tau([0.0, 0.1]).user_mu([-1.0, -0.5, -0.1, 0.1, 0.5, 1.0]).user_phi([0.0])
+  >>> ds = Disort(op)
+  >>> prop = torch.tensor([[[0.1, 1.0]]], dtype=torch.float64)
+  >>> ftoa = torch.tensor([[3.14159]], dtype=torch.float64)
+  >>> bc = torch.zeros((op.nwave(), op.ncol(), 5), dtype=torch.float64)
+  >>> bc[:, :, iumu0] = 0.1
+  >>> rad = ds.forward(prop, ftoa, bc)
   >>> rad
   array([[[0.        , 0.        , 0.        , 0.18095504, 0.0516168 , 0.02707849],
           [0.02703935, 0.05146774, 0.17839685, 0.        , 0.        , 0.        ]]])
@@ -149,7 +142,7 @@ PYBIND11_MODULE(pydisort, m) {
   - If you want to have more insights into DISORT internal inputs,
     you can set the ``print-input`` flag to ``True``.
     The DISORT internal inputs will be printed to the standard output
-    when the ``run()`` method is called.
+    when the ``forward()`` method is called.
 
   References
   ----------
@@ -161,16 +154,22 @@ PYBIND11_MODULE(pydisort, m) {
          Journal of Quantitative Spectroscopy and Radiative Transfer, 55(6), 761-779.
   )";
 
-  m.attr("RFLDIR") = 0;
-  m.attr("FLDN") = 1;
-  m.attr("FLUP") = 2;
-  m.attr("DFDT") = 3;
-  m.attr("UAVG") = 4;
-  m.attr("UAVGDN") = 5;
-  m.attr("UAVGUP") = 6;
-  m.attr("UAVGSO") = 7;
+  m.attr("irfldir") = disort::irfldir;
+  m.attr("ifldn") = disort::iFLDN;
+  m.attr("iflup") = disort::iFLUP;
+  m.attr("idfdt") = disort::iDFDT;
+  m.attr("iuavg") = disort::iUAVG;
+  m.attr("iuavgdn") = disort::iUAVGDN;
+  m.attr("iuavgup") = disort::kUAVGUP;
+  m.attr("iuavgso") = disort::kUAVGSO;
 
-  m.def("get_phase_function", &get_phase_function, R"(
+  m.attr("iumu0") = disort::kUMU0;
+  m.attr("iphi0") = disort::kPHI0;
+  m.attr("ialbedo") = disort::kALBEDO;
+  m.attr("ifluor") = disort::kFLUOR;
+  m.attr("ifisot") = disort::kFISOT;
+
+  m.def("scattering_moments", &disort::scattering_moments, R"(
       Get phase function moments based on a phase function model
 
       Parameters

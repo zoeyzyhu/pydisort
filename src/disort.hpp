@@ -34,6 +34,18 @@ struct DisortOptions {
   // spatial dimensions
   ADD_ARG(int, ncol) = 1;
 
+  // user optical depth grid
+  ADD_ARG(std::vector<double>, user_tau) = { 0. };
+
+  // user polar angle grid
+  ADD_ARG(std::vector<double>, user_mu) = { 1. };
+
+  // user azimuthal angle grid
+  ADD_ARG(std::vector<double>, user_phi) = { 0. };
+
+  // whether to output radiance or flux (default)
+  ADD_ARG(bool, output_rad) = false;
+
   // placeholder for disort state
   ADD_ARG(disort_state, ds);
 };
@@ -70,6 +82,7 @@ class DisortImpl : public torch::nn::Cloneable<DisortImpl> {
    * \return radiative flux or intensity (nwave, ncol, nlvl, 2)
    */
   torch::Tensor forward(torch::Tensor prop, torch::Tensor ftoa,
+                        torch::Tensor bc,
                         torch::optional<torch::Tensor> temf = torch::nullopt);
 
  private:
