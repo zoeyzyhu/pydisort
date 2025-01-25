@@ -1,6 +1,7 @@
 #pragma once
 
 // C/C++
+#include <map>
 #include <string>
 #include <utility>
 #include <vector>
@@ -77,12 +78,13 @@ class DisortImpl : public torch::nn::Cloneable<DisortImpl> {
   //! Calculate radiative flux or intensity
   /*!
    * \param prop properties at each level (nwave, ncol, nlyr, nprop)
-   * \param ftoa top of atmosphere flux (nwave, ncol)
+   * \param bc dictionary of disort boundary conditions each of size (nwave,
+   * ncol)
    * \param temf temperature at each level (ncol, nlvl = nlyr + 1)
    * \return radiative flux or intensity (nwave, ncol, nlvl, 2)
    */
-  torch::Tensor forward(torch::Tensor prop, torch::Tensor ftoa,
-                        torch::Tensor bc,
+  torch::Tensor forward(torch::Tensor prop,
+                        std::map<std::string, torch::Tensor>& bc,
                         torch::optional<torch::Tensor> temf = torch::nullopt);
 
  private:
