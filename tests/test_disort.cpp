@@ -15,31 +15,11 @@ int main(int argc, char **argv) {
   op.ds().nstr = 16;
   op.ds().nmom = 16;
 
-  op.ds().nphi = 1;
-  op.ds().ntau = 2;
-  op.ds().numu = 6;
+  op.user_mu({-1, -0.5, -0.1, 0.1, 0.5, 1});
+  op.user_phi({0});
+  op.user_tau({0, 0.03125});
 
   disort::Disort disort(op);
-
-  for (int i = 0; i < op.nwave(); ++i) {
-    disort->ds(i).bc.umu0 = 0.1;
-    disort->ds(i).bc.phi0 = 0.0;
-    disort->ds(i).bc.albedo = 0.0;
-    disort->ds(i).bc.fluor = 0.0;
-    disort->ds(i).bc.fisot = 0.0;
-
-    disort->ds(i).umu[0] = -1.;
-    disort->ds(i).umu[1] = -0.5;
-    disort->ds(i).umu[2] = -0.1;
-    disort->ds(i).umu[3] = 0.1;
-    disort->ds(i).umu[4] = 0.5;
-    disort->ds(i).umu[5] = 1.;
-
-    disort->ds(i).phi[0] = 0.0;
-
-    disort->ds(i).utau[0] = 0.0;
-    disort->ds(i).utau[1] = 0.03125;
-  }
 
   auto prop = torch::zeros({disort->options.nwave(), disort->options.ncol(),
                             disort->ds().nlyr, 2 + disort->ds().nstr},
@@ -52,10 +32,16 @@ int main(int argc, char **argv) {
           disort->ds().nstr,
           disort::PhaseMomentOptions().type(disort::kIsotropic));
 
-  auto ftoa = torch::zeros({disort->options.nwave(), disort->options.ncol()},
-                           torch::kDouble);
-  ftoa.fill_(M_PI / disort->ds().bc.umu0);
+  std::map<std::string, torch::Tensor> bc;
 
-  auto result = disort->forward(prop, ftoa);
+  bc["umu0"] =
+      0.1 * torch::ones({disort->options.nwave(), disort->options.ncol()},
+                        torch::kDouble);
+  bc["fbeam"] = M_PI / bc["umu0"];
+
+  auto result = disort->forward(prop, bc);
   std::cout << "result: " << result << std::endl;
+
+  auto rad = disort->get_rad(prop.options());
+  std::cout << "rad = " << rad << std::endl;
 }

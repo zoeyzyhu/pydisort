@@ -4,7 +4,7 @@
 #include <cdisort213/cdisort.h>
 
 // disort
-#include <common.h>
+#include "common.h"
 
 #define FLX(i, m) flx[(i) * 2 + (m)]
 #define PROP(i, m) prop[(i) * nprop + (m)]
@@ -48,7 +48,7 @@ void disort_impl(T* flx, T* prop, T* fbeam, T* umu0, T* phi0, T* albedo,
     ds.pmom[(ds.nlyr - 1 - i) * (ds.nmom_nstr + 1)] = 1.;
     for (int m = 0; m < nprop - 2; ++m) {
       ds.pmom[(ds.nlyr - 1 - i) * (ds.nmom_nstr + 1) + m + 1] =
-          PROP(i, IPM + m);
+          PROP(i, index::IPM + m);
     }
 
     for (int m = nprop - 2; m < ds.nmom; ++m) {

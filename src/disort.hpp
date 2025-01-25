@@ -44,9 +44,6 @@ struct DisortOptions {
   // user azimuthal angle grid
   ADD_ARG(std::vector<double>, user_phi) = { 0. };
 
-  // whether to output radiance or flux (default)
-  ADD_ARG(bool, output_rad) = false;
-
   // placeholder for disort state
   ADD_ARG(disort_state, ds);
 };
@@ -74,6 +71,9 @@ class DisortImpl : public torch::nn::Cloneable<DisortImpl> {
   disort_output& ds_out(int n = 0, int j = 0) {
     return ds_out_[n * options.ncol() + j];
   }
+
+  torch::Tensor get_flx(torch::TensorOptions op) const;
+  torch::Tensor get_rad(torch::TensorOptions op) const;
 
   //! Calculate radiative flux or intensity
   /*!
