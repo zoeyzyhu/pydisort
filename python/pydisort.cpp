@@ -10,162 +10,12 @@
 // disort
 #include <disort/disort.hpp>
 #include <disort/disort_formatter.hpp>
-#include <disort/scattering_moments.hpp>
 
 namespace py = pybind11;
 
-void bind_disort_options(py::module &m) {
-  py::class_<disort::DisortOptions>(m, "DisortOptions", R"(
-        Set radiation flags for disort
-
-        Parameters
-        ----------
-        arg0 : dict
-          Dictionary of radiation flags consisting of a key (flag) and a value (True/False).
-
-        Returns
-        -------
-        DisortWrapper object
-
-        Examples
-        --------
-        >>> import pydisort
-        >>> disort = pydisort.disort()
-        >>> dict = {'ibcnd': False, 'usrtau': True, 'usrang': True, 'lamber': True, 'plank': True}
-        >>> disort.set_flags(dict).seal()
-        >>> rad, flx = disort.run()
-
-        Notes
-        -----
-        The following flags are supported:
-
-        .. list-table::
-           :widths: 25 25
-           :header-rows: 1
-
-           * - Flag
-             - Description
-           * - 'ibcnd'
-             - General or Specific boundary condition
-           * - 'usrtau'
-             - use user optical depths
-           * - 'usrang'
-             - use user azimuthal angles
-           * - 'lamber'
-             - turn on lambertian reflection surface
-           * - 'plank'
-             - turn on plank source (thermal emission)
-           * - 'spher'
-             - turn on spherical correction
-           * - 'onlyfl'
-             - only compute radiative fluxes
-           * - 'quiet'
-             - turn on disort internal printout
-           * - 'intensity_correction'
-             - turn on intensity correction
-           * - 'old_intensity_correction'
-             - turn on old intensity correction
-           * - 'general_source'
-             - turn on general source
-           * - 'output_uum'
-             - output azimuthal components of the intensity
-           * - 'print-input'
-             - print input parameters
-           * - 'print-fluxes'
-             - print fluxes
-           * - 'print-intensity'
-             - print intensity
-           * - 'print-transmissivity'
-             - print transmissivity
-           * - 'print-phase-function'
-             - print phase function
-
-        A General boundary condition is invoked when 'ibcnd' is set to False.
-        This allows:
-
-        - beam illumination from the top (set fbeam)
-        - isotropic illumination from the top (set fisot)
-        - thermal emission from the top (set ttemp and temis)
-        - internal thermal emission (use set_temperature_on_level)
-        - reflection at the bottom (set lamber, albedo)
-        - thermal emission from the bottom (set btemp)
-
-        A Special boundary condition is invoked when 'ibcnd' is set to True.
-        Special boundary condition only returns albedo and transmissivity of
-        the entire medium.
-
-        - current version of pydisort has limited support for this option.
-        - consult the documentation of DISORT for more details on this option.
-        )")
-      .def(py::init<>())
-      .def("__repr__",
-           [](const disort::DisortOptions &a) {
-             return fmt::format("DisortOptions{}", a);
-           })
-      .ADD_OPTION(std::string, disort::DisortOptions, header)
-      .ADD_OPTION(std::string, disort::DisortOptions, flags)
-      .ADD_OPTION(int, disort::DisortOptions, nwave)
-      .ADD_OPTION(int, disort::DisortOptions, ncol)
-      .ADD_OPTION(std::vector<double>, disort::DisortOptions, user_tau)
-      .ADD_OPTION(std::vector<double>, disort::DisortOptions, user_mu)
-      .ADD_OPTION(std::vector<double>, disort::DisortOptions, user_phi);
-}
-
-void bind_phase_options(py::module &m) {
-  py::class_<disort::PhaseMomentOptions>(m, "PhaseMomentOptions")
-      .def(py::init<>())
-      .def("__repr__",
-           [](const disort::PhaseMomentOptions &a) {
-             return fmt::format("PhaseMomentOptions{}", a);
-           })
-      .def(
-          "type",
-          [](disort::PhaseMomentOptions &a, std::string type) {
-            if (type == "isotropic") {
-              a.type(disort::kIsotropic);
-            } else if (type == "rayleigh") {
-              a.type(disort::kRayleigh);
-            } else if (type == "henyey-greenstein") {
-              a.type(disort::kHenyeyGreenstein);
-            } else if (type == "double-henyey-greenstein") {
-              a.type(disort::kDoubleHenyeyGreenstein);
-            } else if (type == "haze-garcia-siewert") {
-              a.type(disort::kHazeGarciaSiewert);
-            } else if (type == "cloud-garcia-siewert") {
-              a.type(disort::kCloudGarciaSiewert);
-            } else {
-              throw std::runtime_error("Unknown phase function model");
-            }
-          },
-          R"(
-      Notes
-      -----
-      The following phase function models are supported:
-
-      .. list-table::
-          :widths: 25 40
-          :header-rows: 1
-
-          * - Model
-            - Description
-          * - 'isotropic'
-            - Isotropic phase function, [0, 0, 0, ...]
-          * - 'rayleigh'
-            - Rayleigh scattering phase function, [0, 0.1, 0, ...]
-          * - 'henyey-greenstein'
-            - Henyey-Greenstein phase function, [gg, gg^2, gg^3, ...]
-          * - 'double-henyey-greenstein'
-            - Double Henyey-Greenstein phase function, [gg1, gg2, gg1^2, gg2^2, ...]
-          * - 'haze-garcia-siewert'
-            - Tabulated haze phase function by Garcia/Siewert
-          * - 'cloud-garcia-siewert'
-            - Tabulated cloud phase function by Garcia/Siewert
-      )")
-      .ADD_OPTION(double, disort::PhaseMomentOptions, gg)
-      .ADD_OPTION(double, disort::PhaseMomentOptions, gg1)
-      .ADD_OPTION(double, disort::PhaseMomentOptions, gg2)
-      .ADD_OPTION(double, disort::PhaseMomentOptions, ff);
-}
+void bind_disort_options(py::module &m);
+void bind_phase_options(py::module &m);
+void bind_cdisort(py::module &m);
 
 PYBIND11_MODULE(pydisort, m) {
   m.attr("__name__") = "disort";
@@ -341,4 +191,5 @@ PYBIND11_MODULE(pydisort, m) {
 
   bind_disort_options(m);
   bind_phase_options(m);
+  bind_cdisort(m);
 }

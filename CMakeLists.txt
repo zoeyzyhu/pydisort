@@ -51,18 +51,11 @@ endforeach()
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
 
-option(PYTHON_BINDINGS "Build Python Bindings" ON)
-
 message(STATUS "${Blue}${PROJECT_NAME}-1. Set up project compiler flags ...${ColorReset}")
 message(STATUS "Include ${CMAKE_CURRENT_SOURCE_DIR}/cmake/compilers.cmake")
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/compilers.cmake)
 
 message(STATUS "${Blue}${PROJECT_NAME}-2. Setting up system libraries ...${ColorReset}")
-if(PYTHON_BINDINGS)
-  set(Python_FIND_VIRTUALENV FIRST)
-  find_package(Python3 ${PYTHON_VERSION} REQUIRED
-               COMPONENTS Interpreter Development.Module)
-endif()
 find_package(Torch REQUIRED)
 find_package(CUDAToolkit)
 include(${CMAKE_SOURCE_DIR}/cmake/pybind11.cmake)
@@ -71,10 +64,6 @@ include(${CMAKE_SOURCE_DIR}/cmake/fmt.cmake)
 message(STATUS "${Blue}${PROJECT_NAME}-3. Setting up project libraries ...${ColorReset}")
 add_subdirectory(src)
 add_subdirectory(cdisort213)
-
-if(PYTHON_BINDINGS)
-  #  add_subdirectory(python)
-endif()
 
 message(STATUS "${Blue}${PROJECT_NAME}-4. Setting up unit tests ...${ColorReset}")
 add_subdirectory(tests)

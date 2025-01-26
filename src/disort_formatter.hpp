@@ -11,13 +11,25 @@
 #include "scattering_moments.hpp"
 
 template <>
+struct fmt::formatter<disort_state> {
+  constexpr auto parse(fmt::format_parse_context& ctx) { return ctx.begin(); }
+
+  template <typename FormatContext>
+  auto format(const disort_state& ds, FormatContext& ctx) const {
+    return fmt::format_to(ctx.out(), "(nlyr = {}; nstr = {}; nmom = {})",
+                          ds.nlyr, ds.nstr, ds.nmom);
+  }
+};
+
+template <>
 struct fmt::formatter<disort::DisortOptions> {
   constexpr auto parse(fmt::format_parse_context& ctx) { return ctx.begin(); }
 
   template <typename FormatContext>
   auto format(const disort::DisortOptions& p, FormatContext& ctx) const {
-    return fmt::format_to(ctx.out(), "(flags = {}; nwave = {}; ncol = {})",
-                          p.flags(), p.nwave(), p.ncol());
+    return fmt::format_to(
+        ctx.out(), "(flags = {}; nwave = {}; ncol = {}; disort_state = {})",
+        p.flags(), p.nwave(), p.ncol(), p.ds());
   }
 };
 
