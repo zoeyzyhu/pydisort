@@ -47,6 +47,10 @@ foreach(_file ${_macro_files})
   include(${_file})
 endforeach()
 
+# set output directories
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
+
 option(PYTHON_BINDINGS "Build Python Bindings" ON)
 
 message(STATUS "${Blue}${PROJECT_NAME}-1. Set up project compiler flags ...${ColorReset}")
@@ -69,7 +73,7 @@ add_subdirectory(src)
 add_subdirectory(cdisort213)
 
 if(PYTHON_BINDINGS)
-  #add_subdirectory(python)
+  #  add_subdirectory(python)
 endif()
 
 message(STATUS "${Blue}${PROJECT_NAME}-4. Setting up unit tests ...${ColorReset}")

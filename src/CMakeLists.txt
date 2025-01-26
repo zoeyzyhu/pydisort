@@ -43,7 +43,11 @@ target_include_directories(${namel}_${buildl}
     PRIVATE "${FMT_INCLUDE_DIR}"
     )
 
-target_link_libraries(${namel}_${buildl} pydisort::cdisort fmt::fmt)
+target_link_libraries(${namel}_${buildl}
+    PUBLIC
+    pydisort::cdisort
+    fmt::fmt
+    )
 
 # CUDA source codes
 file(GLOB cu_src_files *.cu)
@@ -59,8 +63,9 @@ set_target_properties(${namel}_cuda_${buildl}
     )
 
 target_link_libraries(${namel}_cuda_${buildl}
-		PRIVATE
+    PUBLIC
     CUDA::cudart
+    CUDA::cudart_static
     )
 
 add_library(pydisort::disort ALIAS ${namel}_${buildl})

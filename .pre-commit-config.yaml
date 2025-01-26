@@ -97,7 +97,7 @@ repos:
         types_or: [c, c++, c#, objective-c, cuda]
         language: python
         args: [
-          "--filter=-legal/copyright,-build/include_subdir,-runtime/references,-build/include_order"
+          "--filter=-legal/copyright,-build/include_subdir,-runtime/references,-build/include_order,-runtime/casting"
         ]
         exclude: |
           (?x)^(
