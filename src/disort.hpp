@@ -20,6 +20,11 @@
 
 namespace disort {
 
+DISPATCH_MACRO
+inline double emission_temp(double wlo, double whi, double temp) {
+  return temp;
+}
+
 struct DisortOptions {
   DisortOptions();
 
@@ -28,6 +33,10 @@ struct DisortOptions {
 
   //! set disort flags
   void set_flags(std::string const& flags);
+
+  //! emission function
+  ADD_ARG(std::function<double(double, double, double)>,
+          emission) = emission_temp;
 
   //! header
   ADD_ARG(std::string, header) = "running disort ...";

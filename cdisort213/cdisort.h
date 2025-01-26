@@ -24,6 +24,12 @@
 #ifndef __cdisort_h
 #define __cdisort_h
 
+#ifdef __CUDACC__
+#define DISPATCH_MACRO __host__ __device__
+#else
+#define DISPATCH_MACRO
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif 
@@ -528,8 +534,21 @@ typedef struct {
  * Function prototypes *
  *---------------------*/
 
+DISPATCH_MACRO
+double c_planck_func1(double wnumlo,
+                      double wnumhi,
+                      double t);
+
+DISPATCH_MACRO
+double c_planck_func2(double wnumlo,
+                      double wnumhi,
+                      double t);
+
+typedef double(*emission_func_t)(double, double, double);
+
 int c_disort(disort_state  *ds,
-              disort_output *out);
+              disort_output *out,
+              emission_func_t emi_func);
 
 double c_bidir_reflectivity ( double       wvnmlo,
 			      double       wvnmhi,
@@ -703,7 +722,8 @@ void c_disort_set(disort_state *ds,
                   double       *oprim,
                   double       *tauc,
                   double       *taucpr,
-                  double       *utaupr);
+                  double       *utaupr,
+                  emission_func_t emi_func);
 
 void c_set_matrix(disort_state *ds,
                   double       *bdr,
@@ -1128,7 +1148,8 @@ void c_twostr(disort_state  *ds,
               int            deltam,
               double        *gg,
               int           *ierror,
-              double         radius);
+              double         radius,
+              emission_func_t emi_func);
 
 double c_chapman(int     lc,
                  double  taup,
@@ -1214,7 +1235,8 @@ void c_twostr_set(disort_state *ds,
                   double       *tauc,
                   double       *taucpr,
                   double       *tplanck,
-                  double       *utaupr);
+                  double       *utaupr,
+                  emission_func_t  emi_func);
 
 void c_twostr_solve_bc(disort_state *ds,
                        twostr_xyz   *ts,
@@ -1233,14 +1255,6 @@ void c_twostr_solve_bc(disort_state *ds,
                        double       *b,
                        double       *ll,
                        twostr_diag  *diag);
-
-double c_planck_func1(double wnumlo,
-                      double wnumhi,
-                      double t);
-
-double c_planck_func2(double wnumlo,
-                      double wnumhi,
-                      double t);
 
 void c_disort_state_alloc(disort_state *ds);
 

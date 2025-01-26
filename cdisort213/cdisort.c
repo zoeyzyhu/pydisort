@@ -394,7 +394,8 @@
 */ 
 
 int c_disort(disort_state  *ds,
-	      disort_output *out)
+	      disort_output *out,
+        emission_func_t emi_func)
 {
   static int
     self_tested = -1;
@@ -452,7 +453,7 @@ int c_disort(disort_state  *ds,
     self_tested = 0;
     compare     = FALSE;
     c_self_test(compare,prntu0_test,&ds_test,&out_test);
-    c_disort(&ds_test,&out_test);
+    c_disort(&ds_test,&out_test,emi_func);
   }
 
   /*
@@ -569,7 +570,7 @@ int c_disort(disort_state  *ds,
     }
 
     /* Perform various setup operations */
-    c_disort_set(ds,ch,chtau,cmu,cwt,deltam,dtaucpr,expbea,flyr,gl,layru,&lyrcut,&ncut,&nn,&corint,oprim,tauc,taucpr,utaupr);
+    c_disort_set(ds,ch,chtau,cmu,cwt,deltam,dtaucpr,expbea,flyr,gl,layru,&lyrcut,&ncut,&nn,&corint,oprim,tauc,taucpr,utaupr,emi_func);
 
     /*  Print input information */
     if(ds->flag.prnt[0]) {
@@ -682,7 +683,7 @@ int c_disort(disort_state  *ds,
   }
 
   /* Perform various setup operations */
-  c_disort_set(ds,ch,chtau,cmu,cwt,deltam,dtaucpr,expbea,flyr,gl,layru,&lyrcut,&ncut,&nn,&corint,oprim,tauc,taucpr,utaupr);
+  c_disort_set(ds,ch,chtau,cmu,cwt,deltam,dtaucpr,expbea,flyr,gl,layru,&lyrcut,&ncut,&nn,&corint,oprim,tauc,taucpr,utaupr,emi_func);
 
 
   /*  Print input information */
@@ -698,10 +699,10 @@ int c_disort(disort_state  *ds,
     tplanck = 0.;
   }
   else {
-    tplanck = c_planck_func2(ds->wvnmlo,ds->wvnmhi,ds->bc.ttemp)*ds->bc.temis;
-    bplanck = c_planck_func2(ds->wvnmlo,ds->wvnmhi,ds->bc.btemp);
+    tplanck = emi_func(ds->wvnmlo,ds->wvnmhi,ds->bc.ttemp)*ds->bc.temis;
+    bplanck = emi_func(ds->wvnmlo,ds->wvnmhi,ds->bc.btemp);
     for (lev = 0; lev <= ds->nlyr; lev++) {
-      PKAG(lev) = c_planck_func2(ds->wvnmlo,ds->wvnmhi,TEMPER(lev));
+      PKAG(lev) = emi_func(ds->wvnmlo,ds->wvnmhi,TEMPER(lev));
     }
   }
 
@@ -3512,7 +3513,8 @@ void c_disort_set(disort_state *ds,
                   double       *oprim,
                   double       *tauc,
                   double       *taucpr,
-                  double       *utaupr)
+                  double       *utaupr,
+                  emission_func_t emi_func)
 {
   register int
     iq,iu,k,lc,lu;
@@ -9579,7 +9581,8 @@ void c_twostr(disort_state  *ds,
               int            deltam,
               double        *gg,
               int           *ierror,
-              double         radius)
+              double         radius,
+              emission_func_t emi_func)
 {
   register int
     lc,ierr;
@@ -9674,7 +9677,7 @@ void c_twostr(disort_state  *ds,
   * Perform various setup operations
   */
   c_twostr_set(ds,&bplanck,ch,chtau,&cmu,deltam,dtaucpr,expbea,flyr,gg,ggprim,layru,&lyrcut,
-             &ncut,&nn,oprim,pkag,pkagc,radius,tauc,taucpr,&tplanck,utaupr);
+             &ncut,&nn,oprim,pkag,pkagc,radius,tauc,taucpr,&tplanck,utaupr,emi_func);
 
   /*
    * Print input information
@@ -10627,7 +10630,8 @@ void c_twostr_set(disort_state *ds,
                   double       *tauc,
                   double       *taucpr,
                   double       *tplanck,
-                  double       *utaupr)
+                  double       *utaupr,
+                  emission_func_t emi_func)
 {
   static int
     firstpass = TRUE;
@@ -10764,14 +10768,14 @@ void c_twostr_set(disort_state *ds,
      */
   }
   else {
-    *tplanck = c_planck_func2(ds->wvnmlo,ds->wvnmhi,ds->bc.ttemp)*ds->bc.temis;
-    *bplanck = c_planck_func2(ds->wvnmlo,ds->wvnmhi,ds->bc.btemp);
+    *tplanck = emi_func(ds->wvnmlo,ds->wvnmhi,ds->bc.ttemp)*ds->bc.temis;
+    *bplanck = emi_func(ds->wvnmlo,ds->wvnmhi,ds->bc.btemp);
     for (lev = 0; lev <= ds->nlyr; lev++) {
-      PKAG(lev) = c_planck_func2(ds->wvnmlo,ds->wvnmhi,TEMPER(lev));
+      PKAG(lev) = emi_func(ds->wvnmlo,ds->wvnmhi,TEMPER(lev));
     }
     for (lc = 1; lc <=ds->nlyr; lc++) {
       tempc     = .5*(TEMPER(lc-1)+TEMPER(lc));
-      PKAGC(lc) = c_planck_func2(ds->wvnmlo,ds->wvnmhi,tempc);
+      PKAGC(lc) = emi_func(ds->wvnmlo,ds->wvnmhi,tempc);
     }
   }
 

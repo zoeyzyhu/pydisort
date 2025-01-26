@@ -56,7 +56,7 @@ void disort_impl(T* flx, T* prop, T* fbeam, T* umu0, T* phi0, T* albedo,
     }
   }
 
-  c_disort(&ds, &ds_out);
+  c_disort(&ds, &ds_out, c_planck_func2);
 
   for (int i = 0; i <= ds.nlyr; ++i) {
     int i1 = ds.nlyr - (rank_in_column * (ds.nlyr - 1) + i);
