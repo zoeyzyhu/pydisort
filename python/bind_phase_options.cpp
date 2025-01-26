@@ -60,8 +60,83 @@ void bind_phase_options(py::module &m) {
           * - 'cloud-garcia-siewert'
             - Tabulated cloud phase function by Garcia/Siewert
       )")
-      .ADD_OPTION(double, disort::PhaseMomentOptions, gg)
-      .ADD_OPTION(double, disort::PhaseMomentOptions, gg1)
-      .ADD_OPTION(double, disort::PhaseMomentOptions, gg2)
-      .ADD_OPTION(double, disort::PhaseMomentOptions, ff);
+
+      .ADD_OPTION(double, disort::PhaseMomentOptions, gg, R"(
+        Set the asymmetry parameter for the Henyey-Greenstein phase function
+
+        Parameters
+        ----------
+        gg : float
+            Asymmetry parameter
+
+        Returns
+        -------
+        PhaseMomentOptions object
+
+        Examples
+        --------
+        >>> import pydisort
+        >>> op = pydisort.PhaseMomentOptions().type('henyey-greenstein').gg(0.85)
+        >>> print(op)
+        )")
+
+      .ADD_OPTION(double, disort::PhaseMomentOptions, gg1, R"(
+        Set the asymmetry parameter for the first Henyey-Greenstein phase function
+
+        Parameters
+        ----------
+        gg1 : float
+            Asymmetry parameter
+
+        Returns
+        -------
+        PhaseMomentOptions object
+
+        Examples
+        --------
+        >>> import pydisort
+        >>> op = pydisort.PhaseMomentOptions().type('double-henyey-greenstein')
+        >>> op.gg1(0.85).gg2(0.6).ff(0.85)
+        >>> print(op)
+        )")
+
+      .ADD_OPTION(double, disort::PhaseMomentOptions, gg2, R"(
+        Set the asymmetry parameter for the second Henyey-Greenstein phase function
+
+        Parameters
+        ----------
+        gg2 : float
+            Asymmetry parameter
+
+        Returns
+        -------
+        PhaseMomentOptions object
+
+        Examples
+        --------
+        >>> import pydisort
+        >>> op = pydisort.PhaseMomentOptions().type('double-henyey-greenstein')
+        >>> op.gg1(0.85).gg2(0.6).ff(0.85)
+        >>> print(op)
+        )")
+
+      .ADD_OPTION(double, disort::PhaseMomentOptions, ff, R"(
+        Set the forward scattering fraction for the Henyey-Greenstein phase function
+
+        Parameters
+        ----------
+        ff : float
+            Forward scattering fraction
+
+        Returns
+        -------
+        PhaseMomentOptions object
+
+        Examples
+        --------
+        >>> import pydisort
+        >>> op = pydisort.PhaseMomentOptions().type('double-henyey-greenstein')
+        >>> op.gg1(0.85).gg2(0.6).ff(0.85)
+        >>> print(op)
+        )");
 }
