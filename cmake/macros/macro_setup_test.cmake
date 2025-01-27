@@ -22,13 +22,12 @@ macro(setup_test namel)
 
   target_link_libraries(${namel}.${buildl}
     PRIVATE pydisort::disort
-            pydisort::disort_cu
             ${TORCH_LIBRARY}
             ${TORCH_CPU_LIBRARY}
-            ${TORCH_CUDA_LIBRARY}
             ${C10_LIBRARY}
-            ${C10_CUDA_LIBRARY}
-            )
+            $<IF:$<BOOL:${CUDAToolkit_FOUND}>,pydisort::disort_cu,>
+            $<IF:$<BOOL:${CUDAToolkit_FOUND}>,${TORCH_CUDA_LIBRARY},>
+            $<IF:$<BOOL:${CUDAToolkit_FOUND}>,${C10_CUDA_LIBRARIES},>)
 
   add_test(NAME ${namel}.${buildl} COMMAND ${namel}.${buildl})
 endmacro()

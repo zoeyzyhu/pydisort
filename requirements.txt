@@ -1,5 +1,6 @@
 clang-format
 cmake
+cppcheck
 cpplint
 guzzle_sphinx_theme
 numpy

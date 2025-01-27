@@ -316,7 +316,11 @@ torch::Tensor DisortImpl::forward(torch::Tensor prop,
   if (prop.is_cpu()) {
     call_disort_cpu(iter, rank_in_column, ds_.data(), ds_out_.data());
   } else if (prop.is_cuda()) {
+#if defined(__CUDACC__)
     call_disort_cuda(iter, rank_in_column, ds_.data(), ds_out_.data());
+#else
+    TORCH_CHECK(false, "DisortImpl::forward: CUDA is not available");
+#endif
   } else {
     TORCH_CHECK(false, "DisortImpl::forward: unsupported device");
   }

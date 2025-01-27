@@ -4,20 +4,25 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-project(
-  pydisort
-  LANGUAGES CXX C CUDA
-  DESCRIPTION "Python-CUDA extension for disort library")
+# Check if CUDA is available
+find_package(CUDAToolkit QUIET)
 
-# search for <Package>_ROOT
-cmake_policy(SET CMP0074 NEW)
+if (CUDAToolkit_FOUND)
+  project(
+    pydisort
+    LANGUAGES CXX C CUDA
+    DESCRIPTION "Python-CUDA extension for disort library")
+else()
+  project(
+    pydisort
+    LANGUAGES CXX C
+    DESCRIPTION "Python extension for disort library")
+endif()
+
+set(BUILD_SHARED_LIBS OFF)
 
 # Set the _GLIBCXX_USE_CXX11_ABI flag to 0 (use old ABI)
 add_definitions(-D_GLIBCXX_USE_CXX11_ABI=0)
-
-set(CMAKE_CUDA_ARCHITECTURES 61 86 89)
-set(CMAKE_CUDA_STANDARD 17)
-set(BUILD_SHARED_LIBS OFF)
 
 # make colorful output
 string(ASCII 27 Esc)
@@ -56,10 +61,13 @@ message(STATUS "Include ${CMAKE_CURRENT_SOURCE_DIR}/cmake/compilers.cmake")
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/compilers.cmake)
 
 message(STATUS "${Blue}${PROJECT_NAME}-2. Setting up system libraries ...${ColorReset}")
-find_package(Torch REQUIRED)
-find_package(CUDAToolkit)
-include(${CMAKE_SOURCE_DIR}/cmake/pybind11.cmake)
 include(${CMAKE_SOURCE_DIR}/cmake/fmt.cmake)
+find_package(Torch REQUIRED)
+
+if (CUDAToolkit_FOUND)
+  set(CMAKE_CUDA_ARCHITECTURES 61 86 89)
+  set(CMAKE_CUDA_STANDARD 17)
+endif()
 
 message(STATUS "${Blue}${PROJECT_NAME}-3. Setting up project libraries ...${ColorReset}")
 add_subdirectory(src)

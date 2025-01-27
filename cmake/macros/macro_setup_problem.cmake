@@ -10,7 +10,8 @@ macro(setup_problem namel)
 
   set_target_properties(
     ${namel}.${buildl}
-    PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
+    PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
                COMPILE_FLAGS ${CMAKE_CXX_FLAGS_${buildu}})
 
   target_include_directories(
@@ -25,10 +26,5 @@ macro(setup_problem namel)
   target_link_libraries(${namel}.${buildl}
     PRIVATE pydisort::disort
             pydisort::disort_cu
-            ${TORCH_LIBRARY}
-            ${TORCH_CPU_LIBRARY}
-            ${TORCH_CUDA_LIBRARY}
-            ${C10_LIBRARY}
-            ${C10_CUDA_LIBRARY}
-            )
+            ${TORCH_LIBRARIES})
 endmacro()
