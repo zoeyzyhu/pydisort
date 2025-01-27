@@ -5,6 +5,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 option(CUDA "Enable CUDA support" OFF)
+option(BUILD_TESTS "Build tests" OFF)
+option(BUILD_EXAMPLES "Build examples" OFF)
+
 if (CUDA)
   project(
     pydisort
@@ -76,8 +79,12 @@ message(STATUS "${Blue}${PROJECT_NAME}-3. Setting up project libraries ...${Colo
 add_subdirectory(src)
 add_subdirectory(cdisort213)
 
-message(STATUS "${Blue}${PROJECT_NAME}-4. Setting up unit tests ...${ColorReset}")
-add_subdirectory(tests)
+if (BUILD_TESTS)
+  message(STATUS "${Blue}${PROJECT_NAME}-4. Setting up unit tests ...${ColorReset}")
+  add_subdirectory(tests)
+endif()
 
-#message(STATUS "${Blue}${PROJECT_NAME}-6. Setting up examples ...${ColorReset}")
-#add_subdirectory(examples)
+if (BUILD_EXAMPLES)
+  message(STATUS "${Blue}${PROJECT_NAME}-5. Setting up examples ...${ColorReset}")
+  add_subdirectory(examples)
+endif()
