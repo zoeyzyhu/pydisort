@@ -1325,8 +1325,8 @@ void disort_test14(void);
 
 /* * * * * * * * * * * * * * * * * * * * * * * end of cdisort.h * * * * * * * * * * * * * * * * * * */
 
-#endif
-
 #ifdef __cplusplus
 } /* extern "C" */
 #endif 
+
+#endif
