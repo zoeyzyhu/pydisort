@@ -115,6 +115,13 @@ void DisortImpl::reset() {
   TORCH_CHECK(options.ds().nmom >= options.ds().nstr,
               "DisortImpl: ds.nmom < ds.nstr");
 
+  if (options.ds().flag.planck) {
+    TORCH_CHECK(options.wave_lower().size() == options.nwave(),
+                "DisortImpl: wave_lower.size() != nwave");
+    TORCH_CHECK(options.wave_upper().size() == options.nwave(),
+                "DisortImpl: wave_upper.size() != nwave");
+  }
+
   if (allocated_) {
     for (int i = 0; i < options.nwave() * options.ncol(); ++i) {
       c_disort_state_free(&ds_[i]);
@@ -141,6 +148,14 @@ void DisortImpl::reset() {
 
       for (int j = 0; j < options.user_phi().size(); ++j)
         ds_[i].phi[j] = options.user_phi()[j];
+    }
+
+    if (ds_[i].flag.planck) {
+      ds_[i].wvnmlo = options.wave_lower()[i];
+      ds_[i].wvnmhi = options.wave_upper()[i];
+    } else {
+      ds_[i].wvnmlo = 0.;
+      ds_[i].wvnmhi = 1.;
     }
   }
 

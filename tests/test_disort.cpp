@@ -1,5 +1,9 @@
+// fmt
+#include <fmt/format.h>
+
 // disort
 #include <disort/disort.hpp>
+#include <disort/disort_formatter.hpp>
 #include <disort/scattering_moments.hpp>
 
 int main(int argc, char **argv) {
@@ -44,4 +48,6 @@ int main(int argc, char **argv) {
 
   auto rad = disort->get_rad(prop.options());
   std::cout << "rad = " << rad << std::endl;
+
+  std::cout << "options = " << fmt::format("{}", disort->options) << std::endl;
 }
