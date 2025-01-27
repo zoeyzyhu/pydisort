@@ -27,7 +27,7 @@ macro(setup_test namel)
             ${C10_LIBRARY}
             $<IF:$<BOOL:${CUDAToolkit_FOUND}>,pydisort::disort_cu,>
             $<IF:$<BOOL:${CUDAToolkit_FOUND}>,${TORCH_CUDA_LIBRARY},>
-            $<IF:$<BOOL:${CUDAToolkit_FOUND}>,${C10_CUDA_LIBRARIES},>)
+            $<IF:$<BOOL:${CUDAToolkit_FOUND}>,${C10_CUDA_LIBRARY},>)
 
   add_test(NAME ${namel}.${buildl} COMMAND ${namel}.${buildl})
 endmacro()

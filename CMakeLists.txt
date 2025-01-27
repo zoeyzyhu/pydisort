@@ -4,10 +4,8 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-# Check if CUDA is available
-find_package(CUDAToolkit QUIET)
-
-if (CUDAToolkit_FOUND)
+option(CUDA "Enable CUDA support" OFF)
+if (CUDA)
   project(
     pydisort
     LANGUAGES CXX C CUDA
@@ -63,6 +61,11 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/compilers.cmake)
 message(STATUS "${Blue}${PROJECT_NAME}-2. Setting up system libraries ...${ColorReset}")
 include(${CMAKE_SOURCE_DIR}/cmake/fmt.cmake)
 find_package(Torch REQUIRED)
+if (CUDA)
+  find_package(CUDAToolkit REQUIRED)
+else()
+  set(CUDAToolkit_FOUND OFF)
+endif()
 
 if (CUDAToolkit_FOUND)
   set(CMAKE_CUDA_ARCHITECTURES 61 86 89)

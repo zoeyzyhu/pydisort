@@ -65,6 +65,12 @@ if (CUDAToolkit_FOUND)
       CUDA_SEPARABLE_COMPILATION ON
       )
 
+  target_link_libraries(${namel}_cuda_${buildl}
+      PUBLIC
+      $<IF:$<BOOL:${CUDAToolkit_FOUND}>,CUDA::cudart,>
+      $<IF:$<BOOL:${CUDAToolkit_FOUND}>,CUDA::cudart_static,>
+      )
+
   add_library(pydisort::disort_cu ALIAS ${namel}_cuda_${buildl})
 endif()
 
