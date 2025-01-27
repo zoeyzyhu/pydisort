@@ -7,6 +7,7 @@ import glob
 from pathlib import Path
 from setuptools import setup
 from torch.utils import cpp_extension
+import torch
 
 def parse_library_names(libdir):
     """Parse the library files."""
@@ -48,16 +49,30 @@ if not check_requirements():
 
 # Setup configuration
 current_dir = Path().absolute()
-setup(
-    ext_modules=[cpp_extension.CUDAExtension(
-        name = 'pydisort',
-        sources = glob.glob('python/*.cpp') + glob.glob('src/**/*.cu', recursive=True),
-        include_dirs = [f'{current_dir}',
-                        f'{current_dir}/build',
-                        f'{current_dir}/build/_deps/fmt-src/include'],
-        library_dirs = [f'{current_dir}/build/lib'],
-        libraries = parse_library_names(f'{current_dir}/build/lib'),
-        extra_compile_args = {'nvcc': ['--extended-lambda']},
-        )],
-    cmdclass={'build_ext': cpp_extension.BuildExtension},
-)
+if torch.cuda.is_available():
+    setup(
+        ext_modules=[cpp_extension.CUDAExtension(
+            name = 'pydisort',
+            sources = glob.glob('python/*.cpp') + glob.glob('src/**/*.cu', recursive=True),
+            include_dirs = [f'{current_dir}',
+                            f'{current_dir}/build',
+                            f'{current_dir}/build/_deps/fmt-src/include'],
+            library_dirs = [f'{current_dir}/build/lib'],
+            libraries = parse_library_names(f'{current_dir}/build/lib'),
+            extra_compile_args = {'nvcc': ['--extended-lambda']},
+            )],
+        cmdclass={'build_ext': cpp_extension.BuildExtension},
+    )
+else:
+    setup(
+        ext_modules=[cpp_extension.CppExtension(
+            name = 'pydisort',
+            sources = glob.glob('python/*.cpp'),
+            include_dirs = [f'{current_dir}',
+                            f'{current_dir}/build',
+                            f'{current_dir}/build/_deps/fmt-src/include'],
+            library_dirs = [f'{current_dir}/build/lib'],
+            libraries = parse_library_names(f'{current_dir}/build/lib'),
+            )],
+        cmdclass={'build_ext': cpp_extension.BuildExtension},
+    )
