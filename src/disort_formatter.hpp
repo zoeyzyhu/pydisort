@@ -29,7 +29,7 @@ struct fmt::formatter<disort::DisortOptions> {
   auto format(const disort::DisortOptions& p, FormatContext& ctx) const {
     std::string waves = "(";
     if (p.ds().flag.planck) {
-      for (size_t i = 0; i < p.nwave(); ++i) {
+      for (int i = 0; i < p.nwave(); ++i) {
         waves += fmt::format("({},{})", p.wave_lower()[i], p.wave_upper()[i]);
         if (i < p.nwave() - 1) {
           waves += ", ";
