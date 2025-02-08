@@ -150,7 +150,7 @@ class DisortImpl : public torch::nn::Cloneable<DisortImpl> {
    * \return radiative flux or intensity (nwave, ncol, nlvl, 2)
    */
   torch::Tensor forward(torch::Tensor prop,
-                        std::map<std::string, torch::Tensor>& bc,
+                        std::map<std::string, torch::Tensor>* bc,
                         torch::optional<torch::Tensor> temf = torch::nullopt);
 
  private:

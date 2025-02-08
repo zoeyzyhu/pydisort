@@ -43,7 +43,7 @@ int main(int argc, char **argv) {
                         torch::kDouble);
   bc["fbeam"] = M_PI / bc["umu0"];
 
-  auto result = disort->forward(prop, bc);
+  auto result = disort->forward(prop, &bc);
   std::cout << "result: " << result << std::endl;
 
   auto rad = disort->get_rad(prop.options());
