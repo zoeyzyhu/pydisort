@@ -46,10 +46,14 @@ void disort_impl(T* flx, T* prop, T* fbeam, T* umu0, T* phi0, T* albedo,
 
   for (int i = 0; i < ds.nlyr; ++i) {
     // absorption
-    ds.dtauc[ds.nlyr - 1 - i] = PROP(i, index::IAB);
+    ds.dtauc[ds.nlyr - 1 - i] = PROP(i, index::IEX);
 
     // single scatering albedo
-    ds.ssalb[ds.nlyr - 1 - i] = PROP(i, index::ISS);
+    if (nprop > 1) {
+      ds.ssalb[ds.nlyr - 1 - i] = PROP(i, index::ISS);
+    } else {
+      ds.ssalb[ds.nlyr - 1 - i] = 0.;
+    }
 
     // Legendre coefficients
     ds.pmom[(ds.nlyr - 1 - i) * (ds.nmom_nstr + 1)] = 1.;

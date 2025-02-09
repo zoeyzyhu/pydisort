@@ -29,7 +29,7 @@ int main(int argc, char **argv) {
                             disort->ds().nlyr, 2 + disort->ds().nstr},
                            torch::kDouble);
 
-  prop.select(3, disort::index::IAB) = disort->ds().utau[1];
+  prop.select(3, disort::index::IEX) = disort->ds().utau[1];
   prop.select(3, disort::index::ISS) = 0.2;
   prop.narrow(3, disort::index::IPM, disort->ds().nstr) =
       disort::scattering_moments(

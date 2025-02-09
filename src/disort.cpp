@@ -336,7 +336,7 @@ torch::Tensor DisortImpl::forward(torch::Tensor prop,
     TORCH_CHECK(options.ds().flag.planck == 0,
                 "DisortImpl::forward: ds.planck != 0");
     // dummy
-    tem = torch::empty({1, 1}, prop.options());
+    tem = torch::empty({ncol, nlyr + 1}, prop.options());
   }
 
   auto flx = torch::zeros({nwave, ncol, nlyr + 1, 2}, prop.options());
@@ -362,7 +362,8 @@ torch::Tensor DisortImpl::forward(torch::Tensor prop,
           .add_owned_const_input(bc->at("btemp").unsqueeze(-1).unsqueeze(-1))
           .add_owned_const_input(bc->at("ttemp").unsqueeze(-1).unsqueeze(-1))
           .add_owned_const_input(bc->at("temis").unsqueeze(-1).unsqueeze(-1))
-          .add_owned_const_input(tem.unsqueeze(0).unsqueeze(-1))
+          .add_owned_const_input(tem.view({1, ncol, nlyr + 1, 1, 1})
+                                     .expand({nwave, ncol, nlyr + 1, 1, 1}))
           .add_input(index)
           .build();
 

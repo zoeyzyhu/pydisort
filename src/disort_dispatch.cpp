@@ -13,7 +13,7 @@ namespace disort {
 void call_disort_cpu(at::TensorIterator& iter, int rank_in_column,
                      disort_state* ds, disort_output* ds_out) {
   AT_DISPATCH_FLOATING_TYPES(iter.dtype(), "disort_cpu", [&] {
-    auto nprop = at::native::ensure_nonempty_size(iter.output(), -1);
+    auto nprop = at::native::ensure_nonempty_size(iter.input(0), -1);
 
     iter.for_each([&](char** data, const int64_t* strides, int64_t n) {
       for (int i = 0; i < n; i++) {

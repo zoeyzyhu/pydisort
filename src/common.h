@@ -9,7 +9,7 @@
 namespace disort {
 
 namespace index {
-constexpr int IAB = 0;
+constexpr int IEX = 0;
 constexpr int ISS = 1;
 constexpr int IPM = 2;
 
