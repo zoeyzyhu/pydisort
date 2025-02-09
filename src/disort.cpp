@@ -295,6 +295,36 @@ torch::Tensor DisortImpl::forward(torch::Tensor prop,
     (*bc)["fisot"] = torch::zeros({nwave, ncol}, prop.options());
   }
 
+  if (bc->find("btemp") != bc->end()) {
+    TORCH_CHECK(
+        bc->at("btemp").size(0) == nwave || bc->at("btemp").size(0) == 1,
+        "DisortImpl::forward: bc->btemp.size(0) != nwave");
+    TORCH_CHECK(bc->at("btemp").size(1) == ncol || bc->at("btemp").size(1) == 1,
+                "DisortImpl::forward: bc->btemp.size(1) != ncol");
+  } else {
+    (*bc)["btemp"] = torch::zeros({nwave, ncol}, prop.options());
+  }
+
+  if (bc->find("ttemp") != bc->end()) {
+    TORCH_CHECK(
+        bc->at("ttemp").size(0) == nwave || bc->at("ttemp").size(0) == 1,
+        "DisortImpl::forward: bc->ttemp.size(0) != nwave");
+    TORCH_CHECK(bc->at("ttemp").size(1) == ncol || bc->at("ttemp").size(1) == 1,
+                "DisortImpl::forward: bc->ttemp.size(1) != ncol");
+  } else {
+    (*bc)["ttemp"] = torch::zeros({nwave, ncol}, prop.options());
+  }
+
+  if (bc->find("temis") != bc->end()) {
+    TORCH_CHECK(
+        bc->at("temis").size(0) == nwave || bc->at("temis").size(0) == 1,
+        "DisortImpl::forward: bc->temis.size(0) != nwave");
+    TORCH_CHECK(bc->at("temis").size(1) == ncol || bc->at("temis").size(1) == 1,
+                "DisortImpl::forward: bc->temis.size(1) != ncol");
+  } else {
+    (*bc)["temis"] = torch::zeros({nwave, ncol}, prop.options());
+  }
+
   torch::Tensor tem;
   if (temf.has_value()) {
     TORCH_CHECK(temf.value().size(0) == ncol,
@@ -329,6 +359,9 @@ torch::Tensor DisortImpl::forward(torch::Tensor prop,
           .add_owned_const_input(bc->at("albedo").unsqueeze(-1).unsqueeze(-1))
           .add_owned_const_input(bc->at("fluor").unsqueeze(-1).unsqueeze(-1))
           .add_owned_const_input(bc->at("fisot").unsqueeze(-1).unsqueeze(-1))
+          .add_owned_const_input(bc->at("btemp").unsqueeze(-1).unsqueeze(-1))
+          .add_owned_const_input(bc->at("ttemp").unsqueeze(-1).unsqueeze(-1))
+          .add_owned_const_input(bc->at("temis").unsqueeze(-1).unsqueeze(-1))
           .add_owned_const_input(tem.unsqueeze(0).unsqueeze(-1))
           .add_input(index)
           .build();

@@ -20,11 +20,6 @@
 
 namespace disort {
 
-DISPATCH_MACRO
-inline double emission_temp(double wlo, double whi, double temp) {
-  return temp;
-}
-
 struct DisortOptions {
   DisortOptions();
 
@@ -36,7 +31,7 @@ struct DisortOptions {
 
   //! emission function
   ADD_ARG(std::function<double(double, double, double)>,
-          emission) = emission_temp;
+          emission) = c_planck_func2;
 
   //! header
   ADD_ARG(std::string, header) = "running disort ...";

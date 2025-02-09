@@ -25,10 +25,14 @@ void call_disort_cpu(at::TensorIterator& iter, int rank_in_column,
         auto albedo = reinterpret_cast<scalar_t*>(data[5] + i * strides[5]);
         auto fluor = reinterpret_cast<scalar_t*>(data[6] + i * strides[6]);
         auto fisot = reinterpret_cast<scalar_t*>(data[7] + i * strides[7]);
-        auto temf = reinterpret_cast<scalar_t*>(data[8] + i * strides[8]);
-        auto idx = reinterpret_cast<int64_t*>(data[9] + i * strides[9]);
-        disort_impl(out, prop, fbeam, umu0, phi0, albedo, fluor, fisot, temf,
-                    rank_in_column, ds[*idx], ds_out[*idx], nprop);
+        auto btemp = reinterpret_cast<scalar_t*>(data[8] + i * strides[8]);
+        auto ttemp = reinterpret_cast<scalar_t*>(data[9] + i * strides[9]);
+        auto temis = reinterpret_cast<scalar_t*>(data[10] + i * strides[10]);
+        auto temf = reinterpret_cast<scalar_t*>(data[11] + i * strides[11]);
+        auto idx = reinterpret_cast<int64_t*>(data[12] + i * strides[12]);
+        disort_impl(out, prop, fbeam, umu0, phi0, albedo, fluor, fisot, btemp,
+                    ttemp, temis, temf, rank_in_column, ds[*idx], ds_out[*idx],
+                    nprop);
       }
     });
   });

@@ -14,14 +14,18 @@
 #define ALBEDO (*albedo)
 #define FLUOR (*fluor)
 #define FISOT (*fisot)
+#define BTEMP (*btemp)
+#define TTEMP (*ttemp)
+#define TEMIS (*temis)
 #define TEMF(i) temf[i]
 
 namespace disort {
 
 template <typename T>
 void disort_impl(T* flx, T* prop, T* fbeam, T* umu0, T* phi0, T* albedo,
-                 T* fluor, T* fisot, T* temf, int rank_in_column,
-                 disort_state& ds, disort_output& ds_out, int nprop) {
+                 T* fluor, T* fisot, T* btemp, T* ttemp, T* temis, T* temf,
+                 int rank_in_column, disort_state& ds, disort_output& ds_out,
+                 int nprop) {
   // run disort
   if (ds.flag.planck) {
     for (int i = 0; i <= ds.nlyr; ++i) {
@@ -36,6 +40,9 @@ void disort_impl(T* flx, T* prop, T* fbeam, T* umu0, T* phi0, T* albedo,
   ds.bc.albedo = ALBEDO;
   ds.bc.fluor = FLUOR;
   ds.bc.fisot = FISOT;
+  ds.bc.btemp = BTEMP;
+  ds.bc.ttemp = TTEMP;
+  ds.bc.temis = TEMIS;
 
   for (int i = 0; i < ds.nlyr; ++i) {
     // absorption
@@ -76,4 +83,7 @@ void disort_impl(T* flx, T* prop, T* fbeam, T* umu0, T* phi0, T* albedo,
 #undef ALBEDO
 #undef FLUOR
 #undef FISOT
+#undef BTEMP
+#undef TTEMP
+#undef TEMIS
 #undef TEMF
