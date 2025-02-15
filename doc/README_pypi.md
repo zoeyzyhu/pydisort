@@ -14,4 +14,4 @@ DISORT (Discrete Ordinate Radiative Transfer) is a widely-used algorithm that ca
 
 For a detailed documentation, please visit https://pydisort.readthedocs.io/.
 
-> ❗ We only support Python 3.6+ on Linux and Python 3.8+ on MacOS. Anaconda is not fully supported at the moment; it only works if the Python path and `conda` environment are set correctly. For the current stage, we strongly recommend using `python3.11 -m venv env` (you Python version might differ) to create a virtual environment and install `pydisort` in this clean environment.
+> ❗ We only support Python 3.8+ on Linux and MacOS. Anaconda is not fully supported at the moment; it only works if the Python path and `conda` environment are set correctly. For the current stage, we strongly recommend using `python3.11 -m venv env` (you Python version might differ) to create a virtual environment and install `pydisort` in this clean environment.

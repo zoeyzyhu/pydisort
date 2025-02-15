@@ -11,7 +11,7 @@ env:
 jobs:
   macos-wheel:
     name: Build macOS wheels
-    runs-on: macos-11
+    runs-on: macos-latest
     outputs:
       job-status: ${{ job.status }}
 
@@ -29,6 +29,9 @@ jobs:
         with:
           ref: ${{ github.event.inputs.incoming_ref }}
 
+      - name: Install python modules
+        run: pip install -r requirements.txt
+
       - name: Configure CMake
         run: |
           cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
@@ -42,7 +45,7 @@ jobs:
           # uncomment this to enable passing environment variables
           #CIBW_ENVIRONMENT: "CMAKE_ARGS=-DPYTHON_VERSION=3.${{ matrix.py }}"
           # cross compilation with arm64 does not work
-          CIBW_ARCHS_MACOS: x86_64
+          CIBW_ARCHS_MACOS: universal2
           CIBW_BUILD: cp${{ matrix.py }}-*
 
       - name: Archive the built wheels
@@ -59,7 +62,7 @@ jobs:
 
     strategy:
       matrix:
-        py: ["36", "37", "38", "39", "310", "311", "312", "313"]
+        py: ["38", "39", "310", "311", "312", "313"]
         arch: ["x86_64"]
         libc: ["many"]
       fail-fast: true
@@ -69,6 +72,9 @@ jobs:
         name: Checkout the repository
         with:
           ref: ${{ github.event.inputs.incoming_ref }}
+
+      - name: Install python modules
+        run: pip install -r requirements.txt
 
       - name: Configure CMake
         run: |
