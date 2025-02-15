@@ -27,7 +27,7 @@ jobs:
 
     strategy:
       matrix:
-        py: ["38", "39", "310", "311", "312", "313"]
+        py: ["38", "39", "310", "311", "312"]
         deployment_target: ["11.0"]
       fail-fast: true
     env:
@@ -38,6 +38,12 @@ jobs:
         name: Checkout the repository
         with:
           ref: ${{ github.event.inputs.incoming_ref }}
+
+      - name: create virtual environment
+        run: python3 -m venv venv
+
+      - name: activate virtual environment
+        run: source venv/bin/activate
 
       - name: Install python modules
         run: pip install -r requirements.txt
@@ -72,7 +78,7 @@ jobs:
 
     strategy:
       matrix:
-        py: ["38", "39", "310", "311", "312", "313"]
+        py: ["38", "39", "310", "311", "312"]
         arch: ["x86_64"]
         libc: ["many"]
       fail-fast: true
