@@ -5,6 +5,9 @@ on:
     tags:
       - v*
 
+env:
+  BUILD_TYPE: Release
+
 jobs:
   macos-wheel:
     name: Build macOS wheels
@@ -14,7 +17,7 @@ jobs:
 
     strategy:
       matrix:
-        py: ["38", "39", "310", "311", "312"]
+        py: ["38", "39", "310", "311", "312", "313"]
         deployment_target: ["11.0"]
       fail-fast: true
     env:
@@ -25,6 +28,13 @@ jobs:
         name: Checkout the repository
         with:
           ref: ${{ github.event.inputs.incoming_ref }}
+
+      - name: Configure CMake
+        run: |
+          cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+
+      - name: Build
+        run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
 
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.16.2
@@ -49,7 +59,7 @@ jobs:
 
     strategy:
       matrix:
-        py: ["36", "37", "38", "39", "310", "311", "312"]
+        py: ["36", "37", "38", "39", "310", "311", "312", "313"]
         arch: ["x86_64"]
         libc: ["many"]
       fail-fast: true
@@ -59,6 +69,13 @@ jobs:
         name: Checkout the repository
         with:
           ref: ${{ github.event.inputs.incoming_ref }}
+
+      - name: Configure CMake
+        run: |
+          cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+
+      - name: Build
+        run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
 
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.16.2
