@@ -5,6 +5,15 @@ on:
     tags:
       - v*
   workflow_dispatch:
+    inputs:
+      incoming_ref:
+        description: 'The ref to checkout before running the workflow'
+        required: true
+        default: 'main'
+      upload_to_pypi:
+        description: 'Whether to upload to PyPI'
+        required: true
+        default: 'false'
 
 env:
   BUILD_TYPE: Release
