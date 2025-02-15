@@ -4,6 +4,12 @@ on:
     # Run on tags that look like releases
     tags:
       - v*
+  workflow_dispatch:
+    inputs:
+      incoming_ref:
+        description: 'The ref to checkout before running the workflow'
+        required: false
+        default: 'main'
 
 env:
   BUILD_TYPE: Release
