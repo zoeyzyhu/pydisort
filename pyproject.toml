@@ -1,12 +1,12 @@
 [build-system]
-requires = ["setuptools", "wheel", "cmake", "pybind11", "torch"]
+requires = ["setuptools", "wheel", "cmake", "pybind11", "numpy", "torch"]
 build-backend = "setuptools.build_meta"
 
 [tool.cibuildwheel]
 before-build = """
 pip install -r requirements.txt
-cmake -B $ENV{WORKSPACE}/build -DCMAKE_BUILD_TYPE=Release
-cmake --build $ENV{WORKSPACE}/build --config Release
+cmake -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build --config Release
 """
 
 # Install system library

@@ -98,6 +98,9 @@ jobs:
       fail-fast: true
 
     steps:
+      - name: Install Python library
+        run: |
+          apt install -y python3.8-dev python3.9-dev python3.10-dev python3.11-dev python3.12-dev
       - uses: actions/checkout@v3
         name: Checkout the repository
         with:
