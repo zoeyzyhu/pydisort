@@ -1,9 +1,13 @@
 [build-system]
-requires = ["setuptools", "wheel", "cmake", "pybind11", "torch @ https://download.pytorch.org/whl/cpu"]
+requires = ["setuptools", "wheel", "cmake", "pybind11", "torch"]
 build-backend = "setuptools.build_meta"
 
 [tool.cibuildwheel]
-before-build = "pip install -r requirements.txt"
+before-build = """
+pip install -r requirements.txt
+cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
+"""
 
 # Install system library
 [tool.cibuildwheel.linux]
