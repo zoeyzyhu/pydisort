@@ -19,7 +19,7 @@ env:
   BUILD_TYPE: Release
 
 jobs:
-  macos-wheel:
+  macos-arm-wheel:
     name: Build macOS wheels
     runs-on: macos-latest
     outputs:
@@ -65,13 +65,84 @@ jobs:
       - name: Build
         run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
 
+      - name: Set Library Paths
+        run: |
+          echo "LD_LIBRARY_PATH=$(python -c 'import torch; print(torch.__path__[0] + "/lib")')" >> $GITHUB_ENV
+          echo "CMAKE_PREFIX_PATH=$(python -c 'import torch; print(torch.utils.cmake_prefix_path)')" >> $GITHUB_ENV
+
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.16.2
         env:
           # uncomment this to enable passing environment variables
           #CIBW_ENVIRONMENT: "CMAKE_ARGS=-DPYTHON_VERSION=3.${{ matrix.py }}"
           # cross compilation with arm64 does not work
-          CIBW_ARCHS_MACOS: universal2
+          CIBW_ARCHS_MACOS: arm64
+          CIBW_BUILD: cp${{ matrix.py }}-*
+
+      - name: Archive the built wheels
+        uses: actions/upload-artifact@v4
+        with:
+          path: ./wheelhouse/*.whl
+          name: wheels
+
+  macos-x86-wheel:
+    name: Build macOS wheels
+    runs-on: macos-13
+    outputs:
+      job-status: ${{ job.status }}
+
+    strategy:
+      matrix:
+        py: ["38", "39", "310", "311", "312"]
+        deployment_target: ["11.0"]
+      fail-fast: true
+    env:
+      MACOSX_DEPLOYMENT_TARGET: ${{ matrix.deployment_target }}
+
+    steps:
+      - uses: actions/checkout@v3
+        name: Checkout the repository
+        with:
+          ref: ${{ github.event.inputs.incoming_ref }}
+
+      - name: Convert Python version string
+        run: |
+          PYTHON_VERSION=${{ matrix.py }}
+          FORMATTED_VERSION="${PYTHON_VERSION:0:1}.${PYTHON_VERSION:1}"
+          echo "PYTHON_VERSION=$FORMATTED_VERSION" >> $GITHUB_ENV
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "${{ env.PYTHON_VERSION }}"
+
+      - name: create and activate virtual environment
+        run: |
+          python -m venv venv
+          source venv/bin/activate
+
+      - name: Install python modules
+        run: pip install -r requirements.txt
+
+      - name: Configure CMake
+        run: |
+          cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+
+      - name: Build
+        run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
+
+      - name: Set Library Paths
+        run: |
+          echo "LD_LIBRARY_PATH=$(python -c 'import torch; print(torch.__path__[0] + "/lib")')" >> $GITHUB_ENV
+          echo "CMAKE_PREFIX_PATH=$(python -c 'import torch; print(torch.utils.cmake_prefix_path)')" >> $GITHUB_ENV
+
+      - name: Build wheels
+        uses: pypa/cibuildwheel@v2.16.2
+        env:
+          # uncomment this to enable passing environment variables
+          #CIBW_ENVIRONMENT: "CMAKE_ARGS=-DPYTHON_VERSION=3.${{ matrix.py }}"
+          # cross compilation with arm64 does not work
+          CIBW_ARCHS_MACOS: x86_64
           CIBW_BUILD: cp${{ matrix.py }}-*
 
       - name: Archive the built wheels
@@ -132,6 +203,11 @@ jobs:
       - name: Build
         run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
 
+      - name: Set Library Paths
+        run: |
+          echo "LD_LIBRARY_PATH=$(python -c 'import torch; print(torch.__path__[0] + "/lib")')" >> $GITHUB_ENV
+          echo "CMAKE_PREFIX_PATH=$(python -c 'import torch; print(torch.utils.cmake_prefix_path)')" >> $GITHUB_ENV
+
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.16.2
         env:
@@ -154,7 +230,8 @@ jobs:
       job-status: ${{ job.status }}
 
     needs:
-      - "macos-wheel"
+      - "macos-arm-wheel"
+      - "macos-x86-wheel"
       - "linux-wheel"
 
     steps:
