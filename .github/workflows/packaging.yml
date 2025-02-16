@@ -15,9 +15,6 @@ on:
         required: true
         default: 'false'
 
-env:
-  BUILD_TYPE: Release
-
 jobs:
   macos-arm-wheel:
     name: Build macOS arm64 wheels
