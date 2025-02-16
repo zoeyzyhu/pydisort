@@ -20,7 +20,7 @@ env:
 
 jobs:
   macos-arm-wheel:
-    name: Build macOS wheels
+    name: Build macOS arm64 wheels
     runs-on: macos-latest
     outputs:
       job-status: ${{ job.status }}
@@ -86,7 +86,7 @@ jobs:
           name: wheels
 
   macos-x86-wheel:
-    name: Build macOS wheels
+    name: Build macOS x84_64 wheels
     runs-on: macos-13
     outputs:
       job-status: ${{ job.status }}

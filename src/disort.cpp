@@ -345,27 +345,26 @@ torch::Tensor DisortImpl::forward(torch::Tensor prop,
                    .view({nwave, ncol, 1, 1});
   int rank_in_column = 0;
 
-  auto iter =
-      at::TensorIteratorConfig()
-          .resize_outputs(false)
-          .check_all_same_dtype(false)
-          .declare_static_shape({nwave, ncol, nlyr + 1, 2},
-                                /*squash_dims=*/{2, 3})
-          .add_output(flx)
-          .add_input(prop)
-          .add_owned_const_input(bc->at("fbeam").unsqueeze(-1).unsqueeze(-1))
-          .add_owned_const_input(bc->at("umu0").unsqueeze(-1).unsqueeze(-1))
-          .add_owned_const_input(bc->at("phi0").unsqueeze(-1).unsqueeze(-1))
-          .add_owned_const_input(bc->at("albedo").unsqueeze(-1).unsqueeze(-1))
-          .add_owned_const_input(bc->at("fluor").unsqueeze(-1).unsqueeze(-1))
-          .add_owned_const_input(bc->at("fisot").unsqueeze(-1).unsqueeze(-1))
-          .add_owned_const_input(bc->at("btemp").unsqueeze(-1).unsqueeze(-1))
-          .add_owned_const_input(bc->at("ttemp").unsqueeze(-1).unsqueeze(-1))
-          .add_owned_const_input(bc->at("temis").unsqueeze(-1).unsqueeze(-1))
-          .add_owned_const_input(tem.view({1, ncol, nlyr + 1, 1, 1})
-                                     .expand({nwave, ncol, nlyr + 1, 1, 1}))
-          .add_input(index)
-          .build();
+  auto iter = at::TensorIteratorConfig()
+                  .resize_outputs(false)
+                  .check_all_same_dtype(false)
+                  .declare_static_shape({nwave, ncol, nlyr + 1, 2},
+                                        /*squash_dims=*/{2, 3})
+                  .add_output(flx)
+                  .add_input(prop)
+                  .add_owned_input(bc->at("fbeam").unsqueeze(-1).unsqueeze(-1))
+                  .add_owned_input(bc->at("umu0").unsqueeze(-1).unsqueeze(-1))
+                  .add_owned_input(bc->at("phi0").unsqueeze(-1).unsqueeze(-1))
+                  .add_owned_input(bc->at("albedo").unsqueeze(-1).unsqueeze(-1))
+                  .add_owned_input(bc->at("fluor").unsqueeze(-1).unsqueeze(-1))
+                  .add_owned_input(bc->at("fisot").unsqueeze(-1).unsqueeze(-1))
+                  .add_owned_input(bc->at("btemp").unsqueeze(-1).unsqueeze(-1))
+                  .add_owned_input(bc->at("ttemp").unsqueeze(-1).unsqueeze(-1))
+                  .add_owned_input(bc->at("temis").unsqueeze(-1).unsqueeze(-1))
+                  .add_owned_input(tem.view({1, ncol, nlyr + 1, 1, 1})
+                                       .expand({nwave, ncol, nlyr + 1, 1, 1}))
+                  .add_input(index)
+                  .build();
 
   if (prop.is_cpu()) {
     call_disort_cpu(iter, rank_in_column, ds_.data(), ds_out_.data());
