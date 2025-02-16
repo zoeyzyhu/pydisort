@@ -48,7 +48,11 @@ if not check_requirements():
     sys.exit(1)
 
 # Setup configuration
-current_dir = Path().absolute()
+current_dir = os.getenv('WORKSPACE')
+
+if not current_dir:
+    current_dir = Path().absolute()
+
 if torch.cuda.is_available():
     setup(
         ext_modules=[cpp_extension.CUDAExtension(
