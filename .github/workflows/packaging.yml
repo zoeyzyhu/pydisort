@@ -39,11 +39,21 @@ jobs:
         with:
           ref: ${{ github.event.inputs.incoming_ref }}
 
-      - name: create virtual environment
-        run: python3 -m venv venv
+      - name: Convert Python version string
+        run: |
+          PYTHON_VERSION=${{ matrix.py }}
+          FORMATTED_VERSION="${PYTHON_VERSION:0:1}.${PYTHON_VERSION:1}"
+          echo "PYTHON_VERSION=$FORMATTED_VERSION" >> $GITHUB_ENV
 
-      - name: activate virtual environment
-        run: source venv/bin/activate
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "${{ env.PYTHON_VERSION }}"
+
+      - name: create and activate virtual environment
+        run: |
+          python -m venv venv
+          source venv/bin/activate
 
       - name: Install python modules
         run: pip install -r requirements.txt
@@ -84,10 +94,33 @@ jobs:
       fail-fast: true
 
     steps:
+      - name: Free up disk space
+        run: |
+          df -h
+          sudo rm -rf /usr/local/lib/android /opt/ghc /usr/local/share/boost
+          sudo rm -rf /usr/share/dotnet /opt/hostedtoolcache
+          df -h
+
       - uses: actions/checkout@v3
         name: Checkout the repository
         with:
           ref: ${{ github.event.inputs.incoming_ref }}
+
+      - name: Convert Python version string
+        run: |
+          PYTHON_VERSION=${{ matrix.py }}
+          FORMATTED_VERSION="${PYTHON_VERSION:0:1}.${PYTHON_VERSION:1}"
+          echo "PYTHON_VERSION=$FORMATTED_VERSION" >> $GITHUB_ENV
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "${{ env.PYTHON_VERSION }}"
+
+      - name: create and activate virtual environment
+        run: |
+          python -m venv venv
+          source venv/bin/activate
 
       - name: Install python modules
         run: pip install -r requirements.txt
