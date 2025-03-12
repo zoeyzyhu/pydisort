@@ -220,6 +220,7 @@ torch::Tensor DisortImpl::get_rad(torch::TensorOptions op) const {
 //! block r = 2 gets, 2 - 1 - 0
 torch::Tensor DisortImpl::forward(torch::Tensor prop,
                                   std::map<std::string, torch::Tensor>* bc,
+                                  std::string bname,
                                   torch::optional<torch::Tensor> temf) {
   TORCH_CHECK(options.ds().flag.ibcnd == 0,
               "DisortImpl::forward: ds.ibcnd != 0");
@@ -235,92 +236,116 @@ torch::Tensor DisortImpl::forward(torch::Tensor prop,
   TORCH_CHECK(options.ds().nlyr == nlyr,
               "DisortImpl::forward: ds.nlyr != nlyr");
 
+  // add slash
+  if (bname.size() > 0 && bname.back() != '/') {
+    bname += "/";
+  }
+
   // check bc
-  if (bc->find("fbeam") != bc->end()) {
-    TORCH_CHECK(
-        bc->at("fbeam").size(0) == nwave || bc->at("fbeam").size(0) == 1,
-        "DisortImpl::forward: bc->fbeam.size(0) != nwave");
-    TORCH_CHECK(bc->at("fbeam").size(1) == ncol || bc->at("fbeam").size(1) == 1,
+  if (bc->find(bname + "fbeam") != bc->end()) {
+    TORCH_CHECK(bc->at(bname + "fbeam").size(0) == nwave ||
+                    bc->at(bname + "fbeam").size(0) == 1,
+                "DisortImpl::forward: bc->fbeam.size(0) != nwave");
+    TORCH_CHECK(bc->at(bname + "fbeam").size(1) == ncol ||
+                    bc->at(bname + "fbeam").size(1) == 1,
                 "DisortImpl::forward: bc->fbeam.size(1) != ncol");
+    (*bc)["fbeam"] = bc->at(bname + "fbeam");
   } else {
     (*bc)["fbeam"] = torch::zeros({nwave, ncol}, prop.options());
   }
 
-  if (bc->find("umu0") != bc->end()) {
-    TORCH_CHECK(bc->at("umu0").size(0) == nwave || bc->at("umu0").size(0) == 1,
+  if (bc->find(bname + "umu0") != bc->end()) {
+    TORCH_CHECK(bc->at(bname + "umu0").size(0) == nwave ||
+                    bc->at(bname + "umu0").size(0) == 1,
                 "DisortImpl::forward: bc->umu0.size(0) != nwave");
-    TORCH_CHECK(bc->at("umu0").size(1) == ncol || bc->at("umu0").size(1) == 1,
+    TORCH_CHECK(bc->at(bname + "umu0").size(1) == ncol ||
+                    bc->at(bname + "umu0").size(1) == 1,
                 "DisortImpl::forward: bc->umu0.size(1) != ncol");
+    (*bc)["umu0"] = bc->at(bname + "umu0");
   } else {
     (*bc)["umu0"] = torch::ones({nwave, ncol}, prop.options());
   }
 
-  if (bc->find("phi0") != bc->end()) {
-    TORCH_CHECK(bc->at("phi0").size(0) == nwave || bc->at("phi0").size(0) == 1,
+  if (bc->find(bname + "phi0") != bc->end()) {
+    TORCH_CHECK(bc->at(bname + "phi0").size(0) == nwave ||
+                    bc->at(bname + "phi0").size(0) == 1,
                 "DisortImpl::forward: bc->phi0.size(0) != nwave");
-    TORCH_CHECK(bc->at("phi0").size(1) == ncol || bc->at("phi0").size(1) == 1,
+    TORCH_CHECK(bc->at(bname + "phi0").size(1) == ncol ||
+                    bc->at(bname + "phi0").size(1) == 1,
                 "DisortImpl::forward: bc->phi0.size(1) != ncol");
+    (*bc)["phi0"] = bc->at(bname + "phi0");
   } else {
     (*bc)["phi0"] = torch::zeros({nwave, ncol}, prop.options());
   }
 
-  if (bc->find("albedo") != bc->end()) {
-    TORCH_CHECK(
-        bc->at("albedo").size(0) == nwave || bc->at("albedo").size(0) == 1,
-        "DisortImpl::forward: bc->albedo.size(0) != nwave");
-    TORCH_CHECK(
-        bc->at("albedo").size(1) == ncol || bc->at("albedo").size(1) == 1,
-        "DisortImpl::forward: bc->albedo.size(1) != ncol");
+  if (bc->find(bname + "albedo") != bc->end()) {
+    TORCH_CHECK(bc->at(bname + "albedo").size(0) == nwave ||
+                    bc->at(bname + "albedo").size(0) == 1,
+                "DisortImpl::forward: bc->albedo.size(0) != nwave");
+    TORCH_CHECK(bc->at(bname + "albedo").size(1) == ncol ||
+                    bc->at(bname + "albedo").size(1) == 1,
+                "DisortImpl::forward: bc->albedo.size(1) != ncol");
+    (*bc)["albedo"] = bc->at(bname + "albedo");
   } else {
     (*bc)["albedo"] = torch::zeros({nwave, ncol}, prop.options());
   }
 
-  if (bc->find("fluor") != bc->end()) {
-    TORCH_CHECK(
-        bc->at("fluor").size(0) == nwave || bc->at("fluor").size(0) == 1,
-        "DisortImpl::forward: bc->fluor.size(0) != nwave");
-    TORCH_CHECK(bc->at("fluor").size(1) == ncol || bc->at("fluor").size(1) == 1,
+  if (bc->find(bname + "fluor") != bc->end()) {
+    TORCH_CHECK(bc->at(bname + "fluor").size(0) == nwave ||
+                    bc->at(bname + "fluor").size(0) == 1,
+                "DisortImpl::forward: bc->fluor.size(0) != nwave");
+    TORCH_CHECK(bc->at(bname + "fluor").size(1) == ncol ||
+                    bc->at(bname + "fluor").size(1) == 1,
                 "DisortImpl::forward: bc->fluor.size(1) != ncol");
+    (*bc)["fluor"] = bc->at(bname + "fluor");
   } else {
     (*bc)["fluor"] = torch::zeros({nwave, ncol}, prop.options());
   }
 
-  if (bc->find("fisot") != bc->end()) {
-    TORCH_CHECK(
-        bc->at("fisot").size(0) == nwave || bc->at("fisot").size(0) == 1,
-        "DisortImpl::forward: bc->fisot.size(0) != nwave");
-    TORCH_CHECK(bc->at("fisot").size(1) == ncol || bc->at("fisot").size(1) == 1,
+  if (bc->find(bname + "fisot") != bc->end()) {
+    TORCH_CHECK(bc->at(bname + "fisot").size(0) == nwave ||
+                    bc->at(bname + "fisot").size(0) == 1,
+                "DisortImpl::forward: bc->fisot.size(0) != nwave");
+    TORCH_CHECK(bc->at(bname + "fisot").size(1) == ncol ||
+                    bc->at(bname + "fisot").size(1) == 1,
                 "DisortImpl::forward: bc->fisot.size(1) != ncol");
+    (*bc)["fisot"] = bc->at(bname + "fisot");
   } else {
     (*bc)["fisot"] = torch::zeros({nwave, ncol}, prop.options());
   }
 
-  if (bc->find("btemp") != bc->end()) {
-    TORCH_CHECK(
-        bc->at("btemp").size(0) == nwave || bc->at("btemp").size(0) == 1,
-        "DisortImpl::forward: bc->btemp.size(0) != nwave");
-    TORCH_CHECK(bc->at("btemp").size(1) == ncol || bc->at("btemp").size(1) == 1,
+  if (bc->find(bname + "btemp") != bc->end()) {
+    TORCH_CHECK(bc->at(bname + "btemp").size(0) == nwave ||
+                    bc->at(bname + "btemp").size(0) == 1,
+                "DisortImpl::forward: bc->btemp.size(0) != nwave");
+    TORCH_CHECK(bc->at(bname + "btemp").size(1) == ncol ||
+                    bc->at(bname + "btemp").size(1) == 1,
                 "DisortImpl::forward: bc->btemp.size(1) != ncol");
+    (*bc)["btemp"] = bc->at(bname + "btemp");
   } else {
     (*bc)["btemp"] = torch::zeros({nwave, ncol}, prop.options());
   }
 
-  if (bc->find("ttemp") != bc->end()) {
-    TORCH_CHECK(
-        bc->at("ttemp").size(0) == nwave || bc->at("ttemp").size(0) == 1,
-        "DisortImpl::forward: bc->ttemp.size(0) != nwave");
-    TORCH_CHECK(bc->at("ttemp").size(1) == ncol || bc->at("ttemp").size(1) == 1,
+  if (bc->find(bname + "ttemp") != bc->end()) {
+    TORCH_CHECK(bc->at(bname + "ttemp").size(0) == nwave ||
+                    bc->at(bname + "ttemp").size(0) == 1,
+                "DisortImpl::forward: bc->ttemp.size(0) != nwave");
+    TORCH_CHECK(bc->at(bname + "ttemp").size(1) == ncol ||
+                    bc->at(bname + "ttemp").size(1) == 1,
                 "DisortImpl::forward: bc->ttemp.size(1) != ncol");
+    (*bc)["ttemp"] = bc->at(bname + "ttemp");
   } else {
     (*bc)["ttemp"] = torch::zeros({nwave, ncol}, prop.options());
   }
 
-  if (bc->find("temis") != bc->end()) {
-    TORCH_CHECK(
-        bc->at("temis").size(0) == nwave || bc->at("temis").size(0) == 1,
-        "DisortImpl::forward: bc->temis.size(0) != nwave");
-    TORCH_CHECK(bc->at("temis").size(1) == ncol || bc->at("temis").size(1) == 1,
+  if (bc->find(bname + "temis") != bc->end()) {
+    TORCH_CHECK(bc->at(bname + "temis").size(0) == nwave ||
+                    bc->at(bname + "temis").size(0) == 1,
+                "DisortImpl::forward: bc->temis.size(0) != nwave");
+    TORCH_CHECK(bc->at(bname + "temis").size(1) == ncol ||
+                    bc->at(bname + "temis").size(1) == 1,
                 "DisortImpl::forward: bc->temis.size(1) != ncol");
+    (*bc)["temis"] = bc->at(bname + "temis");
   } else {
     (*bc)["temis"] = torch::zeros({nwave, ncol}, prop.options());
   }

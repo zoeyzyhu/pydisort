@@ -44,13 +44,13 @@ struct DisortOptions {
   ADD_ARG(int, ncol) = 1;
 
   //! user optical depth grid
-  ADD_ARG(std::vector<double>, user_tau) = { 0. };
+  ADD_ARG(std::vector<double>, user_tau) = {0.};
 
   //! user polar angle grid
-  ADD_ARG(std::vector<double>, user_mu) = { 1. };
+  ADD_ARG(std::vector<double>, user_mu) = {1.};
 
   //! user azimuthal angle grid
-  ADD_ARG(std::vector<double>, user_phi) = { 0. };
+  ADD_ARG(std::vector<double>, user_phi) = {0.};
 
   //! set lower wavenumber(length) at each bin
   ADD_ARG(std::vector<double>, wave_lower) = {};
@@ -141,11 +141,13 @@ class DisortImpl : public torch::nn::Cloneable<DisortImpl> {
    * \param prop properties at each level (nwave, ncol, nlyr, nprop)
    * \param bc dictionary of disort boundary conditions each of size (nwave,
    * ncol)
+   * \param bname name of the radiation band
    * \param temf temperature at each level (ncol, nlvl = nlyr + 1)
-   * \return radiative flux or intensity (nwave, ncol, nlvl, 2)
+   * \return radiative flux or intensity (nwave, ncol, nlvl, nrad)
    */
   torch::Tensor forward(torch::Tensor prop,
                         std::map<std::string, torch::Tensor>* bc,
+                        std::string bname = "",
                         torch::optional<torch::Tensor> temf = torch::nullopt);
 
  private:
