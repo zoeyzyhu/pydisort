@@ -314,26 +314,22 @@ torch::Tensor DisortImpl::forward(torch::Tensor prop,
     (*bc)["fisot"] = torch::zeros({nwave, ncol}, prop.options());
   }
 
-  if (bc->find(bname + "btemp") != bc->end()) {
-    TORCH_CHECK(bc->at(bname + "btemp").size(0) == nwave ||
-                    bc->at(bname + "btemp").size(0) == 1,
-                "DisortImpl::forward: bc->btemp.size(0) != nwave");
-    TORCH_CHECK(bc->at(bname + "btemp").size(1) == ncol ||
-                    bc->at(bname + "btemp").size(1) == 1,
+  if (bc->find("btemp") != bc->end()) {
+    TORCH_CHECK(
+        bc->at("btemp").size(0) == nwave || bc->at("btemp").size(0) == 1,
+        "DisortImpl::forward: bc->btemp.size(0) != nwave");
+    TORCH_CHECK(bc->at("btemp").size(1) == ncol || bc->at("btemp").size(1) == 1,
                 "DisortImpl::forward: bc->btemp.size(1) != ncol");
-    (*bc)["btemp"] = bc->at(bname + "btemp");
   } else {
     (*bc)["btemp"] = torch::zeros({nwave, ncol}, prop.options());
   }
 
-  if (bc->find(bname + "ttemp") != bc->end()) {
-    TORCH_CHECK(bc->at(bname + "ttemp").size(0) == nwave ||
-                    bc->at(bname + "ttemp").size(0) == 1,
-                "DisortImpl::forward: bc->ttemp.size(0) != nwave");
-    TORCH_CHECK(bc->at(bname + "ttemp").size(1) == ncol ||
-                    bc->at(bname + "ttemp").size(1) == 1,
+  if (bc->find("ttemp") != bc->end()) {
+    TORCH_CHECK(
+        bc->at("ttemp").size(0) == nwave || bc->at("ttemp").size(0) == 1,
+        "DisortImpl::forward: bc->ttemp.size(0) != nwave");
+    TORCH_CHECK(bc->at("ttemp").size(1) == ncol || bc->at("ttemp").size(1) == 1,
                 "DisortImpl::forward: bc->ttemp.size(1) != ncol");
-    (*bc)["ttemp"] = bc->at(bname + "ttemp");
   } else {
     (*bc)["ttemp"] = torch::zeros({nwave, ncol}, prop.options());
   }
