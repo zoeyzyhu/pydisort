@@ -3,8 +3,8 @@ cmake
 cppcheck
 cpplint
 guzzle_sphinx_theme
-numpy
-numpy
+ninja
+numpy<2
 pre-commit
 pylint
 sphinx

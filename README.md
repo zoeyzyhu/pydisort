@@ -85,15 +85,15 @@ Building upon the aforementioned work, we have developed a `C++` wrapper for the
 
 ## Table of Contents
 
-- [Introduction](#introduction)
-- [How to use](#how-to-use)
-  - [For Python users](#for-python-users)
-  - [For C++ developers](#for-c++-users)
-    - [Check dependencies](#check-dependencies)
-    - [Build and run the C++ wrapper](#build-and-run-the-c++-wrapper)
-    - [Build and run the Python package](#build-and-run-the-python-package)
-- [Contributing](#contributing)
-- [Issues?](#issues)
+-   [Introduction](#introduction)
+-   [How to use](#how-to-use)
+    -   [For Python users](#for-python-users)
+    -   [For C++ developers](#for-c++-users)
+        -   [Check dependencies](#check-dependencies)
+        -   [Build and run the C++ wrapper](#build-and-run-the-c++-wrapper)
+        -   [Build and run the Python package](#build-and-run-the-python-package)
+-   [Contributing](#contributing)
+-   [Issues?](#issues)
 
 ![](doc/img/rainbow.png)
 
@@ -111,14 +111,14 @@ pip install pydisort
 
 Here is a step-by-step tutorial of how to use the pydisort package:
 
-- Step 1. Importing the module.
+-   Step 1. Importing the module.
 
 ```python
 import pydisort
 import numpy as np
 ```
 
-- Step 2. Create an instance of the disort class.
+-   Step 2. Create an instance of the disort class.
 
 ```python
 # Let's assume you have a file named 'isotropic_scatering.toml' which
@@ -126,7 +126,7 @@ import numpy as np
 ds = pydisort.disort.from_file('isotropic_scattering.toml')
 ```
 
-- Step 3. Set up the model dimension.
+-   Step 3. Set up the model dimension.
 
 ```python
 ds.set_atmosphere_dimension(
@@ -136,13 +136,13 @@ ds.set_atmosphere_dimension(
 
 This sets up a one layer of atmosphere with 16 streams for calculating radiation.
 
-- Step 4. Calculate scattering moments.
+-   Step 4. Calculate scattering moments.
 
 ```python
 pmom = get_legendre_coefficients(ds.get_nmom(), "isotropic")
 ```
 
-- Step 5. Set up radiation boundary condition.
+-   Step 5. Set up radiation boundary condition.
 
 ```python
 ds.umu0 = 0.1
@@ -153,7 +153,7 @@ ds.fbeam = pi / ds.umu0
 ds.fisot = 0.0
 ```
 
-- Step 6. Set up output optical depth and polar angles.
+-   Step 6. Set up output optical depth and polar angles.
 
 ```python
 utau = array([0.0, 0.03125])
@@ -161,7 +161,7 @@ umu = array([-1.0, -0.5, -0.1, 0.1, 0.5, 1.0])
 uphi = array([0.0])
 ```
 
-- Step 7. Run radiative transfer and get intensity result.
+-   Step 7. Run radiative transfer and get intensity result.
 
 ```python
 result = ds.run_with(
@@ -198,9 +198,9 @@ For example, you might need to provide your own data file in `from_file` functio
 
 This repository supports both the Linux and MacOS operating systems. The following dependencies are required for building the C++ wrapper:
 
-- `cmake` (version >= 3.16)
-- `g++` (version >= 7.5.0)
-- `python3` (version >= 3.6)
+-   `cmake` (version >= 3.16)
+-   `g++` (version >= 7.5.0)
+-   `python3` (version >= 3.6)
 
 You could check the versions of these dependencies using the following commands:
 
@@ -226,6 +226,14 @@ You could fork or clone this repository to your local machine.
 git clone https://github.com/zoeyzyhu/pydisort.git
 ```
 
+Before building the package, you need to install the dependencies for the `pydisort` package and the pre-commit hooks. You could use the following commands to install the dependencies:
+
+```bash
+cd pydisort
+pip3 install -r requirements.txt
+pre-commit install
+```
+
 If you have no interest in adding or modifying features to the `pydisort` package, and just want to quickly build and run the C++ wrapper to your own use, you can follow the commands below:
 
 ```bash
@@ -239,13 +247,10 @@ After the build is complete, you can run the C++ wrapper using the following com
 
 ```bash
 # Assume that you are still in the build/ directory
-cd bin
+cd tests
 
-# Run the C++ wrapper
-./test_cppdisort.release
-
-# If you're interested in `cdisort`, run the test provided by Dowling
-./test_cdisort.release
+# Run the test
+./test_disort.release
 ```
 
 #### <a id='build-and-run-the-python-package'> 🔻 Build and run the Python package</a>
@@ -255,12 +260,15 @@ If you follow the steps in the previous section, you will have a C++ wrapper tha
 ```bash
 # Assume that you are still in the build/bin/ directory
 # Install the Python package
-cd ..
-make install
+cd ../..  # Go back to the root directory
+python setup.py build
+python setup.py install
+```
 
-# Run the test cases
-cd bin
-python3 test_isotropic_scattering.py
+You can now run the test cases for the Python package using the following command:
+
+```bash
+python test_isotropic_scattering.py
 ```
 
 ❗However, the above steps will put `pydisort` in the system path of Python, which might be inaccessible especially if you are working on a shared server. We recommend that you use a virtual environment for Python to install the `pydisort` package, which will also keep your system path clean even if you have access to it.
@@ -281,12 +289,15 @@ mkdir build
 cd build
 cmake ..
 make
-make install
 
 # Run test cases for C++ wrapper and Python package
-cd bin
-./test_cppdisort.release
-python3 test_isotropic_scattering.py
+cd tests
+./test_disort.release
+
+# Install the Python package in the virtual environment
+cd ../..
+python setup.py build
+python setup.py install
 ```
 
 Installing `requirements.txt` also covers packages for the `pre-commit` hooks, which are very helpful if you'd like to make changes to the repository cloned. You could run the checks and lints manually using the following command to ensure that your changes are compliant with the industry standards:

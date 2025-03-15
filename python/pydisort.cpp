@@ -52,11 +52,13 @@ PYBIND11_MODULE(pydisort, m) {
   >>> import torch
   >>> from pydisort import DisortOptions, Disort
   >>> op = DisortOptions().header("running disort test").flags("onlyfl")
-  >>> op.ds().nlyr(4).nstr(4).nmom(4)
+  >>> op.ds().nlyr = 4
+  >>> op.ds().nstr = 4
+  >>> op.ds().nmom = 4
   >>> ds = Disort(op)
-  >>> tau = torch.tensor([0.1, 0.2, 0.3, 0.4])
-  >>> bc = {"fbeam" : torch.tensor([3.14159])}
-  >>> result = ds.forward(tau, bc)
+  >>> tau = torch.tensor([0.1, 0.2, 0.3, 0.4]).reshape((1,1,4,1))
+  >>> bc = {"fbeam" : torch.tensor([3.14159]).reshape((1,1))}
+  >>> result = ds.forward(tau, bc, "", None)
   >>> flx
   array([[3.14159   , 0.        , 0.        ],
          [2.84262818, 0.        , 0.        ],

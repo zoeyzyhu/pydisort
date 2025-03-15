@@ -44,13 +44,13 @@ struct DisortOptions {
   ADD_ARG(int, ncol) = 1;
 
   //! user optical depth grid
-  ADD_ARG(std::vector<double>, user_tau) = {0.};
+  ADD_ARG(std::vector<double>, user_tau) = { 0. };
 
   //! user polar angle grid
-  ADD_ARG(std::vector<double>, user_mu) = {1.};
+  ADD_ARG(std::vector<double>, user_mu) = { 1. };
 
   //! user azimuthal angle grid
-  ADD_ARG(std::vector<double>, user_phi) = {0.};
+  ADD_ARG(std::vector<double>, user_phi) = { 0. };
 
   //! set lower wavenumber(length) at each bin
   ADD_ARG(std::vector<double>, wave_lower) = {};

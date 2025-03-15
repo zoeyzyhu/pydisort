@@ -9,6 +9,7 @@ from setuptools import setup
 from torch.utils import cpp_extension
 import torch
 
+
 def parse_library_names(libdir):
     """Parse the library files."""
     # Get the library files
@@ -53,6 +54,9 @@ current_dir = os.getenv('WORKSPACE')
 if not current_dir:
     current_dir = Path().absolute()
 
+# Get the current Python library directory
+env_lib_dir = os.path.join(sys.prefix, 'lib', 'python' + sys.version[:3], 'site-packages')
+
 if torch.cuda.is_available():
     setup(
         ext_modules=[cpp_extension.CUDAExtension(
@@ -61,7 +65,8 @@ if torch.cuda.is_available():
             include_dirs = [f'{current_dir}',
                             f'{current_dir}/build',
                             f'{current_dir}/build/_deps/fmt-src/include'],
-            library_dirs = [f'{current_dir}/build/lib'],
+            library_dirs = [env_lib_dir
+                            if os.path.exists(env_lib_dir) else f'{current_dir}/build/lib'],
             libraries = parse_library_names(f'{current_dir}/build/lib'),
             extra_compile_args = {'nvcc': ['--extended-lambda']},
             )],
@@ -75,7 +80,8 @@ else:
             include_dirs = [f'{current_dir}',
                             f'{current_dir}/build',
                             f'{current_dir}/build/_deps/fmt-src/include'],
-            library_dirs = [f'{current_dir}/build/lib'],
+            library_dirs = [env_lib_dir
+                            if os.path.exists(env_lib_dir) else f'{current_dir}/build/lib'],
             libraries = parse_library_names(f'{current_dir}/build/lib'),
             )],
         cmdclass={'build_ext': cpp_extension.BuildExtension},
