@@ -30,7 +30,7 @@ void call_disort_cpu(at::TensorIterator& iter, int rank_in_column,
         auto ttemp = reinterpret_cast<scalar_t*>(data[10] + i * strides[10]);
         auto temf = reinterpret_cast<scalar_t*>(data[11] + i * strides[11]);
         auto idx = reinterpret_cast<int64_t*>(data[12] + i * strides[12]);
-        disort_impl(out, prop, fbeam, umu0, phi0, albedo, fluor, fisot, temis,
+        disort_impl(out, prop, umu0, phi0, fbeam, albedo, fluor, fisot, temis,
                     btemp, ttemp, temf, rank_in_column, ds[*idx], ds_out[*idx],
                     nprop);
       }

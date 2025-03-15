@@ -249,7 +249,7 @@ torch::Tensor DisortImpl::forward(torch::Tensor prop,
                 "DisortImpl::forward: bc->umu0.size(0) != ncol");
     (*bc)["umu0"] = bc->at(bname + "umu0");
   } else {
-    (*bc)["umu0"] = torch::ones({nwave, ncol}, prop.options());
+    (*bc)["umu0"] = torch::ones({1, ncol}, prop.options());
   }
 
   if (bc->find(bname + "phi0") != bc->end()) {
@@ -259,7 +259,7 @@ torch::Tensor DisortImpl::forward(torch::Tensor prop,
                 "DisortImpl::forward: bc->phi0.size(0) != ncol");
     (*bc)["phi0"] = bc->at(bname + "phi0");
   } else {
-    (*bc)["phi0"] = torch::zeros({nwave, ncol}, prop.options());
+    (*bc)["phi0"] = torch::zeros({1, ncol}, prop.options());
   }
 
   if (bc->find(bname + "fbeam") != bc->end()) {
@@ -328,7 +328,7 @@ torch::Tensor DisortImpl::forward(torch::Tensor prop,
     TORCH_CHECK(bc->at("btemp").size(0) == ncol,
                 "DisortImpl::forward: bc->btemp.size(0) != ncol");
   } else {
-    (*bc)["btemp"] = torch::zeros({nwave, ncol}, prop.options());
+    (*bc)["btemp"] = torch::zeros({1, ncol}, prop.options());
   }
 
   if (bc->find("ttemp") != bc->end()) {
@@ -337,7 +337,7 @@ torch::Tensor DisortImpl::forward(torch::Tensor prop,
     TORCH_CHECK(bc->at("ttemp").size(0) == ncol,
                 "DisortImpl::forward: bc->ttemp.size(0) != ncol");
   } else {
-    (*bc)["ttemp"] = torch::zeros({nwave, ncol}, prop.options());
+    (*bc)["ttemp"] = torch::zeros({1, ncol}, prop.options());
   }
 
   torch::Tensor tem;
@@ -362,34 +362,31 @@ torch::Tensor DisortImpl::forward(torch::Tensor prop,
                    .view({nwave, ncol, 1, 1});
   int rank_in_column = 0;
 
-  auto iter = at::TensorIteratorConfig()
-                  .resize_outputs(false)
-                  .check_all_same_dtype(false)
-                  .declare_static_shape({nwave, ncol, nlyr + 1, 2},
-                                        /*squash_dims=*/{2, 3})
-                  .add_output(flx)
-                  .add_input(prop)
-                  .add_owned_input(bc->at("umu0")
-                                       .view({1, ncol, 1, 1, 1})
-                                       .expand({nwave, ncol, 1, 1, 1}))
-                  .add_owned_input(bc->at("phi0")
-                                       .view({1, ncol, 1, 1, 1})
-                                       .expand({nwave, ncol, 1, 1, 1}))
-                  .add_owned_input(bc->at("fbeam").unsqueeze(-1).unsqueeze(-1))
-                  .add_owned_input(bc->at("albedo").unsqueeze(-1).unsqueeze(-1))
-                  .add_owned_input(bc->at("fluor").unsqueeze(-1).unsqueeze(-1))
-                  .add_owned_input(bc->at("fisot").unsqueeze(-1).unsqueeze(-1))
-                  .add_owned_input(bc->at("temis").unsqueeze(-1).unsqueeze(-1))
-                  .add_owned_input(bc->at("btemp")
-                                       .view({1, ncol, 1, 1, 1})
-                                       .expand({nwave, ncol, 1, 1, 1}))
-                  .add_owned_input(bc->at("ttemp")
-                                       .view({1, ncol, 1, 1, 1})
-                                       .expand({nwave, ncol, 1, 1, 1}))
-                  .add_owned_input(tem.view({1, ncol, nlyr + 1, 1, 1})
-                                       .expand({nwave, ncol, nlyr + 1, 1, 1}))
-                  .add_input(index)
-                  .build();
+  auto iter =
+      at::TensorIteratorConfig()
+          .resize_outputs(false)
+          .check_all_same_dtype(false)
+          .declare_static_shape({nwave, ncol, nlyr + 1, 2},
+                                /*squash_dims=*/{2, 3})
+          .add_output(flx)
+          .add_input(prop)
+          .add_owned_input(
+              bc->at("umu0").view({1, ncol, 1, 1}).expand({nwave, ncol, 1, 1}))
+          .add_owned_input(
+              bc->at("phi0").view({1, ncol, 1, 1}).expand({nwave, ncol, 1, 1}))
+          .add_owned_input(bc->at("fbeam").view({nwave, ncol, 1, 1}))
+          .add_owned_input(bc->at("albedo").view({nwave, ncol, 1, 1}))
+          .add_owned_input(bc->at("fluor").view({nwave, ncol, 1, 1}))
+          .add_owned_input(bc->at("fisot").view({nwave, ncol, 1, 1}))
+          .add_owned_input(bc->at("temis").view({nwave, ncol, 1, 1}))
+          .add_owned_input(
+              bc->at("btemp").view({1, ncol, 1, 1}).expand({nwave, ncol, 1, 1}))
+          .add_owned_input(
+              bc->at("ttemp").view({1, ncol, 1, 1}).expand({nwave, ncol, 1, 1}))
+          .add_owned_input(tem.view({1, ncol, nlyr + 1, 1})
+                               .expand({nwave, ncol, nlyr + 1, 1}))
+          .add_input(index)
+          .build();
 
   if (prop.is_cpu()) {
     call_disort_cpu(iter, rank_in_column, ds_.data(), ds_out_.data());

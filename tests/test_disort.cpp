@@ -38,10 +38,10 @@ int main(int argc, char **argv) {
 
   std::map<std::string, torch::Tensor> bc;
 
-  bc["umu0"] =
-      0.1 * torch::ones({disort->options.nwave(), disort->options.ncol()},
-                        torch::kDouble);
-  bc["fbeam"] = M_PI / bc["umu0"];
+  bc["umu0"] = 0.1 * torch::ones({disort->options.ncol()}, torch::kDouble);
+  bc["fbeam"] = (M_PI / bc["umu0"])
+                    .unsqueeze(0)
+                    .expand({disort->options.nwave(), disort->options.ncol()});
 
   auto result = disort->forward(prop, &bc);
   std::cout << "result: " << result << std::endl;

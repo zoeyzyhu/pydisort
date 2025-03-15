@@ -5,8 +5,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 option(CUDA "Enable CUDA support" OFF)
-option(BUILD_TESTS "Build tests" OFF)
-option(BUILD_EXAMPLES "Build examples" OFF)
+option(BUILD_TESTS "Build tests" ON)
 
 if (CUDA)
   project(
