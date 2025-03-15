@@ -138,9 +138,25 @@ class DisortImpl : public torch::nn::Cloneable<DisortImpl> {
 
   //! Calculate radiative flux or intensity
   /*!
-   * \param prop properties at each level (nwave, ncol, nlyr, nprop)
-   * \param bc dictionary of disort boundary conditions each of size (nwave,
-   * ncol)
+   * \param prop optical properties at each level (nwave, ncol, nlyr, nprop)
+   *
+   * \param bc dictionary of disort boundary conditions
+   *        The dimensions of each recognized key are:
+   *        - <band> + "umu0" : (ncol,), cosine of solar zenith angle
+   *        - <band> + "phi0" : (ncol,), azimuthal angle of solar beam
+   *        - <band> + "fbeam" : (nwave, ncol), solar beam flux
+   *        - <band> + "albedo" : (nwave, ncol), surface albedo
+   *        - <band> + "fluor" : (nwave, ncol), isotropic bottom illumination
+   *        - <band> + "fisot" : (nwave, ncol), isotropic top illumination
+   *        - <band> + "temis" : (nwave, ncol), top emissivity
+   *        - "btemp" : (ncol,), bottom temperature
+   *        - "ttemp" : (ncol,), top temperature
+   *
+   *        Some keys can have a prefix band name, <band>.
+   *        If the prefix is an non-empty string, a slash "/" is
+   *        automatically appended to it, such that the key look like
+   *        `B1/umu0`. `btemp` and `ttemp` do not have a band name prefix.
+   *
    * \param bname name of the radiation band
    * \param temf temperature at each level (ncol, nlvl = nlyr + 1)
    * \return radiative flux or intensity (nwave, ncol, nlvl, nrad)

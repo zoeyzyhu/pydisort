@@ -242,48 +242,44 @@ torch::Tensor DisortImpl::forward(torch::Tensor prop,
   }
 
   // check bc
-  if (bc->find(bname + "fbeam") != bc->end()) {
-    TORCH_CHECK(bc->at(bname + "fbeam").size(0) == nwave ||
-                    bc->at(bname + "fbeam").size(0) == 1,
-                "DisortImpl::forward: bc->fbeam.size(0) != nwave");
-    TORCH_CHECK(bc->at(bname + "fbeam").size(1) == ncol ||
-                    bc->at(bname + "fbeam").size(1) == 1,
-                "DisortImpl::forward: bc->fbeam.size(1) != ncol");
-    (*bc)["fbeam"] = bc->at(bname + "fbeam");
-  } else {
-    (*bc)["fbeam"] = torch::zeros({nwave, ncol}, prop.options());
-  }
-
   if (bc->find(bname + "umu0") != bc->end()) {
-    TORCH_CHECK(bc->at(bname + "umu0").size(0) == nwave ||
-                    bc->at(bname + "umu0").size(0) == 1,
-                "DisortImpl::forward: bc->umu0.size(0) != nwave");
-    TORCH_CHECK(bc->at(bname + "umu0").size(1) == ncol ||
-                    bc->at(bname + "umu0").size(1) == 1,
-                "DisortImpl::forward: bc->umu0.size(1) != ncol");
+    TORCH_CHECK(bc->at(bname + "umu0").dim() == 1,
+                "DisortImpl::forward: bc->umu0.dim() != 1");
+    TORCH_CHECK(bc->at(bname + "umu0").size(0) == ncol,
+                "DisortImpl::forward: bc->umu0.size(0) != ncol");
     (*bc)["umu0"] = bc->at(bname + "umu0");
   } else {
     (*bc)["umu0"] = torch::ones({nwave, ncol}, prop.options());
   }
 
   if (bc->find(bname + "phi0") != bc->end()) {
-    TORCH_CHECK(bc->at(bname + "phi0").size(0) == nwave ||
-                    bc->at(bname + "phi0").size(0) == 1,
-                "DisortImpl::forward: bc->phi0.size(0) != nwave");
-    TORCH_CHECK(bc->at(bname + "phi0").size(1) == ncol ||
-                    bc->at(bname + "phi0").size(1) == 1,
-                "DisortImpl::forward: bc->phi0.size(1) != ncol");
+    TORCH_CHECK(bc->at(bname + "phi0").dim() == 1,
+                "DisortImpl::forward: bc->phi0.dim() != 1");
+    TORCH_CHECK(bc->at(bname + "phi0").size(0) == ncol,
+                "DisortImpl::forward: bc->phi0.size(0) != ncol");
     (*bc)["phi0"] = bc->at(bname + "phi0");
   } else {
     (*bc)["phi0"] = torch::zeros({nwave, ncol}, prop.options());
   }
 
+  if (bc->find(bname + "fbeam") != bc->end()) {
+    TORCH_CHECK(bc->at(bname + "fbeam").dim() == 2,
+                "DisortImpl::forward: bc->fbeam.dim() != 2");
+    TORCH_CHECK(bc->at(bname + "fbeam").size(0) == nwave,
+                "DisortImpl::forward: bc->fbeam.size(0) != nwave");
+    TORCH_CHECK(bc->at(bname + "fbeam").size(1) == ncol,
+                "DisortImpl::forward: bc->fbeam.size(1) != ncol");
+    (*bc)["fbeam"] = bc->at(bname + "fbeam");
+  } else {
+    (*bc)["fbeam"] = torch::zeros({nwave, ncol}, prop.options());
+  }
+
   if (bc->find(bname + "albedo") != bc->end()) {
-    TORCH_CHECK(bc->at(bname + "albedo").size(0) == nwave ||
-                    bc->at(bname + "albedo").size(0) == 1,
+    TORCH_CHECK(bc->at(bname + "albedo").dim() == 2,
+                "DisortImpl::forward: bc->albedo.dim() != 2");
+    TORCH_CHECK(bc->at(bname + "albedo").size(0) == nwave,
                 "DisortImpl::forward: bc->albedo.size(0) != nwave");
-    TORCH_CHECK(bc->at(bname + "albedo").size(1) == ncol ||
-                    bc->at(bname + "albedo").size(1) == 1,
+    TORCH_CHECK(bc->at(bname + "albedo").size(1) == ncol,
                 "DisortImpl::forward: bc->albedo.size(1) != ncol");
     (*bc)["albedo"] = bc->at(bname + "albedo");
   } else {
@@ -291,11 +287,11 @@ torch::Tensor DisortImpl::forward(torch::Tensor prop,
   }
 
   if (bc->find(bname + "fluor") != bc->end()) {
-    TORCH_CHECK(bc->at(bname + "fluor").size(0) == nwave ||
-                    bc->at(bname + "fluor").size(0) == 1,
+    TORCH_CHECK(bc->at(bname + "fluor").dim() == 2,
+                "DisortImpl::forward: bc->fluor.dim() != 2");
+    TORCH_CHECK(bc->at(bname + "fluor").size(0) == nwave,
                 "DisortImpl::forward: bc->fluor.size(0) != nwave");
-    TORCH_CHECK(bc->at(bname + "fluor").size(1) == ncol ||
-                    bc->at(bname + "fluor").size(1) == 1,
+    TORCH_CHECK(bc->at(bname + "fluor").size(1) == ncol,
                 "DisortImpl::forward: bc->fluor.size(1) != ncol");
     (*bc)["fluor"] = bc->at(bname + "fluor");
   } else {
@@ -303,51 +299,51 @@ torch::Tensor DisortImpl::forward(torch::Tensor prop,
   }
 
   if (bc->find(bname + "fisot") != bc->end()) {
-    TORCH_CHECK(bc->at(bname + "fisot").size(0) == nwave ||
-                    bc->at(bname + "fisot").size(0) == 1,
+    TORCH_CHECK(bc->at(bname + "fisot").dim() == 2,
+                "DisortImpl::forward: bc->fisot.dim() != 2");
+    TORCH_CHECK(bc->at(bname + "fisot").size(0) == nwave,
                 "DisortImpl::forward: bc->fisot.size(0) != nwave");
-    TORCH_CHECK(bc->at(bname + "fisot").size(1) == ncol ||
-                    bc->at(bname + "fisot").size(1) == 1,
+    TORCH_CHECK(bc->at(bname + "fisot").size(1) == ncol,
                 "DisortImpl::forward: bc->fisot.size(1) != ncol");
     (*bc)["fisot"] = bc->at(bname + "fisot");
   } else {
     (*bc)["fisot"] = torch::zeros({nwave, ncol}, prop.options());
   }
 
-  if (bc->find("btemp") != bc->end()) {
-    TORCH_CHECK(
-        bc->at("btemp").size(0) == nwave || bc->at("btemp").size(0) == 1,
-        "DisortImpl::forward: bc->btemp.size(0) != nwave");
-    TORCH_CHECK(bc->at("btemp").size(1) == ncol || bc->at("btemp").size(1) == 1,
-                "DisortImpl::forward: bc->btemp.size(1) != ncol");
-  } else {
-    (*bc)["btemp"] = torch::zeros({nwave, ncol}, prop.options());
-  }
-
-  if (bc->find("ttemp") != bc->end()) {
-    TORCH_CHECK(
-        bc->at("ttemp").size(0) == nwave || bc->at("ttemp").size(0) == 1,
-        "DisortImpl::forward: bc->ttemp.size(0) != nwave");
-    TORCH_CHECK(bc->at("ttemp").size(1) == ncol || bc->at("ttemp").size(1) == 1,
-                "DisortImpl::forward: bc->ttemp.size(1) != ncol");
-  } else {
-    (*bc)["ttemp"] = torch::zeros({nwave, ncol}, prop.options());
-  }
-
   if (bc->find(bname + "temis") != bc->end()) {
-    TORCH_CHECK(bc->at(bname + "temis").size(0) == nwave ||
-                    bc->at(bname + "temis").size(0) == 1,
+    TORCH_CHECK(bc->at(bname + "temis").dim() == 2,
+                "DisortImpl::forward: bc->temis.dim() != 2");
+    TORCH_CHECK(bc->at(bname + "temis").size(0) == nwave,
                 "DisortImpl::forward: bc->temis.size(0) != nwave");
-    TORCH_CHECK(bc->at(bname + "temis").size(1) == ncol ||
-                    bc->at(bname + "temis").size(1) == 1,
+    TORCH_CHECK(bc->at(bname + "temis").size(1) == ncol,
                 "DisortImpl::forward: bc->temis.size(1) != ncol");
     (*bc)["temis"] = bc->at(bname + "temis");
   } else {
     (*bc)["temis"] = torch::zeros({nwave, ncol}, prop.options());
   }
 
+  if (bc->find("btemp") != bc->end()) {
+    TORCH_CHECK(bc->at("btemp").dim() == 1,
+                "DisortImpl::forward: bc->btemp.dim() != 1");
+    TORCH_CHECK(bc->at("btemp").size(0) == ncol,
+                "DisortImpl::forward: bc->btemp.size(0) != ncol");
+  } else {
+    (*bc)["btemp"] = torch::zeros({nwave, ncol}, prop.options());
+  }
+
+  if (bc->find("ttemp") != bc->end()) {
+    TORCH_CHECK(bc->at("ttemp").dim() == 1,
+                "DisortImpl::forward: bc->ttemp.dim() != 1");
+    TORCH_CHECK(bc->at("ttemp").size(0) == ncol,
+                "DisortImpl::forward: bc->ttemp.size(0) != ncol");
+  } else {
+    (*bc)["ttemp"] = torch::zeros({nwave, ncol}, prop.options());
+  }
+
   torch::Tensor tem;
   if (temf.has_value()) {
+    TORCH_CHECK(temf.value().dim() == 2,
+                "DisortImpl::forward: temf.dim() != 2");
     TORCH_CHECK(temf.value().size(0) == ncol,
                 "DisortImpl::forward: temf.size(0) != ncol");
     TORCH_CHECK(temf.value().size(1) == nlyr + 1,
@@ -373,15 +369,23 @@ torch::Tensor DisortImpl::forward(torch::Tensor prop,
                                         /*squash_dims=*/{2, 3})
                   .add_output(flx)
                   .add_input(prop)
+                  .add_owned_input(bc->at("umu0")
+                                       .view({1, ncol, 1, 1, 1})
+                                       .expand({nwave, ncol, 1, 1, 1}))
+                  .add_owned_input(bc->at("phi0")
+                                       .view({1, ncol, 1, 1, 1})
+                                       .expand({nwave, ncol, 1, 1, 1}))
                   .add_owned_input(bc->at("fbeam").unsqueeze(-1).unsqueeze(-1))
-                  .add_owned_input(bc->at("umu0").unsqueeze(-1).unsqueeze(-1))
-                  .add_owned_input(bc->at("phi0").unsqueeze(-1).unsqueeze(-1))
                   .add_owned_input(bc->at("albedo").unsqueeze(-1).unsqueeze(-1))
                   .add_owned_input(bc->at("fluor").unsqueeze(-1).unsqueeze(-1))
                   .add_owned_input(bc->at("fisot").unsqueeze(-1).unsqueeze(-1))
-                  .add_owned_input(bc->at("btemp").unsqueeze(-1).unsqueeze(-1))
-                  .add_owned_input(bc->at("ttemp").unsqueeze(-1).unsqueeze(-1))
                   .add_owned_input(bc->at("temis").unsqueeze(-1).unsqueeze(-1))
+                  .add_owned_input(bc->at("btemp")
+                                       .view({1, ncol, 1, 1, 1})
+                                       .expand({nwave, ncol, 1, 1, 1}))
+                  .add_owned_input(bc->at("ttemp")
+                                       .view({1, ncol, 1, 1, 1})
+                                       .expand({nwave, ncol, 1, 1, 1}))
                   .add_owned_input(tem.view({1, ncol, nlyr + 1, 1, 1})
                                        .expand({nwave, ncol, nlyr + 1, 1, 1}))
                   .add_input(index)
