@@ -35,6 +35,8 @@ void bind_phase_options(py::module &m) {
             } else {
               throw std::runtime_error("Unknown phase function model");
             }
+
+            return a;
           },
           R"(
       Notes

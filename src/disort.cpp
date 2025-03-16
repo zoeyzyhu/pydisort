@@ -172,35 +172,36 @@ DisortImpl::~DisortImpl() {
   allocated_ = false;
 }
 
-torch::Tensor DisortImpl::get_flx(torch::TensorOptions op) const {
+torch::Tensor DisortImpl::gather_flx() const {
   int nlyr = options.ds().nlyr;
-  auto result =
-      torch::empty({options.nwave() * options.ncol(), nlyr + 1, 8}, op);
+  auto result = torch::empty({options.nwave() * options.ncol(), nlyr + 1, 8},
+                             result_options_);
 
   for (int i = 0; i < options.nwave() * options.ncol(); ++i) {
-    auto var =
-        torch::from_blob(&ds_out_[i].rad[0].rfldir, {nlyr + 1, 8}, {8, 1}, op);
-    result[i] = var;
+    auto var = torch::from_blob(&ds_out_[i].rad[0].rfldir, {nlyr + 1, 8},
+                                {8, 1}, result_options_.dtype(torch::kFloat64));
+    result[i].copy_(var);
   }
 
   return result.view({options.nwave(), options.ncol(), nlyr + 1, 8});
 }
 
-torch::Tensor DisortImpl::get_rad(torch::TensorOptions op) const {
+torch::Tensor DisortImpl::gather_rad() const {
   TORCH_CHECK(options.ds().flag.onlyfl == false,
-              "DisortImpl::get_rad: ds.onlyfl == true");
+              "DisortImpl::gather_rad: ds.onlyfl == true");
 
   int nphi = options.ds().nphi;
   int ntau = options.ds().ntau;
   int numu = options.ds().numu;
 
-  auto result =
-      torch::empty({options.nwave() * options.ncol(), nphi, ntau, numu}, op);
+  auto result = torch::empty(
+      {options.nwave() * options.ncol(), nphi, ntau, numu}, result_options_);
 
   for (int i = 0; i < options.nwave() * options.ncol(); ++i) {
     auto var = torch::from_blob(ds_out_[i].uu, {nphi, ntau, numu},
-                                {ntau * numu, numu, 1}, op);
-    result[i] = var;
+                                {ntau * numu, numu, 1},
+                                result_options_.dtype(torch::kFloat64));
+    result[i].copy_(var);
   }
 
   return result.view({options.nwave(), options.ncol(), nphi, ntau, numu});
@@ -401,6 +402,9 @@ torch::Tensor DisortImpl::forward(torch::Tensor prop,
   } else {
     TORCH_CHECK(false, "DisortImpl::forward: unsupported device");
   }
+
+  // save result tensor options
+  result_options_ = flx.options();
 
   return flx;
 }

@@ -130,14 +130,14 @@ class DisortImpl : public torch::nn::Cloneable<DisortImpl> {
    * \param op tensor options
    * \return disort flux outputs (nwave, ncol, nlvl = nlyr + 1, 8)
    */
-  torch::Tensor get_flx(torch::TensorOptions op) const;
+  torch::Tensor gather_flx() const;
 
   //! disort radiance outputs
   /*!
    * \param op tensor options
    * \return disort radiance outputs (nwave, ncol, nphi, ntau, numu)
    */
-  torch::Tensor get_rad(torch::TensorOptions op) const;
+  torch::Tensor gather_rad() const;
 
   //! Calculate radiative flux or intensity
   /*!
@@ -175,6 +175,9 @@ class DisortImpl : public torch::nn::Cloneable<DisortImpl> {
 
   //! flat array of disort outputs (nwave * ncol)
   std::vector<disort_output> ds_out_;
+
+  //! tensor output options after running disort
+  torch::TensorOptions result_options_;
 
   //! flag to indicate if disort memory has been allocated
   bool allocated_ = false;

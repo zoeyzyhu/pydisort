@@ -46,7 +46,7 @@ int main(int argc, char **argv) {
   auto result = disort->forward(prop, &bc);
   std::cout << "result: " << result << std::endl;
 
-  auto rad = disort->get_rad(prop.options());
+  auto rad = disort->gather_rad();
   std::cout << "rad = " << rad << std::endl;
 
   std::cout << "options = " << fmt::format("{}", disort->options) << std::endl;

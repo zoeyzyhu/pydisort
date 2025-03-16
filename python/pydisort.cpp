@@ -167,6 +167,10 @@ PYBIND11_MODULE(pydisort, m) {
   m.attr("iuavgup") = 6;
   m.attr("iuavgso") = 7;
 
+  bind_disort_options(m);
+  bind_phase_options(m);
+  bind_cdisort(m);
+
   m.def("scattering_moments", &disort::scattering_moments, R"(
       Get phase function moments based on a phase function model
 
@@ -184,7 +188,25 @@ PYBIND11_MODULE(pydisort, m) {
       )");
 
   ADD_DISORT_MODULE(Disort, DisortOptions)
-      .def_readwrite("options", &disort::DisortImpl::options)
+      .def_readonly("options", &disort::DisortImpl::options)
+      .def("gather_flx", &disort::DisortImpl::gather_flx, R"(
+    Gather all disort flux outputs
+
+    Returns
+    -------
+    torch.Tensor
+        Disort flux outputs (nwave, ncol, nlvl = nlyr + 1, 8)
+    )")
+
+      .def("gather_rad", &disort::DisortImpl::gather_rad, R"(
+    Gather all disort radiation outputs
+
+    Returns
+    -------
+    torch.Tensor
+        Disort radiation outputs (nwave, ncol, nlvl = nlyr + 1, 6)
+    )")
+
       .def(
           "forward",
           [](disort::DisortImpl &self, torch::Tensor prop,
@@ -232,8 +254,4 @@ PYBIND11_MODULE(pydisort, m) {
     )",
           py::arg("prop"), py::arg("bc"), py::arg("bname") = "",
           py::arg("temf") = py::none());
-
-  bind_disort_options(m);
-  bind_phase_options(m);
-  bind_cdisort(m);
 }
