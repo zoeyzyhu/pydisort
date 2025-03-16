@@ -72,5 +72,3 @@ clean:
 
 clear:
 	@rm -f core *a *o *BAK *bak *~ *% *.log $(PROGS)
-
-

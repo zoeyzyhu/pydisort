@@ -11837,4 +11837,3 @@ int c_gaussian_quadrature_test(int nstr, float *sza, double umu0)
 /*============================= end of c_gaussian_quadrature_test() =====*/
 
 /* * * * * * * * * * * * * * end of cdisort.c * * * * * * * * * * * */
-

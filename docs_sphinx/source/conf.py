@@ -9,31 +9,32 @@
 import guzzle_sphinx_theme
 import sys
 import os
-project = 'pydisort'
-copyright = '2023, Zoey Hu'
-author = 'Zoey Hu'
+
+project = "pydisort"
+copyright = "2023, Zoey Hu"
+author = "Zoey Hu"
 
 # Adjust the path accordingly
-sys.path.insert(0, os.path.abspath('../../python'))
+sys.path.insert(0, os.path.abspath("../../python"))
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
 extensions = [
-    'sphinx.ext.autodoc',
-    'sphinx.ext.napoleon',
+    "sphinx.ext.autodoc",
+    "sphinx.ext.napoleon",
     # Add other extensions as needed
 ]
 
-templates_path = ['_templates']
+templates_path = ["_templates"]
 exclude_patterns = []
 
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
-#html_theme = 'alabaster'
-#html_static_path = ['_static']
+# html_theme = 'alabaster'
+# html_static_path = ['_static']
 napoleon_google_docstring = False
 napoleon_numpy_docstring = True
 
@@ -43,7 +44,7 @@ napoleon_numpy_docstring = True
 
 
 html_theme_path = guzzle_sphinx_theme.html_theme_path()
-html_theme = 'guzzle_sphinx_theme'
+html_theme = "guzzle_sphinx_theme"
 
 # Register the theme as an extension to generate a sitemap.xml
 extensions.append("guzzle_sphinx_theme")

@@ -1,15 +1,13 @@
 #! python3
 
 """ Test isotropic scattering with pydisort."""
-# pylint: disable = no-name-in-module, invalid-name, import-error, wrong-import-position
+# pylint: disable = no-name-in-module, invalid-name,
+# import-error, wrong-import-position
 
 
-import sys
 import unittest
 from numpy import array, pi
 from numpy.testing import assert_allclose
-
-sys.path.append('@CMAKE_BINARY_DIR@/python')
 from pydisort import disort, get_phase_function, RFLDIR, FLDN, FLUP
 
 # cdisort test01
@@ -100,8 +98,8 @@ class PyDisortTests(unittest.TestCase):
             flx,
             array(
                 [
-                    [3.14159265e00, 0., 7.99450975e-02],
-                    [2.29843829e00, 7.94107954e-02, 0.],
+                    [3.14159265e00, 0.0, 7.99450975e-02],
+                    [2.29843829e00, 7.94107954e-02, 0.0],
                 ]
             ),
             atol=1e-8,
@@ -131,8 +129,8 @@ class PyDisortTests(unittest.TestCase):
             flx,
             array(
                 [
-                    [3.14159265e00, 0., 4.22921778e-01],
-                    [2.29843829e00, 4.20232590e-01, 0.],
+                    [3.14159265e00, 0.0, 4.22921778e-01],
+                    [2.29843829e00, 4.20232590e-01, 0.0],
                 ]
             ),
             atol=1e-8,
