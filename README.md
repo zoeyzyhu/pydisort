@@ -271,8 +271,7 @@ If you follow the steps in the previous section, you will have a C++ wrapper tha
 # Assume that you are still in the build/bin/ directory
 # Install the Python package
 cd ../..  # Go back to the root directory
-python setup.py build
-python setup.py install
+pip install .
 ```
 
 You can now run the test cases for the Python package using the following command:

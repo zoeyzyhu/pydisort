@@ -59,10 +59,13 @@ if not current_dir:
 
 if torch.cuda.is_available():
     setup(
+        name="pydisort",
+        package_dir={"pydisort": "python"},
+        packages=["pydisort"],
         ext_modules=[
             cpp_extension.CUDAExtension(
-                name="pydisort",
-                sources=glob.glob("python/*.cpp")
+                name="pydisort.pydisort",
+                sources=glob.glob("python/src/*.cpp")
                 + glob.glob("src/**/*.cu", recursive=True),
                 include_dirs=[
                     f"{current_dir}",
@@ -78,10 +81,13 @@ if torch.cuda.is_available():
     )
 else:
     setup(
+        name="pydisort",
+        package_dir={"pydisort": "python"},
+        packages=["pydisort"],
         ext_modules=[
             cpp_extension.CppExtension(
-                name="pydisort",
-                sources=glob.glob("python/*.cpp"),
+                name="pydisort.pydisort",
+                sources=glob.glob("python/src/*.cpp"),
                 include_dirs=[
                     f"{current_dir}",
                     f"{current_dir}/build",

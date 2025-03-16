@@ -134,3 +134,5 @@ repos:
             .*/test_cdisort\.c|            # test_cdisort.c
             .*/pydisort.cpp                # pydisort.cpp
           )$
+
+exclude: python/__init__.py

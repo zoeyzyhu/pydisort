@@ -59,7 +59,7 @@ PYBIND11_MODULE(pydisort, m) {
   >>> ds = Disort(op)
   >>> tau = torch.tensor([0.1, 0.2, 0.3, 0.4]).reshape((4,1))
   >>> bc = {"fbeam" : torch.tensor([3.14159]).reshape((1,1))}
-  >>> flx = ds.forward(tau, bc, "", None)
+  >>> flx = ds.forward(tau, bc)
   >>> flx
   tensor([[[[0.0000, 3.1416],
           [0.0000, 2.8426],
