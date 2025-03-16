@@ -11,5 +11,6 @@ void bind_cdisort(py::module &m) {
       .def(py::init<>())
       .def_readwrite("nlyr", &disort_state::nlyr)
       .def_readwrite("nstr", &disort_state::nstr)
+      .def_readwrite("nphase", &disort_state::nphase)
       .def_readwrite("nmom", &disort_state::nmom);
 }

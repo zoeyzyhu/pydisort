@@ -16,8 +16,13 @@ struct fmt::formatter<disort_state> {
 
   template <typename FormatContext>
   auto format(const disort_state& ds, FormatContext& ctx) const {
-    return fmt::format_to(ctx.out(), "(nlyr = {}; nstr = {}; nmom = {})",
-                          ds.nlyr, ds.nstr, ds.nmom);
+    return fmt::format_to(
+        ctx.out(),
+        "(nlyr = {}; nstr = {}; nmom = {}; ibcnd = {}; usrtau = {}; usrang = "
+        "{}; lamber = {}; planck = {}; spher = {}; onlyfl = {})",
+        ds.nlyr, ds.nstr, ds.nmom, ds.flag.ibcnd, ds.flag.usrtau,
+        ds.flag.usrang, ds.flag.lamber, ds.flag.planck, ds.flag.spher,
+        ds.flag.onlyfl);
   }
 };
 

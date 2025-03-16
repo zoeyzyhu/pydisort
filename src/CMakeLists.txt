@@ -75,5 +75,5 @@ if (CUDAToolkit_FOUND)
 endif()
 
 set(DISORT_INCLUDE_DIR
-  "${CMAKE_CURRENT_SOURCE_DIR}/.."
+  ${CMAKE_CURRENT_SOURCE_DIR}
   CACHE INTERNAL "disort include directory")

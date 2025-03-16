@@ -14,10 +14,8 @@ macro(setup_test namel)
   target_include_directories(
     ${namel}.${buildl}
     PRIVATE ${CMAKE_BINARY_DIR}
-            ${DISORT_INCLUDE_DIR}
-            SYSTEM
+            "${DISORT_INCLUDE_DIR}/.."
             ${TORCH_INCLUDE_DIR}
-            SYSTEM
             ${TORCH_API_INCLUDE_DIR})
 
   target_link_libraries(${namel}.${buildl}

@@ -65,8 +65,7 @@ if torch.cuda.is_available():
             include_dirs = [f'{current_dir}',
                             f'{current_dir}/build',
                             f'{current_dir}/build/_deps/fmt-src/include'],
-            library_dirs = [env_lib_dir
-                            if os.path.exists(env_lib_dir) else f'{current_dir}/build/lib'],
+            library_dirs = [f'{current_dir}/build/lib', env_lib_dir],
             libraries = parse_library_names(f'{current_dir}/build/lib'),
             extra_compile_args = {'nvcc': ['--extended-lambda']},
             )],
@@ -80,8 +79,7 @@ else:
             include_dirs = [f'{current_dir}',
                             f'{current_dir}/build',
                             f'{current_dir}/build/_deps/fmt-src/include'],
-            library_dirs = [env_lib_dir
-                            if os.path.exists(env_lib_dir) else f'{current_dir}/build/lib'],
+            library_dirs = [f'{current_dir}/build/lib', env_lib_dir],
             libraries = parse_library_names(f'{current_dir}/build/lib'),
             )],
         cmdclass={'build_ext': cpp_extension.BuildExtension},

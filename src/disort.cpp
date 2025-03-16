@@ -106,6 +106,8 @@ void DisortImpl::reset() {
   options.set_header(options.header());
   options.set_flags(options.flags());
 
+  options.ds().accur = options.accur();
+
   options.ds().nphi = options.user_phi().size();
   options.ds().numu = options.user_mu().size();
   options.ds().ntau = options.user_tau().size();
