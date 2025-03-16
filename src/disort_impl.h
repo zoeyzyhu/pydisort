@@ -24,12 +24,18 @@ namespace disort {
 template <typename T>
 void disort_impl(T* flx, T* prop, T* umu0, T* phi0, T* fbeam, T* albedo,
                  T* fluor, T* fisot, T* temis, T* btemp, T* ttemp, T* temf,
-                 int rank_in_column, disort_state& ds, disort_output& ds_out,
+                 int upward, disort_state& ds, disort_output& ds_out,
                  int nprop) {
   // run disort
   if (ds.flag.planck) {
-    for (int i = 0; i <= ds.nlyr; ++i) {
-      ds.temper[ds.nlyr - i] = TEMF(i);
+    if (upward) {
+      for (int i = 0; i <= ds.nlyr; ++i) {
+        ds.temper[ds.nlyr - i] = TEMF(i);
+      }
+    } else {
+      for (int i = 0; i <= ds.nlyr; ++i) {
+        ds.temper[i] = TEMF(i);
+      }
     }
   }
 
@@ -44,35 +50,65 @@ void disort_impl(T* flx, T* prop, T* umu0, T* phi0, T* fbeam, T* albedo,
   ds.bc.btemp = BTEMP;
   ds.bc.ttemp = TTEMP;
 
-  for (int i = 0; i < ds.nlyr; ++i) {
-    // absorption
-    ds.dtauc[ds.nlyr - 1 - i] = PROP(i, index::IEX);
+  if (upward) {
+    for (int i = 0; i < ds.nlyr; ++i) {
+      // absorption
+      ds.dtauc[ds.nlyr - 1 - i] = PROP(i, index::IEX);
 
-    // single scatering albedo
-    if (nprop > 1) {
-      ds.ssalb[ds.nlyr - 1 - i] = PROP(i, index::ISS);
-    } else {
-      ds.ssalb[ds.nlyr - 1 - i] = 0.;
+      // single scatering albedo
+      if (nprop > 1) {
+        ds.ssalb[ds.nlyr - 1 - i] = PROP(i, index::ISS);
+      } else {
+        ds.ssalb[ds.nlyr - 1 - i] = 0.;
+      }
+
+      // Legendre coefficients
+      ds.pmom[(ds.nlyr - 1 - i) * (ds.nmom_nstr + 1)] = 1.;
+      for (int m = 0; m < nprop - 2; ++m) {
+        ds.pmom[(ds.nlyr - 1 - i) * (ds.nmom_nstr + 1) + m + 1] =
+            PROP(i, index::IPM + m);
+      }
+
+      for (int m = nprop - 2; m < ds.nmom; ++m) {
+        ds.pmom[(ds.nlyr - 1 - i) * (ds.nmom_nstr + 1) + m + 1] = 0.;
+      }
     }
+  } else {
+    for (int i = 0; i < ds.nlyr; ++i) {
+      // absorption
+      ds.dtauc[i] = PROP(i, index::IEX);
 
-    // Legendre coefficients
-    ds.pmom[(ds.nlyr - 1 - i) * (ds.nmom_nstr + 1)] = 1.;
-    for (int m = 0; m < nprop - 2; ++m) {
-      ds.pmom[(ds.nlyr - 1 - i) * (ds.nmom_nstr + 1) + m + 1] =
-          PROP(i, index::IPM + m);
-    }
+      // single scatering albedo
+      if (nprop > 1) {
+        ds.ssalb[i] = PROP(i, index::ISS);
+      } else {
+        ds.ssalb[i] = 0.;
+      }
 
-    for (int m = nprop - 2; m < ds.nmom; ++m) {
-      ds.pmom[(ds.nlyr - 1 - i) * (ds.nmom_nstr + 1) + m + 1] = 0.;
+      // Legendre coefficients
+      ds.pmom[i * (ds.nmom_nstr + 1)] = 1.;
+      for (int m = 0; m < nprop - 2; ++m) {
+        ds.pmom[i * (ds.nmom_nstr + 1) + m + 1] = PROP(i, index::IPM + m);
+      }
+
+      for (int m = nprop - 2; m < ds.nmom; ++m) {
+        ds.pmom[i * (ds.nmom_nstr + 1) + m + 1] = 0.;
+      }
     }
   }
 
   c_disort(&ds, &ds_out, c_planck_func2);
 
-  for (int i = 0; i <= ds.nlyr; ++i) {
-    int i1 = ds.nlyr - (rank_in_column * (ds.nlyr - 1) + i);
-    FLX(i, index::IUP) = ds_out.rad[i1].flup;
-    FLX(i, index::IDN) = ds_out.rad[i1].rfldir + ds_out.rad[i1].rfldn;
+  if (upward) {
+    for (int i = 0; i <= ds.nlyr; ++i) {
+      FLX(ds.nlyr - i, index::IUP) = ds_out.rad[i].flup;
+      FLX(ds.nlyr - i, index::IDN) = ds_out.rad[i].rfldir + ds_out.rad[i].rfldn;
+    }
+  } else {
+    for (int i = 0; i <= ds.nlyr; ++i) {
+      FLX(i, index::IUP) = ds_out.rad[i].flup;
+      FLX(i, index::IDN) = ds_out.rad[i].rfldir + ds_out.rad[i].rfldn;
+    }
   }
 }
 

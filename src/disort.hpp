@@ -46,6 +46,13 @@ struct DisortOptions {
   //! accuracy
   ADD_ARG(double, accur) = 1.e-6;
 
+  //! direction
+  /*!
+   * 0 : downward (disort default)
+   * 1 : upward (atmosphere radiative transfer)
+   */
+  ADD_ARG(int, upward) = 0;
+
   //! user optical depth grid
   ADD_ARG(std::vector<double>, user_tau) = {0.};
 

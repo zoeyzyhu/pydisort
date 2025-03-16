@@ -190,22 +190,22 @@ PYBIND11_MODULE(pydisort, m) {
   ADD_DISORT_MODULE(Disort, DisortOptions)
       .def_readonly("options", &disort::DisortImpl::options)
       .def("gather_flx", &disort::DisortImpl::gather_flx, R"(
-    Gather all disort flux outputs
+        Gather all disort flux outputs
 
-    Returns
-    -------
-    torch.Tensor
-        Disort flux outputs (nwave, ncol, nlvl = nlyr + 1, 8)
-    )")
+        Returns
+        -------
+        torch.Tensor
+            Disort flux outputs (nwave, ncol, nlvl = nlyr + 1, 8)
+        )")
 
       .def("gather_rad", &disort::DisortImpl::gather_rad, R"(
-    Gather all disort radiation outputs
+        Gather all disort radiation outputs
 
-    Returns
-    -------
-    torch.Tensor
-        Disort radiation outputs (nwave, ncol, nlvl = nlyr + 1, 6)
-    )")
+        Returns
+        -------
+        torch.Tensor
+            Disort radiation outputs (nwave, ncol, nlvl = nlyr + 1, 6)
+        )")
 
       .def(
           "forward",
@@ -215,43 +215,42 @@ PYBIND11_MODULE(pydisort, m) {
             while (prop.dim() < 4) {  // (nwave, ncol, nlyr, nprop)
               prop = prop.unsqueeze(0);
             }
-            auto prop1 = prop.flip(2);  // from top to bottom
-            return self.forward(prop1, &bc, bname, temf).flip(2);
+            return self.forward(prop, &bc, bname, temf);
           },
           R"(
-    Calculate radiative flux or intensity
+        Calculate radiative flux or intensity
 
-    Parameters
-    ----------
-    prop : torch.Tensor
-        Optical properties at each level (nwave, ncol, nlyr, nprop)
-    bc : Dict[str, torch.Tensor]
-        Dictionary of disort boundary conditions
-        The dimensions of each recognized key are:
-        - <band> + "umu0" : (ncol,), cosine of solar zenith angle
-        - <band> + "phi0" : (ncol,), azimuthal angle of solar beam
-        - <band> + "fbeam" : (nwave, ncol), solar beam flux
-        - <band> + "albedo" : (nwave, ncol), surface albedo
-        - <band> + "fluor" : (nwave, ncol), isotropic bottom illumination
-        - <band> + "fisot" : (nwave, ncol), isotropic top illumination
-        - <band> + "temis" : (nwave, ncol), top emissivity
-        - "btemp" : (ncol,), bottom temperature
-        - "ttemp" : (ncol,), top temperature
+        Parameters
+        ----------
+        prop : torch.Tensor
+            Optical properties at each level (nwave, ncol, nlyr, nprop)
+        bc : Dict[str, torch.Tensor]
+            Dictionary of disort boundary conditions
+            The dimensions of each recognized key are:
+            - <band> + "umu0" : (ncol,), cosine of solar zenith angle
+            - <band> + "phi0" : (ncol,), azimuthal angle of solar beam
+            - <band> + "fbeam" : (nwave, ncol), solar beam flux
+            - <band> + "albedo" : (nwave, ncol), surface albedo
+            - <band> + "fluor" : (nwave, ncol), isotropic bottom illumination
+            - <band> + "fisot" : (nwave, ncol), isotropic top illumination
+            - <band> + "temis" : (nwave, ncol), top emissivity
+            - "btemp" : (ncol,), bottom temperature
+            - "ttemp" : (ncol,), top temperature
 
-        Some keys can have a prefix band name, <band>.
-        If the prefix is an non-empty string, a slash "/" is
-        automatically appended to it, such that the key look like
-        `B1/umu0`. `btemp` and `ttemp` do not have a band name prefix.
-    bname : str
-        Name of the radiation band
-    temf : Optional[torch.Tensor]
-        Temperature at each level (ncol, nlvl = nlyr + 1)
+            Some keys can have a prefix band name, <band>.
+            If the prefix is an non-empty string, a slash "/" is
+            automatically appended to it, such that the key look like
+            `B1/umu0`. `btemp` and `ttemp` do not have a band name prefix.
+        bname : str
+            Name of the radiation band
+        temf : Optional[torch.Tensor]
+            Temperature at each level (ncol, nlvl = nlyr + 1)
 
-    Returns
-    -------
-    torch.Tensor
-        Radiative flux or intensity (nwave, ncol, nlvl, nrad)
-    )",
+        Returns
+        -------
+        torch.Tensor
+            Radiative flux or intensity (nwave, ncol, nlvl, nrad)
+        )",
           py::arg("prop"), py::arg("bc"), py::arg("bname") = "",
           py::arg("temf") = py::none());
 }

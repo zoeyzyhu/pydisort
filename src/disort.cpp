@@ -11,11 +11,11 @@
 
 namespace disort {
 
-void call_disort_cpu(at::TensorIterator& iter, int rank_in_column,
-                     disort_state* ds, disort_output* ds_out);
+void call_disort_cpu(at::TensorIterator& iter, int upward, disort_state* ds,
+                     disort_output* ds_out);
 
-void call_disort_cuda(at::TensorIterator& iter, int rank_in_column,
-                      disort_state* ds, disort_output* ds_out);
+void call_disort_cuda(at::TensorIterator& iter, int upward, disort_state* ds,
+                      disort_output* ds_out);
 
 DisortOptions::DisortOptions() {
   // flags
@@ -183,7 +183,11 @@ torch::Tensor DisortImpl::gather_flx() const {
     result[i].copy_(var);
   }
 
-  return result.view({options.nwave(), options.ncol(), nlyr + 1, 8});
+  if (options.upward()) {
+    return result.view({options.nwave(), options.ncol(), nlyr + 1, 8}).flip(2);
+  } else {
+    return result.view({options.nwave(), options.ncol(), nlyr + 1, 8});
+  }
 }
 
 torch::Tensor DisortImpl::gather_rad() const {
@@ -363,7 +367,6 @@ torch::Tensor DisortImpl::forward(torch::Tensor prop,
   auto index = torch::range(0, nwave * ncol - 1, 1)
                    .to(torch::kInt64)
                    .view({nwave, ncol, 1, 1});
-  int rank_in_column = 0;
 
   auto iter =
       at::TensorIteratorConfig()
@@ -392,10 +395,10 @@ torch::Tensor DisortImpl::forward(torch::Tensor prop,
           .build();
 
   if (prop.is_cpu()) {
-    call_disort_cpu(iter, rank_in_column, ds_.data(), ds_out_.data());
+    call_disort_cpu(iter, options.upward(), ds_.data(), ds_out_.data());
   } else if (prop.is_cuda()) {
 #if defined(__CUDACC__)
-    call_disort_cuda(iter, rank_in_column, ds_.data(), ds_out_.data());
+    call_disort_cuda(iter, options.upward(), ds_.data(), ds_out_.data());
 #else
     TORCH_CHECK(false, "DisortImpl::forward: CUDA is not available");
 #endif

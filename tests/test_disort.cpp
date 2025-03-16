@@ -18,6 +18,7 @@ int main(int argc, char **argv) {
   op.ds().nlyr = 1;
   op.ds().nstr = 16;
   op.ds().nmom = 16;
+  op.ds().nphase = 16;
 
   op.user_mu({-1, -0.5, -0.1, 0.1, 0.5, 1});
   op.user_phi({0});

@@ -10,8 +10,8 @@
 
 namespace disort {
 
-void call_disort_cpu(at::TensorIterator& iter, int rank_in_column,
-                     disort_state* ds, disort_output* ds_out) {
+void call_disort_cpu(at::TensorIterator& iter, int upward, disort_state* ds,
+                     disort_output* ds_out) {
   AT_DISPATCH_FLOATING_TYPES(iter.dtype(), "disort_cpu", [&] {
     auto nprop = at::native::ensure_nonempty_size(iter.input(0), -1);
 
@@ -31,8 +31,7 @@ void call_disort_cpu(at::TensorIterator& iter, int rank_in_column,
         auto temf = reinterpret_cast<scalar_t*>(data[11] + i * strides[11]);
         auto idx = reinterpret_cast<int64_t*>(data[12] + i * strides[12]);
         disort_impl(out, prop, umu0, phi0, fbeam, albedo, fluor, fisot, temis,
-                    btemp, ttemp, temf, rank_in_column, ds[*idx], ds_out[*idx],
-                    nprop);
+                    btemp, ttemp, temf, upward, ds[*idx], ds_out[*idx], nprop);
       }
     });
   });
