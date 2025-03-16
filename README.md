@@ -226,13 +226,23 @@ You could fork or clone this repository to your local machine.
 git clone https://github.com/zoeyzyhu/pydisort.git
 ```
 
-Before building the package, you need to install the dependencies for the `pydisort` package and the pre-commit hooks. You could use the following commands to install the dependencies:
+Before building the package, you need to install the dependencies for the `pydisort` package and the pre-commit hooks. We recommend that you use a virtual environment for Python to install the `pydisort` package and the dependencies. You could use the following commands to create a virtual environment, install the dependencies, and build the package:
 
 ```bash
 cd pydisort
+python3 -m venv env
+source env/bin/activate  # Make sure you are in the virtual environment
 pip3 install -r requirements.txt
 pre-commit install
 ```
+
+Installing `requirements.txt` also covers packages for the `pre-commit` hooks, which are very helpful if you'd like to make changes to the repository cloned. You could run the checks and lints manually using the following command to ensure that your changes are compliant with the industry standards:
+
+```bash
+pre-commit run --all-files
+```
+
+> 💡 Please feel free to add more checks and lints that suit your need to the `pre-commit` hooks. You could find more information about `pre-commit` [here](https://pre-commit.com/).
 
 If you have no interest in adding or modifying features to the `pydisort` package, and just want to quickly build and run the C++ wrapper to your own use, you can follow the commands below:
 
@@ -268,45 +278,13 @@ python setup.py install
 You can now run the test cases for the Python package using the following command:
 
 ```bash
-python test_isotropic_scattering.py
+$ python build/tests/test_attenuation.py
+.
+----------------------------------------------------------------------
+Ran 1 test in 0.025s
+
+OK
 ```
-
-❗However, the above steps will put `pydisort` in the system path of Python, which might be inaccessible especially if you are working on a shared server. We recommend that you use a virtual environment for Python to install the `pydisort` package, which will also keep your system path clean even if you have access to it.
-
-In this recommended approach, we need to set up the virtual environment before the building process. You could use the following commands to create a virtual environment, build and install the `pydisort` package in it:
-
-```bash
-# Set up Python virtual environment and activate
-python3 -m venv env
-source env/bin/activate
-
-# Install dependencies for `pydisort` and pre-commit hooks
-pip3 install -r requirements.txt
-pre-commit install
-
-# Build the C++ wrapper and Python package
-mkdir build
-cd build
-cmake ..
-make
-
-# Run test cases for C++ wrapper and Python package
-cd tests
-./test_disort.release
-
-# Install the Python package in the virtual environment
-cd ../..
-python setup.py build
-python setup.py install
-```
-
-Installing `requirements.txt` also covers packages for the `pre-commit` hooks, which are very helpful if you'd like to make changes to the repository cloned. You could run the checks and lints manually using the following command to ensure that your changes are compliant with the industry standards:
-
-```bash
-pre-commit run --all-files
-```
-
-> 💡 Please feel free to add more checks and lints that suit your need to the `pre-commit` hooks. You could find more information about `pre-commit` [here](https://pre-commit.com/).
 
 <div align="right"><a href="#table-of-contents"><img src="doc/img/top_green_small.png" width="32px"></div>
 
