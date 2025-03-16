@@ -9,7 +9,6 @@ import torch
 from numpy.testing import assert_allclose
 from pydisort import DisortOptions, Disort
 
-
 class PyDisortTests(unittest.TestCase):
     """Test unit: isotropic scattering with pydisort."""
 
