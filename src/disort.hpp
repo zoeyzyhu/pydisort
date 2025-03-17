@@ -176,6 +176,11 @@ class DisortImpl : public torch::nn::Cloneable<DisortImpl> {
                         std::string bname = "",
                         torch::optional<torch::Tensor> temf = torch::nullopt);
 
+ protected:
+  // This allows type erasure with default arguments
+  FORWARD_HAS_DEFAULT_ARGS({2, torch::nn::AnyValue("")},
+                           {3, torch::nn::AnyValue(torch::nullopt)})
+
  private:
   //! flat array of disort states (nwave * ncol)
   std::vector<disort_state> ds_;
