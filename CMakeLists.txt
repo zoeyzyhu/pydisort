@@ -20,10 +20,14 @@ else()
     DESCRIPTION "Python extension for disort library")
 endif()
 
-set(BUILD_SHARED_LIBS OFF)
+# search for <Package>_ROOT
+cmake_policy(SET CMP0074 NEW)
 
 # Set the _GLIBCXX_USE_CXX11_ABI flag to 0 (use old ABI)
 add_definitions(-D_GLIBCXX_USE_CXX11_ABI=0)
+
+# Set MacOS deployment target
+set(CMAKE_OSX_DEPLOYMENT_TARGET "15.0")
 
 # make colorful output
 string(ASCII 27 Esc)
