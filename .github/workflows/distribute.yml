@@ -84,7 +84,7 @@ jobs:
       - name: Build macOS wheels
         env:
           CIBW_BUILD: cp38-* cp39-* cp310-* cp311-* cp312-* cp313-*
-          CIBW_ARCHS: $(echo ${{ matrix.os }} | sed 's/macos-14-arm64/arm64/; s/macos-14/x86_64/')
+          CIBW_ARCHS: ${{ matrix.os == 'macos-14-arm64' && 'arm64' || 'x86_64' }}
           CIBW_ENVIRONMENT: "SETUPTOOLS_SCM_PRETEND_VERSION=${{ env.VERSION }}"
           CIBW_BEFORE_BUILD: "pip install torch"
         run: |
