@@ -103,8 +103,13 @@ jobs:
       - name: Download all wheels
         uses: actions/download-artifact@v4
         with:
-          pattern: "*-wheels"
-          merge-multiple-artifacts: true
+          name: linux-wheels
+          path: dist
+
+      - name: Download macOS wheels
+        uses: actions/download-artifact@v4
+        with:
+          name: macos-wheels
           path: dist
 
       - name: Publish to PyPI
