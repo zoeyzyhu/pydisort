@@ -99,29 +99,6 @@ PYBIND11_MODULE(pydisort, m) {
   optical depth from the top of the atmosphere to level :math:`z`. The default direction of
   radiative flux is nadir.
 
-  - Example 2: Calculate intensity from isotropic scattering in a plane-parallel atmosphere
-
-  >>> import torch
-  >>> from pydisort import DisortOptions, Disort
-  >>> op = DisortOptions().flags("usrtau,usrang").output_rad(True)
-  >>> op.ds().nlyr(1).nstr(16).nmom(16)
-  >>> op.user_tau([0.0, 0.1]).user_mu([-1.0, -0.5, -0.1, 0.1, 0.5, 1.0]).user_phi([0.0])
-  >>> ds = Disort(op)
-  >>> prop = torch.tensor([[[0.1, 1.0]]], dtype=torch.float64)
-  >>> ftoa = torch.tensor([[3.14159]], dtype=torch.float64)
-  >>> bc = torch.zeros((op.nwave(), op.ncol(), 5), dtype=torch.float64)
-  >>> bc[:, :, iumu0] = 0.1
-  >>> rad = ds.forward(prop, ftoa, bc)
-  >>> rad
-  array([[[0.        , 0.        , 0.        , 0.18095504, 0.0516168 , 0.02707849],
-          [0.02703935, 0.05146774, 0.17839685, 0.        , 0.        , 0.        ]]])
-
-  The intensity array ``rad`` has three dimensions. The first dimension is the
-  azimuthal angles (1). The second dimension is optical depth (2).
-  The third dimension is the polar angles (6). The result is interpreted as backsattering
-  at the top of the atmosphere (optical depth = 0.0) and forward scattering at the bottom
-  of the atmosphere (optical depth = 0.1).
-
 
   Troubleshooting
   ---------------
