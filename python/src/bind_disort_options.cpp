@@ -89,29 +89,11 @@ void bind_disort_options(py::module &m) {
         - consult the documentation of DISORT for more details on this option.
         )")
       .def(py::init<>())
+
       .def("__repr__",
            [](const disort::DisortOptions &a) {
              return fmt::format("DisortOptions{}", a);
            })
-      .ADD_OPTION(disort_state, disort::DisortOptions, ds, R"(
-        Set disort state for disort
-
-        Parameters
-        ----------
-        ds : disort_state
-            disort state for disort
-
-        Returns
-        -------
-        DisortOptions object
-
-        Examples
-        --------
-        >>> import pydisort
-        >>> op = pydisort.DisortOptions()
-        >>> op.ds().nlyr, op.ds().nstr, op.ds().nmom = 10, 4, 4
-        >>> print(op)
-        )")
 
       .ADD_OPTION(std::string, disort::DisortOptions, header, R"(
         Set header for disort
@@ -189,6 +171,44 @@ void bind_disort_options(py::module &m) {
         >>> print(op)
         )")
 
+      .ADD_OPTION(double, disort::DisortOptions, accur, R"(
+        Set accuracy for disort
+
+        Parameters
+        ----------
+        accur : float
+            accuracy for disort
+
+        Returns
+        -------
+        DisortOptions object
+
+        Examples
+        --------
+        >>> import pydisort
+        >>> op = pydisort.DisortOptions().accur(1.e-6)
+        >>> print(op)
+        )")
+
+      .ADD_OPTION(int, disort::DisortOptions, upward, R"(
+        Set direction for disort
+
+        Parameters
+        ----------
+        upward : int
+            direction for disort
+
+        Returns
+        -------
+        DisortOptions object
+
+        Examples
+        --------
+        >>> import pydisort
+        >>> op = pydisort.DisortOptions().upward(true)
+        >>> print(op)
+        )")
+
       .ADD_OPTION(std::vector<double>, disort::DisortOptions, user_tau, R"(
         Set user optical depths for disort
 
@@ -243,6 +263,64 @@ void bind_disort_options(py::module &m) {
         --------
         >>> import pydisort
         >>> op = pydisort.DisortOptions().user_phi([0.1, 0.2, 0.3])
+        >>> print(op)
+        )")
+
+      .ADD_OPTION(std::vector<double>, disort::DisortOptions, wave_lower, R"(
+        Set lower wavenumber(length) at each bin for disort
+
+        Parameters
+        ----------
+        wave_lower : list
+            lower wavenumber(length) at each bin for disort
+
+        Returns
+        -------
+        DisortOptions object
+
+        Examples
+        --------
+        >>> import pydisort
+        >>> op = pydisort.DisortOptions().wave_lower([0.1, 0.2, 0.3])
+        >>> print(op)
+        )")
+
+      .ADD_OPTION(std::vector<double>, disort::DisortOptions, wave_upper, R"(
+        Set upper wavenumber(length) at each bin for disort
+
+        Parameters
+        ----------
+        wave_upper : list
+            upper wavenumber(length) at each bin for disort
+
+        Returns
+        -------
+        DisortOptions object
+
+        Examples
+        --------
+        >>> import pydisort
+        >>> op = pydisort.DisortOptions().wave_upper([0.1, 0.2, 0.3])
+        >>> print(op)
+        )")
+
+      .ADD_OPTION(disort_state, disort::DisortOptions, ds, R"(
+        Set disort state for disort
+
+        Parameters
+        ----------
+        ds : disort_state
+            disort state for disort
+
+        Returns
+        -------
+        DisortOptions object
+
+        Examples
+        --------
+        >>> import pydisort
+        >>> op = pydisort.DisortOptions()
+        >>> op.ds().nlyr, op.ds().nstr, op.ds().nmom = 10, 4, 4
         >>> print(op)
         )");
 }
