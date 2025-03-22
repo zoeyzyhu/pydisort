@@ -17,9 +17,13 @@ jobs:
         python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
         include:
           - os: ubuntu-22.04
-            arch: [x86_64, aarch64]
+            arch: x86_64
+          - os: ubuntu-22.04
+            arch: aarch64
           - os: macos-14
-            arch: [x86_64, arm64]
+            arch: x86_64
+          - os: macos-14
+            arch: arm64
 
     steps:
       - uses: actions/checkout@v4
@@ -50,13 +54,19 @@ jobs:
           python -m pip install -U pip setuptools wheel
           python -m pip install -r requirements.txt
 
+      - name: Configure Python version
+        run: |
+          PY_VERSION=$(echo "${{ matrix.python-version }}" | tr -d '.')
+          echo "PY_VERSION=$PY_VERSION" >> $GITHUB_ENV
+
       - name: Build wheel
         env:
-          CIBW_BUILD: cp${{ matrix.python-version.replace('.', '') }}*
+          CIBW_BUILD: cp${{ env.PY_VERSION }}*
           CIBW_ARCHS: ${{ matrix.arch }}
         run: |
           python -m pip install cibuildwheel
-          python -m cibuildwheel --platform ${{ matrix.os == 'macos-14' && 'macos' || 'linux' }} --output-dir wheelhouse
+          PLATFORM=$([ "${{ matrix.os }}" = "macos-14" ] && echo "macos" || echo "linux")
+          python -m cibuildwheel --platform $PLATFORM --output-dir wheelhouse
 
       - uses: actions/upload-artifact@v4
         with:
