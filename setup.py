@@ -63,14 +63,21 @@ if not current_dir:
 
 # Build a list of library directories.
 # We add both our build directory and the torch library directory.
-lib_dirs = [f"{current_dir}/build/lib", torch_lib_dir, site_packages_dir]
+lib_dirs = [
+    f"{current_dir}/build/lib",
+    torch_lib_dir,
+    site_packages_dir,
+    *torch.utils.cpp_extension.include_paths(cuda=torch.cuda.is_available()),
+]
 
 # For rpath settings, we want the runtime linker to search the torch library
 # directory. (On macOS, extra_link_args will be used to embed this path
 # into the binary.)
 extra_link_args = []
 if platform.system() == "Darwin":
-    extra_link_args.append(f"-Wl,-rpath,{torch_lib_dir}")
+    extra_link_args.append(
+        f"-Wl,-rpath,{torch_lib_dir}", "-Wl,-rpath,@loader_path/../.dylibs"
+    )
 
 if torch.cuda.is_available():
     setup(
@@ -86,9 +93,13 @@ if torch.cuda.is_available():
                     f"{current_dir}",
                     f"{current_dir}/build",
                     f"{current_dir}/build/_deps/fmt-src/include",
+                    *torch.utils.cpp_extension.include_paths(
+                        cuda=torch.cuda.is_available()
+                    ),
                 ],
                 library_dirs=lib_dirs,
-                libraries=parse_library_names(f"{current_dir}/build/lib"),
+                libraries=["c10", "torch", "torch_cpu", "torch_python"]
+                + parse_library_names(f"{current_dir}/build/lib"),
                 extra_compile_args={"nvcc": ["--extended-lambda"]},
                 extra_link_args=extra_link_args,
             )
@@ -108,9 +119,13 @@ else:
                     f"{current_dir}",
                     f"{current_dir}/build",
                     f"{current_dir}/build/_deps/fmt-src/include",
+                    *torch.utils.cpp_extension.include_paths(
+                        cuda=torch.cuda.is_available()
+                    ),
                 ],
                 library_dirs=lib_dirs,
-                libraries=parse_library_names(f"{current_dir}/build/lib"),
+                libraries=["c10", "torch", "torch_cpu", "torch_python"]
+                + parse_library_names(f"{current_dir}/build/lib"),
                 extra_link_args=extra_link_args,
             )
         ],

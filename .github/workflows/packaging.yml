@@ -66,10 +66,16 @@ jobs:
 
       - name: Configure CMake
         run: |
-          cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DBUILD_TESTS=ON
+          cmake -B ${{github.workspace}}/build \
+          -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} \
+          -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/install \
+          -DCMAKE_PREFIX_PATH="$(python -c 'import torch; print(torch.utils.cmake_prefix_path)')" \
+          -DBUILD_TESTS=ON
 
       - name: Build
-        run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
+        #run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
+        run: |
+          cmake --build build --target install --config ${{ env.BUILD_TYPE }}
 
       - name: Install the project
         run: pip install .
@@ -86,9 +92,16 @@ jobs:
           CIBW_BUILD: cp${{ env.PY_VERSION }}*
           CIBW_ARCHS: ${{ matrix.arch }}
           CIBW_ENVIRONMENT: "SETUPTOOLS_SCM_PRETEND_VERSION=${{ env.VERSION }}"
-          CIBW_BEFORE_BUILD: "pip install torch"
+          CIBW_BEFORE_BUILD: "pip install -r requirements.txt"
+          CIBW_REPAIR_WHEEL_COMMAND_MACOS: >
+            delocate-wheel --require-archs {delocate_archs}
+            --lib-sdir .
+            --add-path ${{ env.torch_lib_path }} {wheel}
+          CIBW_REPAIR_WHEEL_COMMAND_LINUX: >
+            auditwheel repair -w {dest_dir} --plat {plat} {wheel}
         run: |
           python -m pip install cibuildwheel
+          echo "torch_lib_path=$(python -c 'import torch; print(torch.__path__[0] + \"/lib\")')" >> $GITHUB_ENV
           PLATFORM=$([ "${{ matrix.os }}" = "macos-14" ] && echo "macos" || echo "linux")
           python -m cibuildwheel --platform $PLATFORM --output-dir wheelhouse
 
