@@ -9,6 +9,9 @@ from setuptools import setup
 from torch.utils import cpp_extension
 import torch
 
+# Add the torch CMake path so that CMake can find torch libraries.
+os.environ["CMAKE_PREFIX_PATH"] = torch.utils.cmake_prefix_path
+
 
 def parse_library_names(libdir):
     """Parse the library files."""
