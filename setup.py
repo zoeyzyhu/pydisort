@@ -74,9 +74,19 @@ lib_dirs = [
 # directory. (On macOS, extra_link_args will be used to embed this path
 # into the binary.)
 extra_link_args = []
+# In the extra_link_args section
 if platform.system() == "Darwin":
-    extra_link_args.append(f"-Wl,-rpath,{torch_lib_dir}")
-    extra_link_args.append("-Wl,-rpath,@loader_path/../.dylibs")
+    extra_link_args.extend(
+        [
+            f"-Wl,-rpath,{torch_lib_dir}",
+            "-Wl,-rpath,@loader_path/.dylibs",
+            "-Wl,-rpath,@executable_path/.dylibs",
+        ]
+    )
+else:
+    extra_link_args.extend(
+        [f"-Wl,-rpath,{torch_lib_dir}", "-Wl,-rpath,$ORIGIN/.libs"]
+    )
 
 if torch.cuda.is_available():
     setup(
