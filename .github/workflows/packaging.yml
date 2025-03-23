@@ -12,6 +12,9 @@ on:
         default: "main"
         type: string
 
+env:
+  BUILD_TYPE: Release
+
 jobs:
   build-wheels:
     name: Build wheels on ${{ matrix.os }}
@@ -60,6 +63,13 @@ jobs:
         run: |
           python -m pip install -U pip setuptools wheel
           python -m pip install -r requirements.txt
+
+      - name: Configure CMake
+        run: |
+          cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DBUILD_TESTS=ON
+
+      - name: Build
+        run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
 
       - name: Configure build environment
         run: |
