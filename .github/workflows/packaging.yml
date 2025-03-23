@@ -8,7 +8,7 @@ on:
         required: true
         default: "v0.10.3"
       branch:
-        description: "Branch to build from"
+        description: "Branch containing workflow YAML"
         required: true
         default: "test-packaging"
         type: string
@@ -37,10 +37,15 @@ jobs:
             arch: arm64
 
     steps:
-      - name: Checkout selected branch
+      - name: Checkout workflow definition branch (for YAML and scripts)
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event.inputs.branch }}
+
+      - name: Fetch and checkout release tag ${{ github.event.inputs.version_tag }}
+        run: |
+          git fetch --tags
+          git checkout ${{ github.event.inputs.version_tag }}
 
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
@@ -75,17 +80,15 @@ jobs:
           -DCMAKE_PREFIX_PATH="$(python -c 'import torch; print(torch.utils.cmake_prefix_path)')" \
           -DBUILD_TESTS=ON
 
-      - name: Build
+      - name: Build and Install
         #run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
         run: |
           cmake --build build --target install --config ${{ env.BUILD_TYPE }}
-
-      - name: Install the project
-        run: pip install .
+          pip install .
 
       - name: Configure build environment
         run: |
-          VERSION=${INPUT_VERSION_TAG#v}
+          VERSION=${{ github.event.inputs.version_tag#v }}
           PY_VERSION=$(echo "${{ matrix.python-version }}" | tr -d '.')
           echo "VERSION=$VERSION" >> $GITHUB_ENV
           echo "PY_VERSION=$PY_VERSION" >> $GITHUB_ENV
