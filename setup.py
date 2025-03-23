@@ -74,13 +74,29 @@ lib_dirs = [
 # directory. (On macOS, extra_link_args will be used to embed this path
 # into the binary.)
 extra_link_args = []
-# In the extra_link_args section
+libraries = [
+    "c10",
+    "torch",
+    "torch_cpu",
+    "torch_python",
+] + parse_library_names(f"{current_dir}/build/lib")
+
 if platform.system() == "Darwin":
     extra_link_args.extend(
         [
             f"-Wl,-rpath,{torch_lib_dir}",
             "-Wl,-rpath,@loader_path/.dylibs",
             "-Wl,-rpath,@executable_path/.dylibs",
+        ]
+    )
+    # Add explicit library paths
+    libraries.extend(
+        [
+            f"-L{torch_lib_dir}",
+            "-lc10",
+            "-ltorch",
+            "-ltorch_cpu",
+            "-ltorch_python",
         ]
     )
 else:
@@ -105,8 +121,7 @@ if torch.cuda.is_available():
                 ]
                 + torch_include_dir,
                 library_dirs=lib_dirs,
-                libraries=["c10", "torch", "torch_cpu", "torch_python"]
-                + parse_library_names(f"{current_dir}/build/lib"),
+                libraries=libraries,
                 extra_compile_args={"nvcc": ["--extended-lambda"]},
                 extra_link_args=extra_link_args,
             )
@@ -129,8 +144,7 @@ else:
                 ]
                 + torch_include_dir,
                 library_dirs=lib_dirs,
-                libraries=["c10", "torch", "torch_cpu", "torch_python"]
-                + parse_library_names(f"{current_dir}/build/lib"),
+                libraries=libraries,
                 extra_link_args=extra_link_args,
             )
         ],
