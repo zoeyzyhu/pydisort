@@ -79,6 +79,8 @@ libraries = [
     "torch",
     "torch_cpu",
     "torch_python",
+    torch_lib_dir,
+    torch_include_dir,
 ] + parse_library_names(f"{current_dir}/build/lib")
 
 if platform.system() == "Darwin":
@@ -87,16 +89,6 @@ if platform.system() == "Darwin":
             f"-Wl,-rpath,{torch_lib_dir}",
             "-Wl,-rpath,@loader_path/.dylibs",
             "-Wl,-rpath,@executable_path/.dylibs",
-        ]
-    )
-    # Add explicit library paths
-    libraries.extend(
-        [
-            f"-L{torch_lib_dir}",
-            "-lc10",
-            "-ltorch",
-            "-ltorch_cpu",
-            "-ltorch_python",
         ]
     )
 else:
