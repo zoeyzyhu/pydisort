@@ -12,9 +12,7 @@ import torch
 
 # Determine the torch library directory.
 torch_lib_dir = os.path.join(os.path.dirname(torch.__file__), "lib")
-torch_include_dir = torch.utils.cpp_extension.include_paths(
-    cuda=torch.cuda.is_available()
-)
+torch_include_dir = torch.utils.cpp_extension.include_paths()
 site_packages_dir = sysconfig.get_path("purelib")
 
 

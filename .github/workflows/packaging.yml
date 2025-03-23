@@ -6,10 +6,11 @@ on:
       version_tag:
         description: "Release version tag (e.g., v1.0.0)"
         required: true
+        default: "v0.10.3"
       branch:
         description: "Branch to build from"
         required: true
-        default: "main"
+        default: "test-packaging"
         type: string
 
 env:
