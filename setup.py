@@ -2,6 +2,7 @@
 # pylint: disable = deprecated-module, exec-used
 import os
 import sys
+import sysconfig
 import platform
 import glob
 from pathlib import Path
@@ -11,6 +12,7 @@ import torch
 
 # Determine the torch library directory.
 torch_lib_dir = os.path.join(os.path.dirname(torch.__file__), "lib")
+site_packages_dir = sysconfig.get_path("purelib")
 
 
 def parse_library_names(libdir):
@@ -61,7 +63,7 @@ if not current_dir:
 
 # Build a list of library directories.
 # We add both our build directory and the torch library directory.
-lib_dirs = [f"{current_dir}/build/lib", torch_lib_dir]
+lib_dirs = [f"{current_dir}/build/lib", torch_lib_dir, site_packages_dir]
 
 # For rpath settings, we want the runtime linker to search the torch library
 # directory. (On macOS, extra_link_args will be used to embed this path
