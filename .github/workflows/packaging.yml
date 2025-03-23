@@ -119,6 +119,10 @@ jobs:
           merge-multiple-artifacts: true
           path: dist
 
+      - name: Flatten distribution directory
+        run: |
+          find dist -mindepth 2 -type f -name '*.whl' -exec mv {} dist/ \;
+
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
