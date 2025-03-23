@@ -88,7 +88,8 @@ jobs:
 
       - name: Configure build environment
         run: |
-          VERSION=${{ github.event.inputs.version_tag#v }}
+          VERSION="${{ github.event.inputs.version_tag }}"
+          VERSION="${VERSION#v}"  # Strip the leading 'v'
           PY_VERSION=$(echo "${{ matrix.python-version }}" | tr -d '.')
           echo "VERSION=$VERSION" >> $GITHUB_ENV
           echo "PY_VERSION=$PY_VERSION" >> $GITHUB_ENV
