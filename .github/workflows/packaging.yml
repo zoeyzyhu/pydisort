@@ -100,9 +100,11 @@ jobs:
             pip install --upgrade delocate
           CIBW_REPAIR_WHEEL_COMMAND_MACOS: >
             delocate-wheel --require-archs {delocate_archs}
+            -L $TORCH_LIB
             -L .dylibs
             -k
             -v {wheel}
+
         run: |
           # Get Torch library path
           echo "TORCH_LIB=$(python -c 'import torch; print(torch.__path__[0] + \"/lib\")')" >> $GITHUB_ENV

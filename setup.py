@@ -74,7 +74,6 @@ lib_dirs = [
 # directory. (On macOS, extra_link_args will be used to embed this path
 # into the binary.)
 extra_link_args = []
-# In the extra_link_args section
 if platform.system() == "Darwin":
     extra_link_args.extend(
         [
