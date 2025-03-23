@@ -9,8 +9,8 @@ from setuptools import setup
 from torch.utils import cpp_extension
 import torch
 
-# Add the torch CMake path so that CMake can find torch libraries.
-os.environ["CMAKE_PREFIX_PATH"] = torch.utils.cmake_prefix_path
+# Determine the torch library directory.
+torch_lib_dir = os.path.join(os.path.dirname(torch.__file__), "lib")
 
 
 def parse_library_names(libdir):
@@ -50,15 +50,25 @@ def check_requirements():
     return True
 
 
-# If the system does not meet requirement, exit.
+# If the system does not meet requirements, exit.
 if not check_requirements():
     sys.exit(1)
 
 # Setup configuration
 current_dir = os.getenv("WORKSPACE")
-
 if not current_dir:
     current_dir = Path().absolute()
+
+# Build a list of library directories.
+# We add both our build directory and the torch library directory.
+lib_dirs = [f"{current_dir}/build/lib", torch_lib_dir]
+
+# For rpath settings, we want the runtime linker to search the torch library
+# directory. (On macOS, extra_link_args will be used to embed this path
+# into the binary.)
+extra_link_args = []
+if platform.system() == "Darwin":
+    extra_link_args.append(f"-Wl,-rpath,{torch_lib_dir}")
 
 if torch.cuda.is_available():
     setup(
@@ -75,9 +85,10 @@ if torch.cuda.is_available():
                     f"{current_dir}/build",
                     f"{current_dir}/build/_deps/fmt-src/include",
                 ],
-                library_dirs=[f"{current_dir}/build/lib"],
+                library_dirs=lib_dirs,
                 libraries=parse_library_names(f"{current_dir}/build/lib"),
                 extra_compile_args={"nvcc": ["--extended-lambda"]},
+                extra_link_args=extra_link_args,
             )
         ],
         cmdclass={"build_ext": cpp_extension.BuildExtension},
@@ -96,8 +107,9 @@ else:
                     f"{current_dir}/build",
                     f"{current_dir}/build/_deps/fmt-src/include",
                 ],
-                library_dirs=[f"{current_dir}/build/lib"],
+                library_dirs=lib_dirs,
                 libraries=parse_library_names(f"{current_dir}/build/lib"),
+                extra_link_args=extra_link_args,
             )
         ],
         cmdclass={"build_ext": cpp_extension.BuildExtension},
