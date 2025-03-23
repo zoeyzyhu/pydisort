@@ -99,20 +99,14 @@ jobs:
             pip install -r requirements.txt
             pip install --upgrade delocate
           CIBW_REPAIR_WHEEL_COMMAND_MACOS: >
-            delocate-wheel --require-archs {delocate_archs}
-            -L $TORCH_LIB
-            -L .dylibs
-            -k
-            -v {wheel}
-
+            delocate-wheel --require-archs {delocate_archs} -L "$TORCH_LIB" -L .dylibs -k -v {wheel}
         run: |
-          # Get Torch library path
-          echo "TORCH_LIB=$(python -c 'import torch; print(torch.__path__[0] + \"/lib\")')" >> $GITHUB_ENV
-
-          # Add Torch lib to linker path
+          # Set and export TORCH_LIB in the current shell
+          TORCH_LIB=$(python -c 'import torch; print(torch.__path__[0] + "/lib")')
+          export TORCH_LIB
           export DYLD_FALLBACK_LIBRARY_PATH="$TORCH_LIB:$DYLD_FALLBACK_LIBRARY_PATH"
 
-          # Build wheels
+          # Build wheels using cibuildwheel
           python -m pip install cibuildwheel
           PLATFORM=$([ "${{ matrix.os }}" = "macos-14" ] && echo "macos" || echo "linux")
           python -m cibuildwheel --platform $PLATFORM --output-dir wheelhouse
