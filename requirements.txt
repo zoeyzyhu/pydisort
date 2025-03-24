@@ -9,6 +9,6 @@ pre-commit
 pylint
 sphinx
 sphinxcontrib-napoleon
-torch
+torch==2.3.0
 twine
 wheel
