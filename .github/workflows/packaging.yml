@@ -125,9 +125,9 @@ jobs:
       - name: Flatten distribution directory
         run: |
           # Move all wheel files from subdirectories to the dist/ folder.
-          find dist -mindepth 2 -type f -name '*.whl' -exec mv {} dist/ \;
+          find dist -mindepth 2 -type f -name '*.whl' -exec mv {} dist/ \; || true
           # Remove any remaining directories under dist.
-          find dist -mindepth 1 -type d -exec rm -rf {} \;
+          find dist -mindepth 1 -type d -exec rm -rf {} \; || true
 
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
