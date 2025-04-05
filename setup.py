@@ -5,10 +5,11 @@ import sys
 import sysconfig
 import platform
 import glob
+import torch
 from pathlib import Path
 from setuptools import setup
+from setuptools.command.install import install
 from torch.utils import cpp_extension
-import torch
 
 # Determine the torch library directory.
 torch_lib_dir = os.path.join(os.path.dirname(torch.__file__), "lib")
@@ -51,6 +52,35 @@ def check_requirements():
         return False
 
     return True
+
+
+class PostInstallRelink(install):
+    def run(self):
+        # Run the standard install first
+        install.run(self)
+
+        # locations
+        torch_path = os.path.join(site_packages_dir, "torch", "lib")
+        link_path = os.path.join(site_packages_dir, "pydisort", ".dylibs")
+        print(f"torch_path: {torch_path}")
+        print(f"link_path: {link_path}")
+
+        if os.path.exists(link_path):
+            # Check if the link is valid
+            if os.path.islink(link_path):
+                target = os.readlink(link_path)
+                if target == torch_path:
+                    print(f"Symlink already exists: {link_path} -> {target}")
+                    return
+            else:
+                # If it's not a symlink, remove it
+                os.remove(link_path)
+
+        # Now create the symlink
+        os.makedirs(os.path.dirname(link_path), exist_ok=True)
+        os.symlink(torch_path, link_path)
+
+        print(f"Creating symlink: {link_path} -> {torch_path}")
 
 
 # If the system does not meet requirements, exit.
@@ -116,7 +146,10 @@ if torch.cuda.is_available():
                 extra_link_args=extra_link_args,
             )
         ],
-        cmdclass={"build_ext": cpp_extension.BuildExtension},
+        cmdclass={
+            "build_ext": cpp_extension.BuildExtension,
+            "install": PostInstallRelink,
+        },
     )
 else:
     setup(
@@ -145,5 +178,8 @@ else:
                 extra_link_args=extra_link_args,
             )
         ],
-        cmdclass={"build_ext": cpp_extension.BuildExtension},
+        cmdclass={
+            "build_ext": cpp_extension.BuildExtension,
+            "install": PostInstallRelink,
+        },
     )
