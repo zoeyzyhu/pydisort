@@ -104,7 +104,13 @@ if torch.cuda.is_available():
                 ]
                 + torch_include_dir,
                 library_dirs=lib_dirs,
-                libraries=["c10", "torch", "torch_cpu", "torch_python"]
+                libraries=[
+                    "c10",
+                    "torch",
+                    "torch_cpu",
+                    "torch_python",
+                    "torch_global_deps",
+                ]
                 + parse_library_names(f"{current_dir}/build/lib"),
                 extra_compile_args={"nvcc": ["--extended-lambda"]},
                 extra_link_args=extra_link_args,
@@ -128,7 +134,13 @@ else:
                 ]
                 + torch_include_dir,
                 library_dirs=lib_dirs,
-                libraries=["c10", "torch", "torch_cpu", "torch_python"]
+                libraries=[
+                    "c10",
+                    "torch",
+                    "torch_cpu",
+                    "torch_python",
+                    "torch_global_deps",
+                ]
                 + parse_library_names(f"{current_dir}/build/lib"),
                 extra_link_args=extra_link_args,
             )
