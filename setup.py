@@ -148,7 +148,6 @@ if torch.cuda.is_available():
         ],
         cmdclass={
             "build_ext": cpp_extension.BuildExtension,
-            "install": PostInstallRelink,
         },
     )
 else:
@@ -180,6 +179,5 @@ else:
         ],
         cmdclass={
             "build_ext": cpp_extension.BuildExtension,
-            "install": PostInstallRelink,
         },
     )
