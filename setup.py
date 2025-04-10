@@ -8,7 +8,6 @@ import glob
 import torch
 from pathlib import Path
 from setuptools import setup
-from setuptools.command.install import install
 from torch.utils import cpp_extension
 
 # Determine the torch library directory.
@@ -33,6 +32,11 @@ def parse_library_names(libdir):
         # remove lib and .so or .a
         library_name = file_name[3:].rsplit(".", 1)[0]
         library_names.append(library_name)
+
+    # add homebrew libraries if on MacOS
+    if platform.system() == "Darwin":
+        library_names.extend(["netcdf"])
+
     return library_names
 
 
@@ -54,35 +58,6 @@ def check_requirements():
     return True
 
 
-class PostInstallRelink(install):
-    def run(self):
-        # Run the standard install first
-        install.run(self)
-
-        # locations
-        torch_path = os.path.join(site_packages_dir, "torch", "lib")
-        link_path = os.path.join(site_packages_dir, "pydisort", ".dylibs")
-        print(f"torch_path: {torch_path}")
-        print(f"link_path: {link_path}")
-
-        if os.path.exists(link_path):
-            # Check if the link is valid
-            if os.path.islink(link_path):
-                target = os.readlink(link_path)
-                if target == torch_path:
-                    print(f"Symlink already exists: {link_path} -> {target}")
-                    return
-            else:
-                # If it's not a symlink, remove it
-                os.remove(link_path)
-
-        # Now create the symlink
-        os.makedirs(os.path.dirname(link_path), exist_ok=True)
-        os.symlink(torch_path, link_path)
-
-        print(f"Creating symlink: {link_path} -> {torch_path}")
-
-
 # If the system does not meet requirements, exit.
 if not check_requirements():
     sys.exit(1)
@@ -92,13 +67,23 @@ current_dir = os.getenv("WORKSPACE")
 if not current_dir:
     current_dir = Path().absolute()
 
+# add homebrew directories if on MacOS
+if platform.system() == "Darwin":
+    extra_libdirs = ["/opt/homebrew/lib"]
+else:
+    extra_libdirs = []
+
 # Build a list of library directories.
 # We add both our build directory and the torch library directory.
-lib_dirs = [
-    f"{current_dir}/build/lib",
-    torch_lib_dir,
-    site_packages_dir,
-] + torch_include_dir
+lib_dirs = (
+    [
+        f"{current_dir}/build/lib",
+        torch_lib_dir,
+        site_packages_dir,
+    ]
+    + torch_include_dir
+    + extra_libdirs
+)
 
 # For rpath settings, we want the runtime linker to search the torch library
 # directory. (On macOS, extra_link_args will be used to embed this path
