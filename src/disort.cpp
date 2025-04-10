@@ -153,8 +153,8 @@ void DisortImpl::reset() {
     }
 
     if (ds_[i].flag.planck) {
-      ds_[i].wvnmlo = options.wave_lower()[i % options.ncol()];
-      ds_[i].wvnmhi = options.wave_upper()[i % options.ncol()];
+      ds_[i].wvnmlo = options.wave_lower()[i / options.ncol()];
+      ds_[i].wvnmhi = options.wave_upper()[i / options.ncol()];
     } else {
       ds_[i].wvnmlo = 0.;
       ds_[i].wvnmhi = 1.;
