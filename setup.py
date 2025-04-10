@@ -33,10 +33,6 @@ def parse_library_names(libdir):
         library_name = file_name[3:].rsplit(".", 1)[0]
         library_names.append(library_name)
 
-    # add homebrew libraries if on MacOS
-    if platform.system() == "Darwin":
-        library_names.extend(["netcdf"])
-
     return library_names
 
 
@@ -67,23 +63,13 @@ current_dir = os.getenv("WORKSPACE")
 if not current_dir:
     current_dir = Path().absolute()
 
-# add homebrew directories if on MacOS
-if platform.system() == "Darwin":
-    extra_libdirs = ["/opt/homebrew/lib"]
-else:
-    extra_libdirs = []
-
 # Build a list of library directories.
 # We add both our build directory and the torch library directory.
-lib_dirs = (
-    [
-        f"{current_dir}/build/lib",
-        torch_lib_dir,
-        site_packages_dir,
-    ]
-    + torch_include_dir
-    + extra_libdirs
-)
+lib_dirs = [
+    f"{current_dir}/build/lib",
+    torch_lib_dir,
+    site_packages_dir,
+] + torch_include_dir
 
 # For rpath settings, we want the runtime linker to search the torch library
 # directory. (On macOS, extra_link_args will be used to embed this path
@@ -120,10 +106,6 @@ if torch.cuda.is_available():
                 + torch_include_dir,
                 library_dirs=lib_dirs,
                 libraries=[
-                    "c10",
-                    "torch",
-                    "torch_cpu",
-                    "torch_python",
                     "torch_global_deps",
                 ]
                 + parse_library_names(f"{current_dir}/build/lib"),
@@ -152,10 +134,6 @@ else:
                 + torch_include_dir,
                 library_dirs=lib_dirs,
                 libraries=[
-                    "c10",
-                    "torch",
-                    "torch_cpu",
-                    "torch_python",
                     "torch_global_deps",
                 ]
                 + parse_library_names(f"{current_dir}/build/lib"),
