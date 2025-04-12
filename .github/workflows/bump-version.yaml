@@ -63,7 +63,7 @@ jobs:
         id: bump
         run: |
           python3 bump_version.py ${{ steps.get-bump.outputs.bump-type }}
-          NEW_VERSION=$(cat VERSION)
+          NEW_VERSION=$(cat python/VERSION)
           echo "new-version=$NEW_VERSION" >> $GITHUB_OUTPUT
 
       - name: Create GitHub release
