@@ -4,7 +4,7 @@ cppcheck
 cpplint
 guzzle_sphinx_theme
 ninja
-numpy<2
+numpy
 pre-commit
 pylint
 sphinx
