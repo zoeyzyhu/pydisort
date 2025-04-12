@@ -47,8 +47,7 @@ jobs:
           done
 
           if [[ "$BUMP_TYPE" == "" ]]; then
-            echo "❌ No version label (version:patch|minor|major) found."
-            exit 1
+            BUMP_TYPE="patch"
           fi
 
           echo "✅ Bump type: $BUMP_TYPE"
