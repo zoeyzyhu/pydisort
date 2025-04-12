@@ -1,0 +1,89 @@
+name: Bump Version on PR Merge
+
+on:
+  pull_request:
+    types: [closed]
+
+jobs:
+  bump-version:
+    if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main'
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install git-changelog
+        run: pip install git-changelog
+
+      - name: Determine bump type from PR labels
+        id: get-bump
+        run: |
+          echo "🔍 Checking labels for bump type..."
+          LABELS=$(jq -r '.pull_request.labels[].name' "$GITHUB_EVENT_PATH")
+          echo "Found labels: $LABELS"
+
+          BUMP_TYPE=""
+          for label in $LABELS; do
+            if [[ "$label" == "version:major" ]]; then
+              BUMP_TYPE="major"
+              break
+            elif [[ "$label" == "version:minor" ]]; then
+              BUMP_TYPE="minor"
+            elif [[ "$label" == "version:patch" ]]; then
+              [[ "$BUMP_TYPE" == "" ]] && BUMP_TYPE="patch"
+            fi
+          done
+
+          if [[ "$BUMP_TYPE" == "" ]]; then
+            echo "❌ No version label (version:patch|minor|major) found."
+            exit 1
+          fi
+
+          echo "✅ Bump type: $BUMP_TYPE"
+          echo "bump-type=$BUMP_TYPE" >> $GITHUB_OUTPUT
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Bump version, tag, and generate changelog
+        id: bump
+        run: |
+          python3 bump_version.py ${{ steps.get-bump.outputs.bump-type }}
+          NEW_VERSION=$(cat VERSION)
+          echo "new-version=$NEW_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.bump.outputs.new-version }}
+          name: v${{ steps.bump.outputs.new-version }}
+          body_path: CHANGELOG.md
+
+      - name: Post comment on PR with changelog
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const changelog = fs.readFileSync('CHANGELOG.md', 'utf8');
+            const version = '${{ steps.bump.outputs.new-version }}';
+            const body = `🎉 Version \`v${version}\` released!\n\n<details><summary>Changelog</summary>\n\n\`\`\`markdown\n${changelog}\n\`\`\`\n</details>`;
+            github.rest.issues.createComment({
+              issue_number: context.payload.pull_request.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: body
+            })
