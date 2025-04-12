@@ -70,7 +70,7 @@ repos:
         description: Formats C, C++, Objective-C, and Java code
         types_or: [c, c++, c#, objective-c, java]
         language: python
-        args: [--style=Google, -i, --no-diff]
+        args: [--style=file, -i, --no-diff]
         exclude: *exclude_pattern
 
       - id: cppcheck
@@ -102,5 +102,34 @@ repos:
     rev: v2.5.0
     hooks:
       - id: pycln
+
+  ## 3. Lints ================================================================
+
+  - repo: https://github.com/pocc/pre-commit-hooks
+    rev: v1.3.5
+    hooks:
+      - id: cpplint
+        name: Find lints in C/C++
+        entry: cpplint-hook
+        description: Find warnings/errors in C/CPP code
+        types_or: [c, c++, c#, objective-c, cuda]
+        language: python
+        args:
+          [
+            "--filter=-legal/copyright,-build/include_subdir,-runtime/references,-build/include_order,-runtime/casting,-whitespace/indent_namespace,-build/include_what_you_use,-readability/fn_size,-whitespace/braces",
+          ]
+        exclude: |
+          (?x)^(
+            .*/cdisort\.(c|h)|             # cdisort.c, cdisort.h
+            .*/COPYING|                    # COPYING
+            .*/DISORT2\.doc|               # DISORT2.doc
+            .*/HOWTO_cdisort|              # HOWTO_cdisort
+            .*/Makefile_cdisort|           # Makefile_cdisort
+            .*/README_cdisort|             # README_cdisort
+            .*/locate\.(c|h)|              # locate.c, locate.h
+            .*/print_test\.c|              # print_test.c
+            .*/test_cdisort\.c|            # test_cdisort.c
+            .*/pydisort.cpp                # pydisort.cpp
+          )$
 
 exclude: python/__init__.py
