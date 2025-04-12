@@ -96,7 +96,7 @@ if torch.cuda.is_available():
         ext_modules=[
             cpp_extension.CUDAExtension(
                 name="pydisort.pydisort",
-                sources=glob.glob("python/src/*.cpp")
+                sources=glob.glob("python/csrc/*.cpp")
                 + glob.glob("src/**/*.cu", recursive=True),
                 include_dirs=[
                     f"{current_dir}",
@@ -125,7 +125,7 @@ else:
         ext_modules=[
             cpp_extension.CppExtension(
                 name="pydisort.pydisort",
-                sources=glob.glob("python/src/*.cpp"),
+                sources=glob.glob("python/csrc/*.cpp"),
                 include_dirs=[
                     f"{current_dir}",
                     f"{current_dir}/build",
