@@ -22,13 +22,11 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
 
-      - name: Install style checkers
-        run: sudo pip install cpplint cppcheck
+      - name: Install Python dependencies
+        run: pip install -r requirements.txt
 
       - name: Run pre-commit
         uses: pre-commit/action@v3.0.1
-        with:
-          args: --all-files
 
   build:
     needs: pre-commit
