@@ -22,8 +22,8 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
 
-      - name: Install pre-commit
-        run: pip install pre-commit
+      - name: Install system dependencies
+        run: sudo pip install cpplint cppcheck
 
       - name: Run pre-commit hooks
         uses: pre-commit/action@v3.0.1
