@@ -3,7 +3,7 @@ repos:
   ## 1. Global check =========================================================
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.0.1
+    rev: v5.0.0
     hooks:
       - id: trailing-whitespace
         name: Trim Trailing Whitespace
@@ -46,7 +46,7 @@ repos:
   ## 2. Per language check ===================================================
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.0.1
+    rev: v5.0.0
     hooks:
       - id: check-yaml
         args: [--allow-multiple-documents]
@@ -84,7 +84,7 @@ repos:
 
   ## Python related ----------------------------------------------------------
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.0.1
+    rev: v5.0.0
     hooks:
       - id: check-docstring-first
       - id: check-ast
