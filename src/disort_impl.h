@@ -22,9 +22,9 @@
 namespace disort {
 
 template <typename T>
-void disort_impl(T* flx, T* prop, T* umu0, T* phi0, T* fbeam, T* albedo,
-                 T* fluor, T* fisot, T* temis, T* btemp, T* ttemp, T* temf,
-                 int upward, disort_state& ds, disort_output& ds_out,
+void disort_impl(T *flx, T *prop, T *umu0, T *phi0, T *fbeam, T *albedo,
+                 T *fluor, T *fisot, T *temis, T *btemp, T *ttemp, T *temf,
+                 int upward, disort_state &ds, disort_output &ds_out,
                  int nprop) {
   // run disort
   if (ds.flag.planck) {

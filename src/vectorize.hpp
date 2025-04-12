@@ -8,7 +8,7 @@
 namespace disort {
 //! split a string to a vector
 template <typename A>
-std::vector<A> Vectorize(const char* cstr, const char* delimiter = " ") {
+std::vector<A> Vectorize(const char *cstr, const char *delimiter = " ") {
   std::vector<A> arr;
   char str[1028], *p;
   snprintf(str, sizeof(str), "%s", cstr);
@@ -21,5 +21,5 @@ std::vector<A> Vectorize(const char* cstr, const char* delimiter = " ") {
 }
 
 template <>
-std::vector<std::string> Vectorize(const char* cstr, const char* delimiter);
+std::vector<std::string> Vectorize(const char *cstr, const char *delimiter);
 }  // namespace disort

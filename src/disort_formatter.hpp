@@ -12,10 +12,10 @@
 
 template <>
 struct fmt::formatter<disort_state> {
-  constexpr auto parse(fmt::format_parse_context& ctx) { return ctx.begin(); }
+  constexpr auto parse(fmt::format_parse_context &ctx) { return ctx.begin(); }
 
   template <typename FormatContext>
-  auto format(const disort_state& ds, FormatContext& ctx) const {
+  auto format(const disort_state &ds, FormatContext &ctx) const {
     return fmt::format_to(
         ctx.out(),
         "(nlyr = {}; nstr = {}; nmom = {}; ibcnd = {}; usrtau = {}; usrang = "
@@ -28,10 +28,10 @@ struct fmt::formatter<disort_state> {
 
 template <>
 struct fmt::formatter<disort::DisortOptions> {
-  constexpr auto parse(fmt::format_parse_context& ctx) { return ctx.begin(); }
+  constexpr auto parse(fmt::format_parse_context &ctx) { return ctx.begin(); }
 
   template <typename FormatContext>
-  auto format(const disort::DisortOptions& p, FormatContext& ctx) const {
+  auto format(const disort::DisortOptions &p, FormatContext &ctx) const {
     std::string waves = "(";
     if (p.ds().flag.planck) {
       for (int i = 0; i < p.nwave(); ++i) {
@@ -52,10 +52,10 @@ struct fmt::formatter<disort::DisortOptions> {
 
 template <>
 struct fmt::formatter<disort::PhaseMomentOptions> {
-  constexpr auto parse(fmt::format_parse_context& ctx) { return ctx.begin(); }
+  constexpr auto parse(fmt::format_parse_context &ctx) { return ctx.begin(); }
 
   template <typename FormatContext>
-  auto format(const disort::PhaseMomentOptions& p, FormatContext& ctx) const {
+  auto format(const disort::PhaseMomentOptions &p, FormatContext &ctx) const {
     std::string type_str;
 
     switch (p.type()) {

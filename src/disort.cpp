@@ -11,11 +11,11 @@
 
 namespace disort {
 
-void call_disort_cpu(at::TensorIterator& iter, int upward, disort_state* ds,
-                     disort_output* ds_out);
+void call_disort_cpu(at::TensorIterator &iter, int upward, disort_state *ds,
+                     disort_output *ds_out);
 
-void call_disort_cuda(at::TensorIterator& iter, int upward, disort_state* ds,
-                      disort_output* ds_out);
+void call_disort_cuda(at::TensorIterator &iter, int upward, disort_state *ds,
+                      disort_output *ds_out);
 
 DisortOptions::DisortOptions() {
   // flags
@@ -48,11 +48,11 @@ DisortOptions::DisortOptions() {
   ds().accur = 1.E-6;
 }
 
-void DisortOptions::set_header(std::string const& header) {
+void DisortOptions::set_header(std::string const &header) {
   snprintf(ds().header, sizeof(ds().header), "%s", header.c_str());
 }
 
-void DisortOptions::set_flags(std::string const& str) {
+void DisortOptions::set_flags(std::string const &str) {
   std::vector<std::string> dstr = Vectorize<std::string>(str.c_str(), " ,");
 
   for (int i = 0; i < dstr.size(); ++i) {
@@ -98,7 +98,7 @@ void DisortOptions::set_flags(std::string const& str) {
   }
 }
 
-DisortImpl::DisortImpl(DisortOptions const& options_) : options(options_) {
+DisortImpl::DisortImpl(DisortOptions const &options_) : options(options_) {
   reset();
 }
 
@@ -226,7 +226,7 @@ torch::Tensor DisortImpl::gather_rad() const {
 //! block r = 1 gets, 4 - 3 - 2
 //! block r = 2 gets, 2 - 1 - 0
 torch::Tensor DisortImpl::forward(torch::Tensor prop,
-                                  std::map<std::string, torch::Tensor>* bc,
+                                  std::map<std::string, torch::Tensor> *bc,
                                   std::string bname,
                                   torch::optional<torch::Tensor> temf) {
   TORCH_CHECK(options.ds().flag.ibcnd == 0,
@@ -412,13 +412,13 @@ torch::Tensor DisortImpl::forward(torch::Tensor prop,
   return flx;
 }
 
-void print_ds_atm(std::ostream& os, disort_state const& ds) {
+void print_ds_atm(std::ostream &os, disort_state const &ds) {
   os << "- Levels = " << ds.nlyr << std::endl;
   os << "- Radiation Streams = " << ds.nstr << std::endl;
   os << "- Phase function moments = " << ds.nmom << std::endl;
 }
 
-void print_ds_out(std::ostream& os, disort_state const& ds) {
+void print_ds_out(std::ostream &os, disort_state const &ds) {
   os << "- User azimuthal angles = " << ds.nphi << std::endl << "  : ";
   for (int i = 0; i < ds.nphi; ++i) {
     os << ds.phi[i] / M_PI * 180. << ", ";
@@ -436,13 +436,13 @@ void print_ds_out(std::ostream& os, disort_state const& ds) {
   os << std::endl;
 }
 
-void DisortImpl::pretty_print(std::ostream& stream) const {
+void DisortImpl::pretty_print(std::ostream &stream) const {
   std::cout << "Options: " << fmt::format("{}", options) << std::endl;
   std::cout << "Disort is configured with:" << std::endl;
   print_ds_flags(std::cout, options.ds());
 }
 
-void print_ds_bc(std::ostream& os, disort_state const& ds) {
+void print_ds_bc(std::ostream &os, disort_state const &ds) {
   os << "- Bottom temperature = " << ds.bc.btemp << std::endl;
   os << "- Albedo = " << ds.bc.albedo << std::endl;
   os << "- Top temperature = " << ds.bc.ttemp << std::endl;
@@ -454,7 +454,7 @@ void print_ds_bc(std::ostream& os, disort_state const& ds) {
   os << "- Solar azimuth angle = " << ds.bc.phi0 << std::endl;
 }
 
-void print_ds_flags(std::ostream& os, disort_state const& ds) {
+void print_ds_flags(std::ostream &os, disort_state const &ds) {
   if (ds.flag.ibcnd) {
     os << "- Spectral boundary condition (ibcnd) = True" << std::endl;
   } else {

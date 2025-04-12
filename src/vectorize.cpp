@@ -8,7 +8,7 @@
 
 namespace disort {
 template <>
-std::vector<std::string> Vectorize(const char* cstr, const char* delimiter) {
+std::vector<std::string> Vectorize(const char *cstr, const char *delimiter) {
   std::vector<std::string> arr;
   char str[1028], *p;
   snprintf(str, sizeof(str), "%s", cstr);
