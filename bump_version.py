@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 
 VERSION_PATTERN = r"^(\d+)\.(\d+)\.(\d+)$"
-VERSION_FILE = Path("VERSION")
+VERSION_FILE = Path("python/VERSION")
 PY_INIT_FILE = Path("python/__init__.py")
 CPP_HEADER_FILE = Path("src/version.h")
 SETUP_CFG_FILE = Path("setup.cfg")
