@@ -102,7 +102,7 @@ def main():
     VERSION_FILE.write_text(new_version + "\n")
     update_file(PY_INIT_FILE, r'(__version__\s*=\s*)".*?"', new_version)
     update_file(
-        CPP_HEADER_FILE, r'(#define PROJECT_VERSION\s+)".*?"', new_version
+        CPP_HEADER_FILE, r'(#define PYDISORT_VERSION\s+)".*?"', new_version
     )
     update_setup_cfg(SETUP_CFG_FILE, new_version)
 
