@@ -25,8 +25,11 @@ jobs:
       - name: Install style checkers
         run: sudo pip install cpplint cppcheck
 
+      - name: Install pre-commit
+        run: pip install pre-commit
+
       - name: Run pre-commit
-        uses: pre-commit/action@v3.0.1
+        run: pre-commit run --all-files
 
   build:
     needs: pre-commit
