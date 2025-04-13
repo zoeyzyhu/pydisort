@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       branch:
-        description: "The branch to release from"
+        description: "Branch to release from"
         required: true
         default: "github-release"
 
@@ -12,31 +12,24 @@ jobs:
   release:
     runs-on: ubuntu-latest
     permissions:
-      contents: write # Allow pushing tags and version bump commits.
-      issues: write # (Optional) if you need to update release notes.
-      pull-requests: write # (Optional) if you want to post release-related comments.
+      contents: write # allow pushing tags & commits
 
     steps:
-      # Check out the repository using the branch provided from workflow_dispatch.
       - name: Check Out Repository
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event.inputs.branch }}
           fetch-depth: 0
 
-      # Set up Python.
       - name: Set Up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.x"
 
-      # Install python-semantic-release.
       - name: Install Release Tool
         run: pip install python-semantic-release
 
-      # Publish the release (this bumps the version, updates the changelog, tags the commit,
-      # and creates/updates a GitHub release).
       - name: Publish Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: semantic-release publish
+        run: semantic-release publish --config semantic_release.yaml
