@@ -24,6 +24,7 @@ github:
   token: $GITHUB_TOKEN
 
 branches:
+  - main
   - github-release
 
 commit_message: "chore(release): v{version}"
