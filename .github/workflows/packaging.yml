@@ -1,4 +1,4 @@
-name: Python Package Release
+name: PyPI Release
 
 on:
   workflow_dispatch:
@@ -109,8 +109,8 @@ jobs:
           CIBW_ENVIRONMENT: "SETUPTOOLS_SCM_PRETEND_VERSION=${{ env.VERSION }}"
         run: |
           export MACOSX_DEPLOYMENT_TARGET=15.0
-          TORCH_LIB=$(python -c 'import torch; print(torch.__path__[0] + "/lib")')
-          export TORCH_LIB
+          export TORCH_LIB=$(python -c 'import torch; print(torch.__path__[0] + "/lib")')
+          export DYLD_FALLBACK_LIBRARY_PATH="$TORCH_LIB:$DYLD_FALLBACK_LIBRARY_PATH"
           python -m pip install cibuildwheel
           PLATFORM=$([ "${{ matrix.os }}" = "macos-15" ] && echo "macos" || echo "linux")
           python -m cibuildwheel --platform $PLATFORM --output-dir wheelhouse
