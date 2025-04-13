@@ -189,4 +189,3 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Removed
 
 - Remove DS_Store hidden file ([2607085](https://github.com/zoeyzyhu/pydisort/commit/2607085ffb128e98cae7edc8a1b3bd421f6653f1) by zoey.zyhu).
-
