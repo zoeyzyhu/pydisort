@@ -1,8 +1,10 @@
 name: Bump Version on PR Merge
 
 on:
-  pull_request:
-    types: [closed]
+  #pull_request:
+  #  types: [closed]
+  issues:
+    types: [labeled]
 
 jobs:
   bump-version:
