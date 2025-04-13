@@ -9,7 +9,7 @@ on:
 #    branches: [main]
 
 env:
-  PYTHON_VERSION: "3.x"
+  PYTHON_VERSION: "3.11"
   BUILD_TYPE: Release
 
 jobs:
