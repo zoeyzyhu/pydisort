@@ -1,44 +1,41 @@
 name: Release
 
 on:
-  push:
-    branches: ["main"]
-
-env:
-  PYTHON_VERSION: "3.x"
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: "The branch to release from"
+        required: true
+        default: "github-release"
 
 jobs:
   release:
     runs-on: ubuntu-latest
     permissions:
-      contents: write # Allows version bump commits, tags, etc.
-      issues: write # (Optional) if need to update release notes or issues.
-      pull-requests: write # (Optional) if status or comments are added.
+      contents: write # Allow pushing tags and version bump commits.
+      issues: write # (Optional) if you need to update release notes.
+      pull-requests: write # (Optional) if you want to post release-related comments.
 
     steps:
-      # Check out the repository (with full git history needed for commit analysis)
+      # Check out the repository using the branch provided from workflow_dispatch.
       - name: Check Out Repository
         uses: actions/checkout@v4
         with:
+          ref: ${{ github.event.inputs.branch }}
           fetch-depth: 0
 
-      # Set up the desired Python version.
+      # Set up Python.
       - name: Set Up Python
         uses: actions/setup-python@v5
         with:
-          python-version: ${{ env.PYTHON_VERSION }}
-          cache: "pip" # Cache pip dependencies for faster builds.
-          cache-dependency-path: requirements.txt # Cache based on requirements.txt
+          python-version: "3.x"
 
-      # Install project dependencies along with semantic-release and other tools.
-      - name: Install Dependencies
-        run: |
-          pip install -r requirements.txt
-          pip install python-semantic-release setuptools wheel twine
+      # Install python-semantic-release.
+      - name: Install Release Tool
+        run: pip install python-semantic-release
 
-      # Publish the release:
-      # This single step will parse commit history, bump version based on Conventional Commits,
-      # generate/update CHANGELOG.md, push a Git tag, and create a GitHub Release.
+      # Publish the release (this bumps the version, updates the changelog, tags the commit,
+      # and creates/updates a GitHub release).
       - name: Publish Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
