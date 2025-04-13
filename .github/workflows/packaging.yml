@@ -102,6 +102,7 @@ jobs:
           CIBW_ENVIRONMENT: "SETUPTOOLS_SCM_PRETEND_VERSION=${{ env.VERSION }}"
         run: |
           TORCH_LIB=$(python -c 'import torch; print(torch.__path__[0] + "/lib")')
+          export TORCH_LIB
           python -m pip install cibuildwheel
           PLATFORM=$(echo "${{ runner.os }}" | tr '[:upper:]' '[:lower:]')
           python -m cibuildwheel --platform $PLATFORM \
