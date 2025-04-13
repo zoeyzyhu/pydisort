@@ -1,4 +1,4 @@
-name: Bump Version on PR Merge
+name: Bump Version and Create Release
 
 on:
   pull_request:
