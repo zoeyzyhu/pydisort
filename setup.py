@@ -61,7 +61,7 @@ if torch.cuda.is_available():
         libraries=["torch_global_deps"]
         + parse_library_names(f"{current_dir}/build/lib"),
         extra_compile_args={"nvcc": ["--extended-lambda"]},
-        extra_link_args=extra_link_args,
+        # extra_link_args=extra_link_args,
     )
 else:
     ext_module = cpp_extension.CppExtension(
@@ -76,7 +76,7 @@ else:
         library_dirs=lib_dirs,
         libraries=["torch_global_deps"]
         + parse_library_names(f"{current_dir}/build/lib"),
-        extra_link_args=extra_link_args,
+        # extra_link_args=extra_link_args,
     )
 
 setup(
