@@ -9,7 +9,6 @@ from setuptools import setup
 from torch.utils import cpp_extension
 
 
-# Dynamic helper functions (parse_library_names, etc.) remain here.
 def parse_library_names(libdir):
     library_names = []
     for root, _, files in os.walk(libdir):
@@ -25,13 +24,23 @@ site_packages_dir = sysconfig.get_path("purelib")
 torch_lib_dir = os.path.join(os.path.dirname(torch.__file__), "lib")
 torch_include_dir = torch.utils.cpp_extension.include_paths()
 
+include_dirs = [
+    f"{current_dir}",
+    f"{current_dir}/build",
+    f"{current_dir}/build/_deps/fmt-src/include",
+] + torch_include_dir
+
 lib_dirs = [
     f"{current_dir}/build/lib",
     torch_lib_dir,
     site_packages_dir,
-] + torch_include_dir
+]
 
-# Set rpath settings.
+libraries = ["torch_global_deps"] + parse_library_names(
+    f"{current_dir}/build/lib"
+)
+
+
 extra_link_args = []
 if platform.system() == "Darwin":
     extra_link_args += [
@@ -45,21 +54,14 @@ else:
         "-Wl,-rpath,$ORIGIN/.libs",
     ]
 
-# Determine the correct extension type based on CUDA availability.
 if torch.cuda.is_available():
     ext_module = cpp_extension.CUDAExtension(
         name="pydisort.pydisort",
         sources=glob.glob("python/csrc/*.cpp")
         + glob.glob("src/**/*.cu", recursive=True),
-        include_dirs=[
-            f"{current_dir}",
-            f"{current_dir}/build",
-            f"{current_dir}/build/_deps/fmt-src/include",
-        ]
-        + torch_include_dir,
+        include_dirs=include_dirs,
         library_dirs=lib_dirs,
-        libraries=["torch_global_deps"]
-        + parse_library_names(f"{current_dir}/build/lib"),
+        libraries=libraries,
         extra_compile_args={"nvcc": ["--extended-lambda"]},
         # extra_link_args=extra_link_args,
     )
@@ -67,15 +69,9 @@ else:
     ext_module = cpp_extension.CppExtension(
         name="pydisort.pydisort",
         sources=glob.glob("python/csrc/*.cpp"),
-        include_dirs=[
-            f"{current_dir}",
-            f"{current_dir}/build",
-            f"{current_dir}/build/_deps/fmt-src/include",
-        ]
-        + torch_include_dir,
+        include_dirs=include_dirs,
         library_dirs=lib_dirs,
-        libraries=["torch_global_deps"]
-        + parse_library_names(f"{current_dir}/build/lib"),
+        libraries=libraries,
         # extra_link_args=extra_link_args,
     )
 

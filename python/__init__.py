@@ -37,7 +37,7 @@ def post_install_relink():
 # relink libraries
 try:
     import torch
-    post_install_relink()
+    #post_install_relink()
 
 except ImportError:
     pass
