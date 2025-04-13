@@ -94,19 +94,26 @@ jobs:
       - name: Build project
         run: cmake --build build --config ${{ env.BUILD_TYPE }} --parallel
 
-      - name: Build wheels
+      - name: Configure build environment
+        run: |
+          VERSION="${{ github.event.inputs.version_tag }}"
+          VERSION="${VERSION#v}"  # Strip the leading 'v'
+          PY_VERSION=$(echo "${{ matrix.python-version }}" | tr -d '.')
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "PY_VERSION=$PY_VERSION" >> $GITHUB_ENV
+
+      - name: Build wheel
         env:
+          CIBW_BUILD: cp${{ env.PY_VERSION }}*
           CIBW_ARCHS: ${{ matrix.arch }}
-          CIBW_BUILD: cp${{ matrix.python-version }}*
-          CIBW_BUILD_VERBOSITY: 1
           CIBW_ENVIRONMENT: "SETUPTOOLS_SCM_PRETEND_VERSION=${{ env.VERSION }}"
         run: |
+          export MACOSX_DEPLOYMENT_TARGET=15.0
           TORCH_LIB=$(python -c 'import torch; print(torch.__path__[0] + "/lib")')
           export TORCH_LIB
           python -m pip install cibuildwheel
-          PLATFORM=$(echo "${{ runner.os }}" | tr '[:upper:]' '[:lower:]')
-          python -m cibuildwheel --platform $PLATFORM \
-            --output-dir wheelhouse
+          PLATFORM=$([ "${{ matrix.os }}" = "macos-15" ] && echo "macos" || echo "linux")
+          python -m cibuildwheel --platform $PLATFORM --output-dir wheelhouse
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
