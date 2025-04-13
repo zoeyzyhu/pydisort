@@ -1,10 +1,6 @@
 version_source: file
 version_file: python/VERSION
 
-release:
-  branches:
-    - name: github-release
-
 commit_author:
   name: github-actions[bot]
   email: github-actions[bot]@users.noreply.github.com
@@ -26,5 +22,9 @@ upload_to_release:
 
 github:
   token: $GITHUB_TOKEN
+
+branches:
+  - main
+  - github-release
 
 commit_message: "chore(release): v{version}"
