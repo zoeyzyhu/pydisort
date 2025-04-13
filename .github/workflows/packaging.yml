@@ -5,52 +5,50 @@ on:
     inputs:
       version_tag:
         description: "Release version tag (e.g., v1.0.0)"
-        required: true
-        default: "v0.10.2"
       branch:
         description: "Branch containing workflow YAML"
-        required: true
-        default: "test-packaging"
         type: string
 
 env:
   BUILD_TYPE: Release
+  BRANCH: if ${{ github.event.inputs.branch }} != '' && ${{ github.event.inputs.branch }} != null; then echo "${{ github.event.inputs.branch }}"; else echo "main"; fi
+  TAG: if ${{ github.event.inputs.version_tag }} != '' && ${{ github.event.inputs.version_tag }} != null; then echo "${{ github.event.inputs.version_tag }}"; else echo "latest"; fi
 
 jobs:
   build-wheels:
     name: Build wheels on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: true
       matrix:
         #os: [ubuntu-22.04, macos-14]
-        os: [macos-15]
-        #python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
+        os: [macos-latest]
+        #python-version: ["3.9", "3.10", "3.11", "3.12"]
         python-version: ["3.9"]
         include:
           #- os: ubuntu-22.04
           #  arch: x86_64
-          #- os: ubuntu-22.04
-          #  arch: aarch64
           #- os: macos-14
           #  arch: x86_64
-          - os: macos-15
+          - os: macos-latest
             arch: arm64
 
     steps:
-      - name: Checkout workflow definition branch (for YAML and scripts)
+      - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.inputs.branch }}
+          ref: ${{ env.BRANCH }}
 
-      - name: Fetch and checkout release tag ${{ github.event.inputs.version_tag }}
+      - name: Fetch and checkout release tag ${{ env.TAG }}
         run: |
           git fetch --tags
-          git checkout ${{ github.event.inputs.version_tag }}
+          git checkout ${{ env.TAG }}
 
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
+          cache: "pip"
 
       - name: Install system dependencies (Linux)
         if: matrix.os == 'ubuntu-22.04'
@@ -72,6 +70,14 @@ jobs:
           grep -Ev '^(twine|sphinx|sphinxcontrib-napoleon|guzzle_sphinx_theme|cpplint|cppcheck|clang-format)$' requirements.txt > filtered_requirements.txt
           pip install -r filtered_requirements.txt
 
+      - name: Cache CMake build
+        uses: actions/cache@v3
+        with:
+          path: ${{ github.workspace }}/build
+          key: ${{ runner.os }}-cmake-${{ env.BUILD_TYPE }}-${{ hashFiles('**/*.cmake', '**/CMakeLists.txt', '**/*.cpp', '**/*.h') }}
+          restore-keys: |
+            ${{ runner.os }}-cmake-${{ env.BUILD_TYPE }}-
+
       - name: Configure CMake
         run: |
           cmake -B ${{github.workspace}}/build \
@@ -82,7 +88,7 @@ jobs:
 
       - name: Build and Install
         run: |
-          cmake --build build --target install --config ${{ env.BUILD_TYPE }}
+          cmake --build build --target install --config ${{ env.BUILD_TYPE }} --parallel
           pip install .
 
       - name: Configure build environment
