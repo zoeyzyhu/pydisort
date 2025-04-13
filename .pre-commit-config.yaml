@@ -71,7 +71,7 @@ repos:
         description: Formats C, C++, Objective-C, and Java code
         types_or: [c, c++, c#, objective-c, java]
         language: python
-        args: [--style=file, -i, --no-diff]
+        args: [--style=Google, -i, --no-diff]
         exclude: *exclude_pattern
 
       - id: cppcheck
