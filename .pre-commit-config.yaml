@@ -65,6 +65,15 @@ repos:
   - repo: https://github.com/pocc/pre-commit-hooks
     rev: v1.3.5
     hooks:
+      - id: clang-format
+        name: Fix C, C++, Objective-C, Java
+        entry: clang-format-hook
+        description: Formats C, C++, Objective-C, and Java code
+        types_or: [c, c++, c#, objective-c, java]
+        language: python
+        args: [--style=file, -i, --no-diff]
+        exclude: *exclude_pattern
+
       - id: cppcheck
         name: Find warnings/errors in C, C++, and Objective-C
         entry: cppcheck-hook
