@@ -2,7 +2,11 @@ name: Bump Version on PR Merge
 
 on:
   pull_request:
+<<<<<<< HEAD
     types: [closed]
+=======
+    #types: [closed]
+>>>>>>> 7e3df51 (wip)
     branches: [main]
 
 env:
