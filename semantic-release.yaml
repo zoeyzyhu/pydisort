@@ -23,8 +23,6 @@ upload_to_release:
 github:
   token: $GITHUB_TOKEN
 
-branches:
-  - main
-  - github-release
+repository_branch: github-release
 
 commit_message: "chore(release): v{version}"
