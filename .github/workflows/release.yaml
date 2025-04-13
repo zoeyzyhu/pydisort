@@ -1,0 +1,45 @@
+name: Release
+
+on:
+  push:
+    branches: ["main"]
+
+env:
+  PYTHON_VERSION: "3.x"
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # Allows version bump commits, tags, etc.
+      issues: write # (Optional) if need to update release notes or issues.
+      pull-requests: write # (Optional) if status or comments are added.
+
+    steps:
+      # Check out the repository (with full git history needed for commit analysis)
+      - name: Check Out Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # Set up the desired Python version.
+      - name: Set Up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: "pip" # Cache pip dependencies for faster builds.
+          cache-dependency-path: requirements.txt # Cache based on requirements.txt
+
+      # Install project dependencies along with semantic-release and other tools.
+      - name: Install Dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install python-semantic-release setuptools wheel twine
+
+      # Publish the release:
+      # This single step will parse commit history, bump version based on Conventional Commits,
+      # generate/update CHANGELOG.md, push a Git tag, and create a GitHub Release.
+      - name: Publish Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: semantic-release publish
