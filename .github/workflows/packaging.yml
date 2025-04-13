@@ -96,10 +96,12 @@ jobs:
 
       - name: Build wheels
         env:
-          CIBW_ARCHS_MACOS: ${{ matrix.arch }}
+          CIBW_ARCHS: ${{ matrix.arch }}
+          CIBW_BUILD: cp${{ matrix.python-version }}*
           CIBW_BUILD_VERBOSITY: 1
           CIBW_ENVIRONMENT: "SETUPTOOLS_SCM_PRETEND_VERSION=${{ env.VERSION }}"
         run: |
+          TORCH_LIB=$(python -c 'import torch; print(torch.__path__[0] + "/lib")')
           python -m pip install cibuildwheel
           PLATFORM=$(echo "${{ runner.os }}" | tr '[:upper:]' '[:lower:]')
           python -m cibuildwheel --platform $PLATFORM \
