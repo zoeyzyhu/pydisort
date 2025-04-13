@@ -12,7 +12,7 @@ on:
 
 env:
   BUILD_TYPE: Release
-  PYTHON_VERSION: "3.11" # Align with CI version
+  PYTHON_VERSION: "3.11"
 
 jobs:
   build-wheels:
@@ -38,7 +38,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ inputs.branch || 'main' }}
-          fetch-depth: 0 # Needed for proper tag checkout
+          fetch-depth: 0
 
       - name: Determine version tag
         id: determine_version
@@ -54,8 +54,14 @@ jobs:
           fi
 
       - name: Checkout tag
-        if: ${{ inputs.version_tag }} != 'latest'
-        run: git checkout ${{ inputs.version_tag }}
+        if: ${{ inputs.version_tag != 'latest' }}
+        run: git checkout ${{ steps.determine_version.outputs.version }}
+
+      - name: Set sanitized version
+        run: |
+          VERSION="${{ steps.determine_version.outputs.version }}"
+          VERSION="${VERSION#v}"
+          echo "VERSION=${VERSION}" >> $GITHUB_ENV
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -77,8 +83,6 @@ jobs:
           key: ${{ runner.os }}-${{ matrix.python-version }}-build-${{ hashFiles('**/CMakeLists.txt', 'requirements.txt') }}
           restore-keys: |
             ${{ runner.os }}-${{ matrix.python-version }}-build-
-            ${{ runner.os }}-${{ matrix.python-version }}-
-            ${{ runner.os }}-
 
       - name: Configure CMake
         run: |
@@ -92,11 +96,13 @@ jobs:
 
       - name: Build wheels
         env:
+          CIBW_ARCHS_MACOS: ${{ matrix.arch }}
           CIBW_BUILD_VERBOSITY: 1
-          CIBW_ENVIRONMENT: "SETUPTOOLS_SCM_PRETEND_VERSION=${{ inputs.version_tag }}"
+          CIBW_ENVIRONMENT: "SETUPTOOLS_SCM_PRETEND_VERSION=${{ env.VERSION }}"
         run: |
           python -m pip install cibuildwheel
-          python -m cibuildwheel --platform ${{ runner.os }} \
+          PLATFORM=$(echo "${{ runner.os }}" | tr '[:upper:]' '[:lower:]')
+          python -m cibuildwheel --platform $PLATFORM \
             --output-dir wheelhouse
 
       - name: Upload artifacts
