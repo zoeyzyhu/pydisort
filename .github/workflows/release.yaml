@@ -32,4 +32,4 @@ jobs:
       - name: Publish Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: semantic-release publish --config semantic_release.yaml
+        run: semantic-release publish
