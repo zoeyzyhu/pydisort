@@ -21,7 +21,15 @@ jobs:
           python-version: ${{ env.PYTHON_VERSION }}
 
       - name: Install style checkers
-        run: sudo pip install cpplint cppcheck
+        run: pip install --user cpplint cppcheck
+
+      - name: Cache pre-commit
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pre-commit
+          key: ${{ runner.os }}-pre-commit-${{ hashFiles('.pre-commit-config.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pre-commit-
 
       - name: Run pre-commit
         uses: pre-commit/action@v3.0.1
@@ -30,6 +38,7 @@ jobs:
     needs: pre-commit
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: true
       matrix:
         os: [ubuntu-latest, macOS-latest]
     steps:
@@ -40,18 +49,30 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
+          cache: "pip"
 
       - name: Install Python dependencies
-        run: pip install -r requirements.txt
+        run: |
+          grep -Ev '^(twine|sphinx|sphinxcontrib-napoleon|guzzle_sphinx_theme|cpplint|cppcheck|clang-format)$' requirements.txt > filtered_requirements.txt
+          pip install -r filtered_requirements.txt
+
+      - name: Cache CMake build
+        uses: actions/cache@v3
+        with:
+          path: ${{ github.workspace }}/build
+          key: ${{ runner.os }}-cmake-${{ env.BUILD_TYPE }}-${{ hashFiles('**/*.cmake', '**/CMakeLists.txt', '**/*.cpp', '**/*.h') }}
+          restore-keys: |
+            ${{ runner.os }}-cmake-${{ env.BUILD_TYPE }}-
 
       - name: Configure CMake
         run: |
           cmake -B ${{ github.workspace }}/build \
+                -G Ninja \
                 -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
                 -DBUILD_TESTS=ON
 
       - name: Build
-        run: cmake --build ${{ github.workspace }}/build --config ${{ env.BUILD_TYPE }}
+        run: cmake --build ${{ github.workspace }}/build --config ${{ env.BUILD_TYPE }} --parallel
 
       - name: Install the project
         run: pip install .

@@ -69,8 +69,8 @@ jobs:
 
       - name: Install Python dependencies
         run: |
-          python -m pip install -U pip setuptools wheel
-          python -m pip install -r requirements.txt
+          grep -Ev '^(twine|sphinx|sphinxcontrib-napoleon|guzzle_sphinx_theme|cpplint|cppcheck|clang-format)$' requirements.txt > filtered_requirements.txt
+          pip install -r filtered_requirements.txt
 
       - name: Configure CMake
         run: |
