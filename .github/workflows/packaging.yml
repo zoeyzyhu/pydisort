@@ -112,21 +112,22 @@ jobs:
         env:
           CIBW_BUILD: cp${{ env.PY_VERSION }}*
           CIBW_ARCHS: ${{ matrix.cibw_arch }}
-          CIBW_MANYLINUX_X86_64_IMAGE: "manylinux_2_28"
+          CIBW_MANYLINUX_X86_64_IMAGE: "manylinux_2_31"
           CIBW_REPAIR_WHEEL_COMMAND_LINUX: >
             PYTORCH_LIB=$(python -c "import torch, os; print(os.path.join(torch.__path__[0], 'lib'))") &&
             echo "Using LD_LIBRARY_PATH=$PYTORCH_LIB" &&
             LD_LIBRARY_PATH=$PYTORCH_LIB auditwheel repair -w {dest_dir} {wheel}
           CIBW_BEFORE_BUILD: |
+            apt-get update && apt-get install -y libgomp1
             pip install torch --index-url https://download.pytorch.org/whl/cpu && \
             export TORCH_LIB=$(python -c 'import torch; print(torch.__path__[0] + "/lib")') && \
             export LD_LIBRARY_PATH="$TORCH_LIB:$LD_LIBRARY_PATH" && \
             pip install -r requirements.txt && \
             cmake -B build -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
-              -DPython3_EXECUTABLE=$(which python) \
-              -DPython3_FIND_IMPLEMENTATIONS=CPython \
-              -DCMAKE_PREFIX_PATH="$(python -c 'import torch; print(torch.utils.cmake_prefix_path)')" \
-              -DBUILD_TESTS=ON && \
+                  -DPython3_EXECUTABLE=$(which python) \
+                  -DPython3_FIND_IMPLEMENTATIONS=CPython \
+                  -DCMAKE_PREFIX_PATH="$(python -c 'import torch; print(torch.utils.cmake_prefix_path)')" \
+                  -DBUILD_TESTS=ON && \
             cmake --build build --parallel
         run: |
           export TORCH_LIB=$(python -c 'import torch; print(torch.__path__[0] + "/lib")')
