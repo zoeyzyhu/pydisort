@@ -24,10 +24,6 @@ site_packages_dir = sysconfig.get_path("purelib")
 torch_lib_dir = os.path.join(os.path.dirname(torch.__file__), "lib")
 torch_include_dir = torch.utils.cpp_extension.include_paths()
 
-torch_libs = [
-    "torch_global_deps",
-]
-
 include_dirs = [
     f"{current_dir}",
     f"{current_dir}/build",
@@ -38,10 +34,8 @@ lib_dirs = [
     f"{current_dir}/build/lib",
     torch_lib_dir,
     site_packages_dir,
-] + torch_include_dir
+]
 
-
-# libraries = torch_libs + parse_library_names(f"{current_dir}/build/lib")
 libraries = parse_library_names(f"{current_dir}/build/lib")
 
 
