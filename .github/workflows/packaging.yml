@@ -116,6 +116,7 @@ jobs:
             PYTORCH_LIB=$(python -c "import torch, os; print(os.path.join(torch.__path__[0], 'lib'))") &&
             echo "Using LD_LIBRARY_PATH=$PYTORCH_LIB" &&
             LD_LIBRARY_PATH=$PYTORCH_LIB auditwheel repair -w {dest_dir} {wheel}
+          CIBW_BEFORE_BUILD: ""
         run: |
           export TORCH_LIB=$(python -c 'import torch; print(torch.__path__[0] + "/lib")')
           export LD_LIBRARY_PATH="$TORCH_LIB:$LD_LIBRARY_PATH"
