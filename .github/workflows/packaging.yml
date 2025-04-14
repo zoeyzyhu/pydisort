@@ -104,7 +104,7 @@ jobs:
           echo "PY_VERSION=$PY_VERSION" >> $GITHUB_ENV
           if [ "${{ matrix.os }}" = "macos-latest" ]; then
             echo "MACOSX_DEPLOYMENT_TARGET=11.1" >> $GITHUB_ENV
-            echo "ARCHFLAGS='-arch ${{ matrix.target_arch }}'" >> $GITHUB_ENV
+            echo "ARCHFLAGS=-arch ${{ matrix.target_arch }}" >> $GITHUB_ENV
           fi
 
       - name: Build wheel
