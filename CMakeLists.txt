@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.18)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_USE_RELATIVE_PATHS ON)
 
 option(CUDA "Enable CUDA support" OFF)
 option(BUILD_EXAMPLES "Build examples" OFF)

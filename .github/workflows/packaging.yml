@@ -21,13 +21,12 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        #os: [ubuntu-latest, macos-latest]
-        os: [ubuntu-latest]
+        os: [ubuntu-latest, macos-latest]
         include:
-          #- os: macos-latest
-          #  python-version: "3.11"
-          #  target_arch: arm64
-          #  cibw_arch: "arm64"
+          - os: macos-latest
+            python-version: "3.11"
+            target_arch: arm64
+            cibw_arch: "arm64"
           - os: ubuntu-latest
             python-version: "3.11"
             target_arch: x86_64
@@ -74,7 +73,7 @@ jobs:
           grep -Ev '^(twine|sphinx|clang-format|cppcheck|cpplint)' requirements.txt > filtered.txt
           pip install -r filtered.txt
 
-      - name: Configure CMake (host build, if needed)
+      - name: Configure CMake (host build, for tests or other purposes)
         run: |
           if [ "${{ matrix.os }}" = "macos-latest" ]; then
             cmake -B build -G Ninja \
@@ -89,7 +88,7 @@ jobs:
               -DBUILD_TESTS=ON
           fi
 
-      - name: Build (host build, if needed)
+      - name: Build (host build)
         run: cmake --build build --config ${{ env.BUILD_TYPE }} --parallel
 
       - name: Configure wheel build environment
@@ -105,6 +104,8 @@ jobs:
           fi
 
       - name: Remove build directory for clean container build on ubuntu
+        # This is necessary because cibuildwheel uses a clean container for each build
+        # and the build directory is not removed by default.
         if: ${{ matrix.os == 'ubuntu-latest' }}
         run: rm -rf build
 
@@ -116,11 +117,12 @@ jobs:
             pip install -r requirements.txt && \
             cmake -B build -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
               -DPython3_EXECUTABLE=$(which python) \
+              -DPython3_FIND_IMPLEMENTATIONS=Interpreter \
+              -DPython3_FIND_STRATEGY=LOCATION \
               -DPython3_LIBRARY=$(
                 python -c "import sysconfig; print(sysconfig.get_config_var('LIBDIR'))"
               )/libpython3.11.so \
-              -DPython3_INCLUDE_DIR=$(python -c "import sysconfig; print(sysconfig.get_config_var('INCLUDEPY'))") \
-              -DPython3_FIND_STRATEGY=LOCATION \
+              -DPython3_INCLUDE_DIR=$(python -c "import sysconfig; print(sysconfig.get_config_var('INCLUDEDIR'))") \
               -DCMAKE_PREFIX_PATH="$(python -c 'import torch; print(torch.utils.cmake_prefix_path)')" \
               -DBUILD_TESTS=ON && \
             cmake --build build --config ${BUILD_TYPE} --parallel
