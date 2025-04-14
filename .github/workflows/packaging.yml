@@ -111,6 +111,9 @@ jobs:
         env:
           CIBW_BUILD: cp${{ env.PY_VERSION }}*
           CIBW_ARCHS: ${{ matrix.cibw_arch }}
+          CIBW_REPAIR_WHEEL_COMMAND: >
+            LD_LIBRARY_PATH=$(python -c "import torch; print(torch.__path__[0] + '/lib')") \
+            auditwheel repair -w {dest_dir} {wheel}
           CIBW_BEFORE_BUILD: |
             rm -rf build && \
             pip install -r requirements.txt && \
