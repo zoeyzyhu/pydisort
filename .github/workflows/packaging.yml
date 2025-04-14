@@ -124,6 +124,7 @@ jobs:
           export TORCH_LIB=$(python -c 'import torch; print(torch.__path__[0] + "/lib")')
           export LD_LIBRARY_PATH="$TORCH_LIB:$LD_LIBRARY_PATH"
           python -m pip install cibuildwheel
+          python -m pip install auditwheel
           PLATFORM=$(echo "${{ runner.os }}" | tr '[:upper:]' '[:lower:]')
           python -m cibuildwheel --platform $PLATFORM --output-dir wheelhouse
 
