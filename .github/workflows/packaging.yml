@@ -28,10 +28,6 @@ jobs:
             python-version: "3.11"
             target_arch: arm64
             cibw_arch: "arm64"
-          #- os: macos-13
-          #  python-version: "3.11"
-          #  target_arch: x86_64
-          #  cibw_arch: "x86_64"
           - os: ubuntu-latest
             python-version: "3.11"
             target_arch: x86_64
@@ -114,7 +110,8 @@ jobs:
           echo "PY_VERSION=$PY_VERSION" >> $GITHUB_ENV
           if [ "${{ matrix.os }}" = "macos-latest" ]; then
             echo "MACOSX_DEPLOYMENT_TARGET=11.1" >> $GITHUB_ENV
-            echo "ARCHFLAGS='-arch ${{ matrix.target_arch }}'" >> $GITHUB_ENV
+            # Removed extra quotes around the architecture flag.
+            echo "ARCHFLAGS=-arch ${{ matrix.target_arch }}" >> $GITHUB_ENV
           fi
 
       - name: Build wheel
