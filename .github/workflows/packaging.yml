@@ -74,7 +74,7 @@ jobs:
           grep -Ev '^(twine|sphinx|clang-format|cppcheck|cpplint)' requirements.txt > filtered.txt
           pip install -r filtered.txt
 
-      - name: Configure CMake (host build, for tests or other purposes)
+      - name: Configure CMake (host build, if needed)
         run: |
           if [ "${{ matrix.os }}" = "macos-latest" ]; then
             cmake -B build -G Ninja \
@@ -89,7 +89,7 @@ jobs:
               -DBUILD_TESTS=ON
           fi
 
-      - name: Build (host build)
+      - name: Build (host build, if needed)
         run: cmake --build build --config ${{ env.BUILD_TYPE }} --parallel
 
       - name: Configure wheel build environment
@@ -105,8 +105,6 @@ jobs:
           fi
 
       - name: Remove build directory for clean container build on ubuntu
-        # This is necessary because cibuildwheel uses a clean container for each build
-        # and the build directory is not removed by default.
         if: ${{ matrix.os == 'ubuntu-latest' }}
         run: rm -rf build
 
@@ -121,7 +119,8 @@ jobs:
               -DPython3_LIBRARY=$(
                 python -c "import sysconfig; print(sysconfig.get_config_var('LIBDIR'))"
               )/libpython3.11.so \
-              -DPython3_INCLUDE_DIR=$(python -c "import sysconfig; print(sysconfig.get_config_var('INCLUDEDIR'))") \
+              -DPython3_INCLUDE_DIR=$(python -c "import sysconfig; print(sysconfig.get_config_var('INCLUDEPY'))") \
+              -DPython3_FIND_STRATEGY=LOCATION \
               -DCMAKE_PREFIX_PATH="$(python -c 'import torch; print(torch.utils.cmake_prefix_path)')" \
               -DBUILD_TESTS=ON && \
             cmake --build build --config ${BUILD_TYPE} --parallel
