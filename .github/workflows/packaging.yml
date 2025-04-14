@@ -19,7 +19,7 @@ jobs:
     name: Build wheels (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
         #os: [ubuntu-latest, macos-latest]
         os: [macos-latest]
@@ -30,10 +30,10 @@ jobs:
             arch: arm64
             target_arch: arm64
             cibw_arch: "arm64"
-          #- os: macos-latest
-          #  arch: x86_64
-          #  target_arch: x86_64
-          #  cibw_arch: "x86_64"
+          - os: macos-latest
+            arch: x86_64
+            target_arch: x86_64
+            cibw_arch: "x86_64"
 
     steps:
       - name: Checkout code
@@ -75,16 +75,6 @@ jobs:
         run: |
           grep -Ev '^(twine|sphinx|clang-format|cppcheck|cpplint)' requirements.txt > filtered.txt
           pip install -r filtered.txt
-
-      - name: Cache build artifacts
-        uses: actions/cache@v3
-        with:
-          path: |
-            ${{ github.workspace }}/build
-            ~/.cache/pip
-          key: ${{ runner.os }}-${{ matrix.python-version }}-build-${{ hashFiles('**/CMakeLists.txt', 'requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-${{ matrix.python-version }}-build-
 
       - name: Configure CMake
         run: |
