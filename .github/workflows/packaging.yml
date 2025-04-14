@@ -107,6 +107,10 @@ jobs:
             echo "ARCHFLAGS=-arch ${{ matrix.target_arch }}" >> $GITHUB_ENV
           fi
 
+      - name: Cleanup build directory before wheel build
+        if: ${{ matrix.os == 'ubuntu-latest' }}
+        run: rm -rf build
+
       - name: Build wheel
         env:
           CIBW_BUILD: cp${{ env.PY_VERSION }}*
