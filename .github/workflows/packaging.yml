@@ -21,12 +21,13 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        #os: [ubuntu-latest, macos-latest]
+        os: [ubuntu-latest]
         include:
-          - os: macos-latest
-            python-version: "3.11"
-            target_arch: arm64
-            cibw_arch: "arm64"
+          #- os: macos-latest
+          #  python-version: "3.11"
+          #  target_arch: arm64
+          #  cibw_arch: "arm64"
           - os: ubuntu-latest
             python-version: "3.11"
             target_arch: x86_64
@@ -111,12 +112,14 @@ jobs:
         env:
           CIBW_BUILD: cp${{ env.PY_VERSION }}*
           CIBW_ARCHS: ${{ matrix.cibw_arch }}
-          CIBW_REPAIR_WHEEL_COMMAND: >
-            LD_LIBRARY_PATH=$(python -c "import torch; print(torch.__path__[0] + '/lib')") \
-            auditwheel repair -w {dest_dir} {wheel}
+          CIBW_REPAIR_WHEEL_COMMAND_LINUX: >
+            echo "Using LD_LIBRARY_PATH=$(python -c 'import torch; print(torch.__path__[0] + \"/lib\")')" && \
+            LD_LIBRARY_PATH=$(python -c "import torch; print(torch.__path__[0] + '/lib')") auditwheel repair -w {dest_dir} {wheel}
+
           CIBW_BEFORE_BUILD: |
             rm -rf build && \
             pip install -r requirements.txt && \
+            pip install auditwheel && \
             cmake -B build -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
               -DPython3_EXECUTABLE=$(which python) \
               -DPython3_FIND_IMPLEMENTATIONS=CPython \
@@ -127,7 +130,6 @@ jobs:
           export TORCH_LIB=$(python -c 'import torch; print(torch.__path__[0] + "/lib")')
           export LD_LIBRARY_PATH="$TORCH_LIB:$LD_LIBRARY_PATH"
           python -m pip install cibuildwheel
-          python -m pip install auditwheel
           PLATFORM=$(echo "${{ runner.os }}" | tr '[:upper:]' '[:lower:]')
           python -m cibuildwheel --platform $PLATFORM --output-dir wheelhouse
 
