@@ -21,22 +21,17 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        #os: [ubuntu-latest, macos-latest]
-        os: [ubuntu-latest]
-        #python-version: ["3.9", "3.10", "3.11", "3.12"]
+        os: [ubuntu-latest, macos-latest]
         include:
-          #- os: macos-latest
-          #  python-version: "3.11"
-          #  target_arch: arm64
-          #  cibw_arch: "arm64"
-          #- os: macos-13
-          #  python-version: "3.11"
-          #  target_arch: x86_64
-          #  cibw_arch: "x86_64"
+          - os: macos-latest
+            python-version: "3.11"
+            target_arch: arm64
+            cibw_arch: "arm64"
           - os: ubuntu-latest
             python-version: "3.11"
             target_arch: x86_64
             cibw_arch: "x86_64"
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -73,7 +68,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: "pip"
 
-      - name: Install python dependencies
+      - name: Install Python dependencies
         run: |
           grep -Ev '^(twine|sphinx|clang-format|cppcheck|cpplint)' requirements.txt > filtered.txt
           pip install -r filtered.txt
@@ -108,22 +103,18 @@ jobs:
             echo "ARCHFLAGS=-arch ${{ matrix.target_arch }}" >> $GITHUB_ENV
           fi
 
-      #- name: Cleanup build directory before wheel build
-      #  if: ${{ matrix.os == 'ubuntu-latest' }}
-      #  run: rm -rf build
-
-      - name: Change directory to build
-        if: ${{ matrix.os == 'ubuntu-latest' }}
-        run: |
-          cd build
-          # Remove the absolute path to the source directory from CMakeCache.txt
-          # This is necessary for cibuildwheel to work correctly
-          sed -i 's|/home/runner/work/pydisort/pydisort|/project|g' CMakeCache.txt
-
       - name: Build wheel
         env:
           CIBW_BUILD: cp${{ env.PY_VERSION }}*
           CIBW_ARCHS: ${{ matrix.cibw_arch }}
+          CIBW_BEFORE_BUILD: |
+            pip install -r requirements.txt && \
+            cmake -B build -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
+              -DPython3_EXECUTABLE=$(which python) \
+              -DPython3_ROOT_DIR=$(python -c "import sysconfig; print(sysconfig.get_config_var('prefix'))") \
+              -DCMAKE_PREFIX_PATH="$(python -c 'import torch; print(torch.utils.cmake_prefix_path)')" \
+              -DBUILD_TESTS=ON && \
+            cmake --build build --config ${BUILD_TYPE} --parallel
         run: |
           export TORCH_LIB=$(python -c 'import torch; print(torch.__path__[0] + "/lib")')
           if [ "${{ matrix.os }}" = "macos-latest" ]; then
