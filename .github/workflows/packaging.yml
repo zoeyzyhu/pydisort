@@ -16,7 +16,7 @@ env:
 
 jobs:
   build-wheels:
-    name: Build wheels (macOS ${{ matrix.target_arch }})
+    name: Build wheels (${{ matrix.os }} - ${{ matrix.target_arch }})
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: true
