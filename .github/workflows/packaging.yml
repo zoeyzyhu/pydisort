@@ -91,8 +91,10 @@ jobs:
             -DCMAKE_PREFIX_PATH="$(python -c 'import torch; print(torch.utils.cmake_prefix_path)')" \
             -DBUILD_TESTS=ON
 
-      - name: Build project
-        run: cmake --build build --config ${{ env.BUILD_TYPE }} --parallel
+      - name: Build and Install
+        run: |
+          cmake --build build --config ${{ env.BUILD_TYPE }} --parallel
+          pip install .
 
       - name: Configure build environment
         run: |
