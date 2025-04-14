@@ -24,10 +24,10 @@ jobs:
         os: [ubuntu-latest, macos-latest]
         #python-version: ["3.9", "3.10", "3.11", "3.12"]
         include:
-          - os: macos-latest
-            python-version: "3.11"
-            target_arch: arm64
-            cibw_arch: "arm64"
+          #- os: macos-latest
+          #  python-version: "3.11"
+          #  target_arch: arm64
+          #  cibw_arch: "arm64"
           #- os: macos-13
           #  python-version: "3.11"
           #  target_arch: x86_64
@@ -107,9 +107,17 @@ jobs:
             echo "ARCHFLAGS=-arch ${{ matrix.target_arch }}" >> $GITHUB_ENV
           fi
 
-      - name: Cleanup build directory before wheel build
+      #- name: Cleanup build directory before wheel build
+      #  if: ${{ matrix.os == 'ubuntu-latest' }}
+      #  run: rm -rf build
+
+      - name: Change directory to build
         if: ${{ matrix.os == 'ubuntu-latest' }}
-        run: rm -rf build
+        run: |
+          cd build
+          # Remove the absolute path to the source directory from CMakeCache.txt
+          # This is necessary for cibuildwheel to work correctly
+          sed -i 's|/home/runner/work/pydisort/pydisort|/project|g' CMakeCache.txt
 
       - name: Build wheel
         env:
