@@ -24,11 +24,15 @@ jobs:
         #os: [ubuntu-latest, macos-latest]
         #python-version: ["3.9", "3.10", "3.11", "3.12"]
         include:
-          #- os: macos-latest
+          - os: macos-latest
+            python-version: "3.11"
+            target_arch: arm64
+            cibw_arch: "arm64"
+          #- os: macos-13
           #  python-version: "3.11"
-          #  target_arch: arm64
-          #  cibw_arch: "arm64"
-          - os: macos-13
+          #  target_arch: x86_64
+          #  cibw_arch: "x86_64"
+          - os: ubuntu-latest
             python-version: "3.11"
             target_arch: x86_64
             cibw_arch: "x86_64"
@@ -85,11 +89,18 @@ jobs:
 
       - name: Configure CMake
         run: |
-          cmake -B build -G Ninja \
-            -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
-            -DCMAKE_OSX_ARCHITECTURES=${{ matrix.target_arch }} \
-            -DCMAKE_PREFIX_PATH="$(python -c 'import torch; print(torch.utils.cmake_prefix_path)')" \
-            -DBUILD_TESTS=ON
+          if [ "${{ matrix.os }}" = "macos-latest" ]; then
+            cmake -B build -G Ninja \
+              -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
+              -DCMAKE_OSX_ARCHITECTURES=${{ matrix.target_arch }} \
+              -DCMAKE_PREFIX_PATH="$(python -c 'import torch; print(torch.utils.cmake_prefix_path)')" \
+              -DBUILD_TESTS=ON
+          else
+            cmake -B build -G Ninja \
+              -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
+              -DCMAKE_PREFIX_PATH="$(python -c 'import torch; print(torch.utils.cmake_prefix_path)')" \
+              -DBUILD_TESTS=ON
+          fi
 
       - name: Build
         run: cmake --build build --config ${{ env.BUILD_TYPE }} --parallel
@@ -101,16 +112,20 @@ jobs:
           PY_VERSION=$(echo "${{ matrix.python-version }}" | tr -d '.')
           echo "VERSION=$VERSION" >> $GITHUB_ENV
           echo "PY_VERSION=$PY_VERSION" >> $GITHUB_ENV
+          if [ "${{ matrix.os }}" = "macos-latest" ]; then
+            echo "MACOSX_DEPLOYMENT_TARGET=11.1" >> $GITHUB_ENV
+            echo "ARCHFLAGS='-arch ${{ matrix.target_arch }}'" >> $GITHUB_ENV
+          fi
 
       - name: Build wheel
         env:
           CIBW_BUILD: cp${{ env.PY_VERSION }}*
           CIBW_ARCHS: ${{ matrix.cibw_arch }}
-          MACOSX_DEPLOYMENT_TARGET: 11.1
-          CIBW_ENVIRONMENT: "ARCHFLAGS='-arch ${{ matrix.target_arch }}'"
         run: |
           export TORCH_LIB=$(python -c 'import torch; print(torch.__path__[0] + "/lib")')
-          export DYLD_FALLBACK_LIBRARY_PATH="$TORCH_LIB:$DYLD_FALLBACK_LIBRARY_PATH"
+          if [ "${{ matrix.os }}" = "macos-latest" ]; then
+            export DYLD_FALLBACK_LIBRARY_PATH="$TORCH_LIB:$DYLD_FALLBACK_LIBRARY_PATH"
+          fi
           python -m pip install cibuildwheel
           PLATFORM=$(echo "${{ runner.os }}" | tr '[:upper:]' '[:lower:]')
           python -m cibuildwheel --platform $PLATFORM --output-dir wheelhouse
