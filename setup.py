@@ -31,7 +31,7 @@ include_dirs = [
 
 lib_dirs = [
     f"{current_dir}/build/lib",
-    site_packages_dir,
+    # site_packages_dir,
 ]
 
 libraries = parse_library_names(f"{current_dir}/build/lib")
