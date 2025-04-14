@@ -30,10 +30,10 @@ jobs:
             arch: arm64
             target_arch: arm64
             cibw_arch: "arm64"
-          - os: macos-latest
-            arch: x86_64
-            target_arch: x86_64
-            cibw_arch: "x86_64"
+          #- os: macos-latest
+          #  arch: x86_64
+          #  target_arch: x86_64
+          #  cibw_arch: "x86_64"
 
     steps:
       - name: Checkout code
