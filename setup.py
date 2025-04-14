@@ -32,7 +32,7 @@ include_dirs = [
 
 lib_dirs = [
     f"{current_dir}/build/lib",
-    torch_lib_dir,
+    # torch_lib_dir,
     site_packages_dir,
 ]
 
