@@ -16,25 +16,22 @@ env:
 
 jobs:
   build-wheels:
-    name: Build wheels (${{ matrix.os }})
+    name: Build wheels (macOS ${{ matrix.target_arch }})
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: true
       matrix:
         #os: [ubuntu-latest, macos-latest]
-        os: [macos-latest]
         #python-version: ["3.9", "3.10", "3.11", "3.12"]
-        python-version: ["3.11"]
         include:
           - os: macos-latest
-            arch: arm64
+            python-version: "3.11"
             target_arch: arm64
             cibw_arch: "arm64"
-          #- os: macos-latest
-          #  arch: x86_64
-          #  target_arch: x86_64
-          #  cibw_arch: "x86_64"
-
+          - os: macos-13
+            python-version: "3.11"
+            target_arch: x86_64
+            cibw_arch: "x86_64"
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -76,6 +73,16 @@ jobs:
           grep -Ev '^(twine|sphinx|clang-format|cppcheck|cpplint)' requirements.txt > filtered.txt
           pip install -r filtered.txt
 
+      - name: Cache build artifacts
+        uses: actions/cache@v3
+        with:
+          path: |
+            ${{ github.workspace }}/build
+            ~/.cache/pip
+          key: ${{ runner.os }}-${{ matrix.python-version }}-${{ matrix.target_arch }}-build-${{ hashFiles('**/CMakeLists.txt', 'requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ matrix.python-version }}-${{ matrix.target_arch }}-build-
+
       - name: Configure CMake
         run: |
           cmake -B build -G Ninja \
@@ -85,10 +92,9 @@ jobs:
             -DBUILD_TESTS=ON
 
       - name: Build
-        run: |
-          cmake --build build --config ${{ env.BUILD_TYPE }} --parallel
+        run: cmake --build build --config ${{ env.BUILD_TYPE }} --parallel
 
-      - name: Configure build environment
+      - name: Configure wheel build environment
         run: |
           VERSION="${{ github.event.inputs.version_tag }}"
           VERSION="${VERSION#v}"  # Strip the leading 'v'
@@ -112,7 +118,7 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: wheels-${{ runner.os }}-${{ matrix.python-version }}
+          name: wheels-${{ runner.os }}-${{ matrix.python-version }}-${{ matrix.target_arch }}
           path: ./wheelhouse/*.whl
 
   publish-pypi:
