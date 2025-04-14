@@ -21,13 +21,12 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        #os: [ubuntu-latest, macos-latest]
-        os: [ubuntu-latest]
+        os: [ubuntu-latest, macos-latest]
         include:
-          #  - os: macos-latest
-          #    python-version: "3.11"
-          #    target_arch: arm64
-          #    cibw_arch: "arm64"
+          - os: macos-latest
+            python-version: "3.11"
+            target_arch: arm64
+            cibw_arch: "arm64"
           - os: ubuntu-latest
             python-version: "3.11"
             target_arch: x86_64
@@ -109,7 +108,15 @@ jobs:
         env:
           CIBW_BUILD: cp${{ env.PY_VERSION }}*
           CIBW_ARCHS: ${{ matrix.cibw_arch }}
-
+          CIBW_BEFORE_BUILD: |
+            rm -rf build && \
+            pip install -r requirements.txt && \
+            cmake -B build -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
+              -DPython3_EXECUTABLE=$(which python) \
+              -DPython3_FIND_IMPLEMENTATIONS=CPython \
+              -DCMAKE_PREFIX_PATH="$(python -c 'import torch; print(torch.utils.cmake_prefix_path)')" \
+              -DBUILD_TESTS=ON && \
+            cmake --build build --config ${BUILD_TYPE} --parallel
         run: |
           export TORCH_LIB=$(python -c 'import torch; print(torch.__path__[0] + "/lib")')
           python -m pip install cibuildwheel
