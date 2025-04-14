@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 import os
-import platform
 import glob
 import torch
 from pathlib import Path
@@ -19,7 +18,6 @@ def parse_library_names(libdir):
 
 
 current_dir = os.getenv("WORKSPACE", Path().absolute())
-torch_lib_dir = os.path.join(os.path.dirname(torch.__file__), "lib")
 include_dirs = [
     f"{current_dir}",
     f"{current_dir}/build",
@@ -27,20 +25,6 @@ include_dirs = [
 ]
 lib_dirs = [f"{current_dir}/build/lib"]
 libraries = parse_library_names(f"{current_dir}/build/lib")
-
-
-extra_link_args = []
-if platform.system() == "Darwin":
-    extra_link_args += [
-        f"-Wl,-rpath,{torch_lib_dir}",
-        "-Wl,-rpath,@loader_path/.dylibs",
-        "-Wl,-rpath,@executable_path/.dylibs",
-    ]
-else:
-    extra_link_args += [
-        f"-Wl,-rpath,{torch_lib_dir}",
-        "-Wl,-rpath,$ORIGIN/.libs",
-    ]
 
 if torch.cuda.is_available():
     ext_module = cpp_extension.CUDAExtension(
@@ -51,7 +35,6 @@ if torch.cuda.is_available():
         library_dirs=lib_dirs,
         libraries=libraries,
         extra_compile_args={"nvcc": ["--extended-lambda"]},
-        # extra_link_args=extra_link_args,
     )
 else:
     ext_module = cpp_extension.CppExtension(
@@ -60,7 +43,6 @@ else:
         include_dirs=include_dirs,
         library_dirs=lib_dirs,
         libraries=libraries,
-        # extra_link_args=extra_link_args,
     )
 
 setup(
