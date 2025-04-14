@@ -22,7 +22,6 @@ jobs:
       fail-fast: true
       matrix:
         os: [ubuntu-latest, macos-latest]
-        #python-version: ["3.9", "3.10", "3.11", "3.12"]
         include:
           - os: macos-latest
             python-version: "3.11"
@@ -73,7 +72,8 @@ jobs:
           grep -Ev '^(twine|sphinx|clang-format|cppcheck|cpplint)' requirements.txt > filtered.txt
           pip install -r filtered.txt
 
-      - name: Cache build artifacts
+      - name: Cache build artifacts (macOS only)
+        if: ${{ matrix.os == 'macos-latest' }}
         uses: actions/cache@v3
         with:
           path: |
@@ -82,6 +82,10 @@ jobs:
           key: ${{ runner.os }}-${{ matrix.python-version }}-${{ matrix.target_arch }}-build-${{ hashFiles('**/CMakeLists.txt', 'requirements.txt') }}
           restore-keys: |
             ${{ runner.os }}-${{ matrix.python-version }}-${{ matrix.target_arch }}-build-
+
+      - name: Clean build directory (Ubuntu)
+        if: ${{ matrix.os == 'ubuntu-latest' }}
+        run: rm -rf build
 
       - name: Configure CMake
         run: |
@@ -110,7 +114,6 @@ jobs:
           echo "PY_VERSION=$PY_VERSION" >> $GITHUB_ENV
           if [ "${{ matrix.os }}" = "macos-latest" ]; then
             echo "MACOSX_DEPLOYMENT_TARGET=11.1" >> $GITHUB_ENV
-            # Removed extra quotes around the architecture flag.
             echo "ARCHFLAGS=-arch ${{ matrix.target_arch }}" >> $GITHUB_ENV
           fi
 
