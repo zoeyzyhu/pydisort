@@ -22,7 +22,6 @@ def parse_library_names(libdir):
 current_dir = os.getenv("WORKSPACE", Path().absolute())
 site_packages_dir = sysconfig.get_path("purelib")
 torch_lib_dir = os.path.join(os.path.dirname(torch.__file__), "lib")
-torch_include_dir = torch.utils.cpp_extension.include_paths()
 
 include_dirs = [
     f"{current_dir}",
