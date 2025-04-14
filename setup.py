@@ -25,14 +25,14 @@ torch_lib_dir = os.path.join(os.path.dirname(torch.__file__), "lib")
 torch_include_dir = torch.utils.cpp_extension.include_paths()
 
 torch_libs = [
-    "c10",
-    "c10_cuda" if torch.cuda.is_available() else None,
-    "torch_cpu",
-    "torch",
-    "torch_python",
+    # "c10",
+    # "c10_cuda" if torch.cuda.is_available() else None,
+    # "torch_cpu",
+    # "torch",
+    # "torch_python",
     "torch_global_deps",
 ]
-torch_libs = [lib for lib in torch_libs if lib is not None]
+# torch_libs = [lib for lib in torch_libs if lib is not None]
 
 include_dirs = [
     f"{current_dir}",
