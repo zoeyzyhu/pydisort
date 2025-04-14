@@ -28,11 +28,10 @@ include_dirs = [
     f"{current_dir}",
     f"{current_dir}/build",
     f"{current_dir}/build/_deps/fmt-src/include",
-] + torch_include_dir
+]
 
 lib_dirs = [
     f"{current_dir}/build/lib",
-    # torch_lib_dir,
     site_packages_dir,
 ]
 
