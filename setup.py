@@ -23,13 +23,16 @@ current_dir = os.getenv("WORKSPACE", Path().absolute())
 site_packages_dir = sysconfig.get_path("purelib")
 torch_lib_dir = os.path.join(os.path.dirname(torch.__file__), "lib")
 torch_include_dir = torch.utils.cpp_extension.include_paths()
+
 torch_libs = [
     "c10",
-    "torch",
+    "c10_cuda" if torch.cuda.is_available() else None,
     "torch_cpu",
-    "torch_global_deps",
+    "torch",
     "torch_python",
+    "torch_global_deps",
 ]
+torch_libs = [lib for lib in torch_libs if lib is not None]
 
 include_dirs = [
     f"{current_dir}",
@@ -41,7 +44,7 @@ lib_dirs = [
     f"{current_dir}/build/lib",
     torch_lib_dir,
     site_packages_dir,
-]
+] + torch_include_dir
 
 
 libraries = torch_libs + parse_library_names(f"{current_dir}/build/lib")
