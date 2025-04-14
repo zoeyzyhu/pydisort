@@ -56,11 +56,10 @@ message(STATUS "Python3_EXECUTABLE: ${Python3_EXECUTABLE}")
 if(Python3_Interpreter_FOUND)
   execute_process(
     COMMAND ${Python3_EXECUTABLE} -c "import torch; print(torch.__file__)"
-    OUTPUT_VARIABLE torch_init_file
+    OUTPUT_VARIABLE torch_init_file_raw
     OUTPUT_STRIP_TRAILING_WHITESPACE ERROR_QUIET)
 
-  cmake_path(CONVERT ${torch_init_file} TO_CMAKE_PATH_LIST torch_init_file
-             NORMALIZE)
+  cmake_path(CONVERT "${torch_init_file_raw}" TO_CMAKE_PATH_LIST torch_init_file NORMALIZE)
 
   cmake_path(REPLACE_FILENAME torch_init_file lib OUTPUT_VARIABLE torch_lib_dir)
   cmake_path(REPLACE_FILENAME torch_init_file include OUTPUT_VARIABLE
