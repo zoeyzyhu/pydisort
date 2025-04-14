@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 import os
-import sysconfig
 import platform
 import glob
 import torch
@@ -20,20 +19,13 @@ def parse_library_names(libdir):
 
 
 current_dir = os.getenv("WORKSPACE", Path().absolute())
-site_packages_dir = sysconfig.get_path("purelib")
 torch_lib_dir = os.path.join(os.path.dirname(torch.__file__), "lib")
-
 include_dirs = [
     f"{current_dir}",
     f"{current_dir}/build",
     f"{current_dir}/build/_deps/fmt-src/include",
 ]
-
-lib_dirs = [
-    f"{current_dir}/build/lib",
-    # site_packages_dir,
-]
-
+lib_dirs = [f"{current_dir}/build/lib"]
 libraries = parse_library_names(f"{current_dir}/build/lib")
 
 
@@ -59,7 +51,7 @@ if torch.cuda.is_available():
         library_dirs=lib_dirs,
         libraries=libraries,
         extra_compile_args={"nvcc": ["--extended-lambda"]},
-        extra_link_args=extra_link_args,
+        # extra_link_args=extra_link_args,
     )
 else:
     ext_module = cpp_extension.CppExtension(
@@ -68,7 +60,7 @@ else:
         include_dirs=include_dirs,
         library_dirs=lib_dirs,
         libraries=libraries,
-        extra_link_args=extra_link_args,
+        # extra_link_args=extra_link_args,
     )
 
 setup(
