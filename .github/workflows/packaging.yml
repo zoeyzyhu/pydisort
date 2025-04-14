@@ -122,6 +122,7 @@ jobs:
             cmake --build build --parallel
         run: |
           export TORCH_LIB=$(python -c 'import torch; print(torch.__path__[0] + "/lib")')
+          export LD_LIBRARY_PATH="$TORCH_LIB:$LD_LIBRARY_PATH"
           python -m pip install cibuildwheel
           PLATFORM=$(echo "${{ runner.os }}" | tr '[:upper:]' '[:lower:]')
           python -m cibuildwheel --platform $PLATFORM --output-dir wheelhouse
