@@ -22,11 +22,16 @@ jobs:
       fail-fast: true
       matrix:
         os: [ubuntu-latest, macos-latest]
+        #python-version: ["3.9", "3.10", "3.11", "3.12"]
         include:
           - os: macos-latest
             python-version: "3.11"
             target_arch: arm64
             cibw_arch: "arm64"
+          #- os: macos-13
+          #  python-version: "3.11"
+          #  target_arch: x86_64
+          #  cibw_arch: "x86_64"
           - os: ubuntu-latest
             python-version: "3.11"
             target_arch: x86_64
@@ -61,9 +66,6 @@ jobs:
           VERSION="${VERSION#v}"
           echo "VERSION=${VERSION}" >> $GITHUB_ENV
 
-      - name: Clean build directory
-        run: rm -rf build
-
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -75,28 +77,20 @@ jobs:
           grep -Ev '^(twine|sphinx|clang-format|cppcheck|cpplint)' requirements.txt > filtered.txt
           pip install -r filtered.txt
 
-      - name: Cache dependencies (macOS only)
-        if: ${{ matrix.os == 'macos-latest' }}
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.cache/pip
-            ${{ github.workspace }}/build/_deps
-          key: ${{ runner.os }}-${{ matrix.python-version }}-${{ matrix.target_arch }}-deps-${{ hashFiles('**/CMakeLists.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-${{ matrix.python-version }}-${{ matrix.target_arch }}-deps-
-
-      - name: Clean build directory (Ubuntu)
-        if: ${{ matrix.os == 'ubuntu-latest' }}
-        run: rm -rf build
-
       - name: Configure CMake
         run: |
-          cmake -B build -G Ninja \
-            -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
-            ${{ matrix.os == 'macos-latest' && '-DCMAKE_OSX_ARCHITECTURES=${{ matrix.target_arch }}' || '' }} \
-            -DCMAKE_PREFIX_PATH="$(python -c 'import torch; print(torch.utils.cmake_prefix_path)')" \
-            -DBUILD_TESTS=ON
+          if [ "${{ matrix.os }}" = "macos-latest" ]; then
+            cmake -B build -G Ninja \
+              -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
+              -DCMAKE_OSX_ARCHITECTURES=${{ matrix.target_arch }} \
+              -DCMAKE_PREFIX_PATH="$(python -c 'import torch; print(torch.utils.cmake_prefix_path)')" \
+              -DBUILD_TESTS=ON
+          else
+            cmake -B build -G Ninja \
+              -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
+              -DCMAKE_PREFIX_PATH="$(python -c 'import torch; print(torch.utils.cmake_prefix_path)')" \
+              -DBUILD_TESTS=ON
+          fi
 
       - name: Build
         run: cmake --build build --config ${{ env.BUILD_TYPE }} --parallel
@@ -110,7 +104,7 @@ jobs:
           echo "PY_VERSION=$PY_VERSION" >> $GITHUB_ENV
           if [ "${{ matrix.os }}" = "macos-latest" ]; then
             echo "MACOSX_DEPLOYMENT_TARGET=11.1" >> $GITHUB_ENV
-            echo "ARCHFLAGS=-arch ${{ matrix.target_arch }}" >> $GITHUB_ENV
+            echo "ARCHFLAGS='-arch ${{ matrix.target_arch }}'" >> $GITHUB_ENV
           fi
 
       - name: Build wheel
