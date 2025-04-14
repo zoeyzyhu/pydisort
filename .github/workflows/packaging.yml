@@ -119,7 +119,7 @@ jobs:
               -DPython3_FIND_IMPLEMENTATIONS=CPython \
               -DCMAKE_PREFIX_PATH="$(python -c 'import torch; print(torch.utils.cmake_prefix_path)')" \
               -DBUILD_TESTS=ON && \
-            cmake --build build --config ${BUILD_TYPE} --parallel
+            cmake --build build --parallel
         run: |
           export TORCH_LIB=$(python -c 'import torch; print(torch.__path__[0] + "/lib")')
           python -m pip install cibuildwheel
