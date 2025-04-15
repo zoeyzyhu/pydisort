@@ -29,9 +29,6 @@ jobs:
       fail-fast: true
 
     steps:
-      - name: Install Python library
-        run: |
-          sudo apt install -y python3.11-dev
       - name: Checkout code
         uses: actions/checkout@v4
         with:
