@@ -64,7 +64,6 @@ jobs:
           echo "VERSION=${VERSION}" >> $GITHUB_ENV
 
       - name: Set up Python
-        if: ${{ matrix.os == 'macos-latest' }}
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
