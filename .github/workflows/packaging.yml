@@ -31,7 +31,7 @@ jobs:
     steps:
       - name: Install Python library
         run: |
-          apt install -y python3.8-dev python3.9-dev python3.10-dev python3.11-dev python3.12-dev
+          sudo apt install -y python3.11-dev
       - name: Checkout code
         uses: actions/checkout@v4
         with:
