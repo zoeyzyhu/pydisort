@@ -120,8 +120,8 @@ jobs:
             LD_LIBRARY_PATH=$PYTORCH_LIB auditwheel repair -w {dest_dir} {wheel}
           CIBW_BEFORE_BUILD: >
             python -m pip install torch --extra-index-url https://download.pytorch.org/whl/cpu && \
-            FILTERED=$(python -c "import re; print('\n'.join(l for l in open('requirements.txt') if not re.match(r'^(twine|sphinx|clang-format|cppcheck|cpplint|torch)', l)))") && \
-            python -m pip install -r $FILTERED && \
+            python -c "import re; open('filtered.txt','w').writelines([l for l in open('requirements.txt') if not re.match(r'^(twine|sphinx|clang-format|cppcheck|cpplint|torch)', l)])" && \
+            python -m pip install -r filtered.txt && \
             TORCH_LIB=$(python -c "import torch; print(torch.__path__[0] + '/lib')") && \
             TORCH_CMAKE_PREFIX_PATH=$(python -c "import torch.utils; print(torch.utils.cmake_prefix_path)") && \
             export LD_LIBRARY_PATH="$TORCH_LIB:$LD_LIBRARY_PATH" && \
