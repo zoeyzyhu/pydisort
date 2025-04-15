@@ -84,7 +84,7 @@ jobs:
         env:
           CIBW_BUILD: cp${{ matrix.py }}-${{ matrix.libc }}linux*
           CIBW_ARCHS: ${{ matrix.arch }}
-          CIBW_ENVIRONMENT: "WORKSPACE=${{ github.workspace }} CMAKE_PREFIX_PATH=$(python -c 'import torch; print(torch.utils.cmake_prefix_path)')"
+          CIBW_ENVIRONMENT: "WORKSPACE=${{ github.workspace }}"
 
       - name: Archive the built wheels
         uses: actions/upload-artifact@v4
