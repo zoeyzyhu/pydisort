@@ -119,7 +119,6 @@ jobs:
             echo "Using LD_LIBRARY_PATH=$PYTORCH_LIB" &&
             LD_LIBRARY_PATH=$PYTORCH_LIB auditwheel repair -w {dest_dir} {wheel}
           CIBW_BEFORE_BUILD: >
-            pip install --upgrade pip && \
             pip install torch --extra-index-url https://download.pytorch.org/whl/cpu && \
             grep -Ev '^(twine|sphinx|clang-format|cppcheck|cpplint|torch)' requirements.txt > filtered.txt && \
             pip install -r filtered.txt && \
