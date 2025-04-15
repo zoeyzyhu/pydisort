@@ -22,8 +22,6 @@ include_dirs = [
     f"{current_dir}",
     f"{current_dir}/build",
     f"{current_dir}/build/_deps/fmt-src/include",
-    f"{current_dir}/cdisort213",
-    f"{current_dir}/disort",
 ]
 lib_dirs = [f"{current_dir}/build/lib"]
 libraries = parse_library_names(f"{current_dir}/build/lib")

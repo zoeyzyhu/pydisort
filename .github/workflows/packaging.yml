@@ -52,12 +52,39 @@ jobs:
         if: ${{ inputs.version_tag != 'latest' }}
         run: git checkout ${{ steps.determine_version.outputs.version }}
 
+      - name: Set sanitized version
+        run: |
+          VERSION="${{ steps.determine_version.outputs.version }}"
+          VERSION="${VERSION#v}"
+          echo "VERSION=${VERSION}" >> $GITHUB_ENV
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: "pip"
+
+      - name: Install Python dependencies
+        run: |
+          grep -Ev '^(twine|sphinx|clang-format|cppcheck|cpplint)' requirements.txt > filtered.txt
+          pip install -r filtered.txt
+
+      - name: Configure CMake (host build, for tests or other purposes)
+        run: |
+          cmake -B build -G Ninja \
+            -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
+            -DCMAKE_PREFIX_PATH="$(python -c 'import torch; print(torch.utils.cmake_prefix_path)')" \
+            -DBUILD_TESTS=ON
+
+      - name: Build (host build)
+        run: cmake --build build --config ${{ env.BUILD_TYPE }} --parallel
+
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.16.2
         env:
           CIBW_BUILD: cp${{ matrix.py }}-${{ matrix.libc }}linux*
           CIBW_ARCHS: ${{ matrix.arch }}
-          CIBW_ENVIRONMENT: "WORKSPACE=${{ github.workspace }}"
+          CIBW_ENVIRONMENT: "WORKSPACE=${{ github.workspace }} CMAKE_PREFIX_PATH=$(python -c 'import torch; print(torch.utils.cmake_prefix_path)')"
 
       - name: Archive the built wheels
         uses: actions/upload-artifact@v4
