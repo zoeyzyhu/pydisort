@@ -30,7 +30,8 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+        #python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+        python-version: ["3.11"]
         include:
           - os: macos-latest
             target_arch: arm64
@@ -93,7 +94,9 @@ jobs:
             -DBUILD_TESTS=OFF
 
       - name: CMake build
-        run: cmake --build build --parallel
+        run: |
+          cmake --build build --parallel
+          pip install .
 
       - name: Build macOS wheel
         env:
@@ -200,10 +203,8 @@ jobs:
 
   publish-pypi:
     name: Publish to PyPI
-    needs:
-      - build-macos
-      - build-linux
-    if: ${{ needs.build-macos.result == 'success' || needs.build-ubuntu.result == 'success' }}
+    if: ${{ always() }}
+    needs: [build-macos, build-linux]
     runs-on: ubuntu-latest
     permissions:
       id-token: write
@@ -221,6 +222,7 @@ jobs:
           find . -name '*.whl' -exec mv {} dist/ \;
 
       - name: Publish to PyPI
+        if: ${{ needs.build-macos.result == 'success' || needs.build-ubuntu.result == 'success' }}
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           user: __token__
