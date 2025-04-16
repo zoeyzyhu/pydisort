@@ -13,37 +13,34 @@ on:
         description: "Select OS to build wheels for"
         required: true
         default: "Both"
+        type: choice
         options:
+          - Both
           - MacOS
           - Ubuntu
-          - Both
 
 env:
   BUILD_TYPE: Release
 
 jobs:
-  build-wheels:
-    name: Build ${{ matrix.os }} - ${{ matrix.target_arch }} - ${{ matrix.python-version }}
-    runs-on: ${{ matrix.os }}
-    if: ${{ github.event.inputs.build_os == 'Both' || (github.event.inputs.build_os == 'MacOS' && matrix.os == 'macos-latest') || (github.event.inputs.build_os == 'Ubuntu' && matrix.os == 'ubuntu-latest') }}
+  build-macos:
+    name: Build macOS wheels
+    runs-on: macos-latest
+    if: ${{ inputs.build_os == 'Both' || inputs.build_os == 'MacOS' }}
     strategy:
       fail-fast: true
       matrix:
-        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+        python-version: ["3.11"]
         include:
           - os: macos-latest
             target_arch: arm64
             cibw_arch: "arm64"
-          - os: ubuntu-latest
-            target_arch: x86_64
-            cibw_arch: "x86_64"
 
     steps:
-      # === 0. Checkout code and set up environment ===
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          ref: ${{ inputs.branch || 'main' }}
+          ref: ${{ inputs.branch }}
           fetch-depth: 0
 
       - name: Determine version tag
@@ -51,139 +48,144 @@ jobs:
         run: |
           echo "Input version tag: '${{ inputs.version_tag }}'"
           if [[ "${{ inputs.version_tag }}" == "latest" ]]; then
-            echo "No specific version provided, determining latest tag..."
             git fetch --tags
-            LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null)
-            echo "Determined tag is ${LATEST_TAG}"
+            LATEST_TAG=$(git describe --tags --abbrev=0)
             echo "version=${LATEST_TAG}" >> $GITHUB_OUTPUT
           else
-            echo "Using provided tag: ${{ inputs.version_tag }}"
             echo "version=${{ inputs.version_tag }}" >> $GITHUB_OUTPUT
           fi
 
-      - name: Checkout tag if not 'latest'
-        if: ${{ inputs.version_tag != 'latest' }}
+      - name: Sanitize version
         run: |
-          echo "Checking out tag: ${{ steps.determine_version.outputs.version }}"
-          git checkout ${{ steps.determine_version.outputs.version }}
+          V="${{ steps.determine_version.outputs.version }}"
+          echo "VERSION=${V#v}" >> $GITHUB_ENV
 
-      - name: Set sanitized version
+      - name: Configure wheel build env
         run: |
-          VERSION="${{ steps.determine_version.outputs.version }}"
-          SANITIZED_VERSION="${VERSION#v}"
-          echo "Sanitized version: ${SANITIZED_VERSION}"
-          echo "VERSION=${SANITIZED_VERSION}" >> $GITHUB_ENV
+          PV=$(echo "${{ matrix.python-version }}" | tr -d '.')
+          echo "PY_VERSION=$PV" >> $GITHUB_ENV
+          echo "MACOSX_DEPLOYMENT_TARGET=11.1" >> $GITHUB_ENV
+          echo "ARCHFLAGS=-arch ${{ matrix.target_arch }}" >> $GITHUB_ENV
 
-      - name: Configure wheel build environment
-        run: |
-          PY_VERSION=$(echo "${{ matrix.python-version }}" | tr -d '.')
-          echo "Setting up Python $PY_VERSION for cibuildwheel"
-          echo "PY_VERSION=$PY_VERSION" >> $GITHUB_ENV
-          if [ "${{ matrix.os }}" = "macos-latest" ]; then
-            echo "MACOSX_DEPLOYMENT_TARGET=11.1" >> $GITHUB_ENV
-            echo "ARCHFLAGS=-arch ${{ matrix.target_arch }}" >> $GITHUB_ENV
-          fi
-
-      # === 1. For MacOS, build in the runner for cibuildwheel ===
-      - name: Set up Python
-        if: ${{ matrix.os == 'macos-latest' }}
+      - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
-          cache: "pip"
+          cache: pip
 
-      - name: Install Python dependencies
-        if: ${{ matrix.os == 'macos-latest' }}
+      - name: Install deps
         run: |
-          grep -Ev '^(twine|sphinx|guzzle_sphinx_theme|pre-commit|clang-format|cppcheck|cpplint|pylint|sphinxcontrib-napoleon|ninja|setuptools|cmake)' requirements.txt > filtered.txt
+          grep -Ev '^(twine|sphinx|pre-commit|clang-format|cppcheck|cpplint|pylint|ninja|setuptools|cmake)' requirements.txt > filtered.txt
           pip install -r filtered.txt
 
-      - name: Configure CMake (host build)
-        if: ${{ matrix.os == 'macos-latest' }}
+      - name: CMake configure
         run: |
           cmake -B build -G Ninja \
             -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
-            -DCMAKE_CXX_FLAGS_RELEASE="-Os -s" \
             -DCMAKE_OSX_ARCHITECTURES=${{ matrix.target_arch }} \
             -DCMAKE_PREFIX_PATH="$(python -c 'import torch; print(torch.utils.cmake_prefix_path)')" \
             -DBUILD_TESTS=OFF
 
-      - name: Build (host build)
-        if: ${{ matrix.os == 'macos-latest' }}
-        run: cmake --build build --config ${{ env.BUILD_TYPE }} --parallel
+      - name: CMake build
+        run: cmake --build build --parallel
 
-      - name: Build wheel MacOS
-        if: ${{ matrix.os == 'macos-latest' }}
+      - name: Build macOS wheel
         env:
           CIBW_PLATFORM: macos
           CIBW_BUILD: cp${{ env.PY_VERSION }}*
           CIBW_ARCHS: ${{ matrix.cibw_arch }}
-          CIBW_BEFORE_BUILD: |
-            python -c "import re; open('filtered.txt','w').writelines([l for l in open('requirements.txt') if not re.match(r'^(twine|sphinx|guzzle_sphinx_theme|pre-commit|clang-format|cppcheck|cpplint|pylint|sphinxcontrib-napoleon|ninja|setuptools|cmake)', l)])" && \
-            pip install -r filtered.txt && \
-            cmake -B build -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
-                  -DCMAKE_CXX_FLAGS_RELEASE="-Os -s" \
-                  -DBUILD_TESTS=OFF && \
-            cmake --build build --parallel
         run: |
-          export TORCH_LIB=$(python -c 'import torch; print(torch.__path__[0] + "/lib")')
-          export DYLD_FALLBACK_LIBRARY_PATH="$TORCH_LIB:$DYLD_FALLBACK_LIBRARY_PATH"
           pip install cibuildwheel
           python -m cibuildwheel --output-dir wheelhouse
 
-      # === 2. For Ubuntu, build using cibuildwheel containers ===
-      - name: Build wheel Ubuntu
-        if: ${{ matrix.os == 'ubuntu-latest' }}
+      - name: Upload macOS wheels
+        uses: actions/upload-artifact@v4
+        with:
+          name: wheels-macos-${{ matrix.python-version }}-${{ matrix.target_arch }}
+          path: wheelhouse/*.whl
+
+  build-ubuntu:
+    name: Build Ubuntu wheels
+    runs-on: ubuntu-latest
+    if: ${{ inputs.build_os == 'Both' || inputs.build_os == 'Ubuntu' }}
+    strategy:
+      fail-fast: true
+      matrix:
+        python-version: ["3.11"]
+        include:
+          - os: ubuntu-latest
+            target_arch: x86_64
+            cibw_arch: "x86_64"
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch }}
+          fetch-depth: 0
+
+      - name: Determine version tag
+        id: determine_version
+        run: |
+          echo "Input version tag: '${{ inputs.version_tag }}'"
+          if [[ "${{ inputs.version_tag }}" == "latest" ]]; then
+            git fetch --tags
+            LATEST_TAG=$(git describe --tags --abbrev=0)
+            echo "version=${LATEST_TAG}" >> $GITHUB_OUTPUT
+          else
+            echo "version=${{ inputs.version_tag }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Sanitize version
+        run: |
+          V="${{ steps.determine_version.outputs.version }}"
+          echo "VERSION=${V#v}" >> $GITHUB_ENV
+
+      - name: Configure wheel build env
+        run: |
+          PV=$(echo "${{ matrix.python-version }}" | tr -d '.')
+          echo "PY_VERSION=$PV" >> $GITHUB_ENV
+
+      - name: Build Ubuntu wheel
         env:
           CIBW_PLATFORM: linux
           CIBW_BUILD: cp${{ env.PY_VERSION }}*
           CIBW_ARCHS: ${{ matrix.cibw_arch }}
           CIBW_SKIP: "*musllinux*"
           CIBW_REPAIR_WHEEL_COMMAND_LINUX: >
-            PYTORCH_LIB=$(python -c "import torch, os; print(os.path.join(torch.__path__[0], 'lib'))") &&
-            echo "Using LD_LIBRARY_PATH=$PYTORCH_LIB" &&
+            PYTORCH_LIB=$(python -c "import torch; print(torch.__path__[0] + '/lib')")
             LD_LIBRARY_PATH=$PYTORCH_LIB auditwheel repair -w {dest_dir} {wheel}
-          CIBW_BEFORE_BUILD: |
-            pip install torch --extra-index-url https://download.pytorch.org/whl/cpu && \
-            python -c "import re; open('filtered.txt','w').writelines([l for l in open('requirements.txt') if not re.match(r'^(twine|sphinx|guzzle_sphinx_theme|pre-commit|clang-format|cppcheck|cpplint|pylint|torch|sphinxcontrib-napoleon|ninja|setuptools|cmake)', l)])" && \
-            pip install -r filtered.txt && \
-            TORCH_LIB=$(python -c "import torch; print(torch.__path__[0] + '/lib')") && \
-            TORCH_CMAKE_PREFIX_PATH=$(python -c "import torch.utils; print(torch.utils.cmake_prefix_path)") && \
-            export LD_LIBRARY_PATH="$TORCH_LIB:$LD_LIBRARY_PATH" && \
-            cmake -B build -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
-                  -DCMAKE_CXX_FLAGS_RELEASE="-Os -s" \
-                  -DPython3_EXECUTABLE=$(which python) \
-                  -DCMAKE_PREFIX_PATH="$TORCH_CMAKE_PREFIX_PATH" \
-                  -DBUILD_TESTS=OFF && \
-            cmake --build build --parallel
         run: |
+          pip install torch --extra-index-url https://download.pytorch.org/whl/cpu
           pip install cibuildwheel
           python -m cibuildwheel --output-dir wheelhouse
 
-      # === 3. Upload wheels ===
-      - name: Upload artifacts
+      - name: Upload Ubuntu wheels
         uses: actions/upload-artifact@v4
         with:
-          name: wheels-${{ runner.os }}-${{ matrix.python-version }}-${{ matrix.target_arch }}
-          path: ./wheelhouse/*.whl
+          name: wheels-ubuntu-${{ matrix.python-version }}-${{ matrix.target_arch }}
+          path: wheelhouse/*.whl
 
   publish-pypi:
-    needs: build-wheels
+    name: Publish to PyPI
+    needs:
+      - build-macos
+      - build-ubuntu
     runs-on: ubuntu-latest
     permissions:
       id-token: write
       contents: read
+
     steps:
       - name: Download all wheels
         uses: actions/download-artifact@v4
         with:
           pattern: wheels-*
-          path: dist
 
-      - name: Merge wheel artifacts
+      - name: Merge wheels
         run: |
-          find dist -name '*.whl' -exec mv {} dist/ \;
-          rm -rf dist/*/
+          mkdir dist
+          find . -name '*.whl' -exec mv {} dist/ \;
 
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
