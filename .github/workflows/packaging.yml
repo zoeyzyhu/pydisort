@@ -45,7 +45,7 @@ jobs:
           if [[ "${{ inputs.version_tag }}" == "latest" ]]; then
             echo "No specific version provided, determining latest tag..."
             git fetch --tags
-            LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "0.10.13")
+            LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null)
             echo "Determined tag is ${LATEST_TAG}"
             echo "version=${LATEST_TAG}" >> $GITHUB_OUTPUT
           else
@@ -66,14 +66,13 @@ jobs:
           echo "Sanitized version: ${SANITIZED_VERSION}"
           echo "VERSION=${SANITIZED_VERSION}" >> $GITHUB_ENV
 
-      # === 1. For MacOS, we build in the runner for cibuildwheel ===
       - name: Set up Python
-        if: ${{ matrix.os == 'macos-latest' }}
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
           cache: "pip"
 
+      # === 1. For MacOS, we build in the runner for cibuildwheel ===
       - name: Install Python dependencies
         if: ${{ matrix.os == 'macos-latest' }}
         run: |
@@ -96,6 +95,7 @@ jobs:
       - name: Configure wheel build environment
         run: |
           PY_VERSION=$(echo "${{ matrix.python_version }}" | tr -d '.')
+          echo "Setting up Python $PY_VERSION for cibuildwheel"
           echo "PY_VERSION=$PY_VERSION" >> $GITHUB_ENV
           if [ "${{ matrix.os }}" = "macos-latest" ]; then
             echo "MACOSX_DEPLOYMENT_TARGET=11.1" >> $GITHUB_ENV
