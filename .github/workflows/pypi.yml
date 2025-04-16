@@ -101,6 +101,16 @@ jobs:
           CIBW_PLATFORM: macos
           CIBW_BUILD: cp${{ env.PY_VERSION }}*
           CIBW_ARCHS: ${{ matrix.cibw_arch }}
+          CIBW_REPAIR_WHEEL_COMMAND_MACOS: >
+            delocate-wheel \
+              --ignore-deps 'libc10.*\.dylib' \
+              --ignore-deps 'libtorch.*\.dylib' \
+              --ignore-deps 'libtorch_cpu.*\.dylib' \
+              --ignore-deps 'libtorch_global_deps.*\.dylib' \
+              --ignore-deps 'libtorch_python.*\.dylib' \
+              --ignore-deps 'libshm.*\.dylib' \
+              --ignore-deps 'libiomp5.*\.dylib' \
+              -w {dest_dir} {wheel}
           CIBW_BEFORE_BUILD: |
             python -c "import re; open('filtered.txt','w').writelines([l for l in open('requirements.txt') if not re.match(r'^(twine|sphinx|guzzle_sphinx_theme|pre-commit|clang-format|cppcheck|cpplint|pylint|sphinxcontrib-napoleon|ninja|setuptools|cmake)', l)])" && \
             pip install -r filtered.txt && \
