@@ -53,7 +53,7 @@ jobs:
 
       - name: Install Python dependencies
         run: |
-          grep -Ev '^(twine|sphinx|guzzle_sphinx_theme|pre-commit|clang-format|cppcheck|cpplint|pylint|torch|sphinxcontrib-napoleon|setuptools|cmake)$' requirements.txt > filtered_requirements.txt
+          grep -Ev '^(twine|sphinx|guzzle_sphinx_theme|pre-commit|clang-format|cppcheck|cpplint|pylint|sphinxcontrib-napoleon|setuptools|cmake)$' requirements.txt > filtered_requirements.txt
           pip install -r filtered_requirements.txt
 
       - name: Cache CMake build
