@@ -111,6 +111,7 @@ jobs:
         run: |
           export TORCH_LIB=$(python -c 'import torch; print(torch.__path__[0] + "/lib")')
           export DYLD_FALLBACK_LIBRARY_PATH="$TORCH_LIB:$DYLD_FALLBACK_LIBRARY_PATH"
+          pip install cibuildwheel
           python -m cibuildwheel --output-dir wheelhouse
 
       # === 2. Build wheels using cibuildwheel containers ===
@@ -139,6 +140,7 @@ jobs:
                   -DBUILD_TESTS=ON && \
             cmake --build build --parallel
         run: |
+          pip install cibuildwheel
           python -m cibuildwheel --output-dir wheelhouse
 
       # === 3. Upload wheels ===
