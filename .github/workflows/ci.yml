@@ -1,10 +1,7 @@
 name: CI
 
 on:
-  #pull_request:
-  #  branches: [main]
-  issue_comment:
-    types: [created]
+  pull_request:
     branches: [main]
 
 env:
