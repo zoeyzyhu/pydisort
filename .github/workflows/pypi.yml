@@ -30,8 +30,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        #python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
-        python-version: ["3.11"]
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
         include:
           - os: macos-latest
             target_arch: arm64
@@ -94,8 +93,7 @@ jobs:
             -DBUILD_TESTS=OFF
 
       - name: CMake build
-        run: |
-          cmake --build build --parallel
+        run: cmake --build build --parallel
 
       - name: Build macOS wheel
         env:
