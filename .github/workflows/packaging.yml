@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       version_tag:
-        description: "Release version tag (e.g., v1.0.0)"
+        description: "Release version tag"
         default: "latest"
       branch:
         description: "Source branch for the release"
@@ -12,7 +12,6 @@ on:
 
 env:
   BUILD_TYPE: Release
-  PYTHON_VERSION: "3.11"
 
 jobs:
   build-wheels:
@@ -21,8 +20,6 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        #os: [ubuntu-latest, macos-latest]
-        os: [ubuntu-latest]
         include:
           #- os: macos-latest
           #  python-version: "3.11"
@@ -34,6 +31,7 @@ jobs:
             cibw_arch: "x86_64"
 
     steps:
+      # === 0. Checkout code and set up sanitized version ===
       - name: Checkout code
         uses: actions/checkout@v4
         with:
@@ -43,27 +41,34 @@ jobs:
       - name: Determine version tag
         id: determine_version
         run: |
+          echo "Input version tag: '${{ inputs.version_tag }}'"
           if [[ "${{ inputs.version_tag }}" == "latest" ]]; then
-            echo "Finding latest tag"
+            echo "No specific version provided, determining latest tag..."
             git fetch --tags
-            LATEST_TAG=$(git describe --tags --abbrev=0 || echo "0.0.0")
+            LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "0.10.13")
+            echo "Determined tag is ${LATEST_TAG}"
             echo "version=${LATEST_TAG}" >> $GITHUB_OUTPUT
           else
             echo "Using provided tag: ${{ inputs.version_tag }}"
             echo "version=${{ inputs.version_tag }}" >> $GITHUB_OUTPUT
           fi
 
-      - name: Checkout tag
+      - name: Checkout tag if not 'latest'
         if: ${{ inputs.version_tag != 'latest' }}
-        run: git checkout ${{ steps.determine_version.outputs.version }}
+        run: |
+          echo "Checking out tag: ${{ steps.determine_version.outputs.version }}"
+          git checkout ${{ steps.determine_version.outputs.version }}
 
       - name: Set sanitized version
         run: |
           VERSION="${{ steps.determine_version.outputs.version }}"
-          VERSION="${VERSION#v}"
-          echo "VERSION=${VERSION}" >> $GITHUB_ENV
+          SANITIZED_VERSION="${VERSION#v}"
+          echo "Sanitized version: ${SANITIZED_VERSION}"
+          echo "VERSION=${SANITIZED_VERSION}" >> $GITHUB_ENV
 
+      # === 1. For MacOS, we build in the runner for cibuildwheel ===
       - name: Set up Python
+        if: ${{ matrix.os == 'macos-latest' }}
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
@@ -75,21 +80,14 @@ jobs:
           grep -Ev '^(twine|sphinx|clang-format|cppcheck|cpplint)' requirements.txt > filtered.txt
           pip install -r filtered.txt
 
-      - name: Configure CMake (host build, for tests or other purposes)
+      - name: Configure CMake (host build)
         if: ${{ matrix.os == 'macos-latest' }}
         run: |
-          if [ "${{ matrix.os }}" = "macos-latest" ]; then
-            cmake -B build -G Ninja \
-              -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
-              -DCMAKE_OSX_ARCHITECTURES=${{ matrix.target_arch }} \
-              -DCMAKE_PREFIX_PATH="$(python -c 'import torch; print(torch.utils.cmake_prefix_path)')" \
-              -DBUILD_TESTS=ON
-          else
-            cmake -B build -G Ninja \
-              -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
-              -DCMAKE_PREFIX_PATH="$(python -c 'import torch; print(torch.utils.cmake_prefix_path)')" \
-              -DBUILD_TESTS=ON
-          fi
+          cmake -B build -G Ninja \
+            -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
+            -DCMAKE_OSX_ARCHITECTURES=${{ matrix.target_arch }} \
+            -DCMAKE_PREFIX_PATH="$(python -c 'import torch; print(torch.utils.cmake_prefix_path)')" \
+            -DBUILD_TESTS=ON
 
       - name: Build (host build)
         if: ${{ matrix.os == 'macos-latest' }}
@@ -97,19 +95,29 @@ jobs:
 
       - name: Configure wheel build environment
         run: |
-          VERSION="${{ github.event.inputs.version_tag }}"
-          VERSION="${VERSION#v}"  # Strip the leading 'v'
-          PY_VERSION=$(echo "${{ matrix.python-version }}" | tr -d '.')
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          PY_VERSION=$(echo "${{ matrix.python_version }}" | tr -d '.')
           echo "PY_VERSION=$PY_VERSION" >> $GITHUB_ENV
           if [ "${{ matrix.os }}" = "macos-latest" ]; then
             echo "MACOSX_DEPLOYMENT_TARGET=11.1" >> $GITHUB_ENV
             echo "ARCHFLAGS=-arch ${{ matrix.target_arch }}" >> $GITHUB_ENV
           fi
 
+      - name: Build wheel MacOS
+        if: ${{ matrix.os == 'macos-latest' }}
+        env:
+          CIBW_PLATFORM: macos
+          CIBW_BUILD: cp${{ env.PY_VERSION }}*
+          CIBW_ARCHS: ${{ matrix.cibw_arch }}
+        run: |
+          export TORCH_LIB=$(python -c 'import torch; print(torch.__path__[0] + "/lib")')
+          export DYLD_FALLBACK_LIBRARY_PATH="$TORCH_LIB:$DYLD_FALLBACK_LIBRARY_PATH"
+          python -m cibuildwheel --output-dir wheelhouse
+
+      # === 2. Build wheels using cibuildwheel containers ===
       - name: Build wheel Ubuntu
         if: ${{ matrix.os == 'ubuntu-latest' }}
         env:
+          CIBW_PLATFORM: linux
           CIBW_BUILD: cp${{ env.PY_VERSION }}*
           CIBW_ARCHS: ${{ matrix.cibw_arch }}
           CIBW_MANYLINUX_X86_64_IMAGE: "manylinux_2_28"
@@ -131,24 +139,9 @@ jobs:
                   -DBUILD_TESTS=ON && \
             cmake --build build --parallel
         run: |
-          export TORCH_LIB=$(python -c 'import torch; print(torch.__path__[0] + "/lib")')
-          export LD_LIBRARY_PATH="$TORCH_LIB:$LD_LIBRARY_PATH"
-          python -m pip install cibuildwheel
-          PLATFORM=$(echo "${{ runner.os }}" | tr '[:upper:]' '[:lower:]')
-          python -m cibuildwheel --platform $PLATFORM --output-dir wheelhouse
+          python -m cibuildwheel --output-dir wheelhouse
 
-      - name: Build wheel MacOS
-        if: ${{ matrix.os == 'macos-latest' }}
-        env:
-          CIBW_BUILD: cp${{ env.PY_VERSION }}*
-          CIBW_ARCHS: ${{ matrix.cibw_arch }}
-        run: |
-          export TORCH_LIB=$(python -c 'import torch; print(torch.__path__[0] + "/lib")')
-          export DYLD_FALLBACK_LIBRARY_PATH="$TORCH_LIB:$DYLD_FALLBACK_LIBRARY_PATH"
-          python -m pip install cibuildwheel
-          PLATFORM=$(echo "${{ runner.os }}" | tr '[:upper:]' '[:lower:]')
-          python -m cibuildwheel --platform $PLATFORM --output-dir wheelhouse
-
+      # === 3. Upload wheels ===
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
