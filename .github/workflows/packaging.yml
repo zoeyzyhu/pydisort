@@ -7,12 +7,12 @@ on:
         description: "Release version tag"
         default: "latest"
       branch:
-        description: "Source branch for the release"
-        default: "cleanup-release"
+        description: "Source branch"
+        default: "main"
       build_os:
         description: "Select OS to build wheels for"
         required: true
-        default: "Both"
+        default: "MacOS"
         type: choice
         options:
           - Both
@@ -222,6 +222,6 @@ jobs:
 
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
-        # with:
-        #   user: __token__
-        #   password: ${{ secrets.PYPI_API_TOKEN }}
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_API_TOKEN }}
