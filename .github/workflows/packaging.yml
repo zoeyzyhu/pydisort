@@ -86,7 +86,7 @@ jobs:
 
       - name: CMake configure
         run: |
-          cmake -B build -G Ninja \
+          cmake -B build \
             -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
             -DCMAKE_OSX_ARCHITECTURES=${{ matrix.target_arch }} \
             -DCMAKE_PREFIX_PATH="$(python -c 'import torch; print(torch.utils.cmake_prefix_path)')" \
@@ -119,7 +119,7 @@ jobs:
           name: wheels-macos-${{ matrix.python-version }}-${{ matrix.target_arch }}
           path: wheelhouse/*.whl
 
-  build-ubuntu:
+  build-linux:
     name: Build Ubuntu wheels
     runs-on: ubuntu-latest
     if: ${{ inputs.build_os == 'Both' || inputs.build_os == 'Ubuntu' }}
@@ -202,7 +202,8 @@ jobs:
     name: Publish to PyPI
     needs:
       - build-macos
-      - build-ubuntu
+      - build-linux
+    if: ${{ needs.build-macos.result == 'success' || needs.build-ubuntu.result == 'success' }}
     runs-on: ubuntu-latest
     permissions:
       id-token: write
