@@ -15,19 +15,20 @@ env:
 
 jobs:
   build-wheels:
-    name: Build wheels (${{ matrix.os }} - ${{ matrix.target_arch }})
+    name: Build ${{ runner.os }} - ${{ matrix.target_arch }} - ${{ matrix.python-version }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: true
       matrix:
-        python-version: [3.9, 3.10, 3.11, 3.12, 3.13]
+        #python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+        python-version: ["3.11"]
         include:
-          - os: macos-latest
-            target_arch: arm64
-            cibw_arch: "arm64"
-          #- os: ubuntu-latest
-          #  target_arch: x86_64
-          #  cibw_arch: "x86_64"
+          #- os: macos-latest
+          #  target_arch: arm64
+          #  cibw_arch: "arm64"
+          - os: ubuntu-latest
+            target_arch: x86_64
+            cibw_arch: "x86_64"
 
     steps:
       # === 0. Checkout code and set up environment ===
@@ -86,7 +87,7 @@ jobs:
       - name: Install Python dependencies
         if: ${{ matrix.os == 'macos-latest' }}
         run: |
-          grep -Ev '^(twine|sphinx|clang-format|cppcheck|cpplint)' requirements.txt > filtered.txt
+          grep -Ev '^(twine|sphinx|guzzle_sphinx_theme|pre-commit|clang-format|cppcheck|cpplint|pylint|torch|sphinxcontrib-napoleon|ninja|setuptools|cmake)' requirements.txt > filtered.txt
           pip install -r filtered.txt
 
       - name: Configure CMake (host build)
@@ -94,9 +95,10 @@ jobs:
         run: |
           cmake -B build -G Ninja \
             -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
+            -DCMAKE_CXX_FLAGS_RELEASE="-Os -s" \
             -DCMAKE_OSX_ARCHITECTURES=${{ matrix.target_arch }} \
             -DCMAKE_PREFIX_PATH="$(python -c 'import torch; print(torch.utils.cmake_prefix_path)')" \
-            -DBUILD_TESTS=ON
+            -DBUILD_TESTS=OFF
 
       - name: Build (host build)
         if: ${{ matrix.os == 'macos-latest' }}
@@ -128,15 +130,16 @@ jobs:
             LD_LIBRARY_PATH=$PYTORCH_LIB auditwheel repair -w {dest_dir} {wheel}
           CIBW_BEFORE_BUILD: |
             pip install torch --extra-index-url https://download.pytorch.org/whl/cpu && \
-            python -c "import re; open('filtered.txt','w').writelines([l for l in open('requirements.txt') if not re.match(r'^(twine|sphinx|guzzle_sphinx_theme|pre-commit|clang-format|cppcheck|cpplint|pylint|torch|sphinxcontrib-napoleon)', l)])" && \
+            python -c "import re; open('filtered.txt','w').writelines([l for l in open('requirements.txt') if not re.match(r'^(twine|sphinx|guzzle_sphinx_theme|pre-commit|clang-format|cppcheck|cpplint|pylint|torch|sphinxcontrib-napoleon|ninja|setuptools|cmake)', l)])" && \
             pip install -r filtered.txt && \
             TORCH_LIB=$(python -c "import torch; print(torch.__path__[0] + '/lib')") && \
             TORCH_CMAKE_PREFIX_PATH=$(python -c "import torch.utils; print(torch.utils.cmake_prefix_path)") && \
             export LD_LIBRARY_PATH="$TORCH_LIB:$LD_LIBRARY_PATH" && \
             cmake -B build -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
+                  -DCMAKE_CXX_FLAGS_RELEASE="-Os -s" \
                   -DPython3_EXECUTABLE=$(which python) \
                   -DCMAKE_PREFIX_PATH="$TORCH_CMAKE_PREFIX_PATH" \
-                  -DBUILD_TESTS=ON && \
+                  -DBUILD_TESTS=OFF && \
             cmake --build build --parallel
         run: |
           pip install cibuildwheel
