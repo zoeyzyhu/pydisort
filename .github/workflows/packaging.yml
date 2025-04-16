@@ -20,14 +20,14 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        python-version: [3.11]
+        python-version: [3.9, 3.10, 3.11, 3.12, 3.13]
         include:
-          #- os: macos-latest
-          #  target_arch: arm64
-          #  cibw_arch: "arm64"
-          - os: ubuntu-latest
-            target_arch: x86_64
-            cibw_arch: "x86_64"
+          - os: macos-latest
+            target_arch: arm64
+            cibw_arch: "arm64"
+          #- os: ubuntu-latest
+          #  target_arch: x86_64
+          #  cibw_arch: "x86_64"
 
     steps:
       # === 0. Checkout code and set up environment ===
@@ -121,7 +121,6 @@ jobs:
           CIBW_PLATFORM: linux
           CIBW_BUILD: cp${{ env.PY_VERSION }}*
           CIBW_ARCHS: ${{ matrix.cibw_arch }}
-          CIBW_MANYLINUX_X86_64_IMAGE: "manylinux_2_28"
           CIBW_SKIP: "*musllinux*"
           CIBW_REPAIR_WHEEL_COMMAND_LINUX: >
             PYTORCH_LIB=$(python -c "import torch, os; print(os.path.join(torch.__path__[0], 'lib'))") &&
@@ -129,7 +128,7 @@ jobs:
             LD_LIBRARY_PATH=$PYTORCH_LIB auditwheel repair -w {dest_dir} {wheel}
           CIBW_BEFORE_BUILD: |
             pip install torch --extra-index-url https://download.pytorch.org/whl/cpu && \
-            python -c "import re; open('filtered.txt','w').writelines([l for l in open('requirements.txt') if not re.match(r'^(twine|sphinx|clang-format|cppcheck|cpplint|torch)', l)])" && \
+            python -c "import re; open('filtered.txt','w').writelines([l for l in open('requirements.txt') if not re.match(r'^(twine|sphinx|guzzle_sphinx_theme|pre-commit|clang-format|cppcheck|cpplint|pylint|torch|sphinxcontrib-napoleon)', l)])" && \
             pip install -r filtered.txt && \
             TORCH_LIB=$(python -c "import torch; print(torch.__path__[0] + '/lib')") && \
             TORCH_CMAKE_PREFIX_PATH=$(python -c "import torch.utils; print(torch.utils.cmake_prefix_path)") && \
