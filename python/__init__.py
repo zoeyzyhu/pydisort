@@ -48,4 +48,4 @@ signal.signal(signal.SIGTERM, handle_exit)
 
 from .pydisort import *
 
-__version__ = "0.10.13"
+__version__ = "0.10.14"
