@@ -106,7 +106,7 @@ jobs:
         if: ${{ matrix.os == 'macos-latest' }}
         env:
           CIBW_PLATFORM: macos
-          CIBW_BUILD: cp${{ matrix.python-version }}*
+          CIBW_BUILD: cp${{ env.PY_VERSION }}*
           CIBW_ARCHS: ${{ matrix.cibw_arch }}
         run: |
           export TORCH_LIB=$(python -c 'import torch; print(torch.__path__[0] + "/lib")')
@@ -119,7 +119,7 @@ jobs:
         if: ${{ matrix.os == 'ubuntu-latest' }}
         env:
           CIBW_PLATFORM: linux
-          CIBW_BUILD: cp${{ matrix.python-version }}*
+          CIBW_BUILD: cp${{ env.PY_VERSION }}*
           CIBW_ARCHS: ${{ matrix.cibw_arch }}
           CIBW_MANYLINUX_X86_64_IMAGE: "manylinux_2_28"
           CIBW_SKIP: "*musllinux*"
