@@ -23,12 +23,12 @@ jobs:
         #python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
         python-version: ["3.11"]
         include:
-          #- os: macos-latest
-          #  target_arch: arm64
-          #  cibw_arch: "arm64"
-          - os: ubuntu-latest
-            target_arch: x86_64
-            cibw_arch: "x86_64"
+          - os: macos-latest
+            target_arch: arm64
+            cibw_arch: "arm64"
+          #- os: ubuntu-latest
+          #  target_arch: x86_64
+          #  cibw_arch: "x86_64"
 
     steps:
       # === 0. Checkout code and set up environment ===
@@ -172,6 +172,6 @@ jobs:
 
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          user: __token__
-          password: ${{ secrets.PYPI_API_TOKEN }}
+        #with:
+        #user: __token__
+        #password: ${{ secrets.PYPI_API_TOKEN }}
