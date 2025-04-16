@@ -30,7 +30,7 @@ jobs:
             cibw_arch: "x86_64"
 
     steps:
-      # === 0. Checkout code and set up sanitized version ===
+      # === 0. Checkout code and set up environment ===
       - name: Checkout code
         uses: actions/checkout@v4
         with:
@@ -65,13 +65,24 @@ jobs:
           echo "Sanitized version: ${SANITIZED_VERSION}"
           echo "VERSION=${SANITIZED_VERSION}" >> $GITHUB_ENV
 
+      - name: Configure wheel build environment
+        run: |
+          PY_VERSION=$(echo "${{ matrix.python_version }}" | tr -d '.')
+          echo "Setting up Python $PY_VERSION for cibuildwheel"
+          echo "PY_VERSION=$PY_VERSION" >> $GITHUB_ENV
+          if [ "${{ matrix.os }}" = "macos-latest" ]; then
+            echo "MACOSX_DEPLOYMENT_TARGET=11.1" >> $GITHUB_ENV
+            echo "ARCHFLAGS=-arch ${{ matrix.target_arch }}" >> $GITHUB_ENV
+          fi
+
+      # === 1. For MacOS, build in the runner for cibuildwheel ===
       - name: Set up Python
+        if: ${{ matrix.os == 'macos-latest' }}
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
           cache: "pip"
 
-      # === 1. For MacOS, we build in the runner for cibuildwheel ===
       - name: Install Python dependencies
         if: ${{ matrix.os == 'macos-latest' }}
         run: |
@@ -91,21 +102,11 @@ jobs:
         if: ${{ matrix.os == 'macos-latest' }}
         run: cmake --build build --config ${{ env.BUILD_TYPE }} --parallel
 
-      - name: Configure wheel build environment
-        run: |
-          PY_VERSION=$(echo "${{ matrix.python_version }}" | tr -d '.')
-          echo "Setting up Python $PY_VERSION for cibuildwheel"
-          echo "PY_VERSION=$PY_VERSION" >> $GITHUB_ENV
-          if [ "${{ matrix.os }}" = "macos-latest" ]; then
-            echo "MACOSX_DEPLOYMENT_TARGET=11.1" >> $GITHUB_ENV
-            echo "ARCHFLAGS=-arch ${{ matrix.target_arch }}" >> $GITHUB_ENV
-          fi
-
       - name: Build wheel MacOS
         if: ${{ matrix.os == 'macos-latest' }}
         env:
           CIBW_PLATFORM: macos
-          CIBW_BUILD: cp${{ env.PY_VERSION }}*
+          CIBW_BUILD: cp${{ matrix.python-version }}*
           CIBW_ARCHS: ${{ matrix.cibw_arch }}
         run: |
           export TORCH_LIB=$(python -c 'import torch; print(torch.__path__[0] + "/lib")')
@@ -113,12 +114,12 @@ jobs:
           pip install cibuildwheel
           python -m cibuildwheel --output-dir wheelhouse
 
-      # === 2. Build wheels using cibuildwheel containers ===
+      # === 2. For Ubuntu, build using cibuildwheel containers ===
       - name: Build wheel Ubuntu
         if: ${{ matrix.os == 'ubuntu-latest' }}
         env:
           CIBW_PLATFORM: linux
-          CIBW_BUILD: cp${{ env.PY_VERSION }}*
+          CIBW_BUILD: cp${{ matrix.python-version }}*
           CIBW_ARCHS: ${{ matrix.cibw_arch }}
           CIBW_MANYLINUX_X86_64_IMAGE: "manylinux_2_28"
           CIBW_SKIP: "*musllinux*"
