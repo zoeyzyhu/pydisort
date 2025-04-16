@@ -15,7 +15,7 @@ env:
 
 jobs:
   build-wheels:
-    name: Build ${{ runner.os }} - ${{ matrix.target_arch }} - ${{ matrix.python-version }}
+    name: Build ${{ matrix.os }} - ${{ matrix.target_arch }} - ${{ matrix.python-version }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: true
