@@ -87,7 +87,7 @@ jobs:
       - name: Install Python dependencies
         if: ${{ matrix.os == 'macos-latest' }}
         run: |
-          grep -Ev '^(twine|sphinx|guzzle_sphinx_theme|pre-commit|clang-format|cppcheck|cpplint|pylint|torch|sphinxcontrib-napoleon|ninja|setuptools|cmake)' requirements.txt > filtered.txt
+          grep -Ev '^(twine|sphinx|guzzle_sphinx_theme|pre-commit|clang-format|cppcheck|cpplint|pylint|sphinxcontrib-napoleon|ninja|setuptools|cmake)' requirements.txt > filtered.txt
           pip install -r filtered.txt
 
       - name: Configure CMake (host build)
