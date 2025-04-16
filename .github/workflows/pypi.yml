@@ -174,10 +174,19 @@ jobs:
           CIBW_SKIP: "*musllinux*"
           CIBW_REPAIR_WHEEL_COMMAND_LINUX: >
             PYTORCH_LIB=$(python -c "import torch; print(torch.__path__[0] + '/lib')") &&
-            LD_LIBRARY_PATH=$PYTORCH_LIB auditwheel repair -w {dest_dir} {wheel}
+            LD_LIBRARY_PATH=$PYTORCH_LIB auditwheel repair \
+              --exclude libtorch*.so \
+              --exclude libtorch*.so.* \
+              --exclude libc10*.so \
+              --exclude libc10*.so.* \
+              --exclude libgomp*.so \
+              --exclude libgomp*.so.* \
+              --exclude libshm*.so \
+              --exclude libshm*.so.* \
+              -w {dest_dir} {wheel}
           CIBW_BEFORE_BUILD: |
             pip install torch --extra-index-url https://download.pytorch.org/whl/cpu && \
-            python -c "import re; open('filtered.txt','w').writelines([l for l in open('requirements.txt') if not re.match(r'^(twine|sphinx|guzzle_sphinx_theme|pre-commit|clang-format|cppcheck|cpplint|pylint|torch|sphinxcontrib-napoleon|ninja|setuptools|cmake)', l)])" && \
+            python -c "import re; open('filtered.txt','w').writelines([l for l in open('requirements.txt') if not re.match(r'^(twine|sphinx|guzzle_sphinx_theme|pre-commit|clang-format|cppcheck|cpplint|pylint|torch|sphinxcontrib-napoleon|ninja|setuptools|cmake|wheel)', l)])" && \
             pip install -r filtered.txt && \
             TORCH_LIB=$(python -c "import torch; print(torch.__path__[0] + '/lib')") && \
             TORCH_CMAKE_PREFIX_PATH=$(python -c "import torch.utils; print(torch.utils.cmake_prefix_path)") && \
@@ -221,6 +230,6 @@ jobs:
       - name: Publish to PyPI
         if: ${{ needs.build-macos.result == 'success' || needs.build-ubuntu.result == 'success' }}
         uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          user: __token__
-          password: ${{ secrets.PYPI_API_TOKEN }}
+        #with:
+        #user: __token__
+        #password: ${{ secrets.PYPI_API_TOKEN }}
