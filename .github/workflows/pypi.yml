@@ -30,7 +30,8 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+        #python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+        python-version: ["3.11"]
         include:
           - os: macos-latest
             target_arch: arm64
@@ -81,7 +82,7 @@ jobs:
 
       - name: Install deps
         run: |
-          grep -Ev '^(twine|sphinx|guzzle_sphinx_theme|pre-commit|clang-format|cppcheck|cpplint|pylint|sphinxcontrib-napoleon|ninja|setuptools|cmake)' requirements.txt > filtered.txt
+          grep -Ev '^(twine|sphinx|guzzle_sphinx_theme|pre-commit|clang-format|cppcheck|cpplint|pylint|sphinxcontrib-napoleon|ninja|setuptools|cmake|wheel)' requirements.txt > filtered.txt
           pip install -r filtered.txt
 
       - name: CMake configure
