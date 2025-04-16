@@ -20,13 +20,12 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
+        python-version: [3.11]
         include:
           #- os: macos-latest
-          #  python-version: "3.11"
           #  target_arch: arm64
           #  cibw_arch: "arm64"
           - os: ubuntu-latest
-            python-version: "3.11"
             target_arch: x86_64
             cibw_arch: "x86_64"
 
