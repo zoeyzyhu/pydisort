@@ -96,7 +96,6 @@ jobs:
       - name: CMake build
         run: |
           cmake --build build --parallel
-          pip install .
 
       - name: Build macOS wheel
         env:
