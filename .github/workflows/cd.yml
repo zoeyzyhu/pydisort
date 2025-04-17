@@ -68,11 +68,7 @@ jobs:
       matrix:
         #python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
         python-version: ["3.11"]
-        include:
-          - os: macos-latest
-            macos_arch: arm64
-          - os: macos-latest
-            macos_arch: x86_64
+        macos_arch: [x86_64, arm64]
 
     steps:
       - name: Checkout code
