@@ -68,6 +68,7 @@ jobs:
       matrix:
         #python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
         python-version: ["3.11"]
+        arch: ["arm64", "x86_64"]
 
     steps:
       - name: Checkout code
@@ -80,7 +81,7 @@ jobs:
           PV=$(echo "${{ matrix.python-version }}" | tr -d '.')
           echo "PY_VERSION=$PV" >> $GITHUB_ENV
           echo "MACOSX_DEPLOYMENT_TARGET=11.1" >> $GITHUB_ENV
-          echo "ARCHFLAGS=-arch ${{ env.MACOS_ARCH }}" >> $GITHUB_ENV
+          echo "ARCHFLAGS=-arch ${{ matrix.arch }}" >> $GITHUB_ENV
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -97,7 +98,7 @@ jobs:
           TORCH_CMAKE_PREFIX_PATH=$(python -c 'import torch.utils; print(torch.utils.cmake_prefix_path)')
           cmake -B build \
             -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
-            -DCMAKE_OSX_ARCHITECTURES=${{ env.MACOS_ARCH }} \
+            -DCMAKE_OSX_ARCHITECTURES=${{ matrix.arch }} \
             -DCMAKE_PREFIX_PATH="$TORCH_CMAKE_PREFIX_PATH"
 
       - name: CMake build
@@ -107,11 +108,9 @@ jobs:
         env:
           CIBW_PLATFORM: macos
           CIBW_BUILD: cp${{ env.PY_VERSION }}*
-          CIBW_ARCHS: ${{ env.MACOS_ARCH }}
+          CIBW_ARCHS: ${{ matrix.arch }}
           CIBW_REPAIR_WHEEL_COMMAND_MACOS: >
-            delocate-wheel \
-              -e torch \
-              -w {dest_dir} {wheel}
+            delocate-wheel -e torch -w {dest_dir} {wheel}
           CIBW_BEFORE_BUILD: |
             pip install numpy torch
             cmake --build build --config ${{ env.BUILD_TYPE }} --parallel
@@ -124,7 +123,7 @@ jobs:
       - name: Upload macOS wheels
         uses: actions/upload-artifact@v4
         with:
-          name: wheels-macos-${{ env.MACOS_ARCH }}-${{ matrix.python-version }}
+          name: wheels-macos-${{ matrix.arch }}-${{ matrix.python-version }}
           path: wheelhouse/*.whl
 
   build-linux:
