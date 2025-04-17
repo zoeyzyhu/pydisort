@@ -67,8 +67,7 @@ jobs:
       fail-fast: true
       matrix:
         os: [macos-latest, macos-13]
-        #python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
-        python-version: ["3.11"]
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
         include:
           - os: macos-latest
             arch: arm64
@@ -143,8 +142,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        #python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
-        python-version: ["3.11"]
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
 
     steps:
       - name: Checkout code
@@ -208,7 +206,7 @@ jobs:
           find . -name '*.whl' -exec mv {} dist/ \;
 
       - name: Publish to PyPI
-        if: ${{ needs.build-macos.result == 'success' && needs.build-linux.result == 'success' }}
+        if: ${{ needs.build-macos.result == 'success' || needs.build-linux.result == 'success' }}
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           user: __token__
