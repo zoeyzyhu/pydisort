@@ -66,7 +66,7 @@ jobs:
           echo $PYTHON_VERSIONS
           echo $LINUX_ARCH
           echo $BUILD_TYPE
-          REQUIREMENTS=$(eval "$FILTERED")
+          REQUIREMENTS=${{ env.FILTERED }}
           echo "Filtered requirements: $REQUIREMENTS"
 
       - name: Determine version tag
@@ -194,7 +194,7 @@ jobs:
               -w {dest_dir} {wheel}
           CIBW_BEFORE_BUILD: |
             pip install torch --extra-index-url https://download.pytorch.org/whl/cpu && \
-            REQUIREMENTS=$(eval "$FILTERED") && \
+            REQUIREMENTS=${{ env.FILTERED }} && \
             pip install $REQUIREMENTS && \
             export LD_LIBRARY_PATH="$(${TORCH_LIB_CMD}):$LD_LIBRARY_PATH" && \
             cmake -B build -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
