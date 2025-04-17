@@ -1,6 +1,6 @@
 <!-- Logo ------------------------------------------->
 <h4 align="center">
-    <img src="https://github.com/zoeyzyhu/pybind_cmake_simple/raw/main/logo_tr_git.png" alt="Pydisort" width="300" style="display: block; margin: 0 auto">
+    <img src="https://github.com/zoeyzyhu/pydisort/blob/main/doc/img/logo_tr_git.png" alt="Pydisort" width="300" style="display: block; margin: 0 auto">
 </h4>
 
 <!-- Subtitle --------------------------------------->
@@ -14,4 +14,4 @@ DISORT (Discrete Ordinate Radiative Transfer) is a widely-used algorithm that ca
 
 For a detailed documentation, please visit https://pydisort.readthedocs.io/.
 
-> ❗ We only support Python 3.8+ on Linux and MacOS. Anaconda is not fully supported at the moment; it only works if the Python path and `conda` environment are set correctly. For the current stage, we strongly recommend using `python3.11 -m venv env` (you Python version might differ) to create a virtual environment and install `pydisort` in this clean environment.
+> ❗ We only support Python 3.9+ on Linux and MacOS. Anaconda is not fully supported at the moment; it only works if the Python path and `conda` environment are set correctly. For the current stage, we strongly recommend using `python3.11 -m venv env` (you Python version might differ) to create a virtual environment and install `pydisort` in this clean environment.

@@ -10,6 +10,6 @@ pylint
 setuptools
 sphinx
 sphinxcontrib-napoleon
-torch
+torch>=2.4.0
 twine
 wheel
