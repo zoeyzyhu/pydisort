@@ -40,10 +40,12 @@ env:
     wheel
   FILTERED: |
     python -c "import os, re; \
-      dev_libs = os.environ['DEV_LIBS']; \
-      open('filtered.txt','w').writelines([\
-        l for l in open('requirements.txt') \
-        if not re.match(rf'^({dev_libs})', l)])"
+      dev_libs = os.environ['DEV_LIBS'].split(); \
+      dev_pattern = re.compile(r'^(' + '|'.join(dev_libs) + r')'); \
+      print(' '.join([ \
+        l.strip() for l in open('requirements.txt') \
+        if not dev_pattern.match(l) \
+      ]))"
 
 jobs:
   prepare:
@@ -182,7 +184,8 @@ jobs:
               -w {dest_dir} {wheel}
           CIBW_BEFORE_BUILD: |
             pip install torch --extra-index-url https://download.pytorch.org/whl/cpu && \
-            eval "$FILTERED" && pip install -r filtered.txt && \
+            REQUIREMENTS=$(eval "$FILTERED") && \
+            pip install $REQUIREMENTS && \
             export LD_LIBRARY_PATH="$(${TORCH_LIB_CMD}):$LD_LIBRARY_PATH" && \
             cmake -B build -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
                   -DPython3_EXECUTABLE=$(which python) \
