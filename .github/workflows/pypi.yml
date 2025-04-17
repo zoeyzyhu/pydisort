@@ -12,7 +12,7 @@ on:
       build_os:
         description: "Select OS to build wheels for"
         required: true
-        default: "MacOS"
+        default: "Both"
         type: choice
         options:
           - Both
@@ -21,28 +21,17 @@ on:
 
 env:
   BUILD_TYPE: Release
+  PYTHON_VERSIONS: "cp39-* cp310-* cp311-* cp312-* cp313-*"
+  DEV_LIBS: "twine|sphinx|guzzle_sphinx_theme|pre-commit|clang-format|cppcheck|cpplint|pylint|sphinxcontrib-napoleon|ninja|setuptools|cmake|wheel"
 
 jobs:
-  build-macos:
-    name: Build macOS wheels
-    runs-on: macos-latest
-    if: ${{ inputs.build_os == 'Both' || inputs.build_os == 'MacOS' }}
-    strategy:
-      fail-fast: true
-      matrix:
-        #python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
-        python-version: ["3.11"]
-        include:
-          - os: macos-latest
-            target_arch: arm64
-            cibw_arch: "arm64"
-          - os: macos-latest
-            target_arch: x86_64
-            cibw_arch: "x86_64"
-
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.determine_version.outputs.version }}
+      version_no_v: ${{ steps.sanitize.outputs.no_v }}
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           ref: ${{ inputs.branch }}
           fetch-depth: 0
@@ -50,30 +39,47 @@ jobs:
       - name: Determine version tag
         id: determine_version
         run: |
-          echo "Input version tag: '${{ inputs.version_tag }}'"
           if [[ "${{ inputs.version_tag }}" == "latest" ]]; then
             git fetch --tags
-            LATEST_TAG=$(git describe --tags --abbrev=0)
-            echo "version=${LATEST_TAG}" >> $GITHUB_OUTPUT
+            echo "version=$(git describe --tags --abbrev=0)" >> $GITHUB_OUTPUT
           else
             echo "version=${{ inputs.version_tag }}" >> $GITHUB_OUTPUT
           fi
 
-      - name: Checkout tag if not 'latest'
+      - name: Checkout tag (if not latest)
         if: ${{ inputs.version_tag != 'latest' }}
         run: |
-          echo "Checking out tag: ${{ steps.determine_version.outputs.version }}"
           git checkout ${{ steps.determine_version.outputs.version }}
 
-      - name: Sanitize version
+      - name: Strip leading “v”
+        id: sanitize
         run: |
-          V="${{ steps.determine_version.outputs.version }}"
-          echo "VERSION=${V#v}" >> $GITHUB_ENV
+          raw=${{ steps.determine_version.outputs.version }}
+          echo "version_no_v=${raw#v}" >> $GITHUB_OUTPUT
+
+  build-macos:
+    needs: prepare
+    name: Build macOS wheels
+    runs-on: macos-latest
+    if: ${{ inputs.build_os == 'Both' || inputs.build_os == 'MacOS' }}
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - os: macos-latest
+            target_arch: arm64
+            cibw_arch: "arm64"
+          - os: macos-latest
+            target_arch: x86_64
+            cibw_arch: "x86_64"
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.prepare.outputs.version }}
 
       - name: Configure wheel build env
         run: |
-          PV=$(echo "${{ matrix.python-version }}" | tr -d '.')
-          echo "PY_VERSION=$PV" >> $GITHUB_ENV
           echo "MACOSX_DEPLOYMENT_TARGET=11.1" >> $GITHUB_ENV
           echo "ARCHFLAGS=-arch ${{ matrix.target_arch }}" >> $GITHUB_ENV
 
@@ -85,7 +91,7 @@ jobs:
 
       - name: Install deps
         run: |
-          grep -Ev '^(twine|sphinx|guzzle_sphinx_theme|pre-commit|clang-format|cppcheck|cpplint|pylint|sphinxcontrib-napoleon|ninja|setuptools|cmake|wheel)' requirements.txt > filtered.txt
+          grep -Ev "^(${{ env.DEV_LIBS }})" requirements.txt > filtered.txt
           pip install -r filtered.txt
 
       - name: CMake configure
@@ -102,20 +108,12 @@ jobs:
       - name: Build macOS wheel
         env:
           CIBW_PLATFORM: macos
-          CIBW_BUILD: cp${{ env.PY_VERSION }}*
+          CIBW_BUILD: ${{ env.PYTHON_VERSIONS }}
           CIBW_ARCHS: ${{ matrix.cibw_arch }}
           CIBW_REPAIR_WHEEL_COMMAND_MACOS: >
-            delocate-wheel \
-              --exclude 'libc10.*\.dylib' \
-              --exclude 'libtorch.*\.dylib' \
-              --exclude 'libtorch_cpu.*\.dylib' \
-              --exclude 'libtorch_global_deps.*\.dylib' \
-              --exclude 'libtorch_python.*\.dylib' \
-              --exclude 'libshm.*\.dylib' \
-              --exclude 'libiomp5.*\.dylib' \
-              -w {dest_dir} {wheel}
+            delocate-wheel --exclude 'lib(c10|torch|shm|iomp).*\.dylib' -w {dest_dir} {wheel}
           CIBW_BEFORE_BUILD: |
-            python -c "import re; open('filtered.txt','w').writelines([l for l in open('requirements.txt') if not re.match(r'^(twine|sphinx|guzzle_sphinx_theme|pre-commit|clang-format|cppcheck|cpplint|pylint|sphinxcontrib-napoleon|ninja|setuptools|cmake)', l)])" && \
+            python -c "import re; open('filtered.txt','w').writelines([l for l in open('requirements.txt') if not re.match(r'^(${{ env.DEV_LIBS }})', l)])" && \
             pip install -r filtered.txt && \
             cmake -B build -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
                   -DCMAKE_CXX_FLAGS_RELEASE="-Os -s" \
@@ -134,14 +132,13 @@ jobs:
           path: wheelhouse/*.whl
 
   build-linux:
+    needs: prepare
     name: Build Ubuntu wheels
     runs-on: ubuntu-latest
     if: ${{ inputs.build_os == 'Both' || inputs.build_os == 'Ubuntu' }}
     strategy:
       fail-fast: true
       matrix:
-        python-version: ["3.11"]
-        #python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
         include:
           - os: ubuntu-latest
             target_arch: x86_64
@@ -151,57 +148,21 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          ref: ${{ inputs.branch }}
+          ref: ${{ needs.prepare.outputs.version }}
           fetch-depth: 0
-
-      - name: Determine version tag
-        id: determine_version
-        run: |
-          echo "Input version tag: '${{ inputs.version_tag }}'"
-          if [[ "${{ inputs.version_tag }}" == "latest" ]]; then
-            git fetch --tags
-            LATEST_TAG=$(git describe --tags --abbrev=0)
-            echo "version=${LATEST_TAG}" >> $GITHUB_OUTPUT
-          else
-            echo "version=${{ inputs.version_tag }}" >> $GITHUB_OUTPUT
-          fi
-      - name: Checkout tag if not 'latest'
-        if: ${{ inputs.version_tag != 'latest' }}
-        run: |
-          echo "Checking out tag: ${{ steps.determine_version.outputs.version }}"
-          git checkout ${{ steps.determine_version.outputs.version }}
-
-      - name: Sanitize version
-        run: |
-          V="${{ steps.determine_version.outputs.version }}"
-          echo "VERSION=${V#v}" >> $GITHUB_ENV
-
-      - name: Configure wheel build env
-        run: |
-          PV=$(echo "${{ matrix.python-version }}" | tr -d '.')
-          echo "PY_VERSION=$PV" >> $GITHUB_ENV
 
       - name: Build Ubuntu wheel
         env:
           CIBW_PLATFORM: linux
-          CIBW_BUILD: cp${{ env.PY_VERSION }}*
+          CIBW_BUILD: ${{ env.PYTHON_VERSIONS }}
           CIBW_ARCHS: ${{ matrix.cibw_arch }}
           CIBW_SKIP: "*musllinux*"
           CIBW_REPAIR_WHEEL_COMMAND_LINUX: >
             PYTORCH_LIB=$(python -c "import torch; print(torch.__path__[0] + '/lib')") &&
-            LD_LIBRARY_PATH=$PYTORCH_LIB auditwheel repair \
-              --exclude libtorch*.so \
-              --exclude libtorch*.so.* \
-              --exclude libc10*.so \
-              --exclude libc10*.so.* \
-              --exclude libgomp*.so \
-              --exclude libgomp*.so.* \
-              --exclude libshm*.so \
-              --exclude libshm*.so.* \
-              -w {dest_dir} {wheel}
+            LD_LIBRARY_PATH=$PYTORCH_LIB auditwheel repair --exclude 'lib(c10|torch|gomp|shm).*\.so' -w {dest_dir} {wheel}
           CIBW_BEFORE_BUILD: |
             pip install torch --extra-index-url https://download.pytorch.org/whl/cpu && \
-            python -c "import re; open('filtered.txt','w').writelines([l for l in open('requirements.txt') if not re.match(r'^(twine|sphinx|guzzle_sphinx_theme|pre-commit|clang-format|cppcheck|cpplint|pylint|torch|sphinxcontrib-napoleon|ninja|setuptools|cmake|wheel)', l)])" && \
+            python -c "import re; open('filtered.txt','w').writelines([l for l in open('requirements.txt') if not re.match(r'^(${{ env.DEV_LIBS }})', l)])" && \
             pip install -r filtered.txt && \
             TORCH_LIB=$(python -c "import torch; print(torch.__path__[0] + '/lib')") && \
             TORCH_CMAKE_PREFIX_PATH=$(python -c "import torch.utils; print(torch.utils.cmake_prefix_path)") && \
@@ -243,8 +204,8 @@ jobs:
           find . -name '*.whl' -exec mv {} dist/ \;
 
       - name: Publish to PyPI
-        if: ${{ needs.build-macos.result == 'success' || needs.build-ubuntu.result == 'success' }}
+        if: ${{ needs.build-macos.result == 'success' || needs.build-linux.result == 'success' }}
         uses: pypa/gh-action-pypi-publish@release/v1
         #with:
-        #user: __token__
-        #password: ${{ secrets.PYPI_API_TOKEN }}
+        #  user: __token__
+        #  password: ${{ secrets.PYPI_API_TOKEN }}
