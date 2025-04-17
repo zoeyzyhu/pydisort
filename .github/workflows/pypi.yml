@@ -85,13 +85,21 @@ jobs:
       - name: Extract runtime requirements
         id: filter_reqs
         run: |
-          echo "Excluding dev libs: $DEV_LIBS_TO_EXCLUDE"
-          pattern=$(echo "$DEV_LIBS_TO_EXCLUDE" | paste -sd'|' -)
-          runtime_reqs=$(python -c "import re; \
-          pattern = r'^(' + '${pattern}' + ')'; \
-          reqs = [l.strip().split('==')[0] for l in open('requirements.txt') \
-                  if not re.match(pattern, l)]; \
-          print(' '.join(reqs))")
+          echo "Excluding dev libs:"
+          echo "$DEV_LIBS_TO_EXCLUDE"
+
+          # Build the regex pattern in Bash
+          pattern=$(echo "$DEV_LIBS_TO_EXCLUDE" | tr '\n' '|' | sed 's/|$//')
+
+          # Pass the pattern into Python as an argument
+          runtime_reqs=$(python -c "
+            import re, sys
+            pattern = rf'^({sys.argv[1]})'
+            with open('requirements.txt') as f:
+                reqs = [line.strip().split('==')[0] for line in f if not re.match(pattern, line)]
+            print(' '.join(reqs))
+            " "$pattern")
+
           echo "Filtered runtime requirements: $runtime_reqs"
           echo "RUNTIME_REQUIREMENTS=$runtime_reqs" >> $GITHUB_OUTPUT
         env:
