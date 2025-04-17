@@ -12,7 +12,7 @@ on:
       build_os:
         description: "Select OS to build wheels for"
         required: true
-        default: "Both"
+        default: "Ubuntu"
         type: choice
         options:
           - Both
@@ -82,28 +82,13 @@ jobs:
           raw=${{ steps.determine_version.outputs.version }}
           echo "version_no_v=${raw#v}" >> $GITHUB_OUTPUT
 
-      - name: Extract runtime requirements
-        id: filter_reqs
+      - name: Filter dependencies
+        id: filter
         run: |
-          echo "Excluding dev libs:"
-          echo "$DEV_LIBS_TO_EXCLUDE"
-
-          # Build the regex pattern in Bash
-          pattern=$(echo "$DEV_LIBS_TO_EXCLUDE" | tr '\n' '|' | sed 's/|$//')
-
-          # Pass the pattern into Python as an argument
-          runtime_reqs=$(python -c "
-            import re, sys
-            pattern = rf'^({sys.argv[1]})'
-            with open('requirements.txt') as f:
-                reqs = [line.strip().split('==')[0] for line in f if not re.match(pattern, line)]
-            print(' '.join(reqs))
-            " "$pattern")
-
-          echo "Filtered runtime requirements: $runtime_reqs"
-          echo "RUNTIME_REQUIREMENTS=$runtime_reqs" >> $GITHUB_OUTPUT
-        env:
-          DEV_LIBS_TO_EXCLUDE: ${{ env.DEV_LIBS_TO_EXCLUDE }}
+          PATTERN=$(echo "$DEV_LIBS_TO_EXCLUDE" | paste -sd'|' -)
+          FILTERED=$(grep -Ev "^(${PATTERN})" requirements.txt || true | xargs)
+          echo "Filtered requirements: $FILTERED"
+          echo "FILTERED=$FILTERED" >> $GITHUB_ENV
 
   build-macos:
     needs: prepare
@@ -209,7 +194,7 @@ jobs:
               -w {dest_dir} {wheel}
           CIBW_BEFORE_BUILD: |
             pip install torch --extra-index-url https://download.pytorch.org/whl/cpu && \
-            pip install ${{ steps.filter_reqs.outputs.RUNTIME_REQUIREMENTS }}
+            pip install ${{ needs.prepare.outputs.filtered }}
             export LD_LIBRARY_PATH="$(${TORCH_LIB_CMD}):$LD_LIBRARY_PATH" && \
             cmake -B build -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
                   -DPython3_EXECUTABLE=$(which python) \
