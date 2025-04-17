@@ -1,4 +1,4 @@
-name: PyPI Release
+name: Deploy to PyPI
 
 on:
   workflow_dispatch:
@@ -108,7 +108,15 @@ jobs:
           CIBW_BUILD: cp${{ env.PY_VERSION }}*
           CIBW_ARCHS: ${{ env.MACOS_ARCH }}
           CIBW_REPAIR_WHEEL_COMMAND_MACOS: >
-            delocate-wheel --exclude 'lib(c10|torch|shm|iomp).*\.dylib' -w {dest_dir} {wheel}
+            delocate-wheel \
+              --exclude 'libc10.*\.dylib' \
+              --exclude 'libtorch.*\.dylib' \
+              --exclude 'libtorch_cpu.*\.dylib' \
+              --exclude 'libtorch_global_deps.*\.dylib' \
+              --exclude 'libtorch_python.*\.dylib' \
+              --exclude 'libshm.*\.dylib' \
+              --exclude 'libiomp5.*\.dylib' \
+              -w {dest_dir} {wheel}
           CIBW_BEFORE_BUILD: |
             pip install numpy torch
             cmake --build build --config ${{ env.BUILD_TYPE }} --parallel
@@ -146,7 +154,7 @@ jobs:
           PV=$(echo "${{ matrix.python-version }}" | tr -d '.')
           echo "PY_VERSION=$PV" >> $GITHUB_ENV
 
-      - name: Build Ubuntu wheel
+      - name: Build Linux wheel
         env:
           CIBW_PLATFORM: linux
           CIBW_BUILD: cp${{ env.PY_VERSION }}*
@@ -155,7 +163,14 @@ jobs:
           CIBW_REPAIR_WHEEL_COMMAND_LINUX: >
             TORCH_LIB=$(python -c "import torch; print(torch.__path__[0] + '/lib')") &&
             LD_LIBRARY_PATH=$TORCH_LIB auditwheel repair \
-              --exclude 'lib(c10|torch|gomp|shm).*\.so' \
+              --exclude libtorch*.so \
+              --exclude libtorch*.so.* \
+              --exclude libc10*.so \
+              --exclude libc10*.so.* \
+              --exclude libgomp*.so \
+              --exclude libgomp*.so.* \
+              --exclude libshm*.so \
+              --exclude libshm*.so.* \
               -w {dest_dir} {wheel}
           CIBW_BEFORE_BUILD: |
             pip install numpy
