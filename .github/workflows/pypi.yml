@@ -39,13 +39,13 @@ env:
     cmake
     wheel
   FILTERED: |
-    python -c "import os, re; \
-      dev_libs = $DEV_LIBS.split(); \
-      dev_pattern = re.compile(r'^(' + '|'.join(dev_libs) + r')'); \
-      print(' '.join([ \
-        l.strip() for l in open('requirements.txt') \
-        if not dev_pattern.match(l) \
-      ]))"
+    import re
+    dev_libs = '''${{ env.DEV_LIBS }}'''.split()
+    dev_pattern = re.compile(r'^(' + '|'.join(dev_libs) + r')')
+    print(' '.join([
+      l.strip() for l in open('requirements.txt')
+      if not dev_pattern.match(l) and l.strip() and not l.startswith('#')
+    ]))
 
 jobs:
   prepare:
@@ -66,7 +66,7 @@ jobs:
           echo $PYTHON_VERSIONS
           echo $LINUX_ARCH
           echo $BUILD_TYPE
-          REQUIREMENTS=$(${{ env.FILTERED }})
+          REQUIREMENTS=$(python -c "${FILTERED}")
           echo "Filtered requirements: $REQUIREMENTS"
 
       - name: Determine version tag
@@ -194,7 +194,7 @@ jobs:
               -w {dest_dir} {wheel}
           CIBW_BEFORE_BUILD: |
             pip install torch --extra-index-url https://download.pytorch.org/whl/cpu && \
-            REQUIREMENTS=$(${{ env.FILTERED }}) && \
+            REQUIREMENTS=$(python -c "${FILTERED}") && \
             pip install $REQUIREMENTS && \
             export LD_LIBRARY_PATH="$(${TORCH_LIB_CMD}):$LD_LIBRARY_PATH" && \
             cmake -B build -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
