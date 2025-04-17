@@ -8,11 +8,11 @@ on:
         default: "latest"
       branch:
         description: "Source branch"
-        default: "zyhu/reduce-wheel-size"
+        default: "main"
       build_os:
         description: "Select OS to build wheels for"
         required: true
-        default: "MacOS"
+        default: "Both"
         type: choice
         options:
           - Both
@@ -23,8 +23,7 @@ env:
   BUILD_TYPE: Release
   LINUX_ARCH: "x86_64"
   MACOS_ARCH: "arm64"
-  PYTHON_VERSIONS: "cp311-*"
-  #PYTHON_VERSIONS: "cp39-* cp310-* cp311-* cp312-* cp313-*"
+  PYTHON_VERSIONS: "cp39-* cp310-* cp311-* cp312-* cp313-*"
 
 jobs:
   prepare:
@@ -78,11 +77,13 @@ jobs:
           CIBW_ARCHS: ${{ env.MACOS_ARCH }}
           CIBW_ENVIRONMENT: MACOSX_DEPLOYMENT_TARGET=11.1
           CIBW_REPAIR_WHEEL_COMMAND_MACOS: |
+            TORCH_LIB=$(python -c "import torch, os; print(os.path.join(torch.__path__[0],'lib'))")
+            export DYLD_FALLBACK_LIBRARY_PATH="$TORCH_LIB:$DYLD_FALLBACK_LIBRARY_PATH"
             delocate-wheel --exclude 'lib(c10|torch|shm|iomp).*\.dylib' -w {dest_dir} {wheel}
           CIBW_BEFORE_BUILD: |
             pip install numpy torch
             TORCH_LIB=$(python -c 'import torch; print(torch.__path__[0] + "/lib")')
-            export DYLD_FALLBACK_LIBRARY_PATH="$TORCH_LIB:$DYLD_FALLBACK_LIBRARY_PATH"
+            DYLD_FALLBACK_LIBRARY_PATH="$TORCH_LIB:$DYLD_FALLBACK_LIBRARY_PATH"
             TORCH_CMAKE_PREFIX_PATH=$(python -c 'import torch.utils; print(torch.utils.cmake_prefix_path)')
             cmake -B build \
               -DCMAKE_BUILD_TYPE=$BUILD_TYPE \
@@ -164,7 +165,7 @@ jobs:
           find . -name '*.whl' -exec mv {} dist/ \;
 
       - name: Publish to PyPI
-        if: ${{ needs.build-macos.result == 'success' && needs.build-linux.result == 'success' }}
+        if: ${{ needs.build-macos.result == 'success' || needs.build-linux.result == 'success' }}
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           user: __token__
