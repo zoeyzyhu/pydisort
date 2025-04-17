@@ -51,7 +51,7 @@ jobs:
         run: |
           git checkout ${{ steps.determine_version.outputs.version }}
 
-      - name: Strip leading “v”
+      - name: Strip leading “v” of version tag
         id: sanitize
         run: |
           raw=${{ steps.determine_version.outputs.version }}
