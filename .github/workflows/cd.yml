@@ -60,7 +60,7 @@ jobs:
 
   build-macos:
     needs: prepare
-    name: Build macOS wheels
+    name: Build macOS
     runs-on: ${{ matrix.os }}
     if: ${{ inputs.build_os == 'Both' || inputs.build_os == 'MacOS' }}
     strategy:
@@ -96,7 +96,11 @@ jobs:
 
       - name: Install deps
         run: |
-          pip install numpy torch
+          if [[ "${{ matrix.arch }}" == "arm64" ]]; then
+            pip install numpy torch
+          else
+            pip install numpy<2 torch
+          fi
 
       - name: CMake configure
         run: |
@@ -115,8 +119,7 @@ jobs:
           CIBW_BUILD: cp${{ env.PY_VERSION }}*
           CIBW_ARCHS: ${{ matrix.arch }}
           CIBW_REPAIR_WHEEL_COMMAND_MACOS: >
-            delocate-wheel -e torch \
-              -w {dest_dir} {wheel}
+            delocate-wheel -e torch -w {dest_dir} {wheel}
           CIBW_BEFORE_BUILD: |
             pip install numpy torch
             cmake --build build --config ${{ env.BUILD_TYPE }} --parallel
@@ -134,7 +137,7 @@ jobs:
 
   build-linux:
     needs: prepare
-    name: Build Linux wheels
+    name: Build Linux
     runs-on: ubuntu-latest
     if: ${{ inputs.build_os == 'Both' || inputs.build_os == 'Ubuntu' }}
     strategy:
@@ -162,16 +165,7 @@ jobs:
           CIBW_SKIP: "*musllinux*"
           CIBW_REPAIR_WHEEL_COMMAND_LINUX: >
             TORCH_LIB=$(python -c "import torch; print(torch.__path__[0] + '/lib')") &&
-            LD_LIBRARY_PATH=$TORCH_LIB auditwheel repair \
-              --exclude libtorch*.so \
-              --exclude libtorch*.so.* \
-              --exclude libc10*.so \
-              --exclude libc10*.so.* \
-              --exclude libgomp*.so \
-              --exclude libgomp*.so.* \
-              --exclude libshm*.so \
-              --exclude libshm*.so.* \
-              -w {dest_dir} {wheel}
+            LD_LIBRARY_PATH=$TORCH_LIB auditwheel repair --exclude lib*.so -w {dest_dir} {wheel}
           CIBW_BEFORE_BUILD: |
             pip install numpy
             pip install torch --extra-index-url https://download.pytorch.org/whl/cpu
