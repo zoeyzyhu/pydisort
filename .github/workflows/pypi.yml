@@ -115,11 +115,8 @@ jobs:
           CIBW_REPAIR_WHEEL_COMMAND_MACOS: >
             delocate-wheel --exclude 'lib(c10|torch|shm|iomp).*\.dylib' -w {dest_dir} {wheel}
           CIBW_BEFORE_BUILD: |
-            eval "$FILTERED" && pip install -r filtered.txt && \
-            cmake -B build -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
-                  -DCMAKE_CXX_FLAGS_RELEASE="-Os -s" \
-                  -DBUILD_TESTS=OFF && \
-            cmake --build build --parallel
+            pip install numpy torch && \
+            cmake --build build --config {{ env.BUILD_TYPE }} --parallel
         run: |
           export TORCH_LIB=$(python -c 'import torch; print(torch.__path__[0] + "/lib")')
           export DYLD_FALLBACK_LIBRARY_PATH="$TORCH_LIB:$DYLD_FALLBACK_LIBRARY_PATH"
@@ -152,7 +149,8 @@ jobs:
           CIBW_ARCHS: ${{ env.LINUX_ARCH }}
           CIBW_SKIP: "*musllinux*"
           CIBW_REPAIR_WHEEL_COMMAND_LINUX: >
-            LD_LIBRARY_PATH=$(${TORCH_LIB}) auditwheel repair \
+            TORCH_LIB=$(python -c "import torch; print(torch.__path__[0] + '/lib')") &&
+            LD_LIBRARY_PATH=$TORCH_LIB auditwheel repair \
               --exclude 'lib(c10|torch|gomp|shm).*\.so' \
               -w {dest_dir} {wheel}
           CIBW_BEFORE_BUILD: |
@@ -172,7 +170,7 @@ jobs:
       - name: Upload Ubuntu wheels
         uses: actions/upload-artifact@v4
         with:
-          name: wheels-ubuntu-${{ matrix.python-version }}-${{ env.LINUX_ARCH }}}}
+          name: wheels-ubuntu-${{ env.LINUX_ARCH }}}}
           path: wheelhouse/*.whl
 
   publish-pypi:
