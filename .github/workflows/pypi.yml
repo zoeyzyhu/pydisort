@@ -24,6 +24,7 @@ env:
   #PYTHON_VERSIONS: "cp39-* cp310-* cp311-* cp312-* cp313-*"
   PYTHON_VERSIONS: "cp311-*"
   DEV_LIBS: "twine|sphinx|guzzle_sphinx_theme|pre-commit|clang-format|cppcheck|cpplint|pylint|sphinxcontrib-napoleon|ninja|setuptools|cmake|wheel"
+  LINUX_ARCH: "x86_64"
 
 jobs:
   prepare:
@@ -68,10 +69,10 @@ jobs:
       matrix:
         include:
           - os: macos-latest
-            target_arch: arm64
+            arch: arm64
             cibw_arch: "arm64"
           - os: macos-latest
-            target_arch: x86_64
+            arch: x86_64
             cibw_arch: "x86_64"
     steps:
       - name: Checkout code
@@ -82,7 +83,7 @@ jobs:
       - name: Configure wheel build env
         run: |
           echo "MACOSX_DEPLOYMENT_TARGET=11.1" >> $GITHUB_ENV
-          echo "ARCHFLAGS=-arch ${{ matrix.target_arch }}" >> $GITHUB_ENV
+          echo "ARCHFLAGS=-arch ${{ matrix.arch }}" >> $GITHUB_ENV
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -99,7 +100,7 @@ jobs:
         run: |
           cmake -B build \
             -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
-            -DCMAKE_OSX_ARCHITECTURES=${{ matrix.target_arch }} \
+            -DCMAKE_OSX_ARCHITECTURES=${{ matrix.arch }} \
             -DCMAKE_PREFIX_PATH="$(python -c 'import torch; print(torch.utils.cmake_prefix_path)')" \
             -DBUILD_TESTS=OFF
 
@@ -110,7 +111,7 @@ jobs:
         env:
           CIBW_PLATFORM: macos
           CIBW_BUILD: ${{ env.PYTHON_VERSIONS }}
-          CIBW_ARCHS: ${{ matrix.cibw_arch }}
+          CIBW_ARCHS: ${{ matrix.arch }}
           CIBW_REPAIR_WHEEL_COMMAND_MACOS: >
             delocate-wheel --exclude 'lib(c10|torch|shm|iomp).*\.dylib' -w {dest_dir} {wheel}
           CIBW_BEFORE_BUILD: |
@@ -129,7 +130,7 @@ jobs:
       - name: Upload macOS wheels
         uses: actions/upload-artifact@v4
         with:
-          name: wheels-macos-${{ matrix.python-version }}-${{ matrix.target_arch }}
+          name: wheels-macos-${{ matrix.python-version }}-${{ matrix.arch }}
           path: wheelhouse/*.whl
 
   build-linux:
@@ -137,13 +138,6 @@ jobs:
     name: Build Ubuntu wheels
     runs-on: ubuntu-latest
     if: ${{ inputs.build_os == 'Both' || inputs.build_os == 'Ubuntu' }}
-    strategy:
-      fail-fast: true
-      matrix:
-        include:
-          - os: ubuntu-latest
-            target_arch: x86_64
-            cibw_arch: "x86_64"
 
     steps:
       - name: Checkout code
@@ -156,7 +150,7 @@ jobs:
         env:
           CIBW_PLATFORM: linux
           CIBW_BUILD: ${{ env.PYTHON_VERSIONS }}
-          CIBW_ARCHS: ${{ matrix.cibw_arch }}
+          CIBW_ARCHS: ${{ env.LINUX_ARCH }}
           CIBW_SKIP: "*musllinux*"
           CIBW_REPAIR_WHEEL_COMMAND_LINUX: >
             PYTORCH_LIB=$(python -c "import torch; print(torch.__path__[0] + '/lib')") &&
@@ -181,7 +175,7 @@ jobs:
       - name: Upload Ubuntu wheels
         uses: actions/upload-artifact@v4
         with:
-          name: wheels-ubuntu-${{ matrix.python-version }}-${{ matrix.target_arch }}
+          name: wheels-ubuntu-${{ matrix.python-version }}-${{ env.LINUX_ARCH }}}}
           path: wheelhouse/*.whl
 
   publish-pypi:
