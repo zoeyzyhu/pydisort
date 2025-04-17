@@ -61,14 +61,19 @@ jobs:
   build-macos:
     needs: prepare
     name: Build macOS wheels
-    runs-on: macos-latest
+    runs-on: ${{ matrix.os }}
     if: ${{ inputs.build_os == 'Both' || inputs.build_os == 'MacOS' }}
     strategy:
       fail-fast: true
       matrix:
+        os: [macos-latest, macos-13]
         #python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
         python-version: ["3.11"]
-        arch: ["arm64", "x86_64"]
+        include:
+          - os: macos-latest
+            arch: arm64
+          - os: macos-13
+            arch: x86_64
 
     steps:
       - name: Checkout code
@@ -110,7 +115,8 @@ jobs:
           CIBW_BUILD: cp${{ env.PY_VERSION }}*
           CIBW_ARCHS: ${{ matrix.arch }}
           CIBW_REPAIR_WHEEL_COMMAND_MACOS: >
-            delocate-wheel -e torch -w {dest_dir} {wheel}
+            delocate-wheel -e torch \
+              -w {dest_dir} {wheel}
           CIBW_BEFORE_BUILD: |
             pip install numpy torch
             cmake --build build --config ${{ env.BUILD_TYPE }} --parallel
@@ -123,7 +129,7 @@ jobs:
       - name: Upload macOS wheels
         uses: actions/upload-artifact@v4
         with:
-          name: wheels-macos-${{ matrix.arch }}-${{ matrix.python-version }}
+          name: wheels-macos-${{ matrix.os }}-${{ matrix.arch }}-${{ matrix.python-version }}
           path: wheelhouse/*.whl
 
   build-linux:
