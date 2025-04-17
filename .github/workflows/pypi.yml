@@ -8,7 +8,7 @@ on:
         default: "latest"
       branch:
         description: "Source branch"
-        default: "main"
+        default: "zyhu/reduce-wheel-size"
       build_os:
         description: "Select OS to build wheels for"
         required: true
@@ -101,6 +101,16 @@ jobs:
         with:
           ref: ${{ needs.prepare.outputs.version }}
 
+      - name: check FILTERED
+        run: |
+          echo $FILTERED
+          echo $DEV_LIBS
+          echo $PYTHON_VERSIONS
+          echo $LINUX_ARCH
+          echo $BUILD_TYPE
+          REQUIREMENTS=$(eval "$FILTERED")
+          echo "Filtered requirements: $REQUIREMENTS"
+
       - name: Configure wheel build env
         run: |
           echo "MACOSX_DEPLOYMENT_TARGET=11.1" >> $GITHUB_ENV
@@ -155,7 +165,7 @@ jobs:
 
   build-linux:
     needs: prepare
-    name: Build Ubuntu wheels
+    name: Build Linux wheels
     runs-on: ubuntu-latest
     if: ${{ inputs.build_os == 'Both' || inputs.build_os == 'Ubuntu' }}
 
