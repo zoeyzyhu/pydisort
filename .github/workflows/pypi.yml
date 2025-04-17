@@ -24,20 +24,6 @@ env:
   LINUX_ARCH: "x86_64"
   PYTHON_VERSIONS: "cp311-*"
   #PYTHON_VERSIONS: "cp39-* cp310-* cp311-* cp312-* cp313-*"
-  DEV_LIBS_TO_EXCLUDE: |
-    twine
-    sphinx
-    guzzle_sphinx_theme
-    pre-commit
-    clang-format
-    cppcheck
-    cpplint
-    pylint
-    sphinxcontrib-napoleon
-    ninja
-    setuptools
-    cmake
-    wheel
 
 jobs:
   prepare:
@@ -50,16 +36,6 @@ jobs:
         with:
           ref: ${{ inputs.branch }}
           fetch-depth: 0
-
-      - name: check FILTERED
-        run: |
-          echo $FILTERED
-          echo $DEV_LIBS
-          echo $PYTHON_VERSIONS
-          echo $LINUX_ARCH
-          echo $BUILD_TYPE
-          REQUIREMENTS=$(python -c "${FILTERED}")
-          echo "Filtered requirements: $REQUIREMENTS"
 
       - name: Determine version tag
         id: determine_version
@@ -81,14 +57,6 @@ jobs:
         run: |
           raw=${{ steps.determine_version.outputs.version }}
           echo "version_no_v=${raw#v}" >> $GITHUB_OUTPUT
-
-      - name: Filter dependencies
-        id: filter
-        run: |
-          PATTERN=$(echo "$DEV_LIBS_TO_EXCLUDE" | paste -sd'|' -)
-          FILTERED=$(grep -Ev "^(${PATTERN})" requirements.txt || true | xargs)
-          echo "Filtered requirements: $FILTERED"
-          echo "FILTERED=$FILTERED" >> $GITHUB_ENV
 
   build-macos:
     needs: prepare
@@ -170,9 +138,9 @@ jobs:
     if: ${{ inputs.build_os == 'Both' || inputs.build_os == 'Ubuntu' }}
 
     env:
-      TORCH_LIB_CMD: >
+      TORCH_LIB: >
         python -c "import torch; print(torch.__path__[0] + '/lib')"
-      TORCH_CMAKE_PREFIX_CMD: >
+      TORCH_CMAKE_PREFIX: >
         python -c "import torch.utils; print(torch.utils.cmake_prefix_path)"
 
     steps:
@@ -189,16 +157,15 @@ jobs:
           CIBW_ARCHS: ${{ env.LINUX_ARCH }}
           CIBW_SKIP: "*musllinux*"
           CIBW_REPAIR_WHEEL_COMMAND_LINUX: >
-            LD_LIBRARY_PATH=$(${TORCH_LIB_CMD}) auditwheel repair \
+            LD_LIBRARY_PATH=$(${TORCH_LIB}) auditwheel repair \
               --exclude 'lib(c10|torch|gomp|shm).*\.so' \
               -w {dest_dir} {wheel}
           CIBW_BEFORE_BUILD: |
             pip install torch --extra-index-url https://download.pytorch.org/whl/cpu && \
-            pip install ${{ needs.prepare.outputs.filtered }}
-            export LD_LIBRARY_PATH="$(${TORCH_LIB_CMD}):$LD_LIBRARY_PATH" && \
+            export LD_LIBRARY_PATH="$(${TORCH_LIB}):$LD_LIBRARY_PATH" && \
             cmake -B build -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
                   -DPython3_EXECUTABLE=$(which python) \
-                  -DCMAKE_PREFIX_PATH="$TORCH_CMAKE_PREFIX_PATH"
+                  -DCMAKE_PREFIX_PATH="$(${TORCH_CMAKE_PREFIX})"
             cmake --build build --parallel
         run: |
           pip install cibuildwheel
