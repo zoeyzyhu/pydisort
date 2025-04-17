@@ -59,6 +59,16 @@ jobs:
           ref: ${{ inputs.branch }}
           fetch-depth: 0
 
+      - name: check FILTERED
+        run: |
+          echo $FILTERED
+          echo $DEV_LIBS
+          echo $PYTHON_VERSIONS
+          echo $LINUX_ARCH
+          echo $BUILD_TYPE
+          REQUIREMENTS=$(eval "$FILTERED")
+          echo "Filtered requirements: $REQUIREMENTS"
+
       - name: Determine version tag
         id: determine_version
         run: |
@@ -100,16 +110,6 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ needs.prepare.outputs.version }}
-
-      - name: check FILTERED
-        run: |
-          echo $FILTERED
-          echo $DEV_LIBS
-          echo $PYTHON_VERSIONS
-          echo $LINUX_ARCH
-          echo $BUILD_TYPE
-          REQUIREMENTS=$(eval "$FILTERED")
-          echo "Filtered requirements: $REQUIREMENTS"
 
       - name: Configure wheel build env
         run: |
