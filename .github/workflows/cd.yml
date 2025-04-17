@@ -66,9 +66,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        #python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
-        python-version: ["3.11"]
-        macos_arch: [x86_64, arm64]
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
 
     steps:
       - name: Checkout code
@@ -81,7 +79,7 @@ jobs:
           PV=$(echo "${{ matrix.python-version }}" | tr -d '.')
           echo "PY_VERSION=$PV" >> $GITHUB_ENV
           echo "MACOSX_DEPLOYMENT_TARGET=11.1" >> $GITHUB_ENV
-          echo "ARCHFLAGS=-arch ${{ matrix.macos_arch }}" >> $GITHUB_ENV
+          echo "ARCHFLAGS=-arch ${{ env.MACOS_ARCH }}" >> $GITHUB_ENV
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -98,9 +96,8 @@ jobs:
           TORCH_CMAKE_PREFIX_PATH=$(python -c 'import torch.utils; print(torch.utils.cmake_prefix_path)')
           cmake -B build \
             -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
-            -DCMAKE_OSX_ARCHITECTURES=${{ matrix.macos_arch }} \
-            -DCMAKE_PREFIX_PATH="$TORCH_CMAKE_PREFIX_PATH" \
-            -DBUILD_TESTS=OFF
+            -DCMAKE_OSX_ARCHITECTURES=${{ env.MACOS_ARCH }} \
+            -DCMAKE_PREFIX_PATH="$TORCH_CMAKE_PREFIX_PATH"
 
       - name: CMake build
         run: cmake --build build --parallel
@@ -109,7 +106,7 @@ jobs:
         env:
           CIBW_PLATFORM: macos
           CIBW_BUILD: cp${{ env.PY_VERSION }}*
-          CIBW_ARCHS: ${{ matrix.macos_arch }}
+          CIBW_ARCHS: ${{ env.MACOS_ARCH }}
           CIBW_REPAIR_WHEEL_COMMAND_MACOS: >
             delocate-wheel \
               --exclude 'libc10.*\.dylib' \
@@ -122,14 +119,7 @@ jobs:
               -w {dest_dir} {wheel}
           CIBW_BEFORE_BUILD: |
             pip install numpy torch
-            TORCH_CMAKE_PREFIX_PATH=$(python -c 'import torch.utils; print(torch.utils.cmake_prefix_path)')
-            cmake -B build \
-              -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
-              -DCMAKE_OSX_ARCHITECTURES=${{ matrix.macos_arch }} \
-              -DCMAKE_PREFIX_PATH="$TORCH_CMAKE_PREFIX_PATH" \
-              -DCMAKE_CXX_FLAGS_RELEASE="-Os -s" \
-              -DBUILD_TESTS=OFF
-            cmake --build build --parallel
+            cmake --build build --config ${{ env.BUILD_TYPE }} --parallel
         run: |
           export TORCH_LIB=$(python -c 'import torch; print(torch.__path__[0] + "/lib")')
           export DYLD_FALLBACK_LIBRARY_PATH="$TORCH_LIB:$DYLD_FALLBACK_LIBRARY_PATH"
@@ -139,7 +129,7 @@ jobs:
       - name: Upload macOS wheels
         uses: actions/upload-artifact@v4
         with:
-          name: wheels-macos-${{ matrix.macos_arch }}-${{ matrix.python-version }}
+          name: wheels-macos-${{ env.MACOS_ARCH }}-${{ matrix.python-version }}
           path: wheelhouse/*.whl
 
   build-linux:
