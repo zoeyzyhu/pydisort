@@ -77,13 +77,12 @@ jobs:
           CIBW_BUILD: ${{ env.PYTHON_VERSIONS }}
           CIBW_ARCHS: ${{ env.MACOS_ARCH }}
           CIBW_ENVIRONMENT: MACOSX_DEPLOYMENT_TARGET=11.1
-          CIBW_REPAIR_WHEEL_COMMAND_MACOS: >
+          CIBW_REPAIR_WHEEL_COMMAND_MACOS: |
+            pip install numpy torch
+            TORCH_LIB=$(python -c "import torch, os; print(os.path.join(torch.__path__[0],'lib'))")
+            export DYLD_FALLBACK_LIBRARY_PATH="$TORCH_LIB:$DYLD_FALLBACK_LIBRARY_PATH"
             delocate-wheel --exclude 'lib(c10|torch|shm|iomp).*\.dylib' -w {dest_dir} {wheel}
           CIBW_BEFORE_BUILD: |
-            pip install numpy torch
-            TORCH_CMAKE_PREFIX_PATH=$(python -c 'import torch.utils; print(torch.utils.cmake_prefix_path)')
-            export TORCH_LIB=$(python -c 'import torch; print(torch.__path__[0] + "/lib")')
-            export DYLD_FALLBACK_LIBRARY_PATH="$TORCH_LIB:$DYLD_FALLBACK_LIBRARY_PATH"
             cmake -B build \
               -DCMAKE_BUILD_TYPE=$BUILD_TYPE \
               -DCMAKE_OSX_ARCHITECTURES=$MACOS_ARCH \
