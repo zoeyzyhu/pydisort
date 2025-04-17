@@ -40,7 +40,7 @@ env:
     wheel
   FILTERED: |
     import re
-    dev_libs = '''${{ env.DEV_LIBS }}'''.split()
+    dev_libs = '''$DEV_LIBS'''.split()
     dev_pattern = re.compile(r'^(' + '|'.join(dev_libs) + r')')
     print(' '.join([
       l.strip() for l in open('requirements.txt')
@@ -124,7 +124,7 @@ jobs:
 
       - name: Install deps
         run: |
-          grep -Ev "^(${{ env.DEV_LIBS }})" requirements.txt > filtered.txt
+          grep -Ev "^($DEV_LIBS)" requirements.txt > filtered.txt
           pip install -r filtered.txt
 
       - name: CMake configure
@@ -194,7 +194,7 @@ jobs:
               -w {dest_dir} {wheel}
           CIBW_BEFORE_BUILD: |
             pip install torch --extra-index-url https://download.pytorch.org/whl/cpu && \
-            REQUIREMENTS=$(python -c "${FILTERED}") && \
+            REQUIREMENTS=$(${{ env.FILTERED }}) && \
             pip install $REQUIREMENTS && \
             export LD_LIBRARY_PATH="$(${TORCH_LIB_CMD}):$LD_LIBRARY_PATH" && \
             cmake -B build -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
