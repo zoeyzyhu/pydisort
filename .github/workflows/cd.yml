@@ -22,7 +22,6 @@ on:
 env:
   BUILD_TYPE: Release
   LINUX_ARCH: "x86_64"
-  MACOS_ARCH: "arm64"
 
 jobs:
   prepare:
