@@ -141,69 +141,72 @@ op.ds().nphase = 4
 
 - Step 3. Construct the Disort object based on the options.
 
+`ds` is the main object for running the DISORT model.
+It is constructed using the options defined in the previous step.
+Internal memory is allocated for the DISORT model.
+
 ```python
 ds = Disort(op)
-
-# ds is the main object for running the DISORT model.
-# It is constructed using the options defined in the previous step.
-# Internal memory is allocated for the DISORT model.
 ```
 
 - Step 4. Set up optical properties
 
+`pydisort` uses torch tensors to store the optical properties.
+The statement above sets the layer optical thickness from top to bottom.
+The last dimension of the tau tensor is the number of optical properties,
+in the order of optical thickness, single scattering albedo, and moments of scattering phase function.
+The second to the last dimension of tau is the number of layers,
+which must be the same as the number of layers in the DisortOptions object.
+
 ```python
 import torch
 tau = torch.tensor([0.1, 0.2, 0.3, 0.4]).reshape((4,1))
-
-# PyDisort uses torch tensors to store the optical properties.
-# The statement above sets the layer optical thickness from top to bottom.
-# The last dimension of the tau tensor is the number of optical properties,
-# in the order of optical thickness, single scattering albedo, and moments of scattering phase function.
-# The second to the last dimension of tau is the number of layers,
-# which must be the same as the number of layers in the DisortOptions object.
 ```
 
 - Step 5. Set up radiation boundary conditions.
 
+Radiation boundary conditions are set up using a dictionary.
+Each key in the dictionary is a string that specifies the type.
+The value is a torch tensor that specifies the value.
+`pydisort` parallels the radiative transfer calculation over the wavelengths and columns.
+In most cases, the first dimension of the radiation boundary condition is the number of wavelengths,
+and the second dimension is the number of columns.
+In the example above, the incoming beam radiation is set to 3.14159;
+there is only one wavelength and one column.
+
 ```python
 bc = {"fbeam" : torch.tensor([3.14159]).reshape((1,1))}
-
-# Radiation boundary conditions are set up using a dictionary.
-# Each key in the dictionary is a string that specifies the type.
-# The value is a torch tensor that specifies the value.
-# PyDisort parallels the radiative transfer calculation over the wavelengths and columns.
-# In most cases, the first dimension of the radiation boundary condition is the number of wavelengths,
-# and the second dimension is the number of columns.
-# In the example above, the incoming beam radiation is set to 3.14159;
-# there is only one wavelength and one column.
 ```
 
 - Step 6. Run radiative transfer and get intensity result.
 
+a `ds` object is constructed as if it is one layer of a Neural Network model.
+The core function is the forward function, which takes the optical properties and radiation boundary conditions as input.
+The output is the fluxes at each level of the atmosphere.
+
 ```python
 flx = ds.forward(tau, bc)
 flx
-
-# PyDisort is constructed as if it is one layer of a Neural Network model.
-# The core function is the forward function, which takes the optical properties and radiation boundary conditions as input.
-# The output is the fluxes at each level of the atmosphere.
-# The result of the example above should be:
-# tensor([[[[0.0000, 3.1416],
-#           [0.0000, 2.8426],
-#           [0.0000, 2.3273],
-#           [0.0000, 1.7241],
-#           [0.0000, 1.1557]]]])
-#
-# This is 4D tensor with dimensions (wavelengths, columns, levels, 2).
-# In the last dimension, the first element is the upward flux and the second element is the downward flux.
-# Number of levels is one more than the number of layers.
 ```
+
+The result of the example above should be:
+```python
+tensor([[[[0.0000, 3.1416],
+          [0.0000, 2.8426],
+          [0.0000, 2.3273],
+          [0.0000, 1.7241],
+          [0.0000, 1.1557]]]])
+```
+
+This is 4D tensor with dimensions (wavelengths, columns, levels, 2).
+In the last dimension, the first element is the upward flux and the second element is the downward flux.
+Number of levels is one more than the number of layers.
 
 Please note that this is a generic tutorial and you would need to adapt this to your specific use-case.
 
 > 💡 We keep the parameters consistent to the original `DISORT` library, so you can refer to the [DISORT documentation](cdisort213/DISORT2.doc) for more information such as input/out variables, flags, model usage and caveats.
 
-> 💡 One important point to note is that the `PyDisort` library assumes that the provided arrays (optical thickness, single scattering albedo, boundary condition etc.) are torch tensors and it throws exceptions if incompatible data types are provided. So, ensure that you are providing data in the right format to avoid any runtime errors.
+> 💡 One important point to note is that the `pydisort` library assumes that the provided arrays (optical thickness, single scattering albedo, boundary condition etc.) are torch tensors and it throws exceptions if incompatible data types are provided. So, ensure that you are providing data in the right format to avoid any runtime errors.
 
 <div align="right"><a href="#table-of-contents"><img src="doc/img/top_green_small.png" width="32px"></div>
 
@@ -287,7 +290,7 @@ cd tests
 
 #### <a id='build-and-run-the-python-package'> 🔻 Build and run the Python package</a>
 
-If you follow the steps in the previous section, you will have a C++ wrapper that can be used by Python, and a Python packaged called `PyDisort`, which has been binded via `pybind11`. You could simply install and test the Python package using the following command:
+If you follow the steps in the previous section, you will have a C++ wrapper that can be used by Python, and a Python packaged called `pydisort`, which has been binded via `pybind11`. You could simply install and test the Python package using the following command:
 
 ```bash
 # Assume that you are still in the build/bin/ directory
