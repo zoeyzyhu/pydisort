@@ -96,10 +96,10 @@ jobs:
 
       - name: Install deps
         run: |
-          if [[ "${{ matrix.arch }}" == "arm64" ]]; then
-            pip install numpy torch
+          if [[ "${{ matrix.arch }}" == "x86_64" ]]; then
+            pip install "numpy<2" torch
           else
-            pip install numpy<2 torch
+            pip install numpy torch
           fi
 
       - name: CMake configure
