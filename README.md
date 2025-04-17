@@ -115,74 +115,95 @@ Here is a step-by-step tutorial of how to use the pydisort package:
 
 ```python
 import pydisort
-import numpy as np
+from pydisort import DisortOptions, Disort
+
+# DisortOptions is a class that contains the options for configuring the DISORT model
+# Disort is the main class for running the DISORT model
 ```
 
-- Step 2. Create an instance of the disort class.
+- Step 2. Configure dimensions and options.
 
 ```python
-# Let's assume you have a file named 'isotropic_scatering.toml' which
-# has the required data for setting up generic radiation flags
-ds = pydisort.disort.from_file('isotropic_scattering.toml')
+op = DisortOptions().flags("onlyfl,lamber")
+op.ds().nlyr = 4
+op.ds().nstr = 4
+op.ds().nmom = 4
+op.ds().nphase = 4
+
+# DISORT solves plane-parallel radiative transfer problems in a 1D atmosphere
+# The dimensions are number of layers (nlyr), number of streams (nstr),
+# number of phase moments (nmom), and number of phases (nphase).
+# Usually, nlyr, nstr, nmom and nphase are the same.
+# The example above sets the number of layers to 4, number of streams to 4.
+# Radiation flags are packed in a string and passed to the flags function.
+# See later for more details on the flags.
 ```
 
-- Step 3. Set up the model dimension.
+- Step 3. Construct the Disort object based on the options.
 
 ```python
-ds.set_atmosphere_dimension(
-  nlyr=1, nstr=16, nmom=16, nphase=16
-).set_intensity_dimension(nuphi=1, nutau=2, numu=6).finalize()
+ds = Disort(op)
+
+# ds is the main object for running the DISORT model.
+# It is constructed using the options defined in the previous step.
+# Internal memory is allocated for the DISORT model.
 ```
 
-This sets up a one layer of atmosphere with 16 streams for calculating radiation.
-
-- Step 4. Calculate scattering moments.
+- Step 4. Set up optical properties
 
 ```python
-pmom = get_legendre_coefficients(ds.get_nmom(), "isotropic")
+import torch
+tau = torch.tensor([0.1, 0.2, 0.3, 0.4]).reshape((4,1))
+
+# PyDisort uses torch tensors to store the optical properties.
+# The statement above sets the layer optical thickness from top to bottom.
+# The last dimension of the tau tensor is the number of optical properties,
+# in the order of optical thickness, single scattering albedo, and moments of scattering phase function.
+# The second to the last dimension of tau is the number of layers,
+# which must be the same as the number of layers in the DisortOptions object.
 ```
 
-- Step 5. Set up radiation boundary condition.
+- Step 5. Set up radiation boundary conditions.
 
 ```python
-ds.umu0 = 0.1
-ds.phi0 = 0.0
-ds.albedo = 0.0
-ds.fluor = 0.0
-ds.fbeam = pi / ds.umu0
-ds.fisot = 0.0
+bc = {"fbeam" : torch.tensor([3.14159]).reshape((1,1))}
+
+# Radiation boundary conditions are set up using a dictionary.
+# Each key in the dictionary is a string that specifies the type.
+# The value is a torch tensor that specifies the value.
+# PyDisort parallels the radiative transfer calculation over the wavelengths and columns.
+# In most cases, the first dimension of the radiation boundary condition is the number of wavelengths,
+# and the second dimension is the number of columns.
+# In the example above, the incoming beam radiation is set to 3.14159;
+# there is only one wavelength and one column.
 ```
 
-- Step 6. Set up output optical depth and polar angles.
+- Step 6. Run radiative transfer and get intensity result.
 
 ```python
-utau = array([0.0, 0.03125])
-umu = array([-1.0, -0.5, -0.1, 0.1, 0.5, 1.0])
-uphi = array([0.0])
-```
+flx = ds.forward(tau, bc)
+flx
 
-- Step 7. Run radiative transfer and get intensity result.
-
-```python
-result = ds.run_with(
-	{
-		"tau": [0.03125],
-		"ssa": [0.2],
-		"pmom": pmom,
-		"utau": utau,
-		"umu": umu,
-		"uphi": uphi,
-	}
-).get_intensity()
+# PyDisort is constructed as if it is one layer of a Neural Network model.
+# The core function is the forward function, which takes the optical properties and radiation boundary conditions as input.
+# The output is the fluxes at each level of the atmosphere.
+# The result of the example above should be:
+# tensor([[[[0.0000, 3.1416],
+#           [0.0000, 2.8426],
+#           [0.0000, 2.3273],
+#           [0.0000, 1.7241],
+#           [0.0000, 1.1557]]]])
+#
+# This is 4D tensor with dimensions (wavelengths, columns, levels, 2).
+# In the last dimension, the first element is the upward flux and the second element is the downward flux.
+# Number of levels is one more than the number of layers.
 ```
 
 Please note that this is a generic tutorial and you would need to adapt this to your specific use-case.
 
-> 💡 We keep the parameters consistent to the original `DISORT` library, so you can refer to the [DISORT documentation](src/cdisort/DISORT2.doc) for more information such as input/out variables, flags, model usage and caveats.
+> 💡 We keep the parameters consistent to the original `DISORT` library, so you can refer to the [DISORT documentation](cdisort213/DISORT2.doc) for more information such as input/out variables, flags, model usage and caveats.
 
-For example, you might need to provide your own data file in `from_file` function or fill the numpy arrays `optical_depth`, `single_scattering_albedo`, and `level_temperature` according to your requirements.
-
-> 💡 One important point to note is that the `pydisort` library assumes that the provided arrays (optical depth, single scattering albedo, etc.) are in the numpy format and it throws exceptions if incompatible data types are provided. So, ensure that you are providing data in the right format to avoid any runtime errors.
+> 💡 One important point to note is that the `PyDisort` library assumes that the provided arrays (optical thickness, single scattering albedo, boundary condition etc.) are torch tensors and it throws exceptions if incompatible data types are provided. So, ensure that you are providing data in the right format to avoid any runtime errors.
 
 <div align="right"><a href="#table-of-contents"><img src="doc/img/top_green_small.png" width="32px"></div>
 
@@ -200,7 +221,7 @@ This repository supports both the Linux and MacOS operating systems. The followi
 
 - `cmake` (version >= 3.16)
 - `g++` (version >= 7.5.0)
-- `python3` (version >= 3.6)
+- `python3` (version >= 3.9)
 
 You could check the versions of these dependencies using the following commands:
 
@@ -260,12 +281,13 @@ After the build is complete, you can run the C++ wrapper using the following com
 cd tests
 
 # Run the test
+cd tests
 ./test_disort.release
 ```
 
 #### <a id='build-and-run-the-python-package'> 🔻 Build and run the Python package</a>
 
-If you follow the steps in the previous section, you will have a C++ wrapper that can be used by Python, and a Python packaged called `pydisort`, which has been binded via `pybind11`. You could simply install and test the Python package using the following command:
+If you follow the steps in the previous section, you will have a C++ wrapper that can be used by Python, and a Python packaged called `PyDisort`, which has been binded via `pybind11`. You could simply install and test the Python package using the following command:
 
 ```bash
 # Assume that you are still in the build/bin/ directory
@@ -280,7 +302,7 @@ You can now run the test cases for the Python package using the following comman
 $ python build/tests/test_attenuation.py
 .
 ----------------------------------------------------------------------
-Ran 1 test in 0.025s
+Ran 1 test in 0.001s
 
 OK
 ```
