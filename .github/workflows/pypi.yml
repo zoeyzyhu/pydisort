@@ -219,8 +219,8 @@ jobs:
           find . -name '*.whl' -exec mv {} dist/ \;
 
       - name: Publish to PyPI
-        if: ${{ needs.build-macos.result == 'success' || needs.build-linux.result == 'success' }}
+        if: ${{ needs.build-macos.result == 'success' && needs.build-linux.result == 'success' }}
         uses: pypa/gh-action-pypi-publish@release/v1
-        #with:
-        #  user: __token__
-        #  password: ${{ secrets.PYPI_API_TOKEN }}
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_API_TOKEN }}
