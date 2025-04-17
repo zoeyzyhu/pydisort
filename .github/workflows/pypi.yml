@@ -137,12 +137,6 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ inputs.build_os == 'Both' || inputs.build_os == 'Ubuntu' }}
 
-    env:
-      TORCH_LIB: >
-        python -c "import torch; print(torch.__path__[0] + '/lib')"
-      TORCH_CMAKE_PREFIX: >
-        python -c "import torch.utils; print(torch.utils.cmake_prefix_path)"
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -162,10 +156,12 @@ jobs:
               -w {dest_dir} {wheel}
           CIBW_BEFORE_BUILD: |
             pip install torch --extra-index-url https://download.pytorch.org/whl/cpu && \
-            export LD_LIBRARY_PATH="$(${TORCH_LIB}):$LD_LIBRARY_PATH" && \
+            TORCH_LIB=$(python -c "import torch; print(torch.__path__[0] + '/lib')") && \
+            TORCH_CMAKE_PREFIX_PATH=$(python -c "import torch.utils; print(torch.utils.cmake_prefix_path)") && \
+            export LD_LIBRARY_PATH="$TORCH_LIB:$LD_LIBRARY_PATH" && \
             cmake -B build -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
                   -DPython3_EXECUTABLE=$(which python) \
-                  -DCMAKE_PREFIX_PATH="$(${TORCH_CMAKE_PREFIX})"
+                  -DCMAKE_PREFIX_PATH="$TORCH_CMAKE_PREFIX_PATH" \
             cmake --build build --parallel
         run: |
           pip install cibuildwheel
