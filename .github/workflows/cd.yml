@@ -110,7 +110,7 @@ jobs:
           CIBW_ARCHS: ${{ env.MACOS_ARCH }}
           CIBW_REPAIR_WHEEL_COMMAND_MACOS: >
             delocate-wheel \
-              --exclude 'lib.*\.dylib' \
+              -e torch \
               -w {dest_dir} {wheel}
           CIBW_BEFORE_BUILD: |
             pip install numpy torch
