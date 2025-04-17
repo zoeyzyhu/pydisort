@@ -113,15 +113,24 @@ Here is a step-by-step tutorial of how to use the pydisort package:
 
 - Step 1. Importing the module.
 
+`DisortOptions` is a class that contains the options for configuring the DISORT model
+`Disort` is the main class for running the DISORT model
+
 ```python
 import pydisort
 from pydisort import DisortOptions, Disort
-
-# DisortOptions is a class that contains the options for configuring the DISORT model
-# Disort is the main class for running the DISORT model
 ```
 
 - Step 2. Configure dimensions and options.
+
+DISORT solves plane-parallel radiative transfer problems in a 1D atmosphere
+The dimensions are number of layers (nlyr), number of streams (nstr),
+number of phase moments (nmom), and number of phases (nphase).
+Usually, `nlyr`, `nstr`, `nmom` and `nphase` are the same.
+
+The example above sets the number of layers to 4, number of streams to 4.
+Radiation flags are packed in a string and passed to the flags function.
+See later for more details on the flags.
 
 ```python
 op = DisortOptions().flags("onlyfl,lamber")
@@ -129,14 +138,6 @@ op.ds().nlyr = 4
 op.ds().nstr = 4
 op.ds().nmom = 4
 op.ds().nphase = 4
-
-# DISORT solves plane-parallel radiative transfer problems in a 1D atmosphere
-# The dimensions are number of layers (nlyr), number of streams (nstr),
-# number of phase moments (nmom), and number of phases (nphase).
-# Usually, nlyr, nstr, nmom and nphase are the same.
-# The example above sets the number of layers to 4, number of streams to 4.
-# Radiation flags are packed in a string and passed to the flags function.
-# See later for more details on the flags.
 ```
 
 - Step 3. Construct the Disort object based on the options.
@@ -322,7 +323,7 @@ Pull-Requests are welcomed. Fork repository, make changes, send us a pull reques
 
 If you need to make changes to the `cdisort` library, please use patches to record your modification. We keep a sole branch called `cidosrt_patches`, which contains the cmake-built version of the `cdisort` library (v2.1.3) and all the patches that we have applied to it. Please refer to the [patching guide](doc/README_patches.md) for more information.
 
-If you need to include more libraries to the `cppdisrot` wrapper, please use the `CMakeLists.txt` file to add them. You could find more information about the cmake build system [here](https://cmake.org/cmake/help/latest/guide/tutorial/index.html).
+If you need to include more libraries to the `Disort` wrapper, please use the `CMakeLists.txt` file to add them. You could find more information about the cmake build system [here](https://cmake.org/cmake/help/latest/guide/tutorial/index.html).
 
 If you need to make changes to the `pydisort` package, please use the `pybind11` library to bind the C++ wrapper to Python, expose the functions and classes to Python, and add more test cases to the `pydisort` package. You could find more information about the `pybind11` library [here](https://pybind11.readthedocs.io/en/stable/).
 
