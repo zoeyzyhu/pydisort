@@ -22,7 +22,7 @@
 -->
 <a href="https://github.com/zoeyzyhu/pydisort/actions">
   <img alt="GitHub Workflow Status"
-    src="https://img.shields.io/github/actions/workflow/status/zoeyzyhu/pydisort/main.yml?style=flat-square&logo=github"/>
+    src="https://img.shields.io/github/actions/workflow/status/zoeyzyhu/pydisort/ci.yml?style=flat-square&logo=github"/>
 </a>
 <!---
 <a href="https://codecov.io/gh/{{REPOSITORY}}">
