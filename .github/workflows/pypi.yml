@@ -12,7 +12,7 @@ on:
       build_os:
         description: "Select OS to build wheels for"
         required: true
-        default: "Ubuntu"
+        default: "MacOS"
         type: choice
         options:
           - Both
@@ -64,59 +64,27 @@ jobs:
     name: Build macOS wheels
     runs-on: macos-latest
     if: ${{ inputs.build_os == 'Both' || inputs.build_os == 'MacOS' }}
-    strategy:
-      fail-fast: true
-      matrix:
-        include:
-          - os: macos-latest
-            arch: arm64
-            cibw_arch: "arm64"
-          - os: macos-latest
-            arch: x86_64
-            cibw_arch: "x86_64"
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           ref: ${{ needs.prepare.outputs.version }}
 
-      - name: Configure wheel build env
-        run: |
-          echo "MACOSX_DEPLOYMENT_TARGET=11.1" >> $GITHUB_ENV
-          echo "ARCHFLAGS=-arch ${{ matrix.arch }}" >> $GITHUB_ENV
-
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ matrix.python-version }}
-          cache: pip
-
-      - name: Install deps
-        run: |
-          grep -Ev "^($DEV_LIBS)" requirements.txt > filtered.txt
-          pip install -r filtered.txt
-
-      - name: CMake configure
-        run: |
-          cmake -B build \
-            -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
-            -DCMAKE_OSX_ARCHITECTURES=${{ matrix.arch }} \
-            -DCMAKE_PREFIX_PATH="$(python -c 'import torch; print(torch.utils.cmake_prefix_path)')" \
-            -DBUILD_TESTS=OFF
-
-      - name: CMake build
-        run: cmake --build build --parallel
-
       - name: Build macOS wheel
         env:
           CIBW_PLATFORM: macos
           CIBW_BUILD: ${{ env.PYTHON_VERSIONS }}
           CIBW_ARCHS: ${{ env.MACOS_ARCH }}
+          CIBW_ENVIRONMENT: MACOSX_DEPLOYMENT_TARGET=11.1
           CIBW_REPAIR_WHEEL_COMMAND_MACOS: >
             delocate-wheel --exclude 'lib(c10|torch|shm|iomp).*\.dylib' -w {dest_dir} {wheel}
           CIBW_BEFORE_BUILD: |
-            pip install numpy torch && \
-            cmake --build build --config {{ env.BUILD_TYPE }} --parallel
+            pip install numpy torch
+            cmake -B build \
+              -DCMAKE_BUILD_TYPE=$BUILD_TYPE \
+              -DCMAKE_OSX_ARCHITECTURES=$MACOS_ARCH
+            cmake --build build --parallel
         run: |
           export TORCH_LIB=$(python -c 'import torch; print(torch.__path__[0] + "/lib")')
           export DYLD_FALLBACK_LIBRARY_PATH="$TORCH_LIB:$DYLD_FALLBACK_LIBRARY_PATH"
@@ -126,7 +94,7 @@ jobs:
       - name: Upload macOS wheels
         uses: actions/upload-artifact@v4
         with:
-          name: wheels-macos-${{ matrix.python-version }}-${{ env.MACOS_ARCH }}
+          name: wheels-macos-${{ env.MACOS_ARCH }}
           path: wheelhouse/*.whl
 
   build-linux:
@@ -154,14 +122,14 @@ jobs:
               --exclude 'lib(c10|torch|gomp|shm).*\.so' \
               -w {dest_dir} {wheel}
           CIBW_BEFORE_BUILD: |
-            pip install torch --extra-index-url https://download.pytorch.org/whl/cpu && \
-            pip install numpy && \
-            TORCH_LIB=$(python -c "import torch; print(torch.__path__[0] + '/lib')") && \
-            TORCH_CMAKE_PREFIX_PATH=$(python -c "import torch.utils; print(torch.utils.cmake_prefix_path)") && \
-            export LD_LIBRARY_PATH="$TORCH_LIB:$LD_LIBRARY_PATH" && \
+            pip install numpy
+            pip install torch --extra-index-url https://download.pytorch.org/whl/cpu
+            TORCH_LIB=$(python -c "import torch; print(torch.__path__[0] + '/lib')")
+            TORCH_CMAKE_PREFIX_PATH=$(python -c "import torch.utils; print(torch.utils.cmake_prefix_path)")
+            export LD_LIBRARY_PATH="$TORCH_LIB:$LD_LIBRARY_PATH"
             cmake -B build -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
                   -DPython3_EXECUTABLE=$(which python) \
-                  -DCMAKE_PREFIX_PATH="$TORCH_CMAKE_PREFIX_PATH" && \
+                  -DCMAKE_PREFIX_PATH="$TORCH_CMAKE_PREFIX_PATH"
             cmake --build build --parallel
         run: |
           pip install cibuildwheel
