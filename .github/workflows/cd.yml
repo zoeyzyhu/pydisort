@@ -143,7 +143,8 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+        #python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+        python-version: ["3.11"]
 
     steps:
       - name: Checkout code
@@ -164,8 +165,8 @@ jobs:
           CIBW_ARCHS: ${{ env.LINUX_ARCH }}
           CIBW_SKIP: "*musllinux*"
           CIBW_REPAIR_WHEEL_COMMAND_LINUX: >
-            TORCH_LIB=$(python -c "import torch; print(torch.__path__[0] + '/lib')") &&
-            LD_LIBRARY_PATH=$TORCH_LIB auditwheel repair --exclude lib*.so -w {dest_dir} {wheel}
+            export LD_LIBRARY_PATH=$(python -c "import torch; print(torch.__path__[0] + '/lib')") &&
+            auditwheel repair --exclude lib*.so -w {dest_dir} {wheel}
           CIBW_BEFORE_BUILD: |
             pip install numpy
             pip install torch --extra-index-url https://download.pytorch.org/whl/cpu
