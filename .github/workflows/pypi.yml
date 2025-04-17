@@ -87,7 +87,7 @@ jobs:
             cmake -B build \
               -DCMAKE_BUILD_TYPE=$BUILD_TYPE \
               -DCMAKE_OSX_ARCHITECTURES=$MACOS_ARCH \
-              -DCMAKE_PREFIX_PATH="$TORCH_CMAKE_PREFIX_PATH" \
+              -DCMAKE_PREFIX_PATH="$TORCH_CMAKE_PREFIX_PATH"
             cmake --build build --parallel
         run: |
           pip install cibuildwheel
