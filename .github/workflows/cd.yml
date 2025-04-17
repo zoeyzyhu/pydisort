@@ -65,18 +65,17 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        #os: [macos-latest, macos-13]
-        os: [macos-13]
+        os: [macos-latest, macos-13]
+        arch: [arm64, x86_64]
         python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
-        include:
-          - os: macos-latest
-            arch: arm64
-          - os: macos-13
-            arch: x86_64
         exclude:
           - os: macos-13
             arch: x86_64
             python-version: "3.13"
+          - os: macos-latest
+            arch: x86_64
+          - os: macos-13
+            arch: arm64
 
     steps:
       - name: Checkout code
