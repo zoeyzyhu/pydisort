@@ -40,7 +40,7 @@ env:
     wheel
   FILTERED: |
     python -c "import os, re; \
-      dev_libs = os.environ['DEV_LIBS'].split(); \
+      dev_libs = $DEV_LIBS.split(); \
       dev_pattern = re.compile(r'^(' + '|'.join(dev_libs) + r')'); \
       print(' '.join([ \
         l.strip() for l in open('requirements.txt') \
