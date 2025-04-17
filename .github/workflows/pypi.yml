@@ -79,7 +79,7 @@ jobs:
           CIBW_ENVIRONMENT: MACOSX_DEPLOYMENT_TARGET=11.1
           CIBW_REPAIR_WHEEL_COMMAND_MACOS: |
             TORCH_LIB=$(python -c "import torch, os; print(os.path.join(torch.__path__[0],'lib'))")
-            DYLD_FALLBACK_LIBRARY_PATH="$TORCH_LIB:$DYLD_FALLBACK_LIBRARY_PATH"
+            export DYLD_FALLBACK_LIBRARY_PATH="$TORCH_LIB:$DYLD_FALLBACK_LIBRARY_PATH"
             delocate-wheel --exclude 'lib(c10|torch|shm|iomp).*\.dylib' -w {dest_dir} {wheel}
           CIBW_BEFORE_BUILD: |
             pip install numpy torch
