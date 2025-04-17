@@ -59,7 +59,7 @@ jobs:
 
   build-macos:
     needs: prepare
-    name: Build macOS
+    name: Build
     runs-on: ${{ matrix.os }}
     if: ${{ inputs.build_os == 'Both' || inputs.build_os == 'MacOS' }}
     strategy:
@@ -139,7 +139,7 @@ jobs:
 
   build-linux:
     needs: prepare
-    name: Build Linux
+    name: Build
     runs-on: ubuntu-latest
     if: ${{ inputs.build_os == 'Both' || inputs.build_os == 'Ubuntu' }}
     strategy:
@@ -209,7 +209,7 @@ jobs:
           find . -name '*.whl' -exec mv {} dist/ \;
 
       - name: Publish to PyPI
-        if: ${{ needs.build-macos.result == 'success' && needs.build-linux.result == 'success' }}
+        if: ${{ needs.build-macos.result == 'success' || needs.build-linux.result == 'success' }}
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           user: __token__
