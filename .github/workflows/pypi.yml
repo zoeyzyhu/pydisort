@@ -22,6 +22,7 @@ on:
 env:
   BUILD_TYPE: Release
   LINUX_ARCH: "x86_64"
+  MACOS_ARCH: "arm64"
   PYTHON_VERSIONS: "cp311-*"
   #PYTHON_VERSIONS: "cp39-* cp310-* cp311-* cp312-* cp313-*"
 
@@ -110,7 +111,7 @@ jobs:
         env:
           CIBW_PLATFORM: macos
           CIBW_BUILD: ${{ env.PYTHON_VERSIONS }}
-          CIBW_ARCHS: ${{ matrix.arch }}
+          CIBW_ARCHS: ${{ env.MACOS_ARCH }}
           CIBW_REPAIR_WHEEL_COMMAND_MACOS: >
             delocate-wheel --exclude 'lib(c10|torch|shm|iomp).*\.dylib' -w {dest_dir} {wheel}
           CIBW_BEFORE_BUILD: |
@@ -128,7 +129,7 @@ jobs:
       - name: Upload macOS wheels
         uses: actions/upload-artifact@v4
         with:
-          name: wheels-macos-${{ matrix.python-version }}-${{ matrix.arch }}
+          name: wheels-macos-${{ matrix.python-version }}-${{ env.MACOS_ARCH }}
           path: wheelhouse/*.whl
 
   build-linux:
@@ -156,12 +157,13 @@ jobs:
               -w {dest_dir} {wheel}
           CIBW_BEFORE_BUILD: |
             pip install torch --extra-index-url https://download.pytorch.org/whl/cpu && \
+            pip install numpy && \
             TORCH_LIB=$(python -c "import torch; print(torch.__path__[0] + '/lib')") && \
             TORCH_CMAKE_PREFIX_PATH=$(python -c "import torch.utils; print(torch.utils.cmake_prefix_path)") && \
             export LD_LIBRARY_PATH="$TORCH_LIB:$LD_LIBRARY_PATH" && \
             cmake -B build -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
                   -DPython3_EXECUTABLE=$(which python) \
-                  -DCMAKE_PREFIX_PATH="$TORCH_CMAKE_PREFIX_PATH" \
+                  -DCMAKE_PREFIX_PATH="$TORCH_CMAKE_PREFIX_PATH" && \
             cmake --build build --parallel
         run: |
           pip install cibuildwheel
