@@ -24,7 +24,7 @@ env:
   LINUX_ARCH: "x86_64"
   PYTHON_VERSIONS: "cp311-*"
   #PYTHON_VERSIONS: "cp39-* cp310-* cp311-* cp312-* cp313-*"
-  DEV_LIBS: |
+  DEV_LIBS_TO_EXCLUDE: |
     twine
     sphinx
     guzzle_sphinx_theme
@@ -38,14 +38,6 @@ env:
     setuptools
     cmake
     wheel
-  FILTERED: |
-    import re
-    dev_libs = '''$DEV_LIBS'''.split()
-    dev_pattern = re.compile(r'^(' + '|'.join(dev_libs) + r')')
-    print(' '.join([
-      l.strip() for l in open('requirements.txt')
-      if not dev_pattern.match(l) and l.strip() and not l.startswith('#')
-    ]))
 
 jobs:
   prepare:
@@ -89,6 +81,21 @@ jobs:
         run: |
           raw=${{ steps.determine_version.outputs.version }}
           echo "version_no_v=${raw#v}" >> $GITHUB_OUTPUT
+
+      - name: Extract runtime requirements
+        id: filter_reqs
+        run: |
+          echo "Excluding dev libs: $DEV_LIBS_TO_EXCLUDE"
+          pattern=$(echo "$DEV_LIBS_TO_EXCLUDE" | paste -sd'|' -)
+          runtime_reqs=$(python -c "import re; \
+          pattern = r'^(' + '${pattern}' + ')'; \
+          reqs = [l.strip().split('==')[0] for l in open('requirements.txt') \
+                  if not re.match(pattern, l)]; \
+          print(' '.join(reqs))")
+          echo "Filtered runtime requirements: $runtime_reqs"
+          echo "RUNTIME_REQUIREMENTS=$runtime_reqs" >> $GITHUB_OUTPUT
+        env:
+          DEV_LIBS_TO_EXCLUDE: ${{ env.DEV_LIBS_TO_EXCLUDE }}
 
   build-macos:
     needs: prepare
@@ -194,8 +201,7 @@ jobs:
               -w {dest_dir} {wheel}
           CIBW_BEFORE_BUILD: |
             pip install torch --extra-index-url https://download.pytorch.org/whl/cpu && \
-            REQUIREMENTS=$(${{ env.FILTERED }}) && \
-            pip install $REQUIREMENTS && \
+            pip install ${{ steps.filter_reqs.outputs.RUNTIME_REQUIREMENTS }}
             export LD_LIBRARY_PATH="$(${TORCH_LIB_CMD}):$LD_LIBRARY_PATH" && \
             cmake -B build -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
                   -DPython3_EXECUTABLE=$(which python) \
