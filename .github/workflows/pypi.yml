@@ -83,6 +83,10 @@ jobs:
             export DYLD_FALLBACK_LIBRARY_PATH="$TORCH_LIB:$DYLD_FALLBACK_LIBRARY_PATH"
             delocate-wheel --exclude 'lib(c10|torch|shm|iomp).*\.dylib' -w {dest_dir} {wheel}
           CIBW_BEFORE_BUILD: |
+            pip install numpy torch
+            TORCH_CMAKE_PREFIX_PATH=$(python -c 'import torch.utils; print(torch.utils.cmake_prefix_path)')
+            export TORCH_LIB=$(python -c 'import torch; print(torch.__path__[0] + "/lib")')
+            export DYLD_FALLBACK_LIBRARY_PATH="$TORCH_LIB:$DYLD_FALLBACK_LIBRARY_PATH"
             cmake -B build \
               -DCMAKE_BUILD_TYPE=$BUILD_TYPE \
               -DCMAKE_OSX_ARCHITECTURES=$MACOS_ARCH \
