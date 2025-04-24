@@ -1,12 +1,14 @@
 ## An Overview of the DISORT Project 📌
 
-### Fortran-DISORT
+Fortran-DISORT
+~~~~~~~~~~~~~~
 
 DISORT (Discrete Ordinate Radiative Transfer) is a widely-used radiative transfer algorithm that computes the scattering and absorption of radiation in a medium. It is commonly employed in atmospheric and remote sensing studies to model the transfer of solar and thermal radiation through the Earth's atmosphere. The DISORT algorithm provides accurate and efficient calculations of radiative transfer in complex atmospheric conditions.
 
 DISORT solves the radiative transfer equation by discretizing the atmosphere into a set of layers and solving the equations for each layer independently. It considers multiple scattering effects and can handle various types of scattering particles, including molecules, aerosols, and clouds. DISORT is known for its versatility, enabling simulations for a wide range of atmospheric conditions and geometries. The DISORT library is originally written in Fortran.
 
-### CDISORT
+CDISORT
+~~~~~~~
 
 CDISORT is a C library that provides an interface to the DISORT algorithm. It offers a set of functions and data structures for configuring the parameters of the radiative transfer calculation and running the DISORT calculations. CDISORT simplifies the usage of DISORT by providing a higher-level interface that can be accessed from C code.
 
@@ -14,7 +16,8 @@ The CDISORT library encapsulates the complexity of the DISORT algorithm and prov
 
 The library is typically used by researchers and scientists working in fields such as atmospheric physics, climate modeling, remote sensing, and radiative transfer simulations. It facilitates the integration of the DISORT algorithm into existing software or the development of new applications that require radiative transfer calculations.
 
-### CPPDISORT
+CPPDISORT
+~~~~~~~~~
 
 CPPDISORT is a C++ library that builds upon the CDISORT library and provides an object-oriented interface for utilizing the DISORT radiative transfer algorithm. It aims to simplify the usage of DISORT in C++ applications by providing a modern and intuitive interface.
 
@@ -26,13 +29,15 @@ CPPDISORT inherits all the capabilities of the underlying DISORT algorithm, allo
 
 CPPDISORT is designed to cater to the needs of researchers, scientists, and developers working in fields such as atmospheric physics, climate modeling, remote sensing, and related disciplines. It offers a modern and efficient solution for performing radiative transfer simulations in C++ applications, enabling the exploration and analysis of complex atmospheric phenomena.
 
-#### Files
+Files
+~~~~~
 
 The "cppdisort.h" file includes the necessary headers and defines the DisortWrapper class. This class provides a C++ interface to interact with the "cdisort" library. It includes member variables and functions that correspond to the parameters and functions of the "cdisort" library. Some of the important member variables include `btemp`, `ttemp`, `fluor`, `albedo`, `fisot`, `fbeam`, `temis`, `umu0`, and `phi0`, which represent accessible boundary conditions. The class also provides functions for setting various parameters, such as atmosphere dimensions, flags, intensity dimensions, optical depth, single scattering albedo, level temperature, wavenumber range, output optical depth, and outgoing ray. The class also includes functions for running the radiative transfer calculations and retrieving the results.
 
 The "cppdisort.cc" file implements the member functions of the DisortWrapper class. The functions in this file handle the initialization, parameter setting, and execution of the "cdisort" library functions. It also includes a function fromTomlTable that converts a TOML table into a DisortWrapper object.
 
-### PYDISORT
+PYDISORT
+~~~~~~~~
 
 The primary goal of PYDISORT is to allow Python developers to easily access and utilize the functionality provided by cppdisort without having to write C++ code. By using PYDISORT, users can take advantage of the efficient radiative transfer calculations of cppdisort while enjoying the flexibility and ease of use of the Python language.
 
