@@ -1,5 +1,5 @@
-How to use git for this repo 📌
--------------------------------
+How to use git for this repo
+============================
 
 We adopt the idea of **linear history** and a **squash merging** approach in this repository, meaning there is only one permanent branch (`main`), and the only way to push changes to main is by submitting a Pull Request (PR). The main branch is protected to prevent direct pushes. **A linear history ensures that the main branch remains clean and organized**. Squash merging means that **the smallest unit of change is a PR, rather than a commit**.
 
@@ -56,7 +56,7 @@ The content of the message is not crucial at this stage since all the commits wi
 
 The previous command only commits the changes locally. To push your changes to GitHub, use:
 
-.. codeb-block:: bash
+.. code-block:: bash
 
     git push origin <username/issue_description>
 

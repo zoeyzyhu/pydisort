@@ -1,4 +1,5 @@
-## How to install `pydiosrt` 📌
+How to install pydiosrt
+=======================
 
 Install System Libraries
 ------------------------

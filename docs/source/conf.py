@@ -1,7 +1,5 @@
 # Configuration file for the Sphinx documentation builder.
 
-import sys
-import os
 from docutils import nodes
 from docutils.parsers.rst import roles
 
@@ -21,8 +19,10 @@ project = "pydisort"
 copyright = "2025, Zoey Hu"
 author = "Zoey Hu"
 
+autosummary_generate = True
+
 # Adjust the path accordingly
-sys.path.insert(0, os.path.abspath("../../src"))
+# sys.path.insert(0, os.path.abspath("."))
 
 # -- General configuration
 
@@ -32,6 +32,8 @@ extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.napoleon",
     "sphinx.ext.autosummary",
+    "sphinx.ext.viewcode",
+    "sphinx.ext.githubpages",
     "sphinx.ext.intersphinx",
 ]
 
@@ -61,12 +63,16 @@ html_theme = "sphinx_rtd_theme"
 epub_show_urls = "footnote"
 
 # -- Custom options
-html_static_path = ["_static"]
+html_static_path = ["../_static"]
 
 html_css_files = [
     "custom.css",
 ]
 
 # -- napoleon options
-napoleon_google_docstring = False
+napoleon_google_docstring = True
 napoleon_numpy_docstring = True
+napoleon_include_init_with_doc = False
+napoleon_include_private_with_doc = False
+napoleon_use_param = True
+napoleon_use_rtype = True

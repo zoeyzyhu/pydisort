@@ -1,6 +1,5 @@
-
 Software Release Cycle
-----------------------
+======================
 
 `major.minor.patch` naming convention
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -1,27 +1,8 @@
-How to set up Python virtual environment 📌
--------------------------------------------
+How to set up Python virtual environment
+========================================
 
-Table of Contents
-~~~~~~~~~~~~~~~~~
-
-- [🔻 Prerequisites](#prerequisites)
-- [🔻 Restarting this guide](#restarting-this-guide)
-- [🔻 Install Python](#install-python)
-  - [macOS](#macos)
-  - [WSL or Linux](#wsl-or-linux)
-- [🔻 Create a Python virtual environment](#create-a-python-virtual-environment)
-- [🔻 Understanding virtual environments](#understanding-virtual-environments)
-  - [Environment](#environment)
-  - [Environment variables inside a Python program](#environment-variables-inside-a-python-program)
-  - [Virtual environment](#virtual-environment)
-  - [Why virtual environments?](#why-virtual-environments)
-  - [Activate a virtual environment](#activate-a-virtual-environment)
-  - [Replicate a virtual environment](#replicate-a-virtual-environment)
-  - [Deactivate a virtual environment](#deactivate-a-virtual-environment)
-- [🔻 Summary](#summary)
-
-<a id='prerequisites'>🔻 Prerequisites </a>
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Prerequisites
+-------------
 
 At this point, you should already have a folder for your project. Your folder location might be different.
 
@@ -30,8 +11,8 @@ At this point, you should already have a folder for your project. Your folder lo
     $ pwd
     /Users/zoeyzyhu/projects/pydisort
 
-<a id='restarting-this-guide'>🔻 Restarting this guide </a>
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Restarting this guide
+---------------------
 
 If you made a mistake with these Python instructions, here’s how to start over. First, close your shell and reopen it to ensure that environment variables are reset. Then, delete the virtual environment.
 
@@ -41,13 +22,13 @@ If you made a mistake with these Python instructions, here’s how to start over
     /Users/zoeyzyhu/projects/pydisort
     $ rm -rf env
 
-<a id='install-python'>🔻 Install Python </a>
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Install Python
+--------------
 
 Install a recent version of Python.
 
 macOS
-^^^^^
+~~~~~
 
 You might already have Python installed. Your version might be different.
 
@@ -65,7 +46,7 @@ You can install a recent version of Python using the Homebrew package manager. Y
     Python 3.11.3
 
 WSL or Linux
-^^^^^^^^^^^^
+~~~~~~~~~~~~
 
 .. code-block:: bash
 
@@ -73,14 +54,14 @@ WSL or Linux
     $ sudo apt-get install python3 python3-pip python3-venv
 
 
-<a id='create-a-python-virtual-environment'>🔻 Create a Python virtual environment </a>
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Create a Python virtual environment
+-----------------------------------
 
 This section will help you install the Python tools and packages locally, which won’t affect Python tools and packages installed elsewhere on your computer.
 
 After finishing this section, you’ll have a folder called `env/` that contains all the Python packages you need for this project.
 
-.. warn::
+.. warning::
 
     **Pitfall**: Do not use the version of Python provided by Anaconda.
 
@@ -175,16 +156,16 @@ After finishing this section, you’ll have a folder called `env/` that contains
         /usr/local/bin/python3 # NOT anaconda
 
 
-.. warn::
+.. warning::
 
-    **Pitfall**: If the `PYTHONPATH` environment variable is set, it can cause problems.
+    **Pitfall**: If the ``PYTHONPATH`` environment variable is set, it can cause problems.
 
     .. code-block:: bash
 
         $ printenv PYTHONPATH # Output isn't blank, problem!
         /Users/zoeyzyhu/local/lib/python3.11/site-packages/
 
-    **Option 1 (recommended)**: Permanently remove the environment variable. Variables are usually set in your shell initialization file. Check these files to see if they set the offending variable: `.profile`, `.bashrc`, `.bash_profile`, `.zshrc`, `.zprofile`, `.cshrc`, `.tcshrc`, `.login`. Delete or comment out any line that contains `PYTHONPATH`.
+    **Option 1 (recommended)**: Permanently remove the environment variable. Variables are usually set in your shell initialization file. Check these files to see if they set the offending variable: `.profile`, `.bashrc`, `.bash_profile`, `.zshrc`, `.zprofile`, `.cshrc`, `.tcshrc`, `.login`. Delete or comment out any line that contains ``PYTHONPATH``.
 
     .. code-block:: bash
 
@@ -200,7 +181,7 @@ After finishing this section, you’ll have a folder called `env/` that contains
         $ printenv PYTHONPATH # output should be blank
 
 
-    **Option 2**: Temporarily unset the `PYTHONPATH` environment variable. You’ll have to do this every time you start a new shell.
+    **Option 2**: Temporarily unset the ``PYTHONPATH`` environment variable. You’ll have to do this every time you start a new shell.
 
     .. code-block:: bash
 
@@ -222,7 +203,7 @@ Activate virtual environment. You’ll need to do this every time you start a ne
 
     $ source env/bin/activate
 
-👏 We now have a complete local environment for Python. Everything lives in one directory. Environment variables point to this virtual environment.
+We now have a complete local environment for Python. Everything lives in one directory. Environment variables point to this virtual environment.
 
 .. code-block:: bash
 
@@ -265,13 +246,13 @@ Upgrade the Python tools in your virtual environment
     $ pip install --upgrade pip setuptools
 
 
-<a id='understanding-virtual-environments'>🔻 Understanding Virtual Environments </a>
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Understanding Virtual Environments
+----------------------------------
 
 This section will give more detail about virtual environments and how they work. Simply put, a virtual environment is a bunch of files (located in `env/` in this tutorial) used by Python.
 
 Environment
-^^^^^^^^^^^
+~~~~~~~~~~~
 
 An environment is a collection of environment variables that are inputs to your shell and your programs.
 
@@ -310,7 +291,7 @@ Notice that each item in the list is a directory that contains executables, for 
     ...
 
 Environment variables inside a Python program
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 You can set any environment variable you want.
 
@@ -339,7 +320,7 @@ Set an environment variable and run the program.
 This example shows that environment variables are simply another way to provide input to a running program.
 
 Virtual environment
-^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~
 
 A virtual environment is a self-contained directory that contains a Python installation and a number of additional Python packages.
 
@@ -351,7 +332,7 @@ As you saw earlier, the command to create a virtual environment creates a new di
     $ ls env/
     bin include lib pyvenv.cfg
 
-The virtual environment contains a `bin/` directory with executables. It also contains a `lib/ `directory where Python third party packages live. Your versions might be different.
+The virtual environment contains a `bin/` directory with executables. It also contains a `lib/` directory where Python third party packages live. Your versions might be different.
 
 .. code-block:: bash
 
@@ -385,12 +366,12 @@ A pre-configured `python` executable in `bin/` uses the third party packages in 
 
 
 Why virtual environments?
-^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Virtual environments are useful when you want to install different Python programs that have different third party package dependencies. For example, you might have a virtual environment for a `pydisort` project, and a different one for your machine learning project. The two projects have different third party packages and different versions of those packages.
 
 Activate a virtual environment
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 In the previous example, we used the virtual environment by calling its Python executable explicitly (e.g., `./env/bin/python`). As a convenience, we can temporarily make this version the default.
 
@@ -426,7 +407,7 @@ Finally, the `activate` script sets a `$VIRTUAL_ENV` environment variable, which
     /Users/zoeyzyhu/projects/pydisort/env
 
 Replicate a virtual environment
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 In the previous section, we created a Python virtual environment, activated it, and upgraded the Python installer tools (`pip`, `setuptools`). We have not yet installed any new third party Python packages.
 
@@ -473,7 +454,7 @@ Install the package dependencies. Your output might be different.
     zipp 3.15.0
 
 Deactivate a virtual environment
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The deactivate command simply modifies two environment variables, `PATH` and `VIRTUAL_ENV`. First, it unsets `VIRTUAL_ENV`.
 
@@ -491,8 +472,8 @@ Finally, `deactivate` changes `PATH` to its previous value, before the virtual e
     /usr/bin
     /bin
 
-<a id='summary'>🔻 Summary </a>
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Summary
+-------
 
 A Python virtual environment helps you manage third party packages. A pre-configured python executable in `./env/bin/` uses the third party packages in `./env/lib/` (the name of `env/` is your choice).
 

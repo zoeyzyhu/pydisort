@@ -4,13 +4,20 @@
    contain the root `toctree` directive.
 
 Pydisort Documentation
-====================================
+======================
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+    :maxdepth: 2
+    :caption: Contents:
 
-
+    disort
+    install
+    patch
+    release_cycle
+    venv
+    workflow
+    devops
+    api
 
 .. Indices
 .. ==================
@@ -18,11 +25,3 @@ Pydisort Documentation
 .. * :ref:`genindex`
 .. * :ref:`modindex`
 .. * :ref:`search`
-
-.. pydisort module
-.. ===============
-
-.. automodule:: pydisort
-   :members:
-   :undoc-members:
-   :show-inheritance:

@@ -1,5 +1,5 @@
-How to make changes to the `cdisort` source code 📌
----------------------------------------------------
+How to make changes to the `cdisort` source code
+================================================
 
 You may occasionally need to modify the cdisort source code. To ensure a clean version of the code is maintained, follow the procedure outlined below to update the cdisort source code.
 

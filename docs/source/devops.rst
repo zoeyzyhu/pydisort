@@ -1,6 +1,5 @@
-## Developer's guide to this repo 📌
-Development Guide
------------------
+Developer's guide to this repo
+==============================
 
 pre-commit hooks
 ~~~~~~~~~~~~~~~~

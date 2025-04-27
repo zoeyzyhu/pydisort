@@ -1,4 +1,5 @@
-## An Overview of the DISORT Project 📌
+An Overview of the DISORT Project
+=================================
 
 Fortran-DISORT
 ~~~~~~~~~~~~~~
