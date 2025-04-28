@@ -2,14 +2,11 @@ clang-format
 cmake
 cppcheck
 cpplint
-guzzle_sphinx_theme
 ninja
 numpy
 pre-commit
 pylint
 setuptools
-sphinx
-sphinxcontrib-napoleon
 torch>=2.4.0
 twine
 wheel
