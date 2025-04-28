@@ -7,6 +7,6 @@ numpy
 pre-commit
 pylint
 setuptools
-torch>=2.4.0<=2.6
+torch>=2.4.0
 twine
 wheel
