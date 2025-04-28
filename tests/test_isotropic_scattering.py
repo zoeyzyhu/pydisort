@@ -60,7 +60,7 @@ class PyDisortTests(unittest.TestCase):
         tau[0, 1] = 0.2
 
         # scattering moments
-        tau[0, 2:] = scattering_moments(self.nprop - 2)
+        tau[0, 2:] = scattering_moments(self.nprop - 2, "isotropic")
 
         # up and down flux
         result = self.ds.forward(tau, self.bc)
