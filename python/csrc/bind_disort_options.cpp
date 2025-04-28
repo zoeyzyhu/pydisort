@@ -14,6 +14,28 @@ void bind_disort_options(py::module &m) {
   py::class_<disort::DisortOptions>(m, "DisortOptions", R"(
         Set radiation flags and dimension for disort
 
+        This is usually the first step in setting up a disort run.
+        Some disort options can be set directly in the ``disort_state`` object,
+        such as the dimensions and the flags. Others, such as the polarj
+        and azimuthal angles requires allocating the internal arrays of ``disort_state``.
+        The ``DisortOptions`` object holds those arrays temporarily until the
+        ``disort_state`` object is initialized when a ``Disort`` object
+        is created based on the ``DisortOptions`` object.
+
+        .. note::
+
+          When the ``DisortOptions`` object is printed, it may not truly reflect
+          the state of the ``disort_state`` object. This is because the
+          ``DisortOptions`` object holds temporary arrays that are not
+          yet transferred to the ``disort_state`` object. Transferring happens
+          when the ``Disort`` object is created by calling:
+
+          .. code-block:: python
+
+            >>> disort = pydisort.Disort(op)
+
+          where ``op`` is the ``DisortOptions`` object.
+
         Returns:
           DisortOption object
 
@@ -27,8 +49,7 @@ void bind_disort_options(py::module &m) {
           >>> print(op)
           DisortOptions(flags = onlyfl; nwave = 10; ncol = 10; disort_state = (nlyr = 10; nstr = 4; nmom = 4; ibcnd = 0; usrtau = 0; usrang = 0; lamber = 0; planck = 0; spher = 0; onlyfl = 0); wave = ())
 
-        Notes:
-          The following flags are supported:
+        **The following flags are supported:**
 
           .. list-table::
              :widths: 25 25

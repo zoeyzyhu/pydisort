@@ -11,7 +11,16 @@ namespace py = pybind11;
 
 void bind_cdisort(py::module &m) {
   py::class_<disort_state>(m, "disort_state", R"(
-      Disort state object
+      This is a wrapper for the ``disort_state`` object in the C DISORT library.
+      The only important variables are:
+
+        - ``nlyr``: number of layers
+        - ``nstr``: number of streams
+        - ``nmom``: number of phase function moments
+        - ``nphase``: number of angles (grid points)
+
+      The result of the variables will be transferred from the :class:`pydisort.DisortOptions`
+      object when the :class:`pydisort.Disort <disort.cpp.Disort>` object is created.
 
       Returns:
         disort_state object
@@ -37,7 +46,7 @@ void bind_cdisort(py::module &m) {
         Number of streams
       )")
       .def_readwrite("nphase", &disort_state::nphase, R"(
-        Number of phases
+        Number of angles (grid points)
       )")
       .def_readwrite("nmom", &disort_state::nmom, R"(
         Number of phase functions moments

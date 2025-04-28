@@ -44,6 +44,20 @@ PYBIND11_MODULE(pydisort, m) {
   Note that the underlying calculation engine is still the same as the C-DISORT program.
   So the speed of pydisort is the same as the origin C-DISORT program.
 
+  The normal usage of pydisort is to create a :class:`pydisort.DisortOptions` object first
+  and then initialize the :class:`pydisort.Disort <disort.cpp.Disort>` object with
+  the :class:`pydisort.DisortOptions` object by:
+
+  .. code-block:: python
+
+    >>> import pydisort
+    >>> op = pydisort.DisortOptions().flags("onlyfl,lamber")
+    >>> op.ds().nlyr = 4
+    >>> op.ds().nstr = 4
+    >>> op.ds().nmom = 4
+    >>> op.ds().nphase = 4
+    >>> ds = pydisort.Disort(op)
+
   Examples
   --------
   - Example 1: Calculate attenuation of radiative flux in a plane-parallel atmosphere
@@ -250,17 +264,35 @@ PYBIND11_MODULE(pydisort, m) {
           .. code-block:: python
 
             >>> import torch
-            >>> from pydisort import DisortOptions, Disort
-            >>> op = DisortOptions().flags("lamber")
-            >>> op.ds().nlyr = 4
-            >>> op.ds().nstr = 4
-            >>> op.ds().nmom = 4
-            >>> op.ds().nphase = 4
+            >>> import numpy as np
+            >>> from pydisort import DisortOptions, Disort, scattering_moments
+            >>> op = DisortOptions().flags("usrtau,usrang,lamber,print-input")
+            >>> op.ds().nlyr = 1
+            >>> op.ds().nstr = 16
+            >>> op.ds().nmom = 16
+            >>> op.ds().nphase = 16
+            >>> op.user_tau(np.array([0.0, 0.03125]))
+            >>> op.user_mu(np.array([-1.0, -0.5, -0.1, 0.1, 0.5, 1.0]))
+            >>> op.user_phi(np.array([0.0]))
+            >>> nwave, ncol, nprop = 1, 1, 2 + op.ds().nmom
             >>> ds = Disort(op)
             >>> tau = torch.tensor([0.1, 0.2, 0.3, 0.4]).reshape((4,1))
-            >>> bc = {"fbeam" : torch.tensor([3.14159]).reshape((1,1))}
+            >>> bc = {
+            >>>   "umu0": torch.tensor([0.1]),
+            >>>   "phi0": torch.tensor([0.0]),
+            >>>   "albedo": torch.zeros((1, 1)),
+            >>>   "fluor": torch.zeros((1, 1)),
+            >>>   "fisot": torch.zeros((1, 1)),
+            >>> }
+            >>> bc["fbeam"] = np.pi / bc["umu0"].reshape((nwave, ncol))
+            >>> tau = torch.zeros((ncol, nprop))
+            >>> tau[0, 0] = ds.options.user_tau()[-1]
+            >>> tau[0, 1] = 0.2
+            >>> tau[0, 2:] = scattering_moments(nprop - 2, "isotropic")
             >>> flx = ds.forward(tau, bc)
             >>> ds.gather_rad()
+            tensor([[[[[0.0000, 0.0000, 0.0000, 0.1178, 0.0264, 0.0134],
+                       [0.0134, 0.0263, 0.1159, 0.0000, 0.0000, 0.0000]]]]])
         )")
 
       .def(
