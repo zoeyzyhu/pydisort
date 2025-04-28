@@ -10,8 +10,6 @@ Main Classes
 .. autoclass:: disort.cpp.Disort
    :members: gather_flx, gather_rad, forward
 
-.. autoclass:: pydisort.PhaseMomentOptions
-
 .. autoclass:: pydisort.disort_state
    :members:
 

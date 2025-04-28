@@ -22,10 +22,10 @@ void bind_disort_options(py::module &m) {
         .. code-block:: python
 
           >>> import pydisort
-          >>> op = pydisort.DisortOptionis().header('Test run').flags('onlyfl').nwave(10).ncol(10)
+          >>> op = pydisort.DisortOptions().flags('onlyfl').nwave(10).ncol(10)
           >>> op.ds().nlyr, op.ds().nstr, op.ds().nmom = 10, 4, 4
           >>> print(op)
-          >>> rad, flx = disort.run()
+          DisortOptions(flags = onlyfl; nwave = 10; ncol = 10; disort_state = (nlyr = 10; nstr = 4; nmom = 4; ibcnd = 0; usrtau = 0; usrang = 0; lamber = 0; planck = 0; spher = 0; onlyfl = 0); wave = ())
 
         Notes:
           The following flags are supported:
@@ -98,10 +98,14 @@ void bind_disort_options(py::module &m) {
            })
 
       .ADD_OPTION(std::string, disort::DisortOptions, header, R"(
-        Set header for disort
+        Set or get header for disort
+
+        Usage:
+          - header() -> str
+          - header(header: str) -> DisortOptions
 
         Args:
-          header (str): header for disort
+          header (str, optional): header for disort
 
         Returns:
           DisortOptions: object
@@ -116,10 +120,14 @@ void bind_disort_options(py::module &m) {
         )")
 
       .ADD_OPTION(std::string, disort::DisortOptions, flags, R"(
-        Set radiation flags for disort
+        Set or get radiation flags for disort
+
+        Usage:
+          - flags() -> str
+          - flags(key: str) -> DisortOptions
 
         Args:
-          flags (str): radiation flags for disort
+          flags (str, optional): radiation flags for disort
 
         Returns:
           DisortOptions: object
@@ -134,10 +142,14 @@ void bind_disort_options(py::module &m) {
         )")
 
       .ADD_OPTION(int, disort::DisortOptions, nwave, R"(
-        Set number of wavelengths for disort
+        Set or get number of wavelengths for disort
+
+        Usage:
+          - nwave() -> int
+          - nwave(nwave: int) -> DisortOptions
 
         Args:
-          nwave (int): number of wavelengths for disort
+          nwave (int, optional): number of wavelengths for disort
 
         Returns:
           DisortOptions: object
@@ -152,10 +164,14 @@ void bind_disort_options(py::module &m) {
         )")
 
       .ADD_OPTION(int, disort::DisortOptions, ncol, R"(
-        Set number of columns for disort
+        Set or get number of columns for disort
+
+        Usage:
+          - ncol() -> int
+          - ncol(ncol: int) -> DisortOptions
 
         Args:
-          ncol (int): number of columns for disort
+          ncol (int, optional): number of columns for disort
 
         Returns:
           DisortOptions: object
@@ -170,10 +186,14 @@ void bind_disort_options(py::module &m) {
         )")
 
       .ADD_OPTION(double, disort::DisortOptions, accur, R"(
-        Set accuracy for disort
+        Set or get accuracy for disort
+
+        Usage:
+          - accur() -> float
+          - accur(accur: float) -> DisortOptions
 
         Args:
-          accur (float): accuracy for disort
+          accur (float, optional): accuracy for disort
 
         Returns:
           DisortOptions: object
@@ -188,7 +208,11 @@ void bind_disort_options(py::module &m) {
         )")
 
       .ADD_OPTION(int, disort::DisortOptions, upward, R"(
-        Set direction for disort
+        Set or get direction for disort
+
+        Usage:
+          - upward() -> int
+          - upward(upward: int) -> DisortOptions
 
         Args:
           upward (int): direction for disort
@@ -206,7 +230,11 @@ void bind_disort_options(py::module &m) {
         )")
 
       .ADD_OPTION(std::vector<double>, disort::DisortOptions, user_tau, R"(
-        Set user optical depths for disort
+        Set or get user optical depths for disort
+
+        Usage:
+          - user_tau() -> list
+          - user_tau(user_tau: list) -> DisortOptions
 
         Args:
           user_tau (list): user optical depths for disort
@@ -224,7 +252,11 @@ void bind_disort_options(py::module &m) {
         )")
 
       .ADD_OPTION(std::vector<double>, disort::DisortOptions, user_mu, R"(
-        Set user zenith angles for disort
+        Set or get user zenith angles for disort
+
+        Usage:
+          - user_mu() -> list
+          - user_mu(user_mu: list) -> DisortOptions
 
         Args:
           user_mu (list): user zenith angles for disort
@@ -242,7 +274,11 @@ void bind_disort_options(py::module &m) {
         )")
 
       .ADD_OPTION(std::vector<double>, disort::DisortOptions, user_phi, R"(
-        Set user azimuthal angles for disort
+        Set or get user azimuthal angles for disort
+
+        Usage:
+          - user_phi() -> list
+          - user_phi(user_phi: list) -> DisortOptions
 
         Args:
           user_phi (list): user azimuthal angles for disort
@@ -260,7 +296,11 @@ void bind_disort_options(py::module &m) {
         )")
 
       .ADD_OPTION(std::vector<double>, disort::DisortOptions, wave_lower, R"(
-        Set lower wavenumber(length) at each bin for disort
+        Set or get lower wavenumber(length) at each bin for disort
+
+        Usage:
+          - wave_lower() -> list
+          - wave_lower(wave_lower: list) -> DisortOptions
 
         Args:
           wave_lower (list): lower wavenumber(length) at each bin for disort
@@ -278,7 +318,11 @@ void bind_disort_options(py::module &m) {
         )")
 
       .ADD_OPTION(std::vector<double>, disort::DisortOptions, wave_upper, R"(
-        Set upper wavenumber(length) at each bin for disort
+        Set or get upper wavenumber(length) at each bin for disort
+
+        Usage:
+          - wave_upper() -> list
+          - wave_upper(wave_upper: list) -> DisortOptions
 
         Args:
           wave_upper (list): upper wavenumber(length) at each bin for disort

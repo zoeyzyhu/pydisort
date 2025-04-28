@@ -33,9 +33,7 @@ int main(int argc, char **argv) {
   prop.select(3, disort::index::IEX) = disort->ds().utau[1];
   prop.select(3, disort::index::ISS) = 0.2;
   prop.narrow(3, disort::index::IPM, disort->ds().nstr) =
-      disort::scattering_moments(
-          disort->ds().nstr,
-          disort::PhaseMomentOptions().type(disort::kIsotropic));
+      disort::scattering_moments(disort->ds().nstr);
 
   std::map<std::string, torch::Tensor> bc;
 

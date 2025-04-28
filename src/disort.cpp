@@ -173,6 +173,8 @@ DisortImpl::~DisortImpl() {
 }
 
 torch::Tensor DisortImpl::gather_flx() const {
+  TORCH_CHECK(allocated_, "DisortImpl::gather_flx: DisortImpl not allocated");
+
   int nlyr = options.ds().nlyr;
   auto result = torch::empty({options.nwave() * options.ncol(), nlyr + 1, 8},
                              result_options_);
@@ -191,6 +193,8 @@ torch::Tensor DisortImpl::gather_flx() const {
 }
 
 torch::Tensor DisortImpl::gather_rad() const {
+  TORCH_CHECK(allocated_, "DisortImpl::gather_rad: DisortImpl not allocated");
+
   TORCH_CHECK(options.ds().flag.onlyfl == false,
               "DisortImpl::gather_rad: ds.onlyfl == true");
 

@@ -1,0 +1,13 @@
+.sig {
+    display: block;
+    width: 100%;
+    background: #f8f8f8;  /* or match your theme */
+    padding: 8px;
+    border-radius: 4px;
+}
+
+.py.property {
+    display: block;
+    width: 100%;
+    margin-bottom: 1em; /* Optional: space between properties */
+}

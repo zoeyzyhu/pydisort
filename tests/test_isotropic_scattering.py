@@ -12,7 +12,6 @@ from numpy.testing import assert_allclose
 from pydisort import (
     DisortOptions,
     Disort,
-    PhaseMomentOptions,
     scattering_moments,
 )
 
@@ -61,9 +60,7 @@ class PyDisortTests(unittest.TestCase):
         tau[0, 1] = 0.2
 
         # scattering moments
-        tau[0, 2:] = scattering_moments(
-            self.nprop - 2, PhaseMomentOptions().type("isotropic")
-        )
+        tau[0, 2:] = scattering_moments(self.nprop - 2)
 
         # up and down flux
         result = self.ds.forward(tau, self.bc)

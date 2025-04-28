@@ -14,7 +14,6 @@
 namespace py = pybind11;
 
 void bind_disort_options(py::module &m);
-void bind_phase_options(py::module &m);
 void bind_cdisort(py::module &m);
 
 PYBIND11_MODULE(pydisort, m) {
@@ -150,18 +149,68 @@ PYBIND11_MODULE(pydisort, m) {
   m.attr("iuavgso") = 7;
 
   bind_disort_options(m);
-  bind_phase_options(m);
   bind_cdisort(m);
 
-  m.def("scattering_moments", &disort::scattering_moments, R"(
+  m.def("scattering_moments", &disort::scattering_moments, py::arg("nmom"),
+        py::arg("type"), py::arg("gg1") = 0.0, py::arg("gg2") = 0.0,
+        py::arg("ff") = 0.0, R"(
       Get phase function moments based on a phase function model
+
+      The following phase function models are supported:
+
+      .. list-table::
+          :widths: 25 40
+          :header-rows: 1
+
+          * - Model
+            - Description
+          * - 'isotropic'
+            - Isotropic phase function, [0, 0, 0, ...]
+          * - 'rayleigh'
+            - Rayleigh scattering phase function, [0, 0.1, 0, ...]
+          * - 'henyey-greenstein'
+            - Henyey-Greenstein phase function, [gg, gg^2, gg^3, ...]
+          * - 'double-henyey-greenstein'
+            - Double Henyey-Greenstein phase function, [gg1, gg2, gg1^2, gg2^2, ...]
+          * - 'haze-garcia-siewert'
+            - Tabulated haze phase function by Garcia/Siewert
+          * - 'cloud-garcia-siewert'
+            - Tabulated cloud phase function by Garcia/Siewert
 
       Args:
         nmom (int): Number of phase function moments
-        op (PhaseMomentOptions): Phase function model
+        type (str): Phase function model
+        gg1 (float): First Henyey-Greenstein parameter
+        gg2 (float): Second Henyey-Greenstein parameter
+        ff (float): Weighting factor for double Henyey-Greenstein
 
       Returns:
-        list[float]: Phase function moments, shape (nmom,)
+        torch.Tensor: Phase function moments, shape (nmom,)
+
+      Examples:
+        Example 1: Isotropic phase function
+
+        .. code-block:: python
+
+          >>> import pydisort
+          >>> pydisort.scattering_moments(4, 'isotropic')
+          tensor([0., 0., 0., 0.], dtype=torch.float64)
+
+        Example 2: Henyey-Greenstein phase function
+
+        .. code-block:: python
+
+          >>> import pydisort
+          >>> pydisort.scattering_moments(4, 'henyey-greenstein', 0.85)
+          tensor([0.8500, 0.7225, 0.6141, 0.5220], dtype=torch.float64)
+
+        Example 3: Double Henyey-Greenstein phase function
+
+        .. code-block:: python
+
+          >>> import pydisort
+          >>> pydisort.scattering_moments(4, 'double-henyey-greenstein', 0.85, 0.5, 0.5)
+          tensor([0.6750, 0.4862, 0.3696, 0.2923], dtype=torch.float64)
       )");
 
   ADD_DISORT_MODULE(Disort, DisortOptions)
@@ -171,6 +220,23 @@ PYBIND11_MODULE(pydisort, m) {
 
         Returns:
           torch.Tensor: Disort flux outputs (nwave, ncol, nlvl = nlyr + 1, 8)
+
+        Examples:
+
+          .. code-block:: python
+
+            >>> import torch
+            >>> from pydisort import DisortOptions, Disort
+            >>> op = DisortOptions().flags("onlyfl,lamber")
+            >>> op.ds().nlyr = 4
+            >>> op.ds().nstr = 4
+            >>> op.ds().nmom = 4
+            >>> op.ds().nphase = 4
+            >>> ds = Disort(op)
+            >>> tau = torch.tensor([0.1, 0.2, 0.3, 0.4]).reshape((4,1))
+            >>> bc = {"fbeam" : torch.tensor([3.14159]).reshape((1,1))}
+            >>> flx = ds.forward(tau, bc)
+            >>> ds.gather_flx()
         )")
 
       .def("gather_rad", &disort::DisortImpl::gather_rad, R"(
@@ -178,6 +244,23 @@ PYBIND11_MODULE(pydisort, m) {
 
         Returns:
           torch.Tensor: Disort radiation outputs (nwave, ncol, nlvl = nlyr + 1, 6)
+
+        Examples:
+
+          .. code-block:: python
+
+            >>> import torch
+            >>> from pydisort import DisortOptions, Disort
+            >>> op = DisortOptions().flags("lamber")
+            >>> op.ds().nlyr = 4
+            >>> op.ds().nstr = 4
+            >>> op.ds().nmom = 4
+            >>> op.ds().nphase = 4
+            >>> ds = Disort(op)
+            >>> tau = torch.tensor([0.1, 0.2, 0.3, 0.4]).reshape((4,1))
+            >>> bc = {"fbeam" : torch.tensor([3.14159]).reshape((1,1))}
+            >>> flx = ds.forward(tau, bc)
+            >>> ds.gather_rad()
         )")
 
       .def(
@@ -236,11 +319,35 @@ PYBIND11_MODULE(pydisort, m) {
 
         Args:
           prop (torch.Tensor): Optical properties at each level (nwave, ncol, nlyr, nprop)
+
           bc (Dict[str, torch.Tensor]): Dictionary of disort boundary conditions.
+
           bname (str): Name of the radiation band
+
           temf (Optional[torch.Tensor]): Temperature at each level (ncol, nlvl = nlyr + 1)
 
         Returns:
           torch.Tensor: Radiative flux or intensity, shape (nwave, ncol, nlvl, nrad)
+
+        Examples:
+          .. code-block:: python
+
+            >>> import torch
+            >>> from pydisort import DisortOptions, Disort
+            >>> op = DisortOptions().flags("onlyfl,lamber")
+            >>> op.ds().nlyr = 4
+            >>> op.ds().nstr = 4
+            >>> op.ds().nmom = 4
+            >>> op.ds().nphase = 4
+            >>> ds = Disort(op)
+            >>> tau = torch.tensor([0.1, 0.2, 0.3, 0.4]).reshape((4,1))
+            >>> bc = {"fbeam" : torch.tensor([3.14159]).reshape((1,1))}
+            >>> flx = ds.forward(tau, bc)
+            >>> flx
+            tensor([[[[0.0000, 3.1416],
+                    [0.0000, 2.8426],
+                    [0.0000, 2.3273],
+                    [0.0000, 1.7241],
+                    [0.0000, 1.1557]]]])
         )");
 }

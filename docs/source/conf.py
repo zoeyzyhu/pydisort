@@ -2,6 +2,8 @@
 
 from docutils import nodes
 from docutils.parsers.rst import roles
+import sys
+import os
 
 
 def greyed_out_role(
@@ -25,10 +27,10 @@ autosummary_generate = True
 add_module_names = False
 
 # only show the class name
-autodoc_typehints = "description"
+autodoc_typehints = "both"
 
 # Adjust the path accordingly
-# sys.path.insert(0, os.path.abspath("."))
+sys.path.insert(0, os.path.abspath("../python"))
 
 # -- General configuration
 
