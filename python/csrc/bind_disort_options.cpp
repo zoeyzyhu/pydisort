@@ -18,6 +18,9 @@ void bind_disort_options(py::module &m) {
           DisortOption object
 
         Examples:
+
+        .. code-block:: python
+
           >>> import pydisort
           >>> op = pydisort.DisortOptionis().header('Test run').flags('onlyfl').nwave(10).ncol(10)
           >>> op.ds().nlyr, op.ds().nstr, op.ds().nmom = 10, 4, 4
@@ -71,19 +74,21 @@ void bind_disort_options(py::module &m) {
           A General boundary condition is invoked when 'ibcnd' is unspecified (False).
           This allows:
 
-          - beam illumination from the top (set fbeam)
-          - isotropic illumination from the top (set fisot)
-          - thermal emission from the top (set ttemp and temis)
-          - internal thermal emission (use set_temperature_on_level)
-          - reflection at the bottom (set lamber, albedo)
-          - thermal emission from the bottom (set btemp)
+            - beam illumination from the top
+            - isotropic illumination from the top
+            - thermal emission from the top
+            - internal thermal emission
+            - reflection at the bottom
+            - thermal emission from the bottom
 
           A Special boundary condition is invoked when 'ibcnd' is specified (True).
           Special boundary condition only returns albedo and transmissivity of
           the entire medium.
 
-          - current version of pydisort has limited support for this option.
-          - consult the documentation of DISORT for more details on this option.
+          .. warning::
+
+            - current version of pydisort has limited support for this option.
+            - consult the documentation of DISORT for more details on this option.
         )")
       .def(py::init<>())
 
@@ -99,9 +104,12 @@ void bind_disort_options(py::module &m) {
           header (str): header for disort
 
         Returns:
-          DisortOptions object
+          DisortOptions: object
 
         Examples:
+
+        .. code-block:: python
+
           >>> import pydisort
           >>> op = pydisort.DisortOptions().header('Test run')
           >>> print(op)
@@ -114,9 +122,12 @@ void bind_disort_options(py::module &m) {
           flags (str): radiation flags for disort
 
         Returns:
-          DisortOptions object
+          DisortOptions: object
 
         Examples:
+
+        .. code-block:: python
+
           >>> import pydisort
           >>> op = pydisort.DisortOptions().flags('onlyfl')
           >>> print(op)
@@ -129,9 +140,12 @@ void bind_disort_options(py::module &m) {
           nwave (int): number of wavelengths for disort
 
         Returns:
-          DisortOptions object
+          DisortOptions: object
 
         Examples:
+
+        .. code-block:: python
+
           >>> import pydisort
           >>> op = pydisort.DisortOptions().nwave(10)
           >>> print(op)
@@ -144,9 +158,12 @@ void bind_disort_options(py::module &m) {
           ncol (int): number of columns for disort
 
         Returns:
-          DisortOptions object
+          DisortOptions: object
 
         Examples:
+
+        .. code-block:: python
+
           >>> import pydisort
           >>> op = pydisort.DisortOptions().ncol(10)
           >>> print(op)
@@ -156,12 +173,15 @@ void bind_disort_options(py::module &m) {
         Set accuracy for disort
 
         Args:
-        accur (float): accuracy for disort
+          accur (float): accuracy for disort
 
         Returns:
-          DisortOptions object
+          DisortOptions: object
 
         Examples:
+
+        .. code-block:: python
+
           >>> import pydisort
           >>> op = pydisort.DisortOptions().accur(1.e-6)
           >>> print(op)
@@ -174,9 +194,12 @@ void bind_disort_options(py::module &m) {
           upward (int): direction for disort
 
         Returns:
-          DisortOptions object
+          DisortOptions: object
 
         Examples:
+
+        .. code-block:: python
+
           >>> import pydisort
           >>> op = pydisort.DisortOptions().upward(true)
           >>> print(op)
@@ -189,9 +212,12 @@ void bind_disort_options(py::module &m) {
           user_tau (list): user optical depths for disort
 
         Returns:
-          DisortOptions object
+          DisortOptions: object
 
         Examples:
+
+        .. code-block:: python
+
           >>> import pydisort
           >>> op = pydisort.DisortOptions().user_tau([0.1, 0.2, 0.3])
           >>> print(op)
@@ -204,9 +230,12 @@ void bind_disort_options(py::module &m) {
           user_mu (list): user zenith angles for disort
 
         Returns:
-          DisortOptions object
+          DisortOptions: object
 
         Examples:
+
+        .. code-block:: python
+
           >>> import pydisort
           >>> op = pydisort.DisortOptions().user_mu([0.1, 0.2, 0.3])
           >>> print(op)
@@ -219,9 +248,12 @@ void bind_disort_options(py::module &m) {
           user_phi (list): user azimuthal angles for disort
 
         Returns:
-          DisortOptions object
+          DisortOptions: object
 
         Examples:
+
+        .. code-block:: python
+
           >>> import pydisort
           >>> op = pydisort.DisortOptions().user_phi([0.1, 0.2, 0.3])
           >>> print(op)
@@ -234,9 +266,12 @@ void bind_disort_options(py::module &m) {
           wave_lower (list): lower wavenumber(length) at each bin for disort
 
         Returns:
-          DisortOptions object
+          DisortOptions: object
 
         Examples:
+
+        .. code-block:: python
+
           >>> import pydisort
           >>> op = pydisort.DisortOptions().wave_lower([0.1, 0.2, 0.3])
           >>> print(op)
@@ -249,9 +284,12 @@ void bind_disort_options(py::module &m) {
           wave_upper (list): upper wavenumber(length) at each bin for disort
 
         Returns:
-          DisortOptions object
+          DisortOptions: object
 
         Examples:
+
+        .. code-block:: python
+
           >>> import pydisort
           >>> op = pydisort.DisortOptions().wave_upper([0.1, 0.2, 0.3])
           >>> print(op)
@@ -261,13 +299,15 @@ void bind_disort_options(py::module &m) {
         Set disort state for disort
 
         Args:
-        ds : disort_state
-            disort state for disort
+          ds (disort_state): disort state for disort
 
         Returns:
-          DisortOptions object
+          DisortOptions: object
 
         Examples:
+
+        .. code-block:: python
+
           >>> import pydisort
           >>> op = pydisort.DisortOptions()
           >>> op.ds().nlyr, op.ds().nstr, op.ds().nmom = 10, 4, 4

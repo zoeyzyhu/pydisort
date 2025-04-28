@@ -21,6 +21,12 @@ author = "Zoey Hu"
 
 autosummary_generate = True
 
+# Don't show package name
+add_module_names = False
+
+# only show the class name
+autodoc_typehints = "description"
+
 # Adjust the path accordingly
 # sys.path.insert(0, os.path.abspath("."))
 
@@ -35,11 +41,13 @@ extensions = [
     "sphinx.ext.viewcode",
     "sphinx.ext.githubpages",
     "sphinx.ext.intersphinx",
+    "sphinx.ext.autodoc.typehints",
 ]
 
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3/", None),
     "sphinx": ("https://www.sphinx-doc.org/en/master/", None),
+    "torch": ("https://pytorch.org/docs/stable/", None),
 }
 intersphinx_disabled_domains = ["std"]
 
