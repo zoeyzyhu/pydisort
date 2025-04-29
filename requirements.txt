@@ -10,4 +10,3 @@ setuptools
 torch>=2.4.0
 twine
 wheel
-ninja
