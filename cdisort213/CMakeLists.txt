@@ -20,7 +20,7 @@ string(TOUPPER ${namel} nameu)
 file(GLOB src_files *.c)
 
 add_library(${namel}_${buildl}
-    STATIC
+    OBJECT
     ${src_files}
     )
 
