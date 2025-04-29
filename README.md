@@ -1,6 +1,6 @@
 <!-- Logo ------------------------------------------->
 <h4 align="center">
-    <img src="doc/img/logo_tr_git.png" alt="Pydisort" width="340" style="display: block; margin: 0 auto">
+    <img src="docs/img/logo_tr_git.png" alt="Pydisort" width="340" style="display: block; margin: 0 auto">
 </h4>
 
 <!-- Subtitle --------------------------------------->
@@ -81,7 +81,7 @@ DISORT (Discrete Ordinate Radiative Transfer) is a widely-used algorithm that ca
 
 Building upon the aforementioned work, we have developed a `C++` wrapper for the `cdisort` library and subsequently created a `Python` package. The C++ wrapper serves two primary purposes: (1) providing a modern C++ interface for the `cdisort` library to facilitate future development involving DISORT, and (2) establishing the foundation for the Python package's bindings. The Python package, which is binded upon the C++ wrapper via `pybind11`, is designed to be user-friendly, making it easy to install and integrate into a diverse range of applications.
 
-![](doc/img/rainbow.png)
+![](docs/img/rainbow.png)
 
 ## Table of Contents
 
@@ -95,13 +95,13 @@ Building upon the aforementioned work, we have developed a `C++` wrapper for the
 - [Contributing](#contributing)
 - [Issues?](#issues)
 
-![](doc/img/rainbow.png)
+![](docs/img/rainbow.png)
 
 ## How to use
 
 <!-- For Python users-------------------------------->
 
-### <a id='for-python-users'><img src="doc/img/python.png" alt="Python" align=left width=24> For Python users</a>
+### <a id='for-python-users'><img src="docs/img/python.png" alt="Python" align=left width=24> For Python users</a>
 
 We provide the `pydisort` library for Python users. The package can be installed using `pip`:
 
@@ -209,7 +209,7 @@ Please note that this is a generic tutorial and you would need to adapt this to 
 
 > 💡 One important point to note is that the `pydisort` library assumes that the provided arrays (optical thickness, single scattering albedo, boundary condition etc.) are torch tensors and it throws exceptions if incompatible data types are provided. So, ensure that you are providing data in the right format to avoid any runtime errors.
 
-<div align="right"><a href="#table-of-contents"><img src="doc/img/top_green_small.png" width="32px"></div>
+<div align="right"><a href="#table-of-contents"><img src="docs/img/top_green_small.png" width="32px"></div>
 
 [//]: <> (!!Do not remove the following line, which is used for dividing the content)
 
@@ -217,7 +217,7 @@ Please note that this is a generic tutorial and you would need to adapt this to 
 
 <!-- For C++ developers------------------------------>
 
-### <a id='for-c++-users'><img src="doc/img/cpp.png" alt="C++" align=left width=24> For C++ developers</a>
+### <a id='for-c++-users'><img src="docs/img/cpp.png" alt="C++" align=left width=24> For C++ developers</a>
 
 #### <a id='check-dependencies'> 🔻 Check dependences</a>
 
@@ -311,9 +311,9 @@ Ran 1 test in 0.001s
 OK
 ```
 
-<div align="right"><a href="#table-of-contents"><img src="doc/img/top_green_small.png" width="32px"></div>
+<div align="right"><a href="#table-of-contents"><img src="docs/img/top_green_small.png" width="32px"></div>
 
-![](doc/img/rainbow.png)
+![](docs/img/rainbow.png)
 
 ## Contributing
 
@@ -321,17 +321,20 @@ OK
 
 Pull-Requests are welcomed. Fork repository, make changes, send us a pull request. We will review your changes and apply them to the main branch shortly, provided they don't violate our quality standards. Please read the [contribution guide](CONTRIBUTING.md) for details on the workflow, conventions, etc.
 
-If you need to make changes to the `cdisort` library, please use patches to record your modification. We keep a sole branch called `cidosrt_patches`, which contains the cmake-built version of the `cdisort` library (v2.1.3) and all the patches that we have applied to it. Please refer to the [patching guide](doc/README_patches.md) for more information.
+If you need to make changes to the `cdisort` library, please use patches to record your
+modification. We keep a sole branch called `cidosrt_patches`, which contains the
+cmake-built version of the `cdisort` library (v2.1.3) and all the patches that we have
+applied to it. Please refer to the [patching guide](docs/README_patches.md) for more information.
 
 If you need to include more libraries to the `Disort` wrapper, please use the `CMakeLists.txt` file to add them. You could find more information about the cmake build system [here](https://cmake.org/cmake/help/latest/guide/tutorial/index.html).
 
 If you need to make changes to the `pydisort` package, please use the `pybind11` library to bind the C++ wrapper to Python, expose the functions and classes to Python, and add more test cases to the `pydisort` package. You could find more information about the `pybind11` library [here](https://pybind11.readthedocs.io/en/stable/).
 
-For more information to assist your development, please refer to the `doc/` folder in this repository.
+For more information to assist your development, please refer to the `docs/` folder in this repository.
 
-<div align="right"><a href="#table-of-contents"><img src="doc/img/top_green_small.png" width="32px"></div>
+<div align="right"><a href="#table-of-contents"><img src="docs/img/top_green_small.png" width="32px"></div>
 
-![](doc/img/rainbow.png)
+![](docs/img/rainbow.png)
 
 ## Issues?
 
@@ -339,4 +342,5 @@ This repository is maintained actively, so if you face any issue please <a href=
 
 Not sure where to start? Join our discord and we will help you get started!
 
-<a href="https://discord.gg/ZKBZg5K2"><img src="doc/img/discord.png" width="150"/></a> &nbsp;&nbsp; <a target="_blank" href="https://bmc.link/zoeyzyhu"><img src="doc/img/bmc_white.png" alt="Buy me a coffee" width="170"/></a>
+<a href="https://discord.gg/ZKBZg5K2"><img src="docs/img/discord.png" width="150"/></a>
+&nbsp;&nbsp; <a target="_blank" href="https://bmc.link/zoeyzyhu"><img src="docs/img/bmc_white.png" alt="Buy me a coffee" width="170"/></a>
