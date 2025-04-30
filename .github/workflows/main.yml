@@ -7,7 +7,7 @@ on:
 
 jobs:
   run-ci:
-    uses: ./.github/workflows/ci.yml
+    uses: .github/workflows/ci.yml
     with:
       some-input: value
     secrets: inherit  # if you need access to secrets
