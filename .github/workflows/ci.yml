@@ -4,6 +4,10 @@ on:
   pull_request:
     branches: [main]
 
+  push:
+    branches: [main]
+    tags: [v*]
+
 env:
   PYTHON_VERSION: "3.11"
   BUILD_TYPE: Release
