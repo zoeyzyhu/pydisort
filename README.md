@@ -24,6 +24,10 @@
   <img alt="GitHub Workflow Status"
     src="https://img.shields.io/github/actions/workflow/status/zoeyzyhu/pydisort/ci.yml?style=flat-square&logo=github"/>
 </a>
+<a href="">
+  <img alt="Documentation Status"
+    src="https://app.readthedocs.org/projects/pydisort/badge/?version=latest&style=flat-square"/>
+</a>
 <!---
 <a href="https://codecov.io/gh/{{REPOSITORY}}">
   <img alt="Codacy coverage"
@@ -204,6 +208,7 @@ In the last dimension, the first element is the upward flux and the second eleme
 Number of levels is one more than the number of layers.
 
 Please note that this is a generic tutorial and you would need to adapt this to your specific use-case.
+Detailed documentation of the function calls can be found at [pydisort documentation](https://pydisort.readthedocs.io/en/latest/).
 
 > 💡 We keep the parameters consistent to the original `DISORT` library, so you can refer to the [DISORT documentation](cdisort213/DISORT2.doc) for more information such as input/out variables, flags, model usage and caveats.
 

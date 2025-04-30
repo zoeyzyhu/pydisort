@@ -165,9 +165,11 @@ void DisortImpl::reset() {
 }
 
 DisortImpl::~DisortImpl() {
-  for (int i = 0; i < options.nwave() * options.ncol(); ++i) {
-    c_disort_state_free(&ds_[i]);
-    c_disort_out_free(&ds_[i], &ds_out_[i]);
+  if (allocated_) {
+    for (int i = 0; i < options.nwave() * options.ncol(); ++i) {
+      c_disort_state_free(&ds_[i]);
+      c_disort_out_free(&ds_[i], &ds_out_[i]);
+    }
   }
   allocated_ = false;
 }
