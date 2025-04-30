@@ -148,6 +148,7 @@ jobs:
 
       - name: Build Linux wheel
         env:
+          CIBW_MANYLINUX_X86_64_IMAGE: manylinux_2_28
           CIBW_PLATFORM: linux
           CIBW_BUILD: cp${{ env.PY_VERSION }}*
           CIBW_ARCHS: ${{ env.LINUX_ARCH }}
