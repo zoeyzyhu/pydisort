@@ -53,7 +53,7 @@ jobs:
 
       - name: Install Python dependencies
         run: |
-          pip install numpy torch
+          pip install numpy 'torch>=2.7'
 
       - name: Cache CMake build
         uses: actions/cache@v3

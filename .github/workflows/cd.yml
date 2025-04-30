@@ -89,7 +89,7 @@ jobs:
 
       - name: Install deps
         run: |
-          pip install numpy 'torch>=2.4.0'
+          pip install numpy 'torch>=2.7'
 
       - name: CMake configure
         run: |
@@ -110,7 +110,7 @@ jobs:
           CIBW_REPAIR_WHEEL_COMMAND_MACOS: >
             delocate-wheel -e torch -w {dest_dir} {wheel}
           CIBW_BEFORE_BUILD: |
-            pip install numpy 'torch>2.4.0'
+            pip install numpy 'torch>=2.7'
             cmake --build build --config ${{ env.BUILD_TYPE }} --parallel
         run: |
           export TORCH_LIB=$(python -c 'import torch; print(torch.__path__[0] + "/lib")')
@@ -156,8 +156,7 @@ jobs:
             export LD_LIBRARY_PATH=$(python -c "import torch; print(torch.__path__[0] + '/lib')")
             auditwheel repair --exclude lib*.so -w {dest_dir} {wheel}
           CIBW_BEFORE_BUILD: |
-            pip install numpy
-            pip install 'torch>=2.4.0' --extra-index-url https://download.pytorch.org/whl/cpu
+            pip install numpy 'torch>=2.7'
             TORCH_LIB=$(python -c "import torch; print(torch.__path__[0] + '/lib')")
             TORCH_CMAKE_PREFIX_PATH=$(python -c "import torch.utils; print(torch.utils.cmake_prefix_path)")
             export LD_LIBRARY_PATH="$TORCH_LIB:$LD_LIBRARY_PATH"
