@@ -10,8 +10,6 @@ from pydisort import DisortOptions, Disort
 
 
 def test_attenuation():
-    """Test attenuation with pydisort."""
-
     op = DisortOptions().header("Attenuation Test")
     op.flags("onlyfl,lamber")
     op.ds().nlyr = 4
