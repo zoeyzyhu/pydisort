@@ -72,9 +72,8 @@ PYBIND11_MODULE(pydisort, m) {
     >>> op.ds().nmom = 4
     >>> op.ds().nphase = 4
     >>> ds = Disort(op)
-    >>> tau = torch.tensor([0.1, 0.2, 0.3, 0.4]).reshape((4,1))
-    >>> bc = {"fbeam" : torch.tensor([3.14159]).reshape((1,1))}
-    >>> flx = ds.forward(tau, bc)
+    >>> tau = torch.tensor([0.1, 0.2, 0.3, 0.4]).unsqueeze(-1)
+    >>> flx = ds.forward(tau, fbeam=torch.tensor([3.14159]))
     >>> flx
     tensor([[[[0.0000, 3.1416],
             [0.0000, 2.8426],
@@ -92,8 +91,8 @@ PYBIND11_MODULE(pydisort, m) {
   If not specified, both the wavelength/wavenumber dimension and the column dimension
   are assumed to be 1 and are automatically added internally to the input array.
 
-  The boundary condition dictionary `bc` has one key, `fbeam`, which is the solar beam flux.
-  The key `fbeam` has two dimensions. In order of appearance, they are:
+  The boundary condition for the problem such as the beam illuminance is provided as the keyword argument of the `forward` method.
+  The dimensions are automatically broadcasted to account for the degenerate wavelength/wavenumber and column dimensions:
 
     #. The wavelength/wavenumber dimension (nwave = 1),
     #. The column dimension (ncol = 1).
@@ -247,9 +246,8 @@ PYBIND11_MODULE(pydisort, m) {
             >>> op.ds().nmom = 4
             >>> op.ds().nphase = 4
             >>> ds = Disort(op)
-            >>> tau = torch.tensor([0.1, 0.2, 0.3, 0.4]).reshape((4,1))
-            >>> bc = {"fbeam" : torch.tensor([3.14159]).reshape((1,1))}
-            >>> flx = ds.forward(tau, bc)
+            >>> tau = torch.tensor([0.1, 0.2, 0.3, 0.4]).unsqueeze(-1)
+            >>> flx = ds.forward(tau, fbeam=torch.tensor([3.14159]))
             >>> ds.gather_flx()
         )")
 
@@ -280,16 +278,16 @@ PYBIND11_MODULE(pydisort, m) {
             >>> bc = {
             >>>   "umu0": torch.tensor([0.1]),
             >>>   "phi0": torch.tensor([0.0]),
-            >>>   "albedo": torch.zeros((1, 1)),
-            >>>   "fluor": torch.zeros((1, 1)),
-            >>>   "fisot": torch.zeros((1, 1)),
+            >>>   "albedo": torch.tensor([0.0]),
+            >>>   "fluor": torch.tensor([0.0]),
+            >>>   "fisot": torch.tensor([0.0]),
             >>> }
-            >>> bc["fbeam"] = np.pi / bc["umu0"].reshape((nwave, ncol))
+            >>> bc["fbeam"] = np.pi / bc["umu0"]
             >>> tau = torch.zeros((ncol, nprop))
             >>> tau[0, 0] = ds.options.user_tau()[-1]
             >>> tau[0, 1] = 0.2
             >>> tau[0, 2:] = scattering_moments(nprop - 2, "isotropic")
-            >>> flx = ds.forward(tau, bc)
+            >>> flx = ds.forward(tau, **bc)
             >>> ds.gather_rad()
             tensor([[[[[0.0000, 0.0000, 0.0000, 0.1178, 0.0264, 0.0134],
                        [0.0134, 0.0263, 0.1159, 0.0000, 0.0000, 0.0000]]]]])
@@ -392,9 +390,8 @@ PYBIND11_MODULE(pydisort, m) {
             >>> op.ds().nmom = 4
             >>> op.ds().nphase = 4
             >>> ds = Disort(op)
-            >>> tau = torch.tensor([0.1, 0.2, 0.3, 0.4]).reshape((4,1))
-            >>> bc = {"fbeam" : torch.tensor([3.14159]).reshape((1,1))}
-            >>> flx = ds.forward(tau, bc)
+            >>> tau = torch.tensor([0.1, 0.2, 0.3, 0.4]).unsqueeze(-1)
+            >>> flx = ds.forward(tau, fbeam=torch.tensor([3.14159]))
             >>> flx
             tensor([[[[0.0000, 3.1416],
                     [0.0000, 2.8426],
