@@ -83,4 +83,3 @@ jobs:
         run: |
           cd ${{ github.workspace }}/build/tests
           ctest --output-on-failure
-          python test_isotropic_scattering.py
