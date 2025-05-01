@@ -97,3 +97,6 @@ z.junk
 
 # cache
 .cache
+
+# version file
+src/version.h
