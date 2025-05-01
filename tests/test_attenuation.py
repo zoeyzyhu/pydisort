@@ -18,10 +18,8 @@ def test_attenuation():
     op.ds().nphase = 8
 
     ds = Disort(op)
-
-    tau = torch.tensor([0.1, 0.2, 0.3, 0.4]).reshape((4, 1))
-    bc = {"fbeam": torch.tensor([3.14159]).reshape((1, 1))}
-    result = ds.forward(tau, bc)
+    tau = torch.tensor([0.1, 0.2, 0.3, 0.4]).unsqueeze(-1)
+    result = ds.forward(tau, fbeam=torch.tensor([3.14159]))
     assert_equal(result.shape, (1, 1, 5, 2))
     result.squeeze_()
     assert_allclose(

@@ -38,11 +38,11 @@ def test_case1():
     bc = {
         "umu0": torch.tensor([0.1]),
         "phi0": torch.tensor([0.0]),
-        "albedo": torch.zeros((1, 1)),
-        "fluor": torch.zeros((1, 1)),
-        "fisot": torch.zeros((1, 1)),
+        "albedo": torch.tensor([0.0]),
+        "fluor": torch.tensor([0.0]),
+        "fisot": torch.tensor([0.0]),
     }
-    bc["fbeam"] = np.pi / bc["umu0"].reshape((1, 1))
+    bc["fbeam"] = np.pi / bc["umu0"]
 
     # scattering moments
     tau = torch.zeros((1, nprop))
@@ -51,7 +51,7 @@ def test_case1():
     tau[0, 2:] = scattering_moments(nprop - 2, "isotropic")
 
     # up and down flux
-    result = ds.forward(tau, bc)
+    result = ds.forward(tau, **bc)
     assert_equal(result.shape, (1, 1, 2, 2))
     result.squeeze_()
     assert_allclose(
@@ -136,11 +136,11 @@ def test_case2():
     bc = {
         "umu0": torch.tensor([0.1]),
         "phi0": torch.tensor([0.0]),
-        "albedo": torch.zeros((1, 1)),
-        "fluor": torch.zeros((1, 1)),
-        "fisot": torch.zeros((1, 1)),
+        "albedo": torch.tensor([0.0]),
+        "fluor": torch.tensor([0.0]),
+        "fisot": torch.tensor([0.0]),
     }
-    bc["fbeam"] = np.pi / bc["umu0"].reshape((1, 1))
+    bc["fbeam"] = np.pi / bc["umu0"]
 
     # scattering moments
     tau = torch.zeros((1, nprop))
@@ -149,7 +149,7 @@ def test_case2():
     tau[0, 2:] = scattering_moments(nprop - 2, "isotropic")
 
     # up and down flux
-    result = ds.forward(tau, bc)
+    result = ds.forward(tau, **bc)
     assert_equal(result.shape, (1, 1, 2, 2))
     result.squeeze_()
     assert_allclose(
@@ -234,11 +234,11 @@ def test_case3():
     bc = {
         "umu0": torch.tensor([0.1]),
         "phi0": torch.tensor([0.0]),
-        "albedo": torch.zeros((1, 1)),
-        "fluor": torch.zeros((1, 1)),
-        "fbeam": torch.zeros((1, 1)),
+        "albedo": torch.tensor([0.0]),
+        "fluor": torch.tensor([0.0]),
+        "fbeam": torch.tensor([0.0]),
     }
-    bc["fisot"] = torch.ones((1, 1))
+    bc["fisot"] = torch.tensor([1.0])
 
     # scattering moments
     tau = torch.zeros((1, nprop))
@@ -247,7 +247,7 @@ def test_case3():
     tau[0, 2:] = scattering_moments(nprop - 2, "isotropic")
 
     # up and down flux
-    result = ds.forward(tau, bc)
+    result = ds.forward(tau, **bc)
     assert_equal(result.shape, (1, 1, 2, 2))
     result.squeeze_()
     assert_allclose(

@@ -297,16 +297,36 @@ PYBIND11_MODULE(pydisort, m) {
 
       .def(
           "forward",
-          [](disort::DisortImpl &self, torch::Tensor prop,
-             std::map<std::string, torch::Tensor> &bc, std::string bname,
-             torch::optional<torch::Tensor> temf) {
-            while (prop.dim() < 4) {  // (nwave, ncol, nlyr, nprop)
+          [](disort::DisortImpl &self, torch::Tensor prop, std::string bname,
+             torch::optional<torch::Tensor> temf, const py::kwargs &kwargs) {
+            // get bc from kwargs
+            std::map<std::string, torch::Tensor> bc;
+            for (auto item : kwargs) {
+              auto key = py::cast<std::string>(item.first);
+              auto value = py::cast<torch::Tensor>(item.second);
+              bc.emplace(std::move(key), std::move(value));
+            }
+
+            for (auto &[key, value] : bc) {
+              std::vector<std::string> items = {"fbeam", "albedo", "fluor",
+                                                "fisot", "temis"};
+
+              // broadcast dimensions to (nwave, ncol)
+              if (std::find(items.begin(), items.end(), key) != items.end()) {
+                while (value.dim() < 2) {
+                  value = value.unsqueeze(0);
+                }
+              }
+            }
+
+            // broadcast dimensions to (nwave, ncol, nlyr, nprop)
+            while (prop.dim() < 4) {
               prop = prop.unsqueeze(0);
             }
+
             return self.forward(prop, &bc, bname, temf);
           },
-          py::arg("prop"), py::arg("bc"), py::arg("bname") = "",
-          py::arg("temf") = py::none(),
+          py::arg("prop"), py::arg("bname") = "", py::arg("temf") = py::none(),
           R"(
         Calculate radiative flux or intensity
 
