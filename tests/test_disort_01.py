@@ -234,16 +234,16 @@ def test_case3():
     bc = {
         "umu0": torch.tensor([0.1]),
         "phi0": torch.tensor([0.0]),
-        "albedo": 0.99 * torch.ones((1, 1)),
+        "albedo": torch.zeros((1, 1)),
         "fluor": torch.zeros((1, 1)),
         "fbeam": torch.zeros((1, 1)),
     }
-    bc["fisot"] = torch.tensor([1.0]).reshape((1, 1))
+    bc["fisot"] = torch.ones((1, 1))
 
     # scattering moments
     tau = torch.zeros((1, nprop))
     tau[0, 0] = ds.options.user_tau()[-1]
-    tau[0, 1] = 1.0
+    tau[0, 1] = 0.99
     tau[0, 2:] = scattering_moments(nprop - 2, "isotropic")
 
     # up and down flux
@@ -252,7 +252,7 @@ def test_case3():
     result.squeeze_()
     assert_allclose(
         result,
-        torch.tensor([[9.1638e-02, 3.1416e00], [-2.0083e-12, 3.049955]]),
+        torch.tensor([[9.065564e-02, 3.141593e00], [0.0, 3.048975e00]]),
         atol=1e-5,
         rtol=1e-5,
     )
@@ -268,21 +268,21 @@ def test_case3():
                 [
                     0.0000e00,
                     3.1416e00,
-                    9.1638e-02,
-                    1.4817e-13,
-                    5.3101e-01,
+                    9.0656e-02,
+                    6.6687e-02,
+                    5.3068e-01,
                     5.0000e-01,
-                    3.1011e-02,
+                    3.0679e-02,
                     0.0000e00,
                 ],
                 [
                     0.0000e00,
-                    3.0500e00,
-                    -2.0083e-12,
-                    1.3086e-13,
-                    4.6899e-01,
-                    4.6899e-01,
-                    -5.6581e-12,
+                    3.0490e00,
+                    -3.2731e-18,
+                    5.8894e-02,
+                    4.6866e-01,
+                    4.6866e-01,
+                    -1.1800e-17,
                     0.0000e00,
                 ],
             ]
@@ -299,8 +299,8 @@ def test_case3():
         rad,
         torch.tensor(
             [
-                [1.0000, 1.0000, 1.0000, 0.1346, 0.0303, 0.0154],
-                [0.9846, 0.9697, 0.8654, 0.0000, 0.0000, 0.0000],
+                [1.0000, 1.0000, 1.0000, 0.1332, 0.0300, 0.0152],
+                [0.9844, 0.9694, 0.8639, 0.0000, 0.0000, 0.0000],
             ]
         ),
         atol=1e-4,
