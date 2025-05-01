@@ -165,33 +165,19 @@ which must be the same as the number of layers in the DisortOptions object.
 
 ```python
 import torch
-tau = torch.tensor([0.1, 0.2, 0.3, 0.4]).reshape((4,1))
+tau = torch.tensor([0.1, 0.2, 0.3, 0.4]).unsqueeze(-1)
 ```
 
-- Step 5. Set up radiation boundary conditions.
+- Step 5. Run radiative transfer and get intensity result.
 
-Radiation boundary conditions are set up using a dictionary.
-Each key in the dictionary is a string that specifies the type.
-The value is a torch tensor that specifies the value.
-`pydisort` parallels the radiative transfer calculation over the wavelengths and columns.
-In most cases, the first dimension of the radiation boundary condition is the number of wavelengths,
-and the second dimension is the number of columns.
-In the example above, the incoming beam radiation is set to 3.14159;
-there is only one wavelength and one column.
-
-```python
-bc = {"fbeam" : torch.tensor([3.14159]).reshape((1,1))}
-```
-
-- Step 6. Run radiative transfer and get intensity result.
-
-a `ds` object is constructed as if it is one layer of a Neural Network model.
+A `ds` object is constructed as if it is one layer of a Neural Network model.
 The core function is the forward function, which takes the optical properties and radiation boundary conditions as input.
-The output is the fluxes at each level of the atmosphere.
+Radiation boundary conditions are passed as keyword arguments.
+The dimensions will be automatically expanded to account for degenerate dimensions such as wave and column.
+The output is the upward and downward fluxes at each level of the atmosphere.
 
 ```python
-flx = ds.forward(tau, bc)
-flx
+ds.forward(tau, fbeam=torch.tensor([3.14159]))
 ```
 
 The result of the example above should be:
