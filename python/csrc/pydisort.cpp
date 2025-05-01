@@ -328,7 +328,7 @@ PYBIND11_MODULE(pydisort, m) {
           R"(
         Calculate radiative flux or intensity
 
-        The dimensions of each recognized key in ``bc`` are:
+        The dimensions of each recognized key in ``kwargs`` are:
 
         .. list-table::
           :widths: 15 15 25
@@ -365,16 +365,21 @@ PYBIND11_MODULE(pydisort, m) {
             - (ncol,)
             - top temperature
 
-        Some keys can have a prefix band name, ``<band>``. If the prefix is an non-empty string, a slash "/" is automatically appended to it, such that the key looks like ``B1/umu0``. ``btemp`` and ``ttemp`` do not have a band name prefix.
+        Some keys can have a prefix band name, ``<band>``. If the prefix is an non-empty string,
+        a slash "/" is automatically appended to it, such that the key looks like ``B1/umu0``.
+        ``btemp`` and ``ttemp`` do not have a band name prefix.
+        If the values are short of wave or column dimensions, they are automatically broadcasted to be the shape of 1.
 
         Args:
           prop (torch.Tensor): Optical properties at each level (nwave, ncol, nlyr, nprop)
 
-          bc (Dict[str, torch.Tensor]): Dictionary of disort boundary conditions.
+          bname (str): Name of the radiation band, default is empty string.
+            If the name is not empty, a slash "/" is automatically appended to it.
 
-          bname (str): Name of the radiation band
+          temf (Optional[torch.Tensor]): Temperature at each level (ncol, nlvl = nlyr + 1),
+            default is None. If not None, the temperature is used to calculate the Planck function.
 
-          temf (Optional[torch.Tensor]): Temperature at each level (ncol, nlvl = nlyr + 1)
+          kwargs (Dict[str, torch.Tensor]): keyword arguments of disort boundary conditions, see keys listed above
 
         Returns:
           torch.Tensor: Radiative flux or intensity, shape (nwave, ncol, nlvl, nrad)
