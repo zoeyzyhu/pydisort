@@ -29,6 +29,9 @@ add_module_names = False
 # only show the class name
 autodoc_typehints = "both"
 
+# Don't show the function parentheses
+add_function_parentheses = False
+
 # Adjust the path accordingly
 sys.path.insert(0, os.path.abspath("../python"))
 

@@ -100,3 +100,6 @@ z.junk
 
 # version file
 src/version.h
+
+# stubs
+*stubs/
