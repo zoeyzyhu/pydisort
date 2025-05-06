@@ -2,9 +2,7 @@
 
 // disort
 #include <cdisort213/cdisort.h>
-
-// disort
-#include "common.h"
+#include <disort/index.h>
 
 #define FLX(i, m) flx[(i) * 2 + (m)]
 #define PROP(i, m) prop[(i) * nprop + (m)]

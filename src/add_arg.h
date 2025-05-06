@@ -3,7 +3,11 @@
 // C/C++
 #include <utility>
 
-#include "common.h"
+#ifdef __CUDACC__
+#define DISPATCH_MACRO __host__ __device__
+#else
+#define DISPATCH_MACRO
+#endif
 
 #define ADD_ARG(T, name)                                                       \
  public:                                                                       \

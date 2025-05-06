@@ -209,3 +209,5 @@ void print_ds_out(std::ostream& os, disort_state const& ds);
 void print_ds_bc(std::ostream& os, disort_state const& ds);
 
 }  // namespace disort
+
+#undef ADD_ARG

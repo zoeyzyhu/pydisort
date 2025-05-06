@@ -2,6 +2,8 @@
 #include <fmt/format.h>
 
 // disort
+#include <disort/index.h>
+
 #include <disort/disort.hpp>
 #include <disort/disort_formatter.hpp>
 #include <disort/scattering_moments.hpp>
