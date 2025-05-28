@@ -34,6 +34,7 @@ DisortOptions::DisortOptions() {
   for (int i = 0; i < 5; ++i) {
     ds().flag.prnt[i] = false;
   }
+  ds().flag.brdf_type = 0;
 
   // bc
   ds().bc.btemp = 0.;
