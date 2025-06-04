@@ -32,11 +32,14 @@ struct fmt::formatter<disort::DisortOptions> {
 
   template <typename FormatContext>
   auto format(const disort::DisortOptions &p, FormatContext &ctx) const {
+    int nwave = std::min(p.nwave(), static_cast<int>(p.wave_lower().size()));
+    nwave = std::min(nwave, static_cast<int>(p.wave_upper().size()));
+
     std::string waves = "(";
     if (p.flags().find("planck") != std::string::npos) {
-      for (int i = 0; i < p.nwave(); ++i) {
+      for (int i = 0; i < nwave; ++i) {
         waves += fmt::format("({},{})", p.wave_lower()[i], p.wave_upper()[i]);
-        if (i < p.nwave() - 1) {
+        if (i < nwave - 1) {
           waves += ", ";
         }
       }
@@ -45,7 +48,7 @@ struct fmt::formatter<disort::DisortOptions> {
 
     return fmt::format_to(
         ctx.out(),
-        "(flags = {}; nwave = {}; ncol = {}; disort_state = {}; wave = {})",
-        p.flags(), p.nwave(), p.ncol(), p.ds(), waves);
+        "(flags = {}; nwave = {}; ncol = {}; wave = {}; disort_state = {})",
+        p.flags(), p.nwave(), p.ncol(), waves, p.ds());
   }
 };

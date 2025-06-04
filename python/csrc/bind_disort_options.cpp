@@ -69,8 +69,8 @@ Examples:
        - use user azimuthal angles
      * - 'lamber'
        - turn on lambertian reflection surface
-     * - 'plank'
-       - turn on plank source (thermal emission)
+     * - 'planck'
+       - turn on planck source (thermal emission)
      * - 'spher'
        - turn on spherical correction
      * - 'onlyfl'

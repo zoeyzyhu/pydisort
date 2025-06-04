@@ -58,6 +58,25 @@ PYBIND11_MODULE(pydisort, m) {
     >>> op.ds().nphase = 4
     >>> ds = pydisort.Disort(op)
 
+  .. note::
+
+    You can print the :class:`pydisort.DisortOptions` object to see its current settings:
+
+    .. code-block:: python
+
+      >>> print(op)
+      DisortOptions(flags = onlyfl,lamber; nwave = 1; ncol = 1; wave = (); disort_state = (nlyr = 539784046; nstr = 1701994784; nmom = 2036689012; ibcnd = 0; usrtau = 0; usrang = 0; lamber = 0; planck = 0; spher = 0; onlyfl = 0))
+
+    Note that the numbers in `disort_state` are not meaningful now because disort has not been properly initialized yet.
+    Initializing of the disort state is done when the :class:`pydisort.Disort <disort.cpp.Disort>` object is created
+    from the :class:`pydisort.DisortOptions` object:
+
+    .. code-block:: python
+
+      >>> ds = pydisort.Disort(op)
+      >>> print(ds.options)
+      DisortOptions(flags = onlyfl,lamber; nwave = 1; ncol = 1; wave = (); disort_state = (nlyr = 4; nstr = 4; nmom = 4; ibcnd = 0; usrtau = 0; usrang = 0; lamber = 1; planck = 0; spher = 0; onlyfl = 1))
+
   Examples
   --------
   - Example 1: Calculate attenuation of radiative flux in a plane-parallel atmosphere
