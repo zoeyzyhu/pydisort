@@ -23,8 +23,8 @@ such as the dimensions and the flags. Others, such as the polar and azimuthal an
 allocating the internal arrays of :class:`pydisort.disort_state`.
 The :class:`pydisort.DisortOptions` object holds those arrays temporarily
 until the :class:`pydisort.disort_state` object is initialized when a
-:class:`pydisort.Disort <disort.cpp.Disort>` object is created based on
-the :class`pydisort.DisortOptions` object.
+:class:`pydisort.cpp.Disort` object is created based on
+the :class:`pydisort.DisortOptions` object.
 
 .. note::
 
@@ -32,7 +32,7 @@ the :class`pydisort.DisortOptions` object.
   the state of the :class:`pydisort.disort_state` object. This is because the
   :class:`pydisort.DisortOptions` object holds temporary arrays that are not
   yet transferred to the :class:`pydisort.disort_state` object. Transferring happens
-  when the :class:`pydisort.Disort <disort.cpp.Disort>` object is created by calling:
+  when the :class:`pydisort.cpp.Disort` object is created by calling:
 
   .. code-block:: python
 
@@ -113,7 +113,7 @@ Examples:
   .. warning::
 
     - current version of pydisort has limited support for this option.
-    - consult the documentation of DISORT for more details on this option.
+    - consult the `documentation <_static/DISORT2.doc>`_ of DISORT for more details on this option.
         )")
 
       .def("__repr__",

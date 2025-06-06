@@ -372,13 +372,13 @@ torch::Tensor DisortImpl::forward(torch::Tensor prop,
 
   auto flx = torch::zeros({nwave, ncol, nlyr + 1, 2}, prop.options());
   auto index = torch::range(0, nwave * ncol - 1, 1)
-                   .to(torch::kInt64)
-                   .view({nwave, ncol, 1, 1});
+                   .view({nwave, ncol, 1, 1})
+                   .to(prop.options());
 
   auto iter =
       at::TensorIteratorConfig()
           .resize_outputs(false)
-          .check_all_same_dtype(false)
+          .check_all_same_dtype(true)
           .declare_static_shape({nwave, ncol, nlyr + 1, 2},
                                 /*squash_dims=*/{2, 3})
           .add_output(flx)

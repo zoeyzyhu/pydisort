@@ -6,8 +6,9 @@ Main Classes
 
 .. autoclass:: pydisort.DisortOptions
    :members:
+   :special-members: __init__
 
-.. autoclass:: disort.cpp.Disort
+.. autoclass:: pydisort.cpp.Disort
    :members: gather_flx, gather_rad, forward
 
 .. autoclass:: pydisort.disort_state
