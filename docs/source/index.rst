@@ -175,6 +175,14 @@ Troubleshooting
   dimensions or values. The error message shall provide more information on the
   cause of the error.
 
+- Make sure that you have `lamber` in your flags, otherwise DISORT will panic and
+  emit the following error:
+
+   .. code-block:: text
+
+      bidir_reflectivity--surface BDRF model .... not known
+        ******* ERROR >>>>>> Existing...
+
 - The program should not exit unexpectedly. If the program exits unexpectedly,
   please report the issue to the author (zoey.zyhu@gmail.com).
 
