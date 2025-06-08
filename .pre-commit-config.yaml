@@ -129,7 +129,7 @@ repos:
             .*/README_cdisort|             # README_cdisort
             .*/locate\.(c|h)|              # locate.c, locate.h
             .*/print_test\.c|              # print_test.c
-            .*/test_cdisort\.c|            # test_cdisort.c
+            .*/test_cdisort.*\.c|          # test_cdisort(_*).c
             .*/pydisort.cpp                # pydisort.cpp
           )$
 

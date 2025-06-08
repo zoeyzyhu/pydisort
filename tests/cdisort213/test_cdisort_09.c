@@ -41,7 +41,7 @@
  *===========================================================================*/
 int main(void) {
   printf("Running DISORT test 09...\n\n");
-  for (int i = 0; i < 1000; i++) {
+  for (int i = 0; i < 500; i++) {
     // Simulate run for 1000 wavenumbers
     disort_test09();
   }
@@ -104,10 +104,9 @@ void disort_test09(void) {
         c_disort_out_alloc(&ds, &good);
 
         for (lc = 1; lc <= ds.nlyr; lc++) {
-          DTAUC(lc) =
-              static_cast<double>(lc) / ds.nlyr * 6;  // originally (double)lc
-          SSALB(lc) = 0.6 + static_cast<double>(lc) *
-                                0.003;  // originally 0.6+(double)lc*0.05
+          DTAUC(lc) = (double)lc / ds.nlyr * 6;  // originally (double)lc
+          SSALB(lc) =
+              0.6 + (double)lc * 0.003;  // originally 0.6+(double)lc*0.05
         }
 
         UTAU(1) = 0.;
