@@ -246,6 +246,12 @@ torch::Tensor DisortImpl::forward(torch::Tensor prop,
   int ncol = prop.size(1);
   int nlyr = prop.size(2);
 
+  TORCH_CHECK(options.nwave() == nwave,
+              "DisortImpl::forward: options.nwave != prop.size(0)");
+
+  TORCH_CHECK(options.ncol() == ncol,
+              "DisortImpl::forward: options.ncol != prop.size(1)");
+
   // check ds
   TORCH_CHECK(options.ds().nlyr == nlyr,
               "DisortImpl::forward: ds.nlyr != nlyr");
@@ -370,7 +376,7 @@ torch::Tensor DisortImpl::forward(torch::Tensor prop,
     tem = torch::empty({ncol, nlyr + 1}, prop.options());
   }
 
-  auto flx = torch::zeros({nwave, ncol, nlyr + 1, 2}, prop.options());
+  auto flx = torch::zeros({nwave, ncol, ds().ntau, 2}, prop.options());
   auto index = torch::range(0, nwave * ncol - 1, 1)
                    .view({nwave, ncol, 1, 1})
                    .to(prop.options());
@@ -379,7 +385,7 @@ torch::Tensor DisortImpl::forward(torch::Tensor prop,
       at::TensorIteratorConfig()
           .resize_outputs(false)
           .check_all_same_dtype(true)
-          .declare_static_shape({nwave, ncol, nlyr + 1, 2},
+          .declare_static_shape({nwave, ncol, ds().ntau, 2},
                                 /*squash_dims=*/{2, 3})
           .add_output(flx)
           .add_input(prop)

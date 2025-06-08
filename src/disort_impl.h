@@ -98,12 +98,12 @@ void disort_impl(T *flx, T *prop, T *umu0, T *phi0, T *fbeam, T *albedo,
   c_disort(&ds, &ds_out, c_planck_func2);
 
   if (upward) {
-    for (int i = 0; i <= ds.nlyr; ++i) {
-      FLX(ds.nlyr - i, index::IUP) = ds_out.rad[i].flup;
-      FLX(ds.nlyr - i, index::IDN) = ds_out.rad[i].rfldir + ds_out.rad[i].rfldn;
+    for (int i = 0; i < ds.ntau; ++i) {
+      FLX(ds.ntau - i, index::IUP) = ds_out.rad[i].flup;
+      FLX(ds.ntau - i, index::IDN) = ds_out.rad[i].rfldir + ds_out.rad[i].rfldn;
     }
   } else {
-    for (int i = 0; i <= ds.nlyr; ++i) {
+    for (int i = 0; i < ds.ntau; ++i) {
       FLX(i, index::IUP) = ds_out.rad[i].flup;
       FLX(i, index::IDN) = ds_out.rad[i].rfldir + ds_out.rad[i].rfldn;
     }
