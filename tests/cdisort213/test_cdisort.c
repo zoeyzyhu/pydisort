@@ -316,7 +316,7 @@ void disort_test01(void)
     sprintf(ds.header,"Test Case No. 1%.1s:  Isotropic Scattering, Ref. VH1, Table 12:  b =%9.5f, a =%5.2f",abc+icas-1,UTAU(2),SSALB(1));
 
     c_disort_out_alloc(&ds,&out);
-    c_disort(&ds,&out);
+    c_disort(&ds,&out,c_planck_func2);
 
     print_test(&ds,&out,&ds,&good);
     c_disort_out_free(&ds,&out);
@@ -463,7 +463,7 @@ void disort_test02(void)
 
       c_disort_out_alloc(&ds,&out);
 
-      c_disort(&ds,&out);
+      c_disort(&ds,&out,c_planck_func2);
 
       print_test(&ds,&out,&ds,&good);
 
@@ -589,7 +589,7 @@ void disort_test03(void)
 
     c_disort_out_alloc(&ds,&out);
 
-    c_disort(&ds,&out);
+    c_disort(&ds,&out,c_planck_func2);
 
     print_test(&ds,&out,&ds,&good);
 
@@ -785,7 +785,7 @@ void disort_test04(void)
       break;
     }
 
-    c_disort(&ds,&out);
+    c_disort(&ds,&out,c_planck_func2);
 
     print_test(&ds,&out,&ds,&good);
 
@@ -910,7 +910,7 @@ void disort_test05(void)
 
     c_disort_out_alloc(&ds,&out);
 
-    c_disort(&ds,&out);
+    c_disort(&ds,&out,c_planck_func2);
 
     print_test(&ds,&out,&ds,&good);
 
@@ -1328,7 +1328,7 @@ void disort_test06(void)
       break;
     }
 
-    c_disort(&ds,&out);
+    c_disort(&ds,&out,c_planck_func2);
 
     print_test(&ds,&out,&ds,&good);
 
@@ -1668,7 +1668,7 @@ void disort_test07(void)
       break;
     }
 
-    c_disort(&ds,&out);
+    c_disort(&ds,&out,c_planck_func2);
 
     print_test(&ds,&out,&ds,&good);
 
@@ -1814,7 +1814,7 @@ void disort_test08(void)
 
     c_disort_out_alloc(&ds,&out);
 
-    c_disort(&ds,&out);
+    c_disort(&ds,&out,c_planck_func2);
 
     print_test(&ds,&out,&ds,&good);
 
@@ -2051,7 +2051,7 @@ void disort_test09(void)
       break;
     }
 
-    c_disort(&ds,&out);
+    c_disort(&ds,&out,c_planck_func2);
 
     print_test(&ds,&out,&ds,&good);
 
@@ -2160,7 +2160,7 @@ void disort_test10(void)
   ds_good.umu[4-1] =  0.788675129;
   sprintf(ds_good.header,"Test Case No. 10a:  like 9c, ds.flag.usrang = TRUE");
 
-  c_disort(&ds_good,&good);
+  c_disort(&ds_good,&good,c_planck_func2);
 
   /*
    * Case 2
@@ -2196,7 +2196,7 @@ void disort_test10(void)
 
   sprintf(ds_out.header,"Test Case No. 10b:  like 9C, ds.flag.usrang = FALSE");
 
-  c_disort(&ds_out,&out);
+  c_disort(&ds_out,&out,c_planck_func2);
 
   print_test(&ds_out,&out,&ds_good,&good);
 
@@ -2297,7 +2297,7 @@ void disort_test11(void)
 
   sprintf(ds_good.header,"Test Case No. 11a: One Isotropic-Scattering Layer");
 
-  c_disort(&ds_good,&good);
+  c_disort(&ds_good,&good,c_planck_func2);
 
   /*
    * Case 2
@@ -2329,7 +2329,7 @@ void disort_test11(void)
 
   sprintf(ds_out.header,"Test Case No. 11b: Same as 11a but treated as multiple layers");
 
-  c_disort(&ds_out,&out);
+  c_disort(&ds_out,&out,c_planck_func2);
 
   print_test(&ds_out,&out,&ds_good,&good);
 
@@ -2431,7 +2431,7 @@ void disort_test12(void)
 
   sprintf(ds_good.header,"Test Case No. 12a:  Overhead Beam Striking Absorbing/Scattering Medium");
 
-  c_disort(&ds_good,&good);
+  c_disort(&ds_good,&good,c_planck_func2);
 
   /*
    * Case 2
@@ -2467,7 +2467,7 @@ void disort_test12(void)
 
   sprintf(ds_out.header,"Test Case No. 12b: Same as 12a but uses shortcut for absorption optical depth > 10");
 
-  c_disort(&ds_out,&out);
+  c_disort(&ds_out,&out,c_planck_func2);
 
   print_test(&ds_out,&out,&ds_good,&good);
 
@@ -2549,7 +2549,7 @@ void disort_test13(void)
 
   sprintf(ds.header,"Test Case No. 13a:  Albedo and Transmissivity from Shortcut, Single Layer");
 
-  c_disort(&ds,&out);
+  c_disort(&ds,&out,c_planck_func2);
 
   /* Free allocated memory */
   c_disort_out_free(&ds,&out);
@@ -2591,7 +2591,7 @@ void disort_test13(void)
 
   sprintf(ds.header,"Test Case No. 13b:  Albedo and Transmissivity by Regular Method, Single Layer");
 
-  c_disort(&ds,&out);
+  c_disort(&ds,&out,c_planck_func2);
 
   /* Free allocated memory */
   c_disort_out_free(&ds,&out);
@@ -2625,7 +2625,7 @@ void disort_test13(void)
 
   sprintf(ds.header,"Test Case No. 13c:  Albedo and Transmissivity from Shortcut, Multiple Layer");
 
-  c_disort(&ds,&out);
+  c_disort(&ds,&out,c_planck_func2);
 
   /* Free allocated memory */
   c_disort_out_free(&ds,&out);
@@ -2667,7 +2667,7 @@ void disort_test13(void)
 
   sprintf(ds.header,"Test Case No. 13d:  Albedo and Transmissivity by Regular Method, Multiple Layer");
 
-  c_disort(&ds,&out);
+  c_disort(&ds,&out,c_planck_func2);
 
   /* Free allocated memory */
   c_disort_out_free(&ds,&out);
@@ -2774,7 +2774,7 @@ void disort_test14(void)
 
   sprintf(ds_ds.header,"Test Case No. 14a: disort() as in 10b");
 
-  c_disort(&ds_ds,&ds_out);
+  c_disort(&ds_ds,&ds_out,c_planck_func2);
 
   /*
    * Case 2: twostr()
@@ -2821,7 +2821,7 @@ void disort_test14(void)
 
   sprintf(twostr_ds.header,"Test Case No. 14b: twostr() instead of disort()");
 
-  c_twostr(&twostr_ds,&twostr_out,deltam,gg,ierror,radius);
+  c_twostr(&twostr_ds,&twostr_out,deltam,gg,ierror,radius,c_planck_func2);
 
   print_test(&twostr_ds,&twostr_out,&ds_ds,&ds_out);
 
