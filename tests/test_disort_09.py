@@ -88,6 +88,6 @@ if __name__ == "__main__":
 
     # time the test
     start_time = time()
-    run_case1(ncol=2000, nlyr=100, nstr=32, ssalb=0.003)
+    run_case1(ncol=20000, nlyr=100, nstr=32, ssalb=0.003)
     elapsed_time = time() - start_time
     print(f"Test completed in {elapsed_time:.2f} seconds.")

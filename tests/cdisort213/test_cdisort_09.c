@@ -19,51 +19,53 @@
 #include "cdisort.h"
 
 #undef DTAUC
-#define DTAUC(lc) ds.dtauc[(lc)-1]
+#define DTAUC(lc) ds.dtauc[(lc) - 1]
 #undef PHI
-#define PHI(j) ds.phi[(j)-1]
+#define PHI(j) ds.phi[(j) - 1]
 #undef PMOM
-#define PMOM(k, lc) ds.pmom[(k) + ((lc)-1) * (ds.nmom_nstr + 1)]
+#define PMOM(k, lc) ds.pmom[(k) + ((lc) - 1) * (ds.nmom_nstr + 1)]
 #undef SSALB
-#define SSALB(lc) ds.ssalb[(lc)-1]
+#define SSALB(lc) ds.ssalb[(lc) - 1]
 #undef TEMPER
 #define TEMPER(lc) ds.temper[(lc)]
 #undef UMU
-#define UMU(iu) ds.umu[(iu)-1]
+#define UMU(iu) ds.umu[(iu) - 1]
 #undef UTAU
-#define UTAU(lu) ds.utau[(lu)-1]
+#define UTAU(lu) ds.utau[(lu) - 1]
 
 #undef GOODUU
 #define GOODUU(iu, lu, j) \
-  good.uu[(iu)-1 + (((lu)-1 + ((j)-1) * ds.ntau) * ds.numu)]
+  good.uu[(iu) - 1 + (((lu) - 1 + ((j) - 1) * ds.ntau) * ds.numu)]
 
-void run_disort_test09(int nstr, int nlyr);
+void run_disort_test09(int nstr, int nlyr, double ssalb);
 
 int main(int argc, char **argv) {
   int nstr = 32;
   int nlyr = 100;
   int nwave = 1000;  // Number of wavenumbers to loop through
+  double ssalb = 0.003;
 
   if (argc >= 3) {
     nstr = atoi(argv[1]);
     nlyr = atoi(argv[2]);
     nwave = atoi(argv[3]);
+    ssalb = atof(argv[4]);
   } else {
     printf("Usage: %s [nstr nlyr] (default %d %d)\n", argv[0], nstr, nlyr);
   }
 
-  printf("Running DISORT test 09 with nstr=%d, nlyr=%d, nwave=%d\n\n", nstr,
-         nlyr, nwave);
+  printf("Running DISORT test 09 with nstr=%d, nlyr=%d, nwave=%d, ssalb=%f\n\n",
+         nstr, nlyr, nwave, ssalb);
 
   for (int i = 0; i < nwave; ++i) {
-    run_disort_test09(nstr, nlyr);
+    run_disort_test09(nstr, nlyr, ssalb);
   }
 
   printf("\nTest 09 completed.\n");
   return 0;
 }
 
-void run_disort_test09(int nstr, int nlyr) {
+void run_disort_test09(int nstr, int nlyr, double ssalb) {
   register int icas, lc, k;
   const int ncase = 1;
   double gg;
@@ -118,10 +120,9 @@ void run_disort_test09(int nstr, int nlyr) {
         c_disort_out_alloc(&ds, &good);
 
         /* Set optical properties per layer */
-        double total_idx_sum = (double)ds.nlyr * (ds.nlyr + 1) / 2.0;
         for (lc = 1; lc <= ds.nlyr; ++lc) {
           DTAUC(lc) = ((double)lc / ds.nlyr) * 6;
-          SSALB(lc) = 0.99 * (double)lc / total_idx_sum;
+          SSALB(lc) = 0.6 + (double)lc * ssalb;
         }
 
         /* Tau grid" (fixed 5 points) */

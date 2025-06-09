@@ -78,9 +78,10 @@ repos:
         name: Find warnings/errors in C, C++, and Objective-C
         entry: cppcheck-hook
         description: Find warnings/errors in C, C++, and Objective-C code
-        types_or: [c, c++, c#, objective-c]
+        types_or: [c++, c#, objective-c]
         language: python
         args: [--check-config]
+        files: \.(cpp|cc|cxx|h|hpp|hxx)$
         exclude: *exclude_pattern
 
   ## Python related ----------------------------------------------------------
@@ -119,6 +120,7 @@ repos:
           [
             "--filter=-legal/copyright,-build/include_subdir,-runtime/references,-build/include_order,-runtime/casting,-whitespace/indent_namespace,-build/include_what_you_use,-readability/fn_size,-whitespace/braces",
           ]
+        files: \.(cpp|cc|cxx|h|hpp|hxx)$
         exclude: |
           (?x)^(
             .*/cdisort\.(c|h)|             # cdisort.c, cdisort.h
