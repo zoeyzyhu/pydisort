@@ -4,6 +4,9 @@
 #include <ATen/TensorIterator.h>
 #include <ATen/native/DispatchStub.h>
 
+// disort
+#include <cdisort213/cdisort.h>
+
 namespace at::native {
 
 using disort_fn = void (*)(at::TensorIterator &iter, int upward,
