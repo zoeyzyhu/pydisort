@@ -10,7 +10,13 @@
 
 ## <a id='about-pydisort'> About Pydisort </a>
 
+<<<<<<< HEAD
 DISORT (Discrete Ordinate Radiative Transfer) is a widely-used algorithm that calculates the scattering and absorption of radiation in a medium. The original DISORT algorithm was developed by Stamnes et al. in 1988 and was implemented in `FORTRAN`. `pydisort` is a Python wrapper for the DISORT algorithm in `C` by Timothy E. Dowling. Small changes have been made to the `cdisort` package (an important component of the `libRadTran` software) to make it compatible with python scripting. The `cdisort` code has been wrapped first in C++ classes, and the C++ classes have been bound to python using `pybind11`. To enable automatic parallelization, `pydisort` uses PyTorch tensors structure for memory management, and potentially for GPU acceleration and machine learning compatibility in the future.
+=======
+A modern Python interface to the DISORT (Discrete Ordinate Radiative Transfer) algorithm for efficient, high-precision modeling of radiative scattering and absorption in layered media.
+
+`pydisort` provides a high-level Python API (via `pybind11` and `PyTorch` tensors) to the well-tested C implementation of DISORT, originally developed in Fortran (Stamnes et al. 1988) and later ported to C as `cdisort` by Timothy E. Dowling, which is a critical component of `libRadTran`. To support Python integration, the C code was first encapsulated in C++ classes, which were then exposed to Python using `pybind11`. For efficient memory management and potential GPU acceleration, `pydisort` leverages `PyTorch` tensors, paving the way for future applications in machine learning and large-scale parallel computation.
+>>>>>>> 93dc3c8 (Refactor)
 
 The normal usage of pydisort is to create a `pydisort.DisortOptions` object first and then initialize the `pydisort.cpp.Disort` object with the `pydisort.DisortOptions` object by:
 
