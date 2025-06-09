@@ -49,6 +49,8 @@ void call_disort_cpu(at::TensorIterator &iter, int upward, disort_state *ds,
 }  // namespace disort
 
 namespace at::native {
+
 DEFINE_DISPATCH(call_disort);
 REGISTER_ALL_CPU_DISPATCH(call_disort, &disort::call_disort_cpu);
+
 }  // namespace at::native

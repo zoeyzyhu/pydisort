@@ -118,7 +118,7 @@ repos:
         language: python
         args:
           [
-            "--filter=-legal/copyright,-build/include_subdir,-runtime/references,-build/include_order,-runtime/casting,-whitespace/indent_namespace,-build/include_what_you_use,-readability/fn_size,-whitespace/braces",
+            "--filter=-legal/copyright,-build/include_subdir,-runtime/references,-build/include_order,-runtime/casting,-whitespace/indent_namespace,-build/include_what_you_use,-readability/fn_size,-whitespace/braces,-whitespace/parens,-whitespace/blank_line",
           ]
         files: \.(cpp|cc|cxx|h|hpp|hxx)$
         exclude: |
