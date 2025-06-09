@@ -1,18 +1,18 @@
 // torch
 #include <ATen/Dispatch.h>
-#include <ATen/TensorIterator.h>
 #include <ATen/native/ReduceOpsUtils.h>
 #include <ATen/native/cpu/Loops.h>
 #include <torch/torch.h>
 
 // disort
+#include "disort_dispatch.hpp"
 #include "disort_impl.h"
 
 namespace disort {
 
 void call_disort_cpu(at::TensorIterator &iter, int upward, disort_state *ds,
                      disort_output *ds_out) {
-  AT_DISPATCH_FLOATING_TYPES(iter.dtype(), "disort_cpu", [&] {
+  AT_DISPATCH_FLOATING_TYPES(iter.dtype(), "call_disort_cpu", [&] {
     auto nprop = at::native::ensure_nonempty_size(iter.input(0), -1);
     int grain_size = iter.numel() / at::get_num_threads();
 
@@ -47,3 +47,8 @@ void call_disort_cpu(at::TensorIterator &iter, int upward, disort_state *ds,
 }
 
 }  // namespace disort
+
+namespace at::native {
+DEFINE_DISPATCH(call_disort);
+REGISTER_ALL_CPU_DISPATCH(call_disort, &disort::call_disort_cpu);
+}  // namespace at::native

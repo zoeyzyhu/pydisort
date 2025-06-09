@@ -2,6 +2,7 @@
 #include <ATen/Dispatch.h>
 #include <ATen/TensorIterator.h>
 #include <ATen/native/ReduceOpsUtils.h>
+#include <ATen/native/DispatchStub.h>
 #include <c10/cuda/CUDAGuard.h>
 
 // disort
@@ -14,7 +15,7 @@ void call_disort_cuda(at::TensorIterator& iter, int rank_in_column,
                       disort_state *ds, disort_output *ds_out) {
   at::cuda::CUDAGuard device_guard(iter.device());
 
-  AT_DISPATCH_FLOATING_TYPES(iter.dtype(), "disort_cuda", [&] {
+  AT_DISPATCH_FLOATING_TYPES(iter.dtype(), "call_disort_cuda", [&] {
     auto nprop = at::native::ensure_nonempty_size(iter.output(), -1);
 
     native::gpu_kernel<scalar_t, 12>(
@@ -31,11 +32,14 @@ void call_disort_cuda(at::TensorIterator& iter, int rank_in_column,
           auto btemp = reinterpret_cast<scalar_t*>(data[9] + strides[9]);
           auto ttemp = reinterpret_cast<scalar_t*>(data[10] + strides[10]);
           auto temf = reinterpret_cast<scalar_t*>(data[11] + strides[11]);
-          auto idx = reinterpret_cast<int64_t*>(data[12] + strides[12]);
+          auto idxf = reinterpret_cast<scalar_t*>(data[12] + strides[12]);
+          int idx = static_cast<int>(*idxf);
           //  disort_impl(out, prop, ftoa, temf, rank_in_column, ds[*idx],
           //            ds_out[*idx], nprop);
         });
   });
 }
+
+REGISTER_DISPATCH(disort_stub, &call_disort_cuda);
 
 }  // namespace disort

@@ -1,21 +1,13 @@
 // C/C++
 #include <map>
 
-// torch
-#include <ATen/TensorIterator.h>
-
 // disort
 #include "disort.hpp"
+#include "disort_dispatch.hpp"
 #include "disort_formatter.hpp"
 #include "vectorize.hpp"
 
 namespace disort {
-
-void call_disort_cpu(at::TensorIterator &iter, int upward, disort_state *ds,
-                     disort_output *ds_out);
-
-void call_disort_cuda(at::TensorIterator &iter, int upward, disort_state *ds,
-                      disort_output *ds_out);
 
 DisortOptions::DisortOptions() {
   // flags
@@ -407,17 +399,8 @@ torch::Tensor DisortImpl::forward(torch::Tensor prop,
           .add_input(index)
           .build();
 
-  if (prop.is_cpu()) {
-    call_disort_cpu(iter, options.upward(), ds_.data(), ds_out_.data());
-  } else if (prop.is_cuda()) {
-#if defined(__CUDACC__)
-    call_disort_cuda(iter, options.upward(), ds_.data(), ds_out_.data());
-#else
-    TORCH_CHECK(false, "DisortImpl::forward: CUDA is not available");
-#endif
-  } else {
-    TORCH_CHECK(false, "DisortImpl::forward: unsupported device");
-  }
+  at::native::call_disort(flx.device().type(), iter, options.upward(),
+                          ds_.data(), ds_out_.data());
 
   // save result tensor options
   result_options_ = flx.options();
