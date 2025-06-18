@@ -99,8 +99,9 @@ void disort_impl(T *flx, T *prop, T *umu0, T *phi0, T *fbeam, T *albedo,
 
   if (upward) {
     for (int i = 0; i < ds.ntau; ++i) {
-      FLX(ds.ntau - i, index::IUP) = ds_out.rad[i].flup;
-      FLX(ds.ntau - i, index::IDN) = ds_out.rad[i].rfldir + ds_out.rad[i].rfldn;
+      FLX(ds.ntau - 1 - i, index::IUP) = ds_out.rad[i].flup;
+      FLX(ds.ntau - 1 - i, index::IDN) =
+          ds_out.rad[i].rfldir + ds_out.rad[i].rfldn;
     }
   } else {
     for (int i = 0; i < ds.ntau; ++i) {
