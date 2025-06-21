@@ -45,7 +45,6 @@ jobs:
       fail-fast: true
       matrix:
         python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -53,32 +52,18 @@ jobs:
           ref: ${{ needs.prepare.outputs.branch }}
           fetch-depth: 0
 
+      - name: Setup host Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.HOST_PYTHON }}
+          cache: pip
+
       - name: Configure build env
         run: |
           PV=$(echo "${{ matrix.python-version }}" | tr -d '.')
           echo "PY_VERSION=$PV" >> $GITHUB_ENV
           echo "MACOSX_DEPLOYMENT_TARGET=11.1" >> $GITHUB_ENV
           echo "ARCHFLAGS=-arch ${{ env.MACOS_ARCH }}" >> $GITHUB_ENV
-
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ matrix.python-version }}
-          cache: pip
-
-      - name: Install dependencies
-        run: pip install numpy 'torch>=2.7'
-
-      - name: CMake configure
-        run: |
-          TORCH_CMAKE_PREFIX_PATH=$(python -c 'import torch.utils; print(torch.utils.cmake_prefix_path)')
-          cmake -B build \
-            -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
-            -DCMAKE_OSX_ARCHITECTURES=${{ env.MACOS_ARCH }} \
-            -DCMAKE_PREFIX_PATH="$TORCH_CMAKE_PREFIX_PATH"
-
-      - name: CMake build
-        run: cmake --build build --parallel
 
       - name: Build macOS wheel
         env:
@@ -89,6 +74,10 @@ jobs:
             delocate-wheel -e torch -w {dest_dir} {wheel}
           CIBW_BEFORE_BUILD: |
             pip install numpy 'torch>=2.7'
+            TORCH_CMAKE_PREFIX_PATH=$(python -c 'import torch.utils; print(torch.utils.cmake_prefix_path)')
+            cmake -B build -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
+                  -DCMAKE_OSX_ARCHITECTURES=${{ env.MACOS_ARCH }} \
+                  -DCMAKE_PREFIX_PATH="$TORCH_CMAKE_PREFIX_PATH"
             cmake --build build --config ${{ env.BUILD_TYPE }} --parallel
         run: |
           export TORCH_LIB=$(python -c 'import torch; print(torch.__path__[0] + "/lib")')
@@ -111,7 +100,6 @@ jobs:
       fail-fast: true
       matrix:
         python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -124,7 +112,7 @@ jobs:
           PV=$(echo "${{ matrix.python-version }}" | tr -d '.')
           echo "PY_VERSION=$PV" >> $GITHUB_ENV
 
-      - name: Setup Python
+      - name: Setup host Python
         uses: actions/setup-python@v5
         with:
           python-version: ${{ env.HOST_PYTHON }}
@@ -167,18 +155,15 @@ jobs:
     permissions:
       id-token: write
       contents: read
-
     steps:
       - name: Download wheels
         uses: actions/download-artifact@v4
         with:
           pattern: wheels-*
-
       - name: Merge into dist/
         run: |
           mkdir -p dist
           find . -name '*.whl' -exec mv {} dist/ \;
-
       - name: Publish to PyPI
         if: ${{ needs.build-macos.result == 'success' || needs.build-linux.result == 'success' }}
         uses: pypa/gh-action-pypi-publish@release/v1
