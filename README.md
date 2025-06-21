@@ -81,9 +81,9 @@
 
 ## Introduction
 
-DISORT (Discrete Ordinate Radiative Transfer) is a widely-used algorithm that calculates the scattering and absorption of radiation in a medium. The `pydisort` project provides both a high-level Python API and a C++ layer to the well-tested C implementation of DISORT, originally developed in Fortran (Stamnes et al. 1988) and later ported to C as `cdisort` by Timothy E. Dowling, which is a critical component of `libRadTran`. 
+DISORT (Discrete Ordinate Radiative Transfer) is a widely-used algorithm that calculates the scattering and absorption of radiation in a medium. The `pydisort` project provides both a high-level Python API and a C++ layer to the well-tested C implementation of DISORT, originally developed in Fortran (Stamnes et al. 1988) and later ported to C as `cdisort` by Timothy E. Dowling, which is a critical component of `libRadTran`.
 
-To support Python integration, the C code was encapsulated in C++ classes. The C++ wrapper serves two primary purposes: (1) providing a modern C++ interface for the `cdisort` library to facilitate future development involving DISORT, and (2) establishing the foundation for the Python package's bindings. The Python package, which is binded upon the C++ wrapper via `pybind11`, is designed to be user-friendly, making it easy to install and integrate into a diverse range of applications. 
+To support Python integration, the C code was encapsulated in C++ classes. The C++ wrapper serves two primary purposes: (1) providing a modern C++ interface for the `cdisort` library to facilitate future development involving DISORT, and (2) establishing the foundation for the Python package's bindings. The Python package, which is binded upon the C++ wrapper via `pybind11`, is designed to be user-friendly, making it easy to install and integrate into a diverse range of applications.
 
 For efficient memory management and potential GPU acceleration, `pydisort` leverages `PyTorch` tensors, paving the way for future applications in machine learning and large-scale parallel computation.
 
