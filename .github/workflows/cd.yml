@@ -70,7 +70,8 @@ jobs:
 
       - name: Configure macOS Build Env
         run: |
-          $(echo "${{ matrix.python-version }}" | tr -d '.')
+          PV=${{ matrix.python-version }}
+          PV=${PV//./}
           echo "PY_VERSION=$PV" >> $GITHUB_ENV
           echo "ARCHFLAGS=-arch ${{ env.MACOS_ARCH }}" >> $GITHUB_ENV
 
@@ -123,7 +124,8 @@ jobs:
 
       - name: Configure Linux Build Env
         run: |
-          $(echo "${{ matrix.python-version }}" | tr -d '.')
+          PV=${{ matrix.python-version }}
+          PV=${PV//./}
           echo "PY_VERSION=$PV" >> $GITHUB_ENV
 
       - name: Build Linux Wheel
