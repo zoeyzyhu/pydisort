@@ -15,7 +15,7 @@ dynamic = ["version"]
 description = "Modern Python package for DISORT with support for parallel computation."
 readme = "README_pypi.md"
 readme-content-type = "text/markdown"
-license = { text = "GPL-3.0-or-later" }
+license = "GPL-3.0-or-later"
 license-files = ["LICENSE"]
 authors = [
   { name = "Zoey Hu", email = "zoey.zyhu@gmail.com" },
