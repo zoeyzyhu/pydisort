@@ -57,7 +57,7 @@ Issues        = "https://github.com/zoeyzyhu/pydisort/issues"
 attr = "pydisort.__version__"
 
 [tool.setuptools]
-include-package-data = true
+include-package-data = false
 
 [tool.setuptools.package-data]
 "pydisort" = ["src/**/*"]
