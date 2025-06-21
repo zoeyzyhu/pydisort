@@ -42,7 +42,7 @@ jobs:
     runs-on: macos-latest
     if: ${{ inputs.build_os == 'Both' || inputs.build_os == 'MacOS' }}
     strategy:
-      fail-fast: true                   # ← moved here
+      fail-fast: true
       matrix:
         python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
 
@@ -108,7 +108,7 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ inputs.build_os == 'Both' || inputs.build_os == 'Ubuntu' }}
     strategy:
-      fail-fast: true                   # ← and here
+      fail-fast: true
       matrix:
         python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
 
