@@ -55,7 +55,7 @@ jobs:
 
       - name: Configure build env
         run: |
-          PV=${{ matrix.python-version//./}}
+          PV=$(echo "${{ matrix.python-version }}" | tr -d '.')
           echo "PY_VERSION=$PV" >> $GITHUB_ENV
           echo "MACOSX_DEPLOYMENT_TARGET=11.1" >> $GITHUB_ENV
           echo "ARCHFLAGS=-arch ${{ env.MACOS_ARCH }}" >> $GITHUB_ENV
@@ -121,7 +121,7 @@ jobs:
 
       - name: Configure build env
         run: |
-          PV=${{ matrix.python-version//./}}
+          PV=$(echo "${{ matrix.python-version }}" | tr -d '.')
           echo "PY_VERSION=$PV" >> $GITHUB_ENV
 
       - name: Setup Python
