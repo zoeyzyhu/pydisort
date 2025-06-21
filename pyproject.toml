@@ -1,3 +1,55 @@
 [build-system]
-requires = ["setuptools", "wheel", "cmake", "numpy", "ninja", "torch>=2.7.0"]
+requires = [
+  "setuptools>=61.0.0",
+  "wheel",
+  "cmake",
+  "numpy",
+  "ninja",
+  "torch>=2.7.0"
+]
 build-backend = "setuptools.build_meta"
+
+[project]
+name = "pydisort"
+dynamic = ["version"]
+description = "Modern Python package for DISORT with support for parallel computation."
+readme = "README_pypi.md"
+readme-content-type = "text/markdown"
+license = { text = "GPL-3.0-or-later" }
+license-files = ["LICENSE"]
+authors = [
+  { name = "Zoey Hu", email = "zoey.zyhu@gmail.com" },
+]
+dependencies = [
+  "numpy",
+  "torch>=2.7.0",
+]
+requires-python = ">=3.9"
+keywords = [
+  "DISORT",
+  "radiative transfer",
+  "astrophysics",
+  "atmospheric science",
+]
+classifiers = [
+  "Development Status :: 5 - Production/Stable",
+  "Intended Audience :: Science/Research",
+  "Intended Audience :: Developers",
+  "Intended Audience :: Education",
+  "Topic :: Scientific/Engineering",
+  "Topic :: Scientific/Engineering :: Atmospheric Science",
+  "Topic :: Scientific/Engineering :: Physics",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Operating System :: POSIX :: Linux",
+  "Operating System :: MacOS :: MacOS X",
+]
+
+[project.urls]
+Homepage      = "https://github.com/zoeyzyhu/pydisort"
+Documentation = "https://pydisort.readthedocs.io/"
+Issues      = "https://github.com/zoeyzyhu/pydisort/issues"

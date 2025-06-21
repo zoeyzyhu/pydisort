@@ -96,10 +96,6 @@ if (CUDAToolkit_FOUND)
 endif()
 
 message(STATUS "${Blue}${PROJECT_NAME}-4. Setting up project libraries ...${ColorReset}")
-file(READ "${CMAKE_CURRENT_SOURCE_DIR}/python/VERSION" PROJECT_VERSION)
-string(STRIP "${PROJECT_VERSION}" PROJECT_VERSION)
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/version.h.in
-               ${CMAKE_CURRENT_SOURCE_DIR}/src/version.h @ONLY)
 add_subdirectory(src)
 add_subdirectory(cdisort213)
 

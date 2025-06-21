@@ -1,3 +1,0 @@
-#pragma once
-
-#define PYDISORT_VERSION "@PROJECT_VERSION@"
