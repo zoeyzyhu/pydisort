@@ -3,14 +3,12 @@ name: Deploy to PyPI
 on:
   workflow_dispatch:
     inputs:
-      version_tag:
-        description: "Release version tag"
-        default: "latest"
       branch:
-        description: "Source branch"
+        description: "Branch"
+        required: true
         default: "main"
       build_os:
-        description: "Select OS to build wheels for"
+        description: "OS"
         required: true
         default: "Both"
         type: choice
@@ -30,54 +28,34 @@ jobs:
     name: Prepare
     runs-on: ubuntu-latest
     outputs:
-      version: ${{ steps.determine_version.outputs.version }}
-      version_no_v: ${{ steps.sanitize.outputs.no_v }}
+      branch: ${{ inputs.branch }}
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
         with:
           ref: ${{ inputs.branch }}
           fetch-depth: 0
 
-      - name: Determine version tag
-        id: determine_version
-        run: |
-          if [[ "${{ inputs.version_tag }}" == "latest" ]]; then
-            git fetch --tags
-            echo "version=$(git describe --tags --abbrev=0)" >> $GITHUB_OUTPUT
-          else
-            echo "version=${{ inputs.version_tag }}" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Checkout tag (if not latest)
-        if: ${{ inputs.version_tag != 'latest' }}
-        run: |
-          git checkout ${{ steps.determine_version.outputs.version }}
-
-      - name: Strip leading “v” of version tag
-        id: sanitize
-        run: |
-          raw=${{ steps.determine_version.outputs.version }}
-          echo "version_no_v=${raw#v}" >> $GITHUB_OUTPUT
-
   build-macos:
+    name: Build macOS
     needs: prepare
-    name: Build MacOS
     runs-on: macos-latest
     if: ${{ inputs.build_os == 'Both' || inputs.build_os == 'MacOS' }}
     strategy:
-      fail-fast: true
       matrix:
         python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+        fail-fast: true
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          ref: ${{ needs.prepare.outputs.version }}
+          ref: ${{ needs.prepare.outputs.branch }}
+          fetch-depth: 0
 
-      - name: Configure wheel build env
+      - name: Configure build env
         run: |
-          PV=$(echo "${{ matrix.python-version }}" | tr -d '.')
+          PV=${{ matrix.python-version//./}}
           echo "PY_VERSION=$PV" >> $GITHUB_ENV
           echo "MACOSX_DEPLOYMENT_TARGET=11.1" >> $GITHUB_ENV
           echo "ARCHFLAGS=-arch ${{ env.MACOS_ARCH }}" >> $GITHUB_ENV
@@ -88,9 +66,8 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: pip
 
-      - name: Install deps
-        run: |
-          pip install numpy 'torch>=2.7'
+      - name: Install dependencies
+        run: pip install numpy 'torch>=2.7'
 
       - name: CMake configure
         run: |
@@ -122,29 +99,29 @@ jobs:
       - name: Upload macOS wheels
         uses: actions/upload-artifact@v4
         with:
-          name: wheels-macos-${{ matrix.os }}-${{ env.MACOS_ARCH }}-${{ matrix.python-version }}
+          name: wheels-macos-${{ env.MACOS_ARCH }}-${{ matrix.python-version }}
           path: wheelhouse/*.whl
 
   build-linux:
-    needs: prepare
     name: Build Linux
+    needs: prepare
     runs-on: ubuntu-latest
     if: ${{ inputs.build_os == 'Both' || inputs.build_os == 'Ubuntu' }}
     strategy:
-      fail-fast: true
       matrix:
         python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+        fail-fast: true
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          ref: ${{ needs.prepare.outputs.version }}
+          ref: ${{ needs.prepare.outputs.branch }}
           fetch-depth: 0
 
-      - name: Configure wheel build env
+      - name: Configure build env
         run: |
-          PV=$(echo "${{ matrix.python-version }}" | tr -d '.')
+          PV=${{ matrix.python-version//./}}
           echo "PY_VERSION=$PV" >> $GITHUB_ENV
 
       - name: Setup Python
@@ -168,7 +145,7 @@ jobs:
             TORCH_LIB=$(python -c "import torch; print(torch.__path__[0] + '/lib')")
             TORCH_CMAKE_PREFIX_PATH=$(python -c "import torch.utils; print(torch.utils.cmake_prefix_path)")
             export LD_LIBRARY_PATH="$TORCH_LIB:$LD_LIBRARY_PATH"
-            cmake -B build -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
+            cmake -B build -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
                   -DPython3_EXECUTABLE=$(which python) \
                   -DCMAKE_PREFIX_PATH="$TORCH_CMAKE_PREFIX_PATH"
             cmake --build build --parallel
@@ -176,30 +153,29 @@ jobs:
           pip install cibuildwheel
           python -m cibuildwheel --output-dir wheelhouse
 
-      - name: Upload Ubuntu wheels
+      - name: Upload Linux wheels
         uses: actions/upload-artifact@v4
         with:
           name: wheels-ubuntu-${{ env.LINUX_ARCH }}-${{ matrix.python-version }}
           path: wheelhouse/*.whl
-
   publish-pypi:
     name: Publish to PyPI
-    if: ${{ always() }}
     needs: [build-macos, build-linux]
     runs-on: ubuntu-latest
+    if: ${{ always() }}
     permissions:
       id-token: write
       contents: read
 
     steps:
-      - name: Download all wheels
+      - name: Download wheels
         uses: actions/download-artifact@v4
         with:
           pattern: wheels-*
 
-      - name: Merge wheels
+      - name: Merge into dist/
         run: |
-          mkdir dist
+          mkdir -p dist
           find . -name '*.whl' -exec mv {} dist/ \;
 
       - name: Publish to PyPI
