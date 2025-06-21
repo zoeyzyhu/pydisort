@@ -17,34 +17,44 @@ on:
           - MacOS
           - Ubuntu
 
+concurrency:
+  group: deploy-pypi-${{ github.event.inputs.branch }}
+  cancel-in-progress: true
+
 env:
   BUILD_TYPE: Release
-  LINUX_ARCH: "x86_64"
-  MACOS_ARCH: "arm64"
+  LINUX_ARCH: x86_64
+  MACOS_ARCH: arm64
   HOST_PYTHON: 3.11
+
+defaults:
+  run:
+    shell: bash
 
 jobs:
   prepare:
     name: Prepare
     runs-on: ubuntu-latest
     outputs:
-      branch: ${{ inputs.branch }}
+      branch: ${{ github.event.inputs.branch }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          ref: ${{ inputs.branch }}
+          ref: ${{ github.event.inputs.branch }}
           fetch-depth: 0
 
   build-macos:
     name: Build macOS
     needs: prepare
+    if: ${{ github.event.inputs.build_os == 'Both' || github.event.inputs.build_os == 'MacOS' }}
     runs-on: macos-latest
-    if: ${{ inputs.build_os == 'Both' || inputs.build_os == 'MacOS' }}
     strategy:
       fail-fast: true
       matrix:
-        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+        python-version: [3.9, 3.10, 3.11, 3.12, 3.13]
+    env:
+      PY_VERSION: ${{ matrix.python-version }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -52,54 +62,52 @@ jobs:
           ref: ${{ needs.prepare.outputs.branch }}
           fetch-depth: 0
 
-      - name: Setup host Python
+      - name: Setup Host Python
         uses: actions/setup-python@v5
         with:
           python-version: ${{ env.HOST_PYTHON }}
           cache: pip
 
-      - name: Configure build env
+      - name: Configure Build Environment
         run: |
-          PV=$(echo "${{ matrix.python-version }}" | tr -d '.')
+          PV=${PY_VERSION//./}
           echo "PY_VERSION=$PV" >> $GITHUB_ENV
           echo "MACOSX_DEPLOYMENT_TARGET=11.1" >> $GITHUB_ENV
-          echo "ARCHFLAGS=-arch ${{ env.MACOS_ARCH }}" >> $GITHUB_ENV
+          echo "ARCHFLAGS=-arch $MACOS_ARCH" >> $GITHUB_ENV
 
-      - name: Build macOS wheel
+      - name: Build macOS Wheel
         env:
           CIBW_PLATFORM: macos
-          CIBW_BUILD: cp${{ env.PY_VERSION }}*
+          CIBW_BUILD: cp${{ env.PY_VERSION // '.' }}*
           CIBW_ARCHS: ${{ env.MACOS_ARCH }}
-          CIBW_REPAIR_WHEEL_COMMAND_MACOS: >
-            delocate-wheel -e torch -w {dest_dir} {wheel}
           CIBW_BEFORE_BUILD: |
             pip install numpy 'torch>=2.7'
             TORCH_CMAKE_PREFIX_PATH=$(python -c 'import torch.utils; print(torch.utils.cmake_prefix_path)')
-            cmake -B build -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
-                  -DCMAKE_OSX_ARCHITECTURES=${{ env.MACOS_ARCH }} \
+            cmake -B build -DCMAKE_BUILD_TYPE=$BUILD_TYPE \
+                  -DCMAKE_OSX_ARCHITECTURES=$MACOS_ARCH \
                   -DCMAKE_PREFIX_PATH="$TORCH_CMAKE_PREFIX_PATH"
-            cmake --build build --config ${{ env.BUILD_TYPE }} --parallel
+            cmake --build build --config $BUILD_TYPE --parallel
+          CIBW_REPAIR_WHEEL_COMMAND_MACOS: delocate-wheel -e torch -w {dest_dir} {wheel}
         run: |
           export TORCH_LIB=$(python -c 'import torch; print(torch.__path__[0] + "/lib")')
           export DYLD_FALLBACK_LIBRARY_PATH="$TORCH_LIB:$DYLD_FALLBACK_LIBRARY_PATH"
           pip install cibuildwheel
           python -m cibuildwheel --output-dir wheelhouse
-
-      - name: Upload macOS wheels
+      - name: Upload macOS Wheels
         uses: actions/upload-artifact@v4
         with:
-          name: wheels-macos-${{ env.MACOS_ARCH }}-${{ matrix.python-version }}
+          name: wheels-macos-${{ matrix.python-version }}-${{ env.MACOS_ARCH }}
           path: wheelhouse/*.whl
 
   build-linux:
     name: Build Linux
     needs: prepare
+    if: ${{ github.event.inputs.build_os == 'Both' || github.event.inputs.build_os == 'Ubuntu' }}
     runs-on: ubuntu-latest
-    if: ${{ inputs.build_os == 'Both' || inputs.build_os == 'Ubuntu' }}
     strategy:
       fail-fast: true
       matrix:
-        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+        python-version: [3.9, 3.10, 3.11, 3.12, 3.13]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -107,44 +115,42 @@ jobs:
           ref: ${{ needs.prepare.outputs.branch }}
           fetch-depth: 0
 
-      - name: Configure build env
-        run: |
-          PV=$(echo "${{ matrix.python-version }}" | tr -d '.')
-          echo "PY_VERSION=$PV" >> $GITHUB_ENV
-
-      - name: Setup host Python
+      - name: Setup Host Python
         uses: actions/setup-python@v5
         with:
           python-version: ${{ env.HOST_PYTHON }}
           cache: pip
 
-      - name: Build Linux wheel
+      - name: Configure Linux Build Env
+        run: |
+          PV=${{ matrix.python-version//./ }}
+          echo "PY_VERSION=$PV" >> $GITHUB_ENV
+
+      - name: Build Linux Wheel
         env:
-          CIBW_MANYLINUX_X86_64_IMAGE: manylinux_2_28
           CIBW_PLATFORM: linux
+          CIBW_MANYLINUX_X86_64_IMAGE: manylinux_2_28
           CIBW_BUILD: cp${{ env.PY_VERSION }}*
           CIBW_ARCHS: ${{ env.LINUX_ARCH }}
           CIBW_SKIP: "*musllinux*"
-          CIBW_REPAIR_WHEEL_COMMAND_LINUX: |
-            export LD_LIBRARY_PATH=$(python -c "import torch; print(torch.__path__[0] + '/lib')")
-            auditwheel repair --exclude lib*.so -w {dest_dir} {wheel}
           CIBW_BEFORE_BUILD: |
             pip install numpy 'torch>=2.7'
-            TORCH_LIB=$(python -c "import torch; print(torch.__path__[0] + '/lib')")
-            TORCH_CMAKE_PREFIX_PATH=$(python -c "import torch.utils; print(torch.utils.cmake_prefix_path)")
-            export LD_LIBRARY_PATH="$TORCH_LIB:$LD_LIBRARY_PATH"
+            TORCH_CMAKE_PREFIX_PATH=$(python -c 'import torch.utils; print(torch.utils.cmake_prefix_path)')
+            export LD_LIBRARY_PATH=$(python -c "import torch; print(torch.__path__[0] + '/lib')"):$LD_LIBRARY_PATH
             cmake -B build -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
                   -DPython3_EXECUTABLE=$(which python) \
                   -DCMAKE_PREFIX_PATH="$TORCH_CMAKE_PREFIX_PATH"
             cmake --build build --parallel
+          CIBW_REPAIR_WHEEL_COMMAND_LINUX: |
+            auditwheel repair --exclude lib*.so -w {dest_dir} {wheel}
         run: |
           pip install cibuildwheel
           python -m cibuildwheel --output-dir wheelhouse
 
-      - name: Upload Linux wheels
+      - name: Upload Linux Wheels
         uses: actions/upload-artifact@v4
         with:
-          name: wheels-ubuntu-${{ env.LINUX_ARCH }}-${{ matrix.python-version }}
+          name: wheels-linux-${{ matrix.python-version }}-${{ env.LINUX_ARCH }}
           path: wheelhouse/*.whl
 
   publish-pypi:
@@ -156,14 +162,16 @@ jobs:
       id-token: write
       contents: read
     steps:
-      - name: Download wheels
+      - name: Download Wheels
         uses: actions/download-artifact@v4
         with:
-          pattern: wheels-*
-      - name: Merge into dist/
+          pattern: 'wheels-*'
+
+      - name: Aggregate into dist/
         run: |
           mkdir -p dist
           find . -name '*.whl' -exec mv {} dist/ \;
+
       - name: Publish to PyPI
         if: ${{ needs.build-macos.result == 'success' || needs.build-linux.result == 'success' }}
         uses: pypa/gh-action-pypi-publish@release/v1
