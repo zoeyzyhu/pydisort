@@ -49,6 +49,18 @@ classifiers = [
 ]
 
 [project.urls]
-Homepage      = "https://github.com/zoeyzyhu/pydisort"
+Repository    = "https://github.com/zoeyzyhu/pydisort"
 Documentation = "https://pydisort.readthedocs.io/"
-Issues      = "https://github.com/zoeyzyhu/pydisort/issues"
+Issues        = "https://github.com/zoeyzyhu/pydisort/issues"
+
+[tool.setuptools.dynamic.version]
+attr = "pydisort.__version__"
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.package-data]
+"pydisort" = ["src/**/*"]
+
+[tool.setuptools.exclude-package-data]
+"pydisort" = ["csrc/**/*"]

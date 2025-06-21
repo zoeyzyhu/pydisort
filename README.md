@@ -5,7 +5,7 @@
 
 <!-- Subtitle --------------------------------------->
 <p align="center">
-  <i align="center">Empower Discrete Ordinates Radiative Transfer (DISORT) with Python 🚀</i>
+  <i align="center">Superpowered Radiative Transfer: Fast, Scalable, User-Friendly 🚀</i>
 </p>
 
 <!-- primary badges --------------------------------->
