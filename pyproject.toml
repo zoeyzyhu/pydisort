@@ -13,8 +13,7 @@ build-backend = "setuptools.build_meta"
 name = "pydisort"
 dynamic = ["version"]
 description = "Modern Python package for DISORT with support for parallel computation."
-readme = "README_pypi.md"
-readme-content-type = "text/markdown"
+readme = { file = "README_pypi.md", content-type = "text/markdown" }
 license = "GPL-3.0-or-later"
 license-files = ["LICENSE"]
 authors = [
