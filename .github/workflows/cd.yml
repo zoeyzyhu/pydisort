@@ -23,6 +23,7 @@ env:
   BUILD_TYPE: Release
   LINUX_ARCH: "x86_64"
   MACOS_ARCH: "arm64"
+  HOST_PYTHON: 3.11
 
 jobs:
   prepare:
@@ -145,6 +146,12 @@ jobs:
         run: |
           PV=$(echo "${{ matrix.python-version }}" | tr -d '.')
           echo "PY_VERSION=$PV" >> $GITHUB_ENV
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.HOST_PYTHON }}
+          cache: pip
 
       - name: Build Linux wheel
         env:
