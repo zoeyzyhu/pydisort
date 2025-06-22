@@ -1,7 +1,23 @@
----
+# ──────────────────────────────────────────────────────────────────────────────
+# Move exclude_pattern to top‐level so it applies globally
+exclude: |
+  (?x)^(
+    .*/cdisort\.(c|h)|             # cdisort.c, cdisort.h
+    .*/disort\.hpp|                # disort.hpp
+    .*/COPYING|                    # COPYING
+    .*/DISORT2\.doc|               # DISORT2.doc
+    .*/HOWTO_cdisort|              # HOWTO_cdisort
+    .*/Makefile_cdisort|           # Makefile_cdisort
+    .*/README_cdisort|             # README_cdisort
+    .*/locate\.(c|h)|              # locate.c, locate.h
+    .*/print_test\.c|              # print_test.c
+    .*/test_cdisort.*\.c|          # test_cdisort(_*).c
+    .*/pydisort\.cpp|              # pydisort.cpp
+    python/__init__\.py         # python/__init__.py
+  )$
+# ──────────────────────────────────────────────────────────────────────────────
 repos:
   ## 1. Global check =========================================================
-
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
     hooks:
@@ -9,19 +25,7 @@ repos:
         name: Trim Trailing Whitespace
         entry: trailing-whitespace-fixer
         language: python
-        exclude: &exclude_pattern |
-          (?x)^(
-            .*/cdisort\.(c|h)|             # cdisort.c, cdisort.h
-            .*/disort\.hpp|                # disort.hpp
-            .*/COPYING|                    # COPYING
-            .*/DISORT2\.doc|               # DISORT2.doc
-            .*/HOWTO_cdisort|              # HOWTO_cdisort
-            .*/Makefile_cdisort|           # Makefile_cdisort
-            .*/README_cdisort|             # README_cdisort
-            .*/locate\.(c|h)|              # locate.c, locate.h
-            .*/print_test\.c|              # print_test.c
-            .*/test_cdisort\.c             # test_cdisort.c
-          )$
+        # ← no per-hook exclude needed: the global `exclude:` already covers these files
 
       - id: end-of-file-fixer
       - id: check-merge-conflict
@@ -34,10 +38,6 @@ repos:
     rev: v2.2.4
     hooks:
       - id: codespell
-        name: Check Misspellings
-        language: python
-        description: It looks for a set of common misspellings
-        exclude: *exclude_pattern
 
   - repo: https://github.com/python-jsonschema/check-jsonschema
     rev: 0.26.3
@@ -45,7 +45,6 @@ repos:
       - id: check-github-workflows
 
   ## 2. Per language check ===================================================
-
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
     hooks:
@@ -54,35 +53,25 @@ repos:
       - id: requirements-txt-fixer
       - id: check-toml
       - id: check-shebang-scripts-are-executable
-        name: Check that executables have shebangs
-        description: ensures that (non-binary) executables have a shebang.
-        entry: check-executables-have-shebangs
-        types: [text, executable]
-        language: python
 
   ## C/C++ related -----------------------------------------------------------
-
   - repo: https://github.com/pocc/pre-commit-hooks
     rev: v1.3.5
     hooks:
       - id: clang-format
         name: Fix C, C++, Objective-C, Java
         entry: clang-format-hook
-        description: Formats C, C++, Objective-C, and Java code
         types_or: [c, c++, c#, objective-c, java]
         language: python
         args: [--style=Google, -i, --no-diff]
-        exclude: *exclude_pattern
 
       - id: cppcheck
         name: Find warnings/errors in C, C++, and Objective-C
         entry: cppcheck-hook
-        description: Find warnings/errors in C, C++, and Objective-C code
         types_or: [c++, c#, objective-c]
         language: python
         args: [--check-config]
         files: \.(cpp|cc|cxx|h|hpp|hxx)$
-        exclude: *exclude_pattern
 
   ## Python related ----------------------------------------------------------
   - repo: https://github.com/pre-commit/pre-commit-hooks
@@ -106,14 +95,12 @@ repos:
       - id: pycln
 
   ## 3. Lints ================================================================
-
   - repo: https://github.com/pocc/pre-commit-hooks
     rev: v1.3.5
     hooks:
       - id: cpplint
         name: Find lints in C/C++
         entry: cpplint-hook
-        description: Find warnings/errors in C/CPP code
         types_or: [c, c++, c#, objective-c, cuda]
         language: python
         args:
@@ -121,18 +108,3 @@ repos:
             "--filter=-legal/copyright,-build/include_subdir,-runtime/references,-build/include_order,-runtime/casting,-whitespace/indent_namespace,-build/include_what_you_use,-readability/fn_size,-whitespace/braces,-whitespace/parens,-whitespace/blank_line",
           ]
         files: \.(cpp|cc|cxx|h|hpp|hxx)$
-        exclude: |
-          (?x)^(
-            .*/cdisort\.(c|h)|             # cdisort.c, cdisort.h
-            .*/COPYING|                    # COPYING
-            .*/DISORT2\.doc|               # DISORT2.doc
-            .*/HOWTO_cdisort|              # HOWTO_cdisort
-            .*/Makefile_cdisort|           # Makefile_cdisort
-            .*/README_cdisort|             # README_cdisort
-            .*/locate\.(c|h)|              # locate.c, locate.h
-            .*/print_test\.c|              # print_test.c
-            .*/test_cdisort.*\.c|          # test_cdisort(_*).c
-            .*/pydisort.cpp                # pydisort.cpp
-          )$
-
-exclude: python/__init__.py

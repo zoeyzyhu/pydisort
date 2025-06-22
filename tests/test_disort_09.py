@@ -1,5 +1,3 @@
-# /usr/bin/env python
-
 """ Test Problem 9: General Emitting/Absorbing/Scattering """
 
 import torch

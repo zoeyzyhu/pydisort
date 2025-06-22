@@ -6,13 +6,16 @@ import atexit
 
 site_packages_dir = sysconfig.get_path("purelib")
 
+
 def cleanup():
     link_path = os.path.join(site_packages_dir, "pydisort", ".dylibs")
     if os.path.exists(link_path) and os.path.islink(link_path):
         os.unlink(link_path)
 
+
 def handle_exit(sig, frame):
     cleanup()
+
 
 def post_install_relink():
     # locations
@@ -34,9 +37,11 @@ def post_install_relink():
     os.makedirs(os.path.dirname(link_path), exist_ok=True)
     os.symlink(torch_path, link_path)
 
+
 # relink libraries
 try:
     import torch
+
     post_install_relink()
 
 except ImportError:

@@ -18,6 +18,8 @@ jobs:
     steps:
       - name: Check out code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -25,7 +27,9 @@ jobs:
           python-version: ${{ env.PYTHON_VERSION }}
 
       - name: Install style checkers
-        run: pip install --user cpplint cppcheck
+        run: |
+          pip install --user cpplint cppcheck
+          pip install --upgrade pre-commit==4.2.0
 
       - name: Cache pre-commit
         uses: actions/cache@v3

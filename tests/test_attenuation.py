@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 """ Test attenuation with pydisort."""
 # pylint: disable = no-name-in-module, invalid-name,
 # import-error, wrong-import-position
