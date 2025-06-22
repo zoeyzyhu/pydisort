@@ -45,14 +45,14 @@ jobs:
           fetch-depth: 0
 
   build-macos:
-    name: Build macOS
+    name: Build macOS Wheels
     needs: prepare
     if: ${{ github.event.inputs.build_os == 'Both' || github.event.inputs.build_os == 'MacOS' }}
     runs-on: macos-latest
     strategy:
       fail-fast: true
       matrix:
-        python-version: [3.9, 3.10, 3.11, 3.12, 3.13]
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
     env:
       MACOSX_DEPLOYMENT_TARGET: 11.1
     steps:
@@ -104,14 +104,14 @@ jobs:
           path: wheelhouse/*.whl
 
   build-linux:
-    name: Build Linux
+    name: Build Linux Wheels
     needs: prepare
     if: ${{ github.event.inputs.build_os == 'Both' || github.event.inputs.build_os == 'Ubuntu' }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: true
       matrix:
-        python-version: [3.9, 3.10, 3.11, 3.12, 3.13]
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
