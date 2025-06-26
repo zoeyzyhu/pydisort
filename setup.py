@@ -10,7 +10,7 @@ def parse_library_names(libdir):
     library_names = []
     for root, _, files in os.walk(libdir):
         for file in files:
-            if file.endswith((".a", ".so")):
+            if file.endswith((".a", ".so", ".dylib")):
                 file_name = os.path.basename(file)
                 library_names.append(file_name[3:].rsplit(".", 1)[0])
     return library_names
