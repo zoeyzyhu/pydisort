@@ -55,7 +55,7 @@ else:
         include_dirs=include_dirs,
         library_dirs=lib_dirs,
         libraries=libraries,
-        extrak_link_args=extra_link_args,
+        extra_link_args=extra_link_args,
     )
 
 setup(
