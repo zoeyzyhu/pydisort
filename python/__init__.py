@@ -6,6 +6,20 @@ import atexit
 
 site_packages_dir = sysconfig.get_path("purelib")
 
+def add_dylib_path():
+    lib_path_str = f"{site_packages_dir}/pydisort/lib"
+
+    if platform.system() == "Darwin":
+        varname = "DYLD_LIBRARY_PATH"
+    elif platform.system() == "Linux":
+        varname = "LD_LIBRARY_PATH"
+    else:
+        varname = None  # Windows would use PATH, but usually needs a different strategy
+
+    if varname:
+        existing = os.environ.get(varname, "")
+        if lib_path_str not in existing.split(":"):
+            os.environ[varname] = lib_path_str + (":" + existing if existing else "")
 
 def cleanup():
     link_path = os.path.join(site_packages_dir, "pydisort", ".dylibs")
@@ -50,6 +64,8 @@ except ImportError:
 atexit.register(cleanup)
 signal.signal(signal.SIGINT, handle_exit)
 signal.signal(signal.SIGTERM, handle_exit)
+
+add_dylib_path()
 
 from .pydisort import *
 
