@@ -1,12 +1,13 @@
 # Install disrot library
 #
-#   library: libdisort_debug.o
-#   library: libdisort_release.o
+#   library: libdisort_debug.so
+#   library: libdisort_release.so
 #
 # Define the following symbols
 #
 #   DISORT_INCLUDE_DIR
 #   pydisort::disort
+#   pydisort::disort_cu
 #
 # Normal usage would be:
 #
@@ -51,6 +52,9 @@ target_link_libraries(${namel}_${buildl}
     PUBLIC
     pydisort::cdisort
     fmt::fmt
+    ${TORCH_LIBRARY}
+    ${TORCH_CPU_LIBRARY}
+    ${C10_LIBRARY}
     )
 
 add_library(pydisort::disort ALIAS ${namel}_${buildl})
@@ -73,7 +77,8 @@ if (CUDAToolkit_FOUND)
       PUBLIC
       $<IF:$<BOOL:${CUDAToolkit_FOUND}>,CUDA::cudart,>
       $<IF:$<BOOL:${CUDAToolkit_FOUND}>,CUDA::cudart_static,>
-      )
+      $<IF:$<BOOL:${CUDAToolkit_FOUND}>,${TORCH_CUDA_LIBRARY},>
+      $<IF:$<BOOL:${CUDAToolkit_FOUND}>,${C10_CUDA_LIBRARY},>)
 
   add_library(pydisort::disort_cu ALIAS ${namel}_cuda_${buildl})
 endif()
