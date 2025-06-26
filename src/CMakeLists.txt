@@ -34,7 +34,7 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
 endif()
 
 add_library(${namel}_${buildl}
-    STATIC
+    SHARED
     ${src_files}
     )
 
@@ -60,7 +60,7 @@ if (CUDAToolkit_FOUND)
   file(GLOB cu_src_files *.cu)
 
   add_library(${namel}_cuda_${buildl}
-      STATIC
+      SHARED
       ${cu_src_files}
       )
 
