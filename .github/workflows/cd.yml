@@ -90,7 +90,7 @@ jobs:
           CIBW_REPAIR_WHEEL_COMMAND_MACOS: |
             export TORCH_LIB=$(python -c 'import torch; print(torch.__path__[0] + "/lib")')
             export DYLD_FALLBACK_LIBRARY_PATH="$(pwd)/build/lib:$TORCH_LIB:$DYLD_FALLBACK_LIBRARY_PATH"
-            delocate-wheel -e torch -w {dest_dir} {wheel}
+            delocate-wheel -e torch -e disort_release -w {dest_dir} {wheel}
         run: |
           export TORCH_LIB=$(python -c 'import torch; print(torch.__path__[0] + "/lib")')
           export DYLD_FALLBACK_LIBRARY_PATH="$TORCH_LIB:$DYLD_FALLBACK_LIBRARY_PATH"
