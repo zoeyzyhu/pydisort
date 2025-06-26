@@ -60,7 +60,7 @@ attr = "pydisort.__version__"
 include-package-data = false
 
 [tool.setuptools.package-data]
-"pydisort" = ["disort/**/*", "lib/*.so", "lib/*.dylib"]
+"pydisort" = ["disort/**/*", "cdisort213/*", "lib/*.so", "lib/*.dylib"]
 
 [tool.setuptools.exclude-package-data]
 "pydisort" = ["csrc/**/*"]
