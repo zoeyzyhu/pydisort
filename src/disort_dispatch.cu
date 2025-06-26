@@ -6,7 +6,8 @@
 #include <c10/cuda/CUDAGuard.h>
 
 // disort
-#include "loops.cuh"
+#include <disort/loops.cuh>
+#include "disort_dispatch.hpp"
 #include "disort_impl.h"
 
 namespace disort {
@@ -18,7 +19,7 @@ void call_disort_cuda(at::TensorIterator& iter, int rank_in_column,
   AT_DISPATCH_FLOATING_TYPES(iter.dtype(), "call_disort_cuda", [&] {
     auto nprop = at::native::ensure_nonempty_size(iter.output(), -1);
 
-    native::gpu_kernel<scalar_t, 12>(
+    native::gpu_kernel<12>(
         iter, [=] GPU_LAMBDA(char* const data[12], unsigned int strides[12]) {
           auto out = reinterpret_cast<scalar_t*>(data[0] + strides[0]);
           auto prop = reinterpret_cast<scalar_t*>(data[1] + strides[1]);
@@ -40,6 +41,10 @@ void call_disort_cuda(at::TensorIterator& iter, int rank_in_column,
   });
 }
 
-REGISTER_DISPATCH(disort_stub, &call_disort_cuda);
-
 }  // namespace disort
+
+namespace at::native {
+
+REGISTER_CUDA_DISPATCH(call_disort, &disort::call_disort_cuda);
+
+} // namespace at::native
