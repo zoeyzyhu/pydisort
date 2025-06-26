@@ -3,6 +3,7 @@ import signal
 import sysconfig
 import shutil
 import atexit
+import platform
 
 site_packages_dir = sysconfig.get_path("purelib")
 
