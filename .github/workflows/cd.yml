@@ -81,7 +81,7 @@ jobs:
           CIBW_BUILD: cp${{ env.PY_VERSION }}*
           CIBW_ARCHS: ${{ env.MACOS_ARCH }}
           CIBW_BEFORE_BUILD: |
-            pip install numpy 'torch>=2.7'
+            pip install numpy 'torch==2.7.1'
             TORCH_CMAKE_PREFIX_PATH=$(python -c 'import torch.utils; print(torch.utils.cmake_prefix_path)')
             cmake -B build -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
                   -DCMAKE_OSX_ARCHITECTURES=${{ env.MACOS_ARCH }} \
@@ -139,7 +139,7 @@ jobs:
           CIBW_ARCHS: ${{ env.LINUX_ARCH }}
           CIBW_SKIP: "*musllinux*"
           CIBW_BEFORE_BUILD: |
-            pip install numpy 'torch>=2.7'
+            pip install numpy 'torch==2.7.1'
             TORCH_CMAKE_PREFIX_PATH=$(python -c 'import torch.utils; print(torch.utils.cmake_prefix_path)')
             export LD_LIBRARY_PATH=$(python -c "import torch; print(torch.__path__[0] + '/lib')"):$(pwd)/build/lib:$LD_LIBRARY_PATH
             $LD_LIBRARY_PATH
