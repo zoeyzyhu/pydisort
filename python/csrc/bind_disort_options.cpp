@@ -118,7 +118,9 @@ Examples:
 
       .def("__repr__",
            [](const disort::DisortOptions &a) {
-             return fmt::format("DisortOptions{}", a);
+             std::stringstream ss;
+             a.report(ss);
+             return fmt::format("DisortOptions(\n{})", ss.str());
            })
 
       .ADD_OPTION(std::string, disort::DisortOptions, header, R"(

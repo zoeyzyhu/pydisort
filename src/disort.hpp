@@ -23,6 +23,35 @@ namespace disort {
 struct DisortOptions {
   DisortOptions();
 
+  void report(std::ostream& os) const {
+    os << "* header = " << header() << "\n"
+       << "* flags = " << flags() << "\n"
+       << "* nwave = " << nwave() << "\n"
+       << "* ncol = " << ncol() << "\n"
+       << "* accur = " << accur() << "\n"
+       << "* upward = " << upward() << "\n";
+
+    os << "* user_tau = ";
+    for (auto const& v : user_tau()) os << v << ", ";
+    os << "\n";
+
+    os << "* user_mu = ";
+    for (auto const& v : user_mu()) os << v << ", ";
+    os << "\n";
+
+    os << "* user_phi = ";
+    for (auto const& v : user_phi()) os << v << ", ";
+    os << "\n";
+
+    os << "* wave_lower = ";
+    for (auto const& v : wave_lower()) os << v << ", ";
+    os << "\n";
+
+    os << "* wave_upper = ";
+    for (auto const& v : wave_upper()) os << v << ", ";
+    os << "\n";
+  }
+
   //! set disort header
   void set_header(std::string const& header);
 

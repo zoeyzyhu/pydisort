@@ -83,6 +83,7 @@ message(STATUS "${Blue}${PROJECT_NAME}-2. Setting up project parameters ...${Col
 
 message(STATUS "${Blue}${PROJECT_NAME}-3. Setting up system libraries ...${ColorReset}")
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/fmt.cmake)
+#include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/memorypool.cmake)
 find_package(Torch REQUIRED)
 if (CUDA)
   find_package(CUDAToolkit REQUIRED)
