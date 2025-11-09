@@ -218,6 +218,7 @@ References
     :caption: Contents:
 
     api
+    type_hints
     contribute
     venv
     devops
