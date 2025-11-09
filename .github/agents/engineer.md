@@ -22,3 +22,6 @@ pip install -e .
 ```
 
 Before signing off, run pre-commit hooks to ensure lint passes.
+```bash
+pre-commit run --all-files
+```

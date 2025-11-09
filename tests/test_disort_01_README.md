@@ -120,7 +120,7 @@ All tests use:
 ## Reference
 
 These tests are based on:
-- Van de Hulst, H.C., 1980: *Multiple Light Scattering, Tables, Formulas and Applications*, 
+- Van de Hulst, H.C., 1980: *Multiple Light Scattering, Tables, Formulas and Applications*,
   Volumes 1 and 2, Academic Press, New York (VH1, Table 12).
 - Original DISORT test suite by Stamnes et al.
 

@@ -15,7 +15,7 @@ test_case2:
     Tests conservative scattering in thin medium.
 
 test_case3:
-    Thin optical depth (tau=0.03125), near-conservative scattering (albedo=0.99), 
+    Thin optical depth (tau=0.03125), near-conservative scattering (albedo=0.99),
     isotropic source. Tests diffuse illumination in thin medium.
 
 test_case4:
@@ -55,7 +55,7 @@ from pydisort import (
 
 def test_case1():
     """Case 1: Thin optical depth (tau=0.03125), low albedo (0.2), beam source.
-    
+
     Tests basic absorbing medium with minimal scattering under direct beam illumination.
     Single-scatter albedo of 0.2 means most photons are absorbed rather than scattered.
     """
@@ -158,7 +158,7 @@ def test_case1():
 
 def test_case2():
     """Case 2: Thin optical depth (tau=0.03125), conservative scattering (albedo=1.0), beam source.
-    
+
     Tests conservative scattering in thin medium where all photons are scattered (no absorption).
     Single-scatter albedo of 1.0 means no energy loss, only redistribution of radiation.
     """
@@ -261,7 +261,7 @@ def test_case2():
 
 def test_case3():
     """Case 3: Thin optical depth (tau=0.03125), near-conservative scattering (albedo=0.99), isotropic source.
-    
+
     Tests diffuse illumination in thin medium with minimal absorption. Unlike cases 1-2 which
     use a directional beam, this case uses isotropic (uniform) incident radiation from above.
     """
@@ -364,7 +364,7 @@ def test_case3():
 
 def test_case4():
     """Case 4: Thick optical depth (tau=32), low albedo (0.2), beam source.
-    
+
     Tests absorbing medium with significant optical depth. At tau=32, the medium is optically
     thick, meaning most radiation is absorbed/scattered before reaching the bottom. The low
     single-scatter albedo (0.2) means strong absorption dominates over scattering.
@@ -468,7 +468,7 @@ def test_case4():
 
 def test_case5():
     """Case 5: Thick optical depth (tau=32), conservative scattering (albedo=1.0), beam source.
-    
+
     Tests conservative scattering in optically thick medium. With no absorption (albedo=1.0),
     radiation diffuses through multiple scattering events. This represents the extreme case
     of pure scattering with no energy loss in a thick atmosphere.
@@ -572,7 +572,7 @@ def test_case5():
 
 def test_case6():
     """Case 6: Thick optical depth (tau=32), near-conservative scattering (albedo=0.99), isotropic source.
-    
+
     Tests diffuse illumination in optically thick medium with minimal absorption. Combines the
     challenges of thick optical depth with isotropic incident radiation. The near-unity albedo
     (0.99) means photons undergo many scattering events before being absorbed or exiting.
