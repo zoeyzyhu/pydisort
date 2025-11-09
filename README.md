@@ -112,6 +112,7 @@ For efficient memory management and potential GPU acceleration, `pydisort` lever
 We provide the `pydisort` library for Python users. The package can be installed using `pip`:
 
 ```bash
+pip install torch>=2.7.0,<=2.7.1
 pip install pydisort
 ```
 
