@@ -31,14 +31,6 @@ jobs:
           pip install --user cpplint cppcheck
           pip install --upgrade pre-commit==4.2.0
 
-      - name: Cache pre-commit
-        uses: actions/cache@v3
-        with:
-          path: ~/.cache/pre-commit
-          key: ${{ runner.os }}-pre-commit-${{ hashFiles('.pre-commit-config.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pre-commit-
-
       - name: Run pre-commit
         uses: pre-commit/action@v3.0.1
 
@@ -62,14 +54,6 @@ jobs:
       - name: Install Python dependencies
         run: |
           pip install numpy 'torch==2.7.1'
-
-      - name: Cache CMake build
-        uses: actions/cache@v3
-        with:
-          path: ${{ github.workspace }}/build
-          key: ${{ runner.os }}-cmake-${{ env.BUILD_TYPE }}-${{ hashFiles('**/*.cmake', '**/CMakeLists.txt', '**/*.cpp', '**/*.h') }}
-          restore-keys: |
-            ${{ runner.os }}-cmake-${{ env.BUILD_TYPE }}-
 
       - name: Configure CMake
         run: |
