@@ -9,26 +9,26 @@
 #include <disort/scattering_moments.hpp>
 
 int main(int argc, char **argv) {
-  disort::DisortOptions op;
+  auto op = std::make_shared<disort::DisortOptionsImpl>();
 
-  op.header("running disort example");
-  op.flags(
+  op->header("running disort example");
+  op->flags(
       "usrtau,usrang,lamber,quiet,intensity_correction,"
       "old_intensity_correction,print-input,print-phase-function");
 
-  op.nwave(10);
-  op.ds().nlyr = 1;
-  op.ds().nstr = 16;
-  op.ds().nmom = 16;
-  op.ds().nphase = 16;
+  op->nwave(10);
+  op->ds().nlyr = 1;
+  op->ds().nstr = 16;
+  op->ds().nmom = 16;
+  op->ds().nphase = 16;
 
-  op.user_mu({-1, -0.5, -0.1, 0.1, 0.5, 1});
-  op.user_phi({0});
-  op.user_tau({0, 0.03125});
+  op->user_mu({-1, -0.5, -0.1, 0.1, 0.5, 1});
+  op->user_phi({0});
+  op->user_tau({0, 0.03125});
 
   disort::Disort disort(op);
 
-  auto prop = torch::zeros({disort->options.nwave(), disort->options.ncol(),
+  auto prop = torch::zeros({disort->options->nwave(), disort->options->ncol(),
                             disort->ds().nlyr, 2 + disort->ds().nstr},
                            torch::kDouble);
 
@@ -39,10 +39,11 @@ int main(int argc, char **argv) {
 
   std::map<std::string, torch::Tensor> bc;
 
-  bc["umu0"] = 0.1 * torch::ones({disort->options.ncol()}, torch::kDouble);
-  bc["fbeam"] = (M_PI / bc["umu0"])
-                    .unsqueeze(0)
-                    .expand({disort->options.nwave(), disort->options.ncol()});
+  bc["umu0"] = 0.1 * torch::ones({disort->options->ncol()}, torch::kDouble);
+  bc["fbeam"] =
+      (M_PI / bc["umu0"])
+          .unsqueeze(0)
+          .expand({disort->options->nwave(), disort->options->ncol()});
 
   auto result = disort->forward(prop, &bc);
   std::cout << "result: " << result << std::endl;

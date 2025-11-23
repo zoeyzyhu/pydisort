@@ -9,7 +9,7 @@
 
 namespace disort {
 
-DisortOptions::DisortOptions() {
+DisortOptionsImpl::DisortOptionsImpl() {
   // flags
   ds().flag.ibcnd = false;
   ds().flag.usrtau = false;
@@ -41,11 +41,11 @@ DisortOptions::DisortOptions() {
   ds().accur = 1.E-6;
 }
 
-void DisortOptions::set_header(std::string const &header) {
+void DisortOptionsImpl::set_header(std::string const &header) {
   snprintf(ds().header, sizeof(ds().header), "%s", header.c_str());
 }
 
-void DisortOptions::set_flags(std::string const &str) {
+void DisortOptionsImpl::set_flags(std::string const &str) {
   std::vector<std::string> dstr = Vectorize<std::string>(str.c_str(), " ,");
 
   for (int i = 0; i < dstr.size(); ++i) {
@@ -86,7 +86,7 @@ void DisortOptions::set_flags(std::string const &str) {
     } else {
       std::stringstream msg;
       msg << "flag: '" << dstr[i] << "' unrecognized" << std::endl;
-      throw std::runtime_error("DisortOptions::set_flags::" + msg.str());
+      throw std::runtime_error("DisortOptionsImpl::set_flags::" + msg.str());
     }
   }
 }
@@ -96,58 +96,58 @@ DisortImpl::DisortImpl(DisortOptions const &options_) : options(options_) {
 }
 
 void DisortImpl::reset() {
-  options.set_header(options.header());
-  options.set_flags(options.flags());
+  options->set_header(options->header());
+  options->set_flags(options->flags());
 
-  options.ds().accur = options.accur();
+  options->ds().accur = options->accur();
 
-  options.ds().nphi = options.user_phi().size();
-  options.ds().numu = options.user_mu().size();
-  options.ds().ntau = options.user_tau().size();
+  options->ds().nphi = options->user_phi().size();
+  options->ds().numu = options->user_mu().size();
+  options->ds().ntau = options->user_tau().size();
 
-  TORCH_CHECK(options.ds().nlyr > 0, "DisortImpl: ds.nlyr <= 0");
-  TORCH_CHECK(options.ds().nstr > 0, "DisortImpl: ds.nstr <= 0");
-  TORCH_CHECK(options.ds().nmom >= options.ds().nstr,
+  TORCH_CHECK(options->ds().nlyr > 0, "DisortImpl: ds.nlyr <= 0");
+  TORCH_CHECK(options->ds().nstr > 0, "DisortImpl: ds.nstr <= 0");
+  TORCH_CHECK(options->ds().nmom >= options->ds().nstr,
               "DisortImpl: ds.nmom < ds.nstr");
 
-  if (options.ds().flag.planck) {
-    TORCH_CHECK(options.wave_lower().size() == options.nwave(),
+  if (options->ds().flag.planck) {
+    TORCH_CHECK(options->wave_lower().size() == options->nwave(),
                 "DisortImpl: wave_lower.size() != nwave");
-    TORCH_CHECK(options.wave_upper().size() == options.nwave(),
+    TORCH_CHECK(options->wave_upper().size() == options->nwave(),
                 "DisortImpl: wave_upper.size() != nwave");
   }
 
   if (allocated_) {
-    for (int i = 0; i < options.nwave() * options.ncol(); ++i) {
+    for (int i = 0; i < options->nwave() * options->ncol(); ++i) {
       c_disort_state_free(&ds_[i]);
       c_disort_out_free(&ds_[i], &ds_out_[i]);
     }
   }
 
-  ds_.resize(options.nwave() * options.ncol());
-  ds_out_.resize(options.nwave() * options.ncol());
+  ds_.resize(options->nwave() * options->ncol());
+  ds_out_.resize(options->nwave() * options->ncol());
 
-  for (int i = 0; i < options.nwave() * options.ncol(); ++i) {
-    ds_[i] = options.ds();
+  for (int i = 0; i < options->nwave() * options->ncol(); ++i) {
+    ds_[i] = options->ds();
     c_disort_state_alloc(&ds_[i]);
     c_disort_out_alloc(&ds_[i], &ds_out_[i]);
 
     if (ds_[i].flag.usrtau) {
-      for (int j = 0; j < options.user_tau().size(); ++j)
-        ds_[i].utau[j] = options.user_tau()[j];
+      for (int j = 0; j < options->user_tau().size(); ++j)
+        ds_[i].utau[j] = options->user_tau()[j];
     }
 
     if (ds_[i].flag.usrang) {
-      for (int j = 0; j < options.user_mu().size(); ++j)
-        ds_[i].umu[j] = options.user_mu()[j];
+      for (int j = 0; j < options->user_mu().size(); ++j)
+        ds_[i].umu[j] = options->user_mu()[j];
 
-      for (int j = 0; j < options.user_phi().size(); ++j)
-        ds_[i].phi[j] = options.user_phi()[j];
+      for (int j = 0; j < options->user_phi().size(); ++j)
+        ds_[i].phi[j] = options->user_phi()[j];
     }
 
     if (ds_[i].flag.planck) {
-      ds_[i].wvnmlo = options.wave_lower()[i / options.ncol()];
-      ds_[i].wvnmhi = options.wave_upper()[i / options.ncol()];
+      ds_[i].wvnmlo = options->wave_lower()[i / options->ncol()];
+      ds_[i].wvnmhi = options->wave_upper()[i / options->ncol()];
     } else {
       ds_[i].wvnmlo = 0.;
       ds_[i].wvnmhi = 1.;
@@ -159,7 +159,7 @@ void DisortImpl::reset() {
 
 DisortImpl::~DisortImpl() {
   if (allocated_) {
-    for (int i = 0; i < options.nwave() * options.ncol(); ++i) {
+    for (int i = 0; i < options->nwave() * options->ncol(); ++i) {
       c_disort_state_free(&ds_[i]);
       c_disort_out_free(&ds_[i], &ds_out_[i]);
     }
@@ -170,44 +170,45 @@ DisortImpl::~DisortImpl() {
 torch::Tensor DisortImpl::gather_flx() const {
   TORCH_CHECK(allocated_, "DisortImpl::gather_flx: DisortImpl not allocated");
 
-  int nlyr = options.ds().nlyr;
-  auto result = torch::empty({options.nwave() * options.ncol(), nlyr + 1, 8},
+  int nlyr = options->ds().nlyr;
+  auto result = torch::empty({options->nwave() * options->ncol(), nlyr + 1, 8},
                              result_options_);
 
-  for (int i = 0; i < options.nwave() * options.ncol(); ++i) {
+  for (int i = 0; i < options->nwave() * options->ncol(); ++i) {
     auto var = torch::from_blob(&ds_out_[i].rad[0].rfldir, {nlyr + 1, 8},
                                 {8, 1}, result_options_.dtype(torch::kFloat64));
     result[i].copy_(var);
   }
 
-  if (options.upward()) {
-    return result.view({options.nwave(), options.ncol(), nlyr + 1, 8}).flip(2);
+  if (options->upward()) {
+    return result.view({options->nwave(), options->ncol(), nlyr + 1, 8})
+        .flip(2);
   } else {
-    return result.view({options.nwave(), options.ncol(), nlyr + 1, 8});
+    return result.view({options->nwave(), options->ncol(), nlyr + 1, 8});
   }
 }
 
 torch::Tensor DisortImpl::gather_rad() const {
   TORCH_CHECK(allocated_, "DisortImpl::gather_rad: DisortImpl not allocated");
 
-  TORCH_CHECK(options.ds().flag.onlyfl == false,
+  TORCH_CHECK(options->ds().flag.onlyfl == false,
               "DisortImpl::gather_rad: ds.onlyfl == true");
 
-  int nphi = options.ds().nphi;
-  int ntau = options.ds().ntau;
-  int numu = options.ds().numu;
+  int nphi = options->ds().nphi;
+  int ntau = options->ds().ntau;
+  int numu = options->ds().numu;
 
   auto result = torch::empty(
-      {options.nwave() * options.ncol(), nphi, ntau, numu}, result_options_);
+      {options->nwave() * options->ncol(), nphi, ntau, numu}, result_options_);
 
-  for (int i = 0; i < options.nwave() * options.ncol(); ++i) {
+  for (int i = 0; i < options->nwave() * options->ncol(); ++i) {
     auto var = torch::from_blob(ds_out_[i].uu, {nphi, ntau, numu},
                                 {ntau * numu, numu, 1},
                                 result_options_.dtype(torch::kFloat64));
     result[i].copy_(var);
   }
 
-  return result.view({options.nwave(), options.ncol(), nphi, ntau, numu});
+  return result.view({options->nwave(), options->ncol(), nphi, ntau, numu});
 }
 
 //! \note Counting Disort Index
@@ -228,7 +229,7 @@ torch::Tensor DisortImpl::forward(torch::Tensor prop,
                                   std::map<std::string, torch::Tensor> *bc,
                                   std::string bname,
                                   torch::optional<torch::Tensor> temf) {
-  TORCH_CHECK(options.ds().flag.ibcnd == 0,
+  TORCH_CHECK(options->ds().flag.ibcnd == 0,
               "DisortImpl::forward: ds.ibcnd != 0");
 
   // check dimensions
@@ -238,14 +239,14 @@ torch::Tensor DisortImpl::forward(torch::Tensor prop,
   int ncol = prop.size(1);
   int nlyr = prop.size(2);
 
-  TORCH_CHECK(options.nwave() == nwave,
-              "DisortImpl::forward: options.nwave != prop.size(0)");
+  TORCH_CHECK(options->nwave() == nwave,
+              "DisortImpl::forward: options->nwave != prop.size(0)");
 
-  TORCH_CHECK(options.ncol() == ncol,
-              "DisortImpl::forward: options.ncol != prop.size(1)");
+  TORCH_CHECK(options->ncol() == ncol,
+              "DisortImpl::forward: options->ncol != prop.size(1)");
 
   // check ds
-  TORCH_CHECK(options.ds().nlyr == nlyr,
+  TORCH_CHECK(options->ds().nlyr == nlyr,
               "DisortImpl::forward: ds.nlyr != nlyr");
 
   // add slash
@@ -362,7 +363,7 @@ torch::Tensor DisortImpl::forward(torch::Tensor prop,
                 "DisortImpl::forward: temf.size(1) != nlyr + 1");
     tem = temf.value();
   } else {
-    TORCH_CHECK(options.ds().flag.planck == 0,
+    TORCH_CHECK(options->ds().flag.planck == 0,
                 "DisortImpl::forward: ds.planck != 0");
     // dummy
     tem = torch::empty({ncol, nlyr + 1}, prop.options());
@@ -399,7 +400,7 @@ torch::Tensor DisortImpl::forward(torch::Tensor prop,
           .add_input(index)
           .build();
 
-  at::native::call_disort(flx.device().type(), iter, options.upward(),
+  at::native::call_disort(flx.device().type(), iter, options->upward(),
                           ds_.data(), ds_out_.data());
 
   // save result tensor options
@@ -435,7 +436,7 @@ void print_ds_out(std::ostream &os, disort_state const &ds) {
 void DisortImpl::pretty_print(std::ostream &stream) const {
   std::cout << "Options: " << fmt::format("{}", options) << std::endl;
   std::cout << "Disort is configured with:" << std::endl;
-  print_ds_flags(std::cout, options.ds());
+  print_ds_flags(std::cout, options->ds());
 }
 
 void print_ds_bc(std::ostream &os, disort_state const &ds) {

@@ -20,8 +20,8 @@
 
 namespace disort {
 
-struct DisortOptions {
-  DisortOptions();
+struct DisortOptionsImpl {
+  DisortOptionsImpl();
 
   void report(std::ostream& os) const {
     os << "* header = " << header() << "\n"
@@ -100,6 +100,7 @@ struct DisortOptions {
   //! placeholder for disort state
   ADD_ARG(disort_state, ds);
 };
+using DisortOptions = std::shared_ptr<DisortOptionsImpl>;
 
 class DisortImpl : public torch::nn::Cloneable<DisortImpl> {
  public:
@@ -107,7 +108,9 @@ class DisortImpl : public torch::nn::Cloneable<DisortImpl> {
   DisortOptions options;
 
   //! Constructor to initialize the layers
-  DisortImpl() = default;
+  DisortImpl() {
+    options = std::make_shared<DisortOptionsImpl>();
+  }
   explicit DisortImpl(DisortOptions const& options);
   virtual ~DisortImpl();
   void reset() override;
@@ -120,7 +123,7 @@ class DisortImpl : public torch::nn::Cloneable<DisortImpl> {
    * \return disort state
    */
   disort_state const& ds(int n = 0, int j = 0) const {
-    return ds_[n * options.ncol() + j];
+    return ds_[n * options->ncol() + j];
   }
 
   //! disort state at one wave and one column
@@ -129,7 +132,7 @@ class DisortImpl : public torch::nn::Cloneable<DisortImpl> {
    * \param j column index
    * \return disort state
    */
-  disort_state& ds(int n = 0, int j = 0) { return ds_[n * options.ncol() + j]; }
+  disort_state& ds(int n = 0, int j = 0) { return ds_[n * options->ncol() + j]; }
 
   //! disort output at one wave and one column
   /*!
@@ -138,7 +141,7 @@ class DisortImpl : public torch::nn::Cloneable<DisortImpl> {
    * \return disort output
    */
   disort_output const& ds_out(int n = 0, int j = 0) const {
-    return ds_out_[n * options.ncol() + j];
+    return ds_out_[n * options->ncol() + j];
   }
 
   //! disort output at one wave and one column
@@ -148,7 +151,7 @@ class DisortImpl : public torch::nn::Cloneable<DisortImpl> {
    * \return disort output
    */
   disort_output& ds_out(int n = 0, int j = 0) {
-    return ds_out_[n * options.ncol() + j];
+    return ds_out_[n * options->ncol() + j];
   }
 
   //! disort flux outputs
