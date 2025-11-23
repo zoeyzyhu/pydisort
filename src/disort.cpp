@@ -95,6 +95,8 @@ DisortImpl::DisortImpl(DisortOptions const &options_) : options(options_) {
   reset();
 }
 
+// Note: reset() modifies the shared options object. If multiple DisortImpl
+// instances share the same DisortOptions, all instances will see these changes.
 void DisortImpl::reset() {
   options->set_header(options->header());
   options->set_flags(options->flags());
