@@ -22,6 +22,9 @@ namespace disort {
 
 struct DisortOptionsImpl {
   DisortOptionsImpl();
+  static std::shared_ptr<DisortOptionsImpl> create() {
+    return std::make_shared<DisortOptionsImpl>();
+  }
 
   void report(std::ostream& os) const {
     os << "* header = " << header() << "\n"

@@ -51,11 +51,11 @@ void disort_impl(T *flx, T *prop, T *umu0, T *phi0, T *fbeam, T *albedo,
   if (upward) {
     for (int i = 0; i < ds.nlyr; ++i) {
       // absorption
-      ds.dtauc[ds.nlyr - 1 - i] = PROP(i, index::IEX);
+      ds.dtauc[ds.nlyr - 1 - i] = PROP(i, IEX);
 
       // single scatering albedo
       if (nprop > 1) {
-        ds.ssalb[ds.nlyr - 1 - i] = PROP(i, index::ISS);
+        ds.ssalb[ds.nlyr - 1 - i] = PROP(i, ISS);
       } else {
         ds.ssalb[ds.nlyr - 1 - i] = 0.;
       }
@@ -64,7 +64,7 @@ void disort_impl(T *flx, T *prop, T *umu0, T *phi0, T *fbeam, T *albedo,
       ds.pmom[(ds.nlyr - 1 - i) * (ds.nmom_nstr + 1)] = 1.;
       for (int m = 0; m < nprop - 2; ++m) {
         ds.pmom[(ds.nlyr - 1 - i) * (ds.nmom_nstr + 1) + m + 1] =
-            PROP(i, index::IPM + m);
+            PROP(i, IPM + m);
       }
 
       for (int m = nprop - 2; m < ds.nmom; ++m) {
@@ -74,11 +74,11 @@ void disort_impl(T *flx, T *prop, T *umu0, T *phi0, T *fbeam, T *albedo,
   } else {
     for (int i = 0; i < ds.nlyr; ++i) {
       // absorption
-      ds.dtauc[i] = PROP(i, index::IEX);
+      ds.dtauc[i] = PROP(i, IEX);
 
       // single scatering albedo
       if (nprop > 1) {
-        ds.ssalb[i] = PROP(i, index::ISS);
+        ds.ssalb[i] = PROP(i, ISS);
       } else {
         ds.ssalb[i] = 0.;
       }
@@ -86,7 +86,7 @@ void disort_impl(T *flx, T *prop, T *umu0, T *phi0, T *fbeam, T *albedo,
       // Legendre coefficients
       ds.pmom[i * (ds.nmom_nstr + 1)] = 1.;
       for (int m = 0; m < nprop - 2; ++m) {
-        ds.pmom[i * (ds.nmom_nstr + 1) + m + 1] = PROP(i, index::IPM + m);
+        ds.pmom[i * (ds.nmom_nstr + 1) + m + 1] = PROP(i, IPM + m);
       }
 
       for (int m = nprop - 2; m < ds.nmom; ++m) {
@@ -99,14 +99,13 @@ void disort_impl(T *flx, T *prop, T *umu0, T *phi0, T *fbeam, T *albedo,
 
   if (upward) {
     for (int i = 0; i < ds.ntau; ++i) {
-      FLX(ds.ntau - 1 - i, index::IUP) = ds_out.rad[i].flup;
-      FLX(ds.ntau - 1 - i, index::IDN) =
-          ds_out.rad[i].rfldir + ds_out.rad[i].rfldn;
+      FLX(ds.ntau - 1 - i, IUP) = ds_out.rad[i].flup;
+      FLX(ds.ntau - 1 - i, IDN) = ds_out.rad[i].rfldir + ds_out.rad[i].rfldn;
     }
   } else {
     for (int i = 0; i < ds.ntau; ++i) {
-      FLX(i, index::IUP) = ds_out.rad[i].flup;
-      FLX(i, index::IDN) = ds_out.rad[i].rfldir + ds_out.rad[i].rfldn;
+      FLX(i, IUP) = ds_out.rad[i].flup;
+      FLX(i, IDN) = ds_out.rad[i].rfldir + ds_out.rad[i].rfldn;
     }
   }
 }

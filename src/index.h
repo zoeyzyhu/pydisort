@@ -2,13 +2,13 @@
 
 namespace disort {
 
-namespace index {
-constexpr int IEX = 0;
-constexpr int ISS = 1;
-constexpr int IPM = 2;
+enum Index {
+  IEX = 0,
+  ISS = 1,
+  IPM = 2,
 
-constexpr int IUP = 0;
-constexpr int IDN = 1;
-}  // namespace index
+  IUP = 0,
+  IDN = 1,
+};
 
 }  // namespace disort

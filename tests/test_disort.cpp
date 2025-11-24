@@ -9,22 +9,22 @@
 #include <disort/scattering_moments.hpp>
 
 int main(int argc, char **argv) {
-  auto op = std::make_shared<disort::DisortOptionsImpl>();
+  auto op = disort::DisortOptionsImpl::create();
 
-  op->header("running disort example");
-  op->flags(
-      "usrtau,usrang,lamber,quiet,intensity_correction,"
-      "old_intensity_correction,print-input,print-phase-function");
+  (*op)
+      .header("running disort example")
+      .flags(
+          "usrtau,usrang,lamber,quiet,intensity_correction,"
+          "old_intensity_correction,print-input,print-phase-function")
+      .nwave(10)
+      .user_mu({-1, -0.5, -0.1, 0.1, 0.5, 1})
+      .user_phi({0})
+      .user_tau({0, 0.03125});
 
-  op->nwave(10);
   op->ds().nlyr = 1;
   op->ds().nstr = 16;
   op->ds().nmom = 16;
   op->ds().nphase = 16;
-
-  op->user_mu({-1, -0.5, -0.1, 0.1, 0.5, 1});
-  op->user_phi({0});
-  op->user_tau({0, 0.03125});
 
   disort::Disort disort(op);
 
@@ -32,9 +32,9 @@ int main(int argc, char **argv) {
                             disort->ds().nlyr, 2 + disort->ds().nstr},
                            torch::kDouble);
 
-  prop.select(3, disort::index::IEX) = disort->ds().utau[1];
-  prop.select(3, disort::index::ISS) = 0.2;
-  prop.narrow(3, disort::index::IPM, disort->ds().nstr) =
+  prop.select(3, disort::IEX) = disort->ds().utau[1];
+  prop.select(3, disort::ISS) = 0.2;
+  prop.narrow(3, disort::IPM, disort->ds().nstr) =
       disort::scattering_moments(disort->ds().nstr);
 
   std::map<std::string, torch::Tensor> bc;

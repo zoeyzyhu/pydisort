@@ -8,6 +8,7 @@
 #include "pyoptions.hpp"
 
 // disort
+#include <disort/index.h>
 #include <disort/disort.hpp>
 #include <disort/disort_formatter.hpp>
 
@@ -19,14 +20,21 @@ void bind_cdisort(py::module &m);
 PYBIND11_MODULE(pydisort, m) {
   m.attr("__name__") = "pydisort";
 
-  m.attr("irfldir") = 0;
-  m.attr("ifldn") = 1;
-  m.attr("iflup") = 2;
-  m.attr("idfdt") = 3;
-  m.attr("iuavg") = 4;
-  m.attr("iuavgdn") = 5;
-  m.attr("iuavgup") = 6;
-  m.attr("iuavgso") = 7;
+  m.attr("kIRFLDIR") = 0;
+  m.attr("kIFLDN") = 1;
+  m.attr("kIFLUP") = 2;
+  m.attr("kIDFDT") = 3;
+  m.attr("kIUAVG") = 4;
+  m.attr("kIUAVGDN") = 5;
+  m.attr("kIUAVGUP") = 6;
+  m.attr("kIUAVGSO") = 7;
+
+  m.attr("kIEX") = (int)disort::Index::IEX;
+  m.attr("kISS") = (int)disort::Index::ISS;
+  m.attr("kIPM") = (int)disort::Index::IPM;
+
+  m.attr("kIUP") = (int)disort::Index::IUP;
+  m.attr("kIDN") = (int)disort::Index::IDN;
 
   bind_cdisort(m);
   bind_disort_options(m);
