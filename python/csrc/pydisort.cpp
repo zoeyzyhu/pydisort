@@ -29,12 +29,12 @@ PYBIND11_MODULE(pydisort, m) {
   m.attr("kIUAVGUP") = 6;
   m.attr("kIUAVGSO") = 7;
 
-  m.attr("kIEX") = (int)disort::Index::IEX;
-  m.attr("kISS") = (int)disort::Index::ISS;
-  m.attr("kIPM") = (int)disort::Index::IPM;
+  m.attr("kIEX") = (int)disort::PropertyIndex::IEX;
+  m.attr("kISS") = (int)disort::PropertyIndex::ISS;
+  m.attr("kIPM") = (int)disort::PropertyIndex::IPM;
 
-  m.attr("kIUP") = (int)disort::Index::IUP;
-  m.attr("kIDN") = (int)disort::Index::IDN;
+  m.attr("kIUP") = (int)disort::DirectionIndex::IUP;
+  m.attr("kIDN") = (int)disort::DirectionIndex::IDN;
 
   bind_cdisort(m);
   bind_disort_options(m);
