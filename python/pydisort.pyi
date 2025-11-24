@@ -10,14 +10,19 @@ import torch.nn as nn
 from numpy import ndarray
 
 # Module constants
-irfldir: int
-ifldn: int
-iflup: int
-idfdt: int
-iuavg: int
-iuavgdn: int
-iuavgup: int
-iuavgso: int
+kIRFLDIR: int
+kIFLDN: int
+kIFLUP: int
+kIDFDT: int
+kIUAVG: int
+kIUAVGDN: int
+kIUAVGUP: int
+kIUAVGSO: int
+kIEX: int
+kISS: int
+kIPM: int
+kIUP: int
+kIDN: int
 
 class disort_state:
     """
