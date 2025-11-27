@@ -131,6 +131,12 @@ jobs:
           PV=${PV//./}
           echo "PY_VERSION=$PV" >> $GITHUB_ENV
 
+      - name: Free up disk space
+        run: |
+          sudo apt-get clean || true
+          sudo rm -rf /var/lib/apt/lists/* || true
+          python -m pip cache purge || true
+
       - name: Build Linux Wheel
         env:
           CIBW_PLATFORM: linux
