@@ -398,7 +398,7 @@ int c_disort(disort_state  *ds,
         emission_func_t emi_func)
 {
   static int
-    self_tested = -1;
+    self_tested = 1;  // cli: disable self-test by default
   int
     prntu0[2],
     corint,deltam,scat_yes,compare,lyrcut,needdeltam,
