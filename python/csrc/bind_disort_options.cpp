@@ -15,9 +15,8 @@ namespace py = pybind11;
 
 void bind_disort_options(py::module &m) {
   auto pyDisortOptions =
-      py::class_<disort::DisortOptionsImpl,
-                 std::shared_ptr<disort::DisortOptionsImpl> >(m,
-                                                              "DisortOptions");
+      py::class_<disort::DisortOptionsImpl, disort::DisortOptions>(
+          m, "DisortOptions");
 
   pyDisortOptions.def(py::init<>())
       .def("__repr__",
