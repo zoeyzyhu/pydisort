@@ -119,9 +119,7 @@ class DisortImpl : public torch::nn::Cloneable<DisortImpl> {
   DisortOptions options;
 
   //! Constructor to initialize the layers
-  DisortImpl() {
-    options = std::make_shared<DisortOptionsImpl>();
-  }
+  DisortImpl() : options(DisortOptionsImpl::create()) {}
   
   //! Constructor with shared options
   /*!
