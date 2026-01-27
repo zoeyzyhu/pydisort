@@ -26,6 +26,9 @@ struct DisortOptionsImpl {
     return std::make_shared<DisortOptionsImpl>();
   }
 
+  std::shared_ptr<DisortOptionsImpl> clone() const {
+    return std::make_shared<DisortOptionsImpl>(*this);
+  }
   void report(std::ostream& os) const {
     os << "* header = " << header() << "\n"
        << "* flags = " << flags() << "\n"
