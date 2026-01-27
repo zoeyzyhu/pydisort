@@ -6,6 +6,7 @@ enable_testing()
 
 # C++ tests
 setup_test(test_disort)
+setup_test(test_clone)
 
 # Python tests
 
