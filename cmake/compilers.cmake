@@ -2,7 +2,12 @@
 #
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-add_compile_definitions(HAVE_AVX512_CPU_DEFINITION=1 HAVE_AVX2_CPU_DEFINITION=1)
+
+if(APPLE)
+  message(STATUS "Compiling on MacOS")
+else()
+  add_compile_definitions(HAVE_AVX512_CPU_DEFINITION=1 HAVE_AVX2_CPU_DEFINITION=1)
+endif()
 
 # Add the --extended-lambda flag to CUDA compilation
 set(CMAKE_CUDA_FLAGS
