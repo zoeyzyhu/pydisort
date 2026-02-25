@@ -1,5 +1,4 @@
 clang-format
-cmake
 cppcheck
 cpplint
 ninja
@@ -7,6 +6,6 @@ numpy
 pre-commit
 pylint
 setuptools
-torch>=2.7.0
+torch==2.9.1
 twine
 wheel
