@@ -30,9 +30,9 @@ string(TOUPPER ${namel} nameu)
 
 file(GLOB src_files *.cpp)
 
-if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-  list(APPEND src_files utils/DispatchStub.cpp)
-endif()
+#if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+#  list(APPEND src_files utils/DispatchStub.cpp)
+#endif()
 
 add_library(${namel}_${buildl}
     SHARED
