@@ -92,8 +92,15 @@ else()
 endif()
 
 if (CUDAToolkit_FOUND)
-  set(CMAKE_CUDA_ARCHITECTURES 61 86 89 120)
   set(CMAKE_CUDA_STANDARD 17)
+  if (NOT DEFINED CMAKE_CUDA_ARCHITECTURES OR CMAKE_CUDA_ARCHITECTURES STREQUAL "")
+    # Default CUDA architectures; append 120 only if the toolkit is new enough
+    set(_pydisort_cuda_arches 61 86 89)
+    if (DEFINED CUDAToolkit_VERSION AND CUDAToolkit_VERSION VERSION_GREATER_EQUAL 12.0)
+      list(APPEND _pydisort_cuda_arches 120)
+    endif()
+    set(CMAKE_CUDA_ARCHITECTURES "${_pydisort_cuda_arches}")
+  endif()
 endif()
 
 message(STATUS "${Blue}${PROJECT_NAME}-4. Setting up project libraries ...${ColorReset}")
