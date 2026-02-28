@@ -3,7 +3,7 @@ name: Bump Version and Tag
 on:
   pull_request:
     types: [closed]
-    branches: [main]
+    branches: [main,nightly]
 
 env:
   PYTHON_VERSION: "3.11"
