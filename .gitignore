@@ -103,3 +103,7 @@ src/version.h
 
 # stubs
 *stubs/
+
+# agents
+AGENTS.md
+CLAUDE.md

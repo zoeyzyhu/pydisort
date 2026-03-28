@@ -93,14 +93,24 @@ endif()
 
 if (CUDAToolkit_FOUND)
   set(CMAKE_CUDA_STANDARD 17)
-  if (NOT DEFINED CMAKE_CUDA_ARCHITECTURES OR CMAKE_CUDA_ARCHITECTURES STREQUAL "")
-    # Default CUDA architectures; append 120 only if the toolkit is new enough
-    set(_pydisort_cuda_arches 61 86 89)
-    if (DEFINED CUDAToolkit_VERSION AND CUDAToolkit_VERSION VERSION_GREATER_EQUAL 12.0)
-      list(APPEND _pydisort_cuda_arches 120)
+  # 60: P100, 61: 1080Ti, 70: V100, 75: RTX 4000, 80: A100, 86: 3090, 89: 4090, 90: H100/H200, 120: 5090
+  # Start with architectures that are broadly supported.
+  set(_cuda_arch_list 60 61 70 75 80 86 89)
+
+  if(DEFINED CUDAToolkit_VERSION)
+    # nvcc 13+ stops support <75
+    if(CUDAToolkit_VERSION VERSION_GREATER_EQUAL "13.0")
+      list(REMOVE_ITEM _cuda_arch_list 60 61 70)
     endif()
-    set(CMAKE_CUDA_ARCHITECTURES "${_pydisort_cuda_arches}")
+
+    if(CUDAToolkit_VERSION VERSION_GREATER_EQUAL "12.0")
+      list(APPEND _cuda_arch_list 90 120)
+    endif()
+  elseif(DEFINED TORCH_CUDA_VERSION AND TORCH_CUDA_VERSION VERSION_GREATER_EQUAL "12.0")
+    list(APPEND _cuda_arch_list 90 120)
   endif()
+
+  set(CMAKE_CUDA_ARCHITECTURES ${_cuda_arch_list})
 endif()
 
 message(STATUS "${Blue}${PROJECT_NAME}-4. Setting up project libraries ...${ColorReset}")
