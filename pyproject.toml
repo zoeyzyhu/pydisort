@@ -4,7 +4,7 @@ requires = [
   "wheel",
   "cmake",
   "ninja",
-  "torch>=2.8.0"
+  "torch==2.10.0"
 ]
 build-backend = "setuptools.build_meta"
 
@@ -20,9 +20,9 @@ authors = [
 ]
 dependencies = [
   "numpy",
-  "torch>=2.8.0",
+  "torch==2.10.0",
 ]
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 keywords = [
   "DISORT",
   "radiative transfer",
@@ -38,7 +38,6 @@ classifiers = [
   "Topic :: Scientific/Engineering :: Atmospheric Science",
   "Topic :: Scientific/Engineering :: Physics",
   "Programming Language :: Python :: 3",
-  "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
