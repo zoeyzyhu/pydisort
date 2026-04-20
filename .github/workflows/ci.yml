@@ -28,7 +28,6 @@ jobs:
       - name: Install style checkers
         run: |
           pip install --user cpplint cppcheck
-          pip install --upgrade pre-commit==4.2.0
 
       - name: Run pre-commit
         uses: pre-commit/action@v3.0.1
