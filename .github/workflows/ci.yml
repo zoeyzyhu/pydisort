@@ -69,7 +69,7 @@ jobs:
         run: cmake --build ${{ github.workspace }}/build --config ${{ env.BUILD_TYPE }} --parallel
 
       - name: Install the project
-        run: pip install --no-build-isolation --no-deps .
+        run: pip install --no-deps .
 
       - name: Run C++ & Pybind tests
         run: |
