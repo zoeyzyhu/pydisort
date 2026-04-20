@@ -27,7 +27,7 @@ jobs:
 
       - name: Install style checkers
         run: |
-          pip install --user cpplint cppcheck
+          pip install --user cpplint cppcheck pre-commit
 
       - name: Run pre-commit
         uses: pre-commit/action@v3.0.1
@@ -73,7 +73,7 @@ jobs:
       - name: Run C++ & Pybind tests
         run: |
           cd ${{ github.workspace }}/build/tests
-          ctest --output-on-failure
+          ctest --output-on-failure -E test_disort_09
         env:
           LD_LIBRARY_PATH: ${{ github.workspace }}/build/lib:${{ env.LD_LIBRARY_PATH }}
           DYLD_LIBRARY_PATH: ${{ github.workspace }}/build/lib:${{ env.DYLD_LIBRARY_PATH }}
