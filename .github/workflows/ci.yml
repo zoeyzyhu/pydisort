@@ -52,6 +52,7 @@ jobs:
 
       - name: Install Python dependencies
         run: |
+          pip install numpy
           if [[ "$RUNNER_OS" == "Linux" ]]; then
             pip install 'torch==2.10.0' --index-url https://download.pytorch.org/whl/cpu
           else
