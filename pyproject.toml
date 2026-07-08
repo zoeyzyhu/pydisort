@@ -1,6 +1,7 @@
 [build-system]
 requires = [
   "setuptools>=61.0.0",
+  "setuptools-scm>=8",
   "wheel",
   "cmake",
   "build",
@@ -52,9 +53,6 @@ Repository    = "https://github.com/zoeyzyhu/pydisort"
 Documentation = "https://pydisort.readthedocs.io/"
 Issues        = "https://github.com/zoeyzyhu/pydisort/issues"
 
-[tool.setuptools.dynamic.version]
-attr = "pydisort.__version__"
-
 [tool.setuptools]
 include-package-data = false
 
@@ -63,3 +61,6 @@ include-package-data = false
 
 [tool.setuptools.exclude-package-data]
 "pydisort" = ["csrc/**/*"]
+
+[tool.setuptools_scm]
+fallback_version = "0.0.0"

@@ -29,6 +29,14 @@ jobs:
         run: |
           pip install --user cpplint cppcheck pre-commit
 
+      - name: Cache pre-commit
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pre-commit
+          key: ${{ runner.os }}-pre-commit-${{ hashFiles('.pre-commit-config.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pre-commit-
+
       - name: Run pre-commit
         uses: pre-commit/action@v3.0.1
 

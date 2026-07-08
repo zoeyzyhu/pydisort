@@ -1,192 +1,153 @@
-name: Deploy to PyPI
+name: Auto Tag on PR Merge
 
 on:
-  workflow_dispatch:
-    inputs:
-      branch:
-        description: "Branch"
-        required: true
-        default: "main"
-      build_os:
-        description: "OS"
-        required: true
-        default: "Both"
-        type: choice
-        options:
-          - Both
-          - MacOS
-          - Ubuntu
+  pull_request:
+    types: [closed]
+    branches: [main]
 
 concurrency:
-  group: deploy-pypi-${{ github.event.inputs.branch }}
-  cancel-in-progress: true
-
-env:
-  BUILD_TYPE: Release
-  LINUX_ARCH: x86_64
-  MACOS_ARCH: arm64
-  HOST_PYTHON: 3.11
-
-defaults:
-  run:
-    shell: bash
+  group: auto-tag-main
+  cancel-in-progress: false
 
 jobs:
-  prepare:
-    name: Prepare
+  create-tag:
+    if: ${{ github.event.pull_request.merged == true }}
     runs-on: ubuntu-latest
-    outputs:
-      branch: ${{ github.event.inputs.branch }}
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.inputs.branch }}
-          fetch-depth: 0
-
-  build-macos:
-    name: Build macOS Wheels
-    needs: prepare
-    if: ${{ github.event.inputs.build_os == 'Both' || github.event.inputs.build_os == 'MacOS' }}
-    runs-on: macos-latest
-    strategy:
-      fail-fast: true
-      matrix:
-        python-version: ["3.10", "3.11", "3.12", "3.13"]
-    env:
-      MACOSX_DEPLOYMENT_TARGET: 15.0
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ needs.prepare.outputs.branch }}
-          fetch-depth: 0
-
-      - name: Setup Host Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ env.HOST_PYTHON }}
-          cache: pip
-
-      - name: Configure macOS Build Env
-        run: |
-          PV=${{ matrix.python-version }}
-          PV=${PV//./}
-          echo "PY_VERSION=$PV" >> $GITHUB_ENV
-          echo "ARCHFLAGS=-arch ${{ env.MACOS_ARCH }}" >> $GITHUB_ENV
-
-      - name: Build macOS Wheel
-        env:
-          CIBW_PLATFORM: macos
-          CIBW_BUILD: cp${{ env.PY_VERSION }}*
-          CIBW_ARCHS: ${{ env.MACOS_ARCH }}
-          CIBW_BEFORE_BUILD: |
-            pip install numpy 'torch==2.10.0'
-            TORCH_CMAKE_PREFIX_PATH=$(python -c 'import torch.utils; print(torch.utils.cmake_prefix_path)')
-            cmake -B build -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
-                  -DCMAKE_OSX_ARCHITECTURES=${{ env.MACOS_ARCH }} \
-                  -DCMAKE_PREFIX_PATH="$TORCH_CMAKE_PREFIX_PATH"
-            cmake --build build --config ${{ env.BUILD_TYPE }} --parallel
-          CIBW_REPAIR_WHEEL_COMMAND_MACOS: |
-            export TORCH_LIB=$(python -c 'import torch; print(torch.__path__[0] + "/lib")')
-            export DYLD_FALLBACK_LIBRARY_PATH="$(pwd)/build/lib:$TORCH_LIB:$DYLD_FALLBACK_LIBRARY_PATH"
-            delocate-wheel -e torch -e disort_release -w {dest_dir} {wheel}
-        run: |
-          export TORCH_LIB=$(python -c 'import torch; print(torch.__path__[0] + "/lib")')
-          export DYLD_FALLBACK_LIBRARY_PATH="$TORCH_LIB:$DYLD_FALLBACK_LIBRARY_PATH"
-          pip install cibuildwheel
-          python -m cibuildwheel --output-dir wheelhouse
-
-      - name: Upload macOS Wheels
-        uses: actions/upload-artifact@v4
-        with:
-          name: wheels-macos-${{ matrix.python-version }}-${{ env.MACOS_ARCH }}
-          path: wheelhouse/*.whl
-
-  build-linux:
-    name: Build Linux Wheels
-    needs: prepare
-    if: ${{ github.event.inputs.build_os == 'Both' || github.event.inputs.build_os == 'Ubuntu' }}
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: true
-      matrix:
-        python-version: ["3.10", "3.11", "3.12", "3.13"]
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ needs.prepare.outputs.branch }}
-          fetch-depth: 0
-
-      - name: Setup Host Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ env.HOST_PYTHON }}
-          cache: pip
-
-      - name: Configure Linux Build Env
-        run: |
-          PV=${{ matrix.python-version }}
-          PV=${PV//./}
-          echo "PY_VERSION=$PV" >> $GITHUB_ENV
-
-      - name: Free up disk space
-        run: |
-          sudo apt-get clean || true
-          sudo rm -rf /var/lib/apt/lists/* || true
-          python -m pip cache purge || true
-
-      - name: Build Linux Wheel
-        env:
-          CIBW_PLATFORM: linux
-          CIBW_MANYLINUX_X86_64_IMAGE: manylinux_2_28
-          CIBW_BUILD: cp${{ env.PY_VERSION }}*
-          CIBW_ARCHS: ${{ env.LINUX_ARCH }}
-          CIBW_SKIP: "*musllinux*"
-          CIBW_BEFORE_BUILD: |
-            pip install numpy 'torch==2.10.0'
-            TORCH_CMAKE_PREFIX_PATH=$(python -c 'import torch.utils; print(torch.utils.cmake_prefix_path)')
-            export LD_LIBRARY_PATH=$(python -c "import torch; print(torch.__path__[0] + '/lib')"):$(pwd)/build/lib:$LD_LIBRARY_PATH
-            $LD_LIBRARY_PATH
-            cmake -B build -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
-                  -DPython3_EXECUTABLE=$(which python) \
-                  -DCMAKE_PREFIX_PATH="$TORCH_CMAKE_PREFIX_PATH"
-            cmake --build build --parallel
-          CIBW_REPAIR_WHEEL_COMMAND_LINUX: |
-            auditwheel repair --exclude lib*.so -w {dest_dir} {wheel}
-        run: |
-          pip install cibuildwheel
-          python -m cibuildwheel --output-dir wheelhouse
-
-      - name: Upload Linux Wheels
-        uses: actions/upload-artifact@v4
-        with:
-          name: wheels-linux-${{ matrix.python-version }}-${{ env.LINUX_ARCH }}
-          path: wheelhouse/*.whl
-
-  publish-pypi:
-    name: Publish to PyPI
-    needs: [build-macos, build-linux]
-    runs-on: ubuntu-latest
-    if: ${{ always() }}
     permissions:
-      id-token: write
-      contents: read
+      contents: write
+      pull-requests: write
+
     steps:
-      - name: Download Wheels
-        uses: actions/download-artifact@v4
+      - name: Generate bump-bot token
+        id: app_token
+        uses: actions/create-github-app-token@v2
         with:
-          pattern: 'wheels-*'
+          app-id: ${{ vars.BUMP_BOT_APP_ID }}
+          private-key: ${{ secrets.BUMP_BOT_PRIVATE_KEY }}
 
-      - name: Aggregate into dist/
+      - name: Checkout code
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          token: ${{ steps.app_token.outputs.token }}
+
+      - name: Determine next version
+        id: next_version
+        env:
+          LABELS_JSON: ${{ toJson(github.event.pull_request.labels) }}
         run: |
-          mkdir -p dist
-          find . -name '*.whl' -exec mv {} dist/ \;
+          EXISTING_TAG=$(git tag --points-at HEAD | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -n 1 || true)
+          if [[ -n "$EXISTING_TAG" ]]; then
+            echo "skip_bump=true" >> "$GITHUB_OUTPUT"
+            echo "tag=$EXISTING_TAG" >> "$GITHUB_OUTPUT"
+            echo "version=${EXISTING_TAG#v}" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
 
-      - name: Publish to PyPI
-        if: ${{ needs.build-macos.result == 'success' || needs.build-linux.result == 'success' }}
-        uses: pypa/gh-action-pypi-publish@release/v1
+          BUMP_TYPE=$(python3 - <<'PY'
+          import json
+          import os
+
+          labels = {item["name"] for item in json.loads(os.environ["LABELS_JSON"])}
+          selected = [
+              name.split(":", 1)[1]
+              for name in ("release:major", "release:minor", "release:patch")
+              if name in labels
+          ]
+          if len(selected) > 1:
+              raise SystemExit(f"multiple release labels found: {', '.join(selected)}")
+          print(selected[0] if selected else "patch")
+          PY
+          )
+
+          LATEST=$(git describe --tags --abbrev=0 || echo "v0.0.0")
+          MAJOR=$(echo "$LATEST" | cut -d. -f1 | sed 's/v//')
+          MINOR=$(echo "$LATEST" | cut -d. -f2)
+          PATCH=$(echo "$LATEST" | cut -d. -f3)
+
+          case "$BUMP_TYPE" in
+            major)
+              MAJOR=$((MAJOR+1))
+              MINOR=0
+              PATCH=0
+              ;;
+            minor)
+              MINOR=$((MINOR+1))
+              PATCH=0
+              ;;
+            patch)
+              PATCH=$((PATCH+1))
+              ;;
+            *)
+              echo "Unsupported bump type: $BUMP_TYPE"
+              exit 1
+              ;;
+          esac
+
+          while true; do
+            NEXT_VERSION="${MAJOR}.${MINOR}.${PATCH}"
+            NEXT_TAG="v${NEXT_VERSION}"
+            if ! git ls-remote --tags origin "refs/tags/${NEXT_TAG}" | grep -q "refs/tags/${NEXT_TAG}$"; then
+              break
+            fi
+            PATCH=$((PATCH+1))
+          done
+
+          echo "bump_type=${BUMP_TYPE}" >> "$GITHUB_OUTPUT"
+          echo "tag=${NEXT_TAG}" >> "$GITHUB_OUTPUT"
+          echo "version=${NEXT_VERSION}" >> "$GITHUB_OUTPUT"
+
+      - name: Create and push tag
+        if: ${{ steps.next_version.outputs.skip_bump != 'true' }}
+        env:
+          TAG: ${{ steps.next_version.outputs.tag }}
+        run: |
+          git config user.name "bump-bot[app]"
+          git config user.email "bump-bot[app]@users.noreply.github.com"
+          git tag "$TAG"
+          git push origin "$TAG"
+
+      - name: Create GitHub Release
+        if: ${{ steps.next_version.outputs.skip_bump != 'true' }}
+        env:
+          GH_TOKEN: ${{ steps.app_token.outputs.token }}
+          GH_REPO: ${{ github.repository }}
+          TAG: ${{ steps.next_version.outputs.tag }}
+        run: |
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release edit "$TAG" \
+              --title "Release $TAG"
+          else
+            gh release create "$TAG" \
+              --title "Release $TAG" \
+              --generate-notes
+          fi
+
+      - name: Read release notes
+        if: ${{ steps.next_version.outputs.skip_bump != 'true' }}
+        id: release_body
+        env:
+          GH_TOKEN: ${{ steps.app_token.outputs.token }}
+          GH_REPO: ${{ github.repository }}
+          TAG: ${{ steps.next_version.outputs.tag }}
+        run: |
+          {
+            echo "body<<EOF"
+            gh release view "$TAG" --json body --jq '.body'
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Comment on PR with release notes
+        if: ${{ steps.next_version.outputs.skip_bump != 'true' }}
+        uses: actions/github-script@v7
         with:
-          user: __token__
-          password: ${{ secrets.PYPI_API_TOKEN }}
+          github-token: ${{ steps.app_token.outputs.token }}
+          script: |
+            const notes = `${{ steps.release_body.outputs.body }}`;
+            const tag = `${{ steps.next_version.outputs.tag }}`;
+            await github.rest.issues.createComment({
+              issue_number: context.payload.pull_request.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `🎉 Tagged ${tag}! Run the **Publish to PyPI** workflow with this tag to release.\n\n${notes}`
+            });
