@@ -14,9 +14,14 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--layers", type=int, default=40)
     parser.add_argument("--profiles", type=int, default=1)
-    parser.add_argument("--angles", type=float, nargs="+", default=(0.1, 0.5, 0.9))
     parser.add_argument(
-        "--optical-depths", type=float, nargs="+", default=(0.1, 1.0, 4.0, 20.0)
+        "--angles", type=float, nargs="+", default=(0.1, 0.5, 0.9)
+    )
+    parser.add_argument(
+        "--optical-depths",
+        type=float,
+        nargs="+",
+        default=(0.1, 1.0, 4.0, 20.0),
     )
     return parser.parse_args()
 
@@ -32,12 +37,18 @@ def solve(
     optical_depth: float,
     albedo: float,
 ) -> torch.Tensor:
-    prop, temperature, bc = inputs(mode, nprofile, nlayer, nstr, device, scattering)
+    prop, temperature, bc = inputs(
+        mode, nprofile, nlayer, nstr, device, scattering
+    )
     prop[..., 0] = optical_depth / nlayer
     if mode == "shortwave":
         bc["umu0"] = torch.full((nprofile,), umu0, dtype=DTYPE, device=device)
-        bc["fbeam"] = torch.full((1, nprofile), 100.0, dtype=DTYPE, device=device)
-        bc["albedo"] = torch.full((1, nprofile), albedo, dtype=DTYPE, device=device)
+        bc["fbeam"] = torch.full(
+            (1, nprofile), 100.0, dtype=DTYPE, device=device
+        )
+        bc["albedo"] = torch.full(
+            (1, nprofile), albedo, dtype=DTYPE, device=device
+        )
     solver = pydisort_solver(mode, nprofile, nlayer, nstr)
     output = (
         solver(prop, **bc)
@@ -49,7 +60,9 @@ def solve(
     return output.cpu()
 
 
-def relative_rmse(value: torch.Tensor, reference: torch.Tensor) -> float | None:
+def relative_rmse(
+    value: torch.Tensor, reference: torch.Tensor
+) -> float | None:
     scale = float(reference.square().mean().sqrt())
     error = float((value - reference).square().mean().sqrt())
     if scale:

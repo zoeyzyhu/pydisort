@@ -12,10 +12,10 @@
 
 template <>
 struct fmt::formatter<disort_state> {
-  constexpr auto parse(fmt::format_parse_context &ctx) { return ctx.begin(); }
+  constexpr auto parse(fmt::format_parse_context& ctx) { return ctx.begin(); }
 
   template <typename FormatContext>
-  auto format(const disort_state &ds, FormatContext &ctx) const {
+  auto format(const disort_state& ds, FormatContext& ctx) const {
     return fmt::format_to(
         ctx.out(),
         "(nlyr = {}; nstr = {}; nmom = {}; ibcnd = {}; usrtau = {}; usrang = "
@@ -28,10 +28,10 @@ struct fmt::formatter<disort_state> {
 
 template <>
 struct fmt::formatter<disort::DisortOptions> {
-  constexpr auto parse(fmt::format_parse_context &ctx) { return ctx.begin(); }
+  constexpr auto parse(fmt::format_parse_context& ctx) { return ctx.begin(); }
 
   template <typename FormatContext>
-  auto format(const disort::DisortOptions &p, FormatContext &ctx) const {
+  auto format(const disort::DisortOptions& p, FormatContext& ctx) const {
     int nwave = std::min(p->nwave(), static_cast<int>(p->wave_lower().size()));
     nwave = std::min(nwave, static_cast<int>(p->wave_upper().size()));
 

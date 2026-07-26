@@ -38,7 +38,9 @@ def make_inputs(
     nwave: int, ncol: int, ssalb: torch.Tensor, nstr: int
 ) -> tuple[torch.Tensor, dict[str, torch.Tensor]]:
     device = ssalb.device
-    prop = torch.empty((nwave, ncol, NLYR, 2 + nstr), device=device, dtype=DTYPE)
+    prop = torch.empty(
+        (nwave, ncol, NLYR, 2 + nstr), device=device, dtype=DTYPE
+    )
     prop[..., 0] = 0.5
     prop[..., 1] = ssalb
     for moment in range(nstr):
@@ -53,14 +55,17 @@ def make_inputs(
     }
 
 
-def compare_case(ssalb: torch.Tensor, nstr: int) -> tuple[torch.Tensor, float, float]:
+def compare_case(
+    ssalb: torch.Tensor, nstr: int
+) -> tuple[torch.Tensor, float, float]:
     nwave, ncol, _ = ssalb.shape
     solver = make_solver(nwave, ncol, nstr)
     prop_cuda, bc_cuda = make_inputs(nwave, ncol, ssalb.cuda(), nstr)
     gpu = solver(prop_cuda, **bc_cuda)
     torch.cuda.synchronize()
     cpu = solver(
-        prop_cuda.cpu(), **{name: value.cpu() for name, value in bc_cuda.items()}
+        prop_cuda.cpu(),
+        **{name: value.cpu() for name, value in bc_cuda.items()},
     )
     difference = (gpu.cpu() - cpu).abs()
     return (
@@ -118,7 +123,11 @@ def regular_controls(nstr: int) -> list[dict[str, float]]:
         ssalb = torch.full((1, 1, NLYR), value, dtype=DTYPE)
         _, max_abs, scale = compare_case(ssalb, nstr)
         results.append(
-            {"ssalb": value, "max_abs": max_abs, "relative": max_abs / max(scale, 1.0)}
+            {
+                "ssalb": value,
+                "max_abs": max_abs,
+                "relative": max_abs / max(scale, 1.0),
+            }
         )
     return results
 
@@ -126,7 +135,9 @@ def regular_controls(nstr: int) -> list[dict[str, float]]:
 def validate(results: dict[str, object]) -> None:
     for result in results["regular_controls"]:
         if result["relative"] > FAST_RELATIVE_TOLERANCE:
-            raise AssertionError(f"regular control exceeded tolerance: {result}")
+            raise AssertionError(
+                f"regular control exceeded tolerance: {result}"
+            )
 
     for result in results["boundary_scan"]:
         tolerance = (

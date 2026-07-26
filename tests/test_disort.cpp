@@ -8,7 +8,7 @@
 #include <disort/disort_formatter.hpp>
 #include <disort/scattering_moments.hpp>
 
-int main(int argc, char **argv) {
+int main(int argc, char** argv) {
   auto op = disort::DisortOptionsImpl::create();
 
   (*op)

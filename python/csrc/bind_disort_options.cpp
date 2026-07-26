@@ -13,14 +13,14 @@
 
 namespace py = pybind11;
 
-void bind_disort_options(py::module &m) {
+void bind_disort_options(py::module& m) {
   auto pyDisortOptions =
       py::class_<disort::DisortOptionsImpl, disort::DisortOptions>(
           m, "DisortOptions");
 
   pyDisortOptions.def(py::init<>())
       .def("__repr__",
-           [](const disort::DisortOptionsImpl &a) {
+           [](const disort::DisortOptionsImpl& a) {
              std::stringstream ss;
              a.report(ss);
              return fmt::format("DisortOptions(\n{})", ss.str());

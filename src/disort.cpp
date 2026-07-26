@@ -42,11 +42,11 @@ DisortOptionsImpl::DisortOptionsImpl() {
   ds().accur = 1.E-6;
 }
 
-void DisortOptionsImpl::set_header(std::string const &header) {
+void DisortOptionsImpl::set_header(std::string const& header) {
   snprintf(ds().header, sizeof(ds().header), "%s", header.c_str());
 }
 
-void DisortOptionsImpl::set_flags(std::string const &str) {
+void DisortOptionsImpl::set_flags(std::string const& str) {
   std::vector<std::string> dstr = Vectorize<std::string>(str.c_str(), " ,");
 
   for (int i = 0; i < dstr.size(); ++i) {
@@ -92,7 +92,7 @@ void DisortOptionsImpl::set_flags(std::string const &str) {
   }
 }
 
-DisortImpl::DisortImpl(DisortOptions const &options_) : options(options_) {
+DisortImpl::DisortImpl(DisortOptions const& options_) : options(options_) {
   reset();
 }
 
@@ -229,7 +229,7 @@ torch::Tensor DisortImpl::gather_rad() const {
 //! block r = 1 gets, 4 - 3 - 2
 //! block r = 2 gets, 2 - 1 - 0
 torch::Tensor DisortImpl::forward(torch::Tensor prop,
-                                  std::map<std::string, torch::Tensor> *bc,
+                                  std::map<std::string, torch::Tensor>* bc,
                                   std::string bname,
                                   torch::optional<torch::Tensor> temf) {
   TORCH_CHECK(options->ds().flag.ibcnd == 0,
@@ -375,55 +375,49 @@ torch::Tensor DisortImpl::forward(torch::Tensor prop,
   auto flx = prop.is_cuda()
                  ? torch::empty({nwave, ncol, ds().ntau, 2}, prop.options())
                  : torch::zeros({nwave, ncol, ds().ntau, 2}, prop.options());
-  auto build_iterator = [&](torch::Tensor& output, const torch::Tensor& prop_in,
-                            const torch::Tensor& umu0, const torch::Tensor& phi0,
-                            const torch::Tensor& fbeam,
-                            const torch::Tensor& albedo,
-                            const torch::Tensor& fluor,
-                            const torch::Tensor& fisot,
-                            const torch::Tensor& temis,
-                            const torch::Tensor& btemp,
-                            const torch::Tensor& ttemp,
-                            const torch::Tensor& tem_in) {
-    const int64_t input_nwave = prop_in.size(0);
-    const int64_t input_ncol = prop_in.size(1);
-    at::TensorIteratorConfig iter_config;
-    iter_config.resize_outputs(false)
-        .check_all_same_dtype(true)
-        .declare_static_shape({input_nwave, input_ncol, ds().ntau, 2},
-                              /*squash_dims=*/{2, 3})
-        .add_output(output)
-        .add_input(prop_in)
-        .add_owned_input(
-            umu0.view({1, input_ncol, 1, 1})
-                .expand({input_nwave, input_ncol, 1, 1}))
-        .add_owned_input(
-            phi0.view({1, input_ncol, 1, 1})
-                .expand({input_nwave, input_ncol, 1, 1}))
-        .add_owned_input(fbeam.view({input_nwave, input_ncol, 1, 1}))
-        .add_owned_input(albedo.view({input_nwave, input_ncol, 1, 1}))
-        .add_owned_input(fluor.view({input_nwave, input_ncol, 1, 1}))
-        .add_owned_input(fisot.view({input_nwave, input_ncol, 1, 1}))
-        .add_owned_input(temis.view({input_nwave, input_ncol, 1, 1}))
-        .add_owned_input(
-            btemp.view({1, input_ncol, 1, 1})
-                .expand({input_nwave, input_ncol, 1, 1}))
-        .add_owned_input(
-            ttemp.view({1, input_ncol, 1, 1})
-                .expand({input_nwave, input_ncol, 1, 1}))
-        .add_owned_input(tem_in.view({1, input_ncol, nlyr + 1, 1})
-                             .expand({input_nwave, input_ncol, nlyr + 1, 1}));
-    if (!output.is_cuda()) {
-      auto index = torch::arange(input_nwave * input_ncol, prop_in.options())
-                       .view({input_nwave, input_ncol, 1, 1});
-      iter_config.add_owned_input(index);
-    }
-    return iter_config.build();
-  };
+  auto build_iterator =
+      [&](torch::Tensor& output, const torch::Tensor& prop_in,
+          const torch::Tensor& umu0, const torch::Tensor& phi0,
+          const torch::Tensor& fbeam, const torch::Tensor& albedo,
+          const torch::Tensor& fluor, const torch::Tensor& fisot,
+          const torch::Tensor& temis, const torch::Tensor& btemp,
+          const torch::Tensor& ttemp, const torch::Tensor& tem_in) {
+        const int64_t input_nwave = prop_in.size(0);
+        const int64_t input_ncol = prop_in.size(1);
+        at::TensorIteratorConfig iter_config;
+        iter_config.resize_outputs(false)
+            .check_all_same_dtype(true)
+            .declare_static_shape({input_nwave, input_ncol, ds().ntau, 2},
+                                  /*squash_dims=*/{2, 3})
+            .add_output(output)
+            .add_input(prop_in)
+            .add_owned_input(umu0.view({1, input_ncol, 1, 1})
+                                 .expand({input_nwave, input_ncol, 1, 1}))
+            .add_owned_input(phi0.view({1, input_ncol, 1, 1})
+                                 .expand({input_nwave, input_ncol, 1, 1}))
+            .add_owned_input(fbeam.view({input_nwave, input_ncol, 1, 1}))
+            .add_owned_input(albedo.view({input_nwave, input_ncol, 1, 1}))
+            .add_owned_input(fluor.view({input_nwave, input_ncol, 1, 1}))
+            .add_owned_input(fisot.view({input_nwave, input_ncol, 1, 1}))
+            .add_owned_input(temis.view({input_nwave, input_ncol, 1, 1}))
+            .add_owned_input(btemp.view({1, input_ncol, 1, 1})
+                                 .expand({input_nwave, input_ncol, 1, 1}))
+            .add_owned_input(ttemp.view({1, input_ncol, 1, 1})
+                                 .expand({input_nwave, input_ncol, 1, 1}))
+            .add_owned_input(
+                tem_in.view({1, input_ncol, nlyr + 1, 1})
+                    .expand({input_nwave, input_ncol, nlyr + 1, 1}));
+        if (!output.is_cuda()) {
+          auto index =
+              torch::arange(input_nwave * input_ncol, prop_in.options())
+                  .view({input_nwave, input_ncol, 1, 1});
+          iter_config.add_owned_input(index);
+        }
+        return iter_config.build();
+      };
 
   constexpr double kConservativeScatteringThreshold = 1.e-8;
-  const bool fast_flux_eligible =
-      prop.is_cuda() && c_fast_flux_eligible(&ds());
+  const bool fast_flux_eligible = prop.is_cuda() && c_fast_flux_eligible(&ds());
   const bool route_conservative = fast_flux_eligible && prop.size(3) > 1;
   auto run_disort = [&](at::TensorIterator& iter, bool general_path,
                         disort_state* states) {
@@ -444,8 +438,8 @@ torch::Tensor DisortImpl::forward(torch::Tensor prop,
           torch::nonzero(conservative_mask.reshape({-1})).reshape({-1});
       auto fast_iter = build_iterator(
           flx, prop, bc->at("umu0"), bc->at("phi0"), bc->at("fbeam"),
-          bc->at("albedo"), bc->at("fluor"), bc->at("fisot"),
-          bc->at("temis"), bc->at("btemp"), bc->at("ttemp"), tem);
+          bc->at("albedo"), bc->at("fluor"), bc->at("fisot"), bc->at("temis"),
+          bc->at("btemp"), bc->at("ttemp"), tem);
       run_disort(fast_iter, false, ds_.data());
 
       const auto host_indices = conservative_indices.cpu().contiguous();
@@ -465,11 +459,10 @@ torch::Tensor DisortImpl::forward(torch::Tensor prop,
             .index_select(0, conservative_indices)
             .view({1, nconservative});
       };
-      auto sub_prop = prop.flatten(0, 1)
-                          .index_select(0, conservative_indices)
-                          .unsqueeze(0);
-      auto sub_flx = torch::empty({1, nconservative, ds().ntau, 2},
-                                  prop.options());
+      auto sub_prop =
+          prop.flatten(0, 1).index_select(0, conservative_indices).unsqueeze(0);
+      auto sub_flx =
+          torch::empty({1, nconservative, ds().ntau, 2}, prop.options());
       auto general_iter = build_iterator(
           sub_flx, sub_prop, select_column(bc->at("umu0")),
           select_column(bc->at("phi0")), select_wave_column(bc->at("fbeam")),
@@ -488,10 +481,10 @@ torch::Tensor DisortImpl::forward(torch::Tensor prop,
     general_path = nconservative == nwork;
   }
 
-  auto iter = build_iterator(
-      flx, prop, bc->at("umu0"), bc->at("phi0"), bc->at("fbeam"),
-      bc->at("albedo"), bc->at("fluor"), bc->at("fisot"), bc->at("temis"),
-      bc->at("btemp"), bc->at("ttemp"), tem);
+  auto iter =
+      build_iterator(flx, prop, bc->at("umu0"), bc->at("phi0"), bc->at("fbeam"),
+                     bc->at("albedo"), bc->at("fluor"), bc->at("fisot"),
+                     bc->at("temis"), bc->at("btemp"), bc->at("ttemp"), tem);
   run_disort(iter, general_path, ds_.data());
 
   // save result tensor options
@@ -500,13 +493,13 @@ torch::Tensor DisortImpl::forward(torch::Tensor prop,
   return flx;
 }
 
-void print_ds_atm(std::ostream &os, disort_state const &ds) {
+void print_ds_atm(std::ostream& os, disort_state const& ds) {
   os << "- Levels = " << ds.nlyr << std::endl;
   os << "- Radiation Streams = " << ds.nstr << std::endl;
   os << "- Phase function moments = " << ds.nmom << std::endl;
 }
 
-void print_ds_out(std::ostream &os, disort_state const &ds) {
+void print_ds_out(std::ostream& os, disort_state const& ds) {
   os << "- User azimuthal angles = " << ds.nphi << std::endl << "  : ";
   for (int i = 0; i < ds.nphi; ++i) {
     os << ds.phi[i] / M_PI * 180. << ", ";
@@ -524,13 +517,13 @@ void print_ds_out(std::ostream &os, disort_state const &ds) {
   os << std::endl;
 }
 
-void DisortImpl::pretty_print(std::ostream &stream) const {
+void DisortImpl::pretty_print(std::ostream& stream) const {
   std::cout << "Options: " << fmt::format("{}", options) << std::endl;
   std::cout << "Disort is configured with:" << std::endl;
   print_ds_flags(std::cout, options->ds());
 }
 
-void print_ds_bc(std::ostream &os, disort_state const &ds) {
+void print_ds_bc(std::ostream& os, disort_state const& ds) {
   os << "- Bottom temperature = " << ds.bc.btemp << std::endl;
   os << "- Albedo = " << ds.bc.albedo << std::endl;
   os << "- Top temperature = " << ds.bc.ttemp << std::endl;
@@ -542,7 +535,7 @@ void print_ds_bc(std::ostream &os, disort_state const &ds) {
   os << "- Solar azimuth angle = " << ds.bc.phi0 << std::endl;
 }
 
-void print_ds_flags(std::ostream &os, disort_state const &ds) {
+void print_ds_flags(std::ostream& os, disort_state const& ds) {
   if (ds.flag.ibcnd) {
     os << "- Spectral boundary condition (ibcnd) = True" << std::endl;
   } else {

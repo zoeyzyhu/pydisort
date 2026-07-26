@@ -21,7 +21,7 @@ namespace disort {
  * \return 1D tensor of phase moments, size = (npmom,)
  */
 torch::Tensor scattering_moments(int npmom,
-                                 std::string const &type = "isotropic",
+                                 std::string const& type = "isotropic",
                                  double gg1 = 0., double gg2 = 0.,
                                  double ff = 0.);
 

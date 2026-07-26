@@ -91,8 +91,11 @@ else()
   set(CUDAToolkit_FOUND OFF)
 endif()
 
-if (CUDAToolkit_FOUND AND NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
+if (CUDAToolkit_FOUND)
   set(CMAKE_CUDA_STANDARD 17)
+endif()
+
+if (CUDAToolkit_FOUND AND NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
   # 60: P100, 61: 1080Ti, 70: V100, 75: RTX 4000, 80: A100, 86: 3090, 89: 4090, 90: H100/H200, 120: 5090
   # Start with architectures that are broadly supported.
   set(_cuda_arch_list 60 61 70 75 80 86 89)

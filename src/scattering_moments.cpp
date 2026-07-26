@@ -13,7 +13,7 @@
 
 namespace disort {
 
-torch::Tensor scattering_moments(int npmom, std::string const &type, double gg1,
+torch::Tensor scattering_moments(int npmom, std::string const& type, double gg1,
                                  double gg2, double ff) {
   torch::Tensor pmom = torch::zeros({1 + npmom}, torch::kDouble);
   pmom[0] = 1.0;

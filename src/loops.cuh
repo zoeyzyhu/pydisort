@@ -107,8 +107,6 @@ void gpu_chunk_kernel(at::TensorIterator& iter, size_t work_size,
     dim3 grid((unsigned)((chunk_numel + block.x - 1) / block.x));
     element_kernel<<<grid, block, 0, stream>>>(chunk_numel, device_lambda);
     C10_CUDA_KERNEL_LAUNCH_CHECK();
-    // the workspace is reused by the next chunk
-    C10_CUDA_CHECK(cudaStreamSynchronize(stream));
 
     chunk_start += chunk_numel;
   }

@@ -3,6 +3,7 @@
 exclude: |
   (?x)^(
     .*/cdisort\.(c|h)|             # cdisort.c, cdisort.h
+    cdisort213/.*|                  # bundled cdisort sources
     .*/disort\.hpp|                # disort.hpp
     .*/COPYING|                    # COPYING
     .*/DISORT2\.doc|               # DISORT2.doc

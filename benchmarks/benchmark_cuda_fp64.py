@@ -55,10 +55,14 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--layers", type=int, default=40)
     parser.add_argument("--modes", choices=MODES, nargs="+", default=MODES)
-    parser.add_argument("--scenarios", choices=SCENARIOS, nargs="+", default=SCENARIOS)
+    parser.add_argument(
+        "--scenarios", choices=SCENARIOS, nargs="+", default=SCENARIOS
+    )
     parser.add_argument("--warmup", type=int, default=3)
     parser.add_argument("--repeats", type=int, default=10)
-    parser.add_argument("--output", type=Path, default=Path("benchmark-results"))
+    parser.add_argument(
+        "--output", type=Path, default=Path("benchmark-results")
+    )
     parser.add_argument(
         "--results",
         type=Path,
@@ -89,7 +93,11 @@ def time_call(call, device: torch.device, warmup: int, repeats: int) -> float:
 
 
 def scattering_properties(
-    nprofile: int, nlayer: int, nstr: int, device: torch.device, scattering: bool
+    nprofile: int,
+    nlayer: int,
+    nstr: int,
+    device: torch.device,
+    scattering: bool,
 ) -> torch.Tensor:
     options = {"device": device, "dtype": DTYPE}
     prop = torch.empty((1, nprofile, nlayer, 2 + nstr), **options)
@@ -100,7 +108,9 @@ def scattering_properties(
     return prop
 
 
-def thermal_profile(nprofile: int, nlayer: int, device: torch.device) -> torch.Tensor:
+def thermal_profile(
+    nprofile: int, nlayer: int, device: torch.device
+) -> torch.Tensor:
     options = {"device": device, "dtype": DTYPE}
     level = torch.arange(nlayer + 1, **options)
     top_to_bottom = torch.where(
@@ -157,7 +167,9 @@ def pydisort_solver(mode: str, nprofile: int, nlayer: int, nstr: int):
 
     options = DisortOptions()
     options.upward(True)
-    options.flags("onlyfl,lamber,quiet" + (",planck" if mode == "longwave" else ""))
+    options.flags(
+        "onlyfl,lamber,quiet" + (",planck" if mode == "longwave" else "")
+    )
     options.nwave(1)
     options.ncol(nprofile)
     if mode == "longwave":
@@ -181,7 +193,9 @@ def benchmark_pydisort(
     repeats: int,
 ) -> Result:
     solver = pydisort_solver(mode, nprofile, nlayer, nstr)
-    prop, temperature, bc = inputs(mode, nprofile, nlayer, nstr, device, scattering)
+    prop, temperature, bc = inputs(
+        mode, nprofile, nlayer, nstr, device, scattering
+    )
 
     def call():
         if temperature is None:
@@ -215,7 +229,9 @@ def benchmark_pyharp(
         toon_options.wave_lower(WAVE_LOWER)
         toon_options.wave_upper(WAVE_UPPER)
     solver = pyharp.ToonMcKay89(toon_options)
-    prop, temperature, bc = inputs(mode, nprofile, nlayer, 1, device, scattering)
+    prop, temperature, bc = inputs(
+        mode, nprofile, nlayer, 1, device, scattering
+    )
 
     def call():
         if temperature is None:
@@ -259,7 +275,9 @@ def benchmark_exofms(
         "exofms_lw_toon_5node_seconds": "longwave",
     }
     for line in completed.stdout.splitlines():
-        fields = dict(item.split("=", 1) for item in line.split(",") if "=" in item)
+        fields = dict(
+            item.split("=", 1) for item in line.split(",") if "=" in item
+        )
         if "nprofile" in fields:
             current_profiles = int(fields["nprofile"])
         elif current_profiles:
@@ -304,7 +322,9 @@ def exofms_accuracy(
     )
     rows = []
     for line in completed.stdout.splitlines():
-        fields = dict(item.split("=", 1) for item in line.split(",") if "=" in item)
+        fields = dict(
+            item.split("=", 1) for item in line.split(",") if "=" in item
+        )
         if "accuracy_level" in fields:
             rows.append(fields)
     if len(rows) != nlayer + 1:
@@ -318,8 +338,12 @@ def exofms_accuracy(
     }
     temperature = output.pop("temperature").flip(0).view(1, -1)
     return temperature, {
-        "shortwave": torch.stack((output["sw_up"], output["sw_down"]), dim=-1).flip(0),
-        "longwave": torch.stack((output["lw_up"], output["lw_down"]), dim=-1).flip(0),
+        "shortwave": torch.stack(
+            (output["sw_up"], output["sw_down"]), dim=-1
+        ).flip(0),
+        "longwave": torch.stack(
+            (output["lw_up"], output["lw_down"]), dim=-1
+        ).flip(0),
     }
 
 
@@ -381,7 +405,9 @@ def score_accuracy(
     return (
         relative_rmse(value[:, 0], reference[:, 0]),
         relative_rmse(value[:, 1], reference[:, 1]),
-        relative_rmse(value[:, 0] - value[:, 1], reference[:, 0] - reference[:, 1]),
+        relative_rmse(
+            value[:, 0] - value[:, 1], reference[:, 0] - reference[:, 1]
+        ),
     )
 
 
@@ -411,7 +437,9 @@ def benchmark_accuracy(
                         (
                             "pyharp Toon",
                             device.type.upper(),
-                            flux_pyharp(mode, scattering, nlayer, device, thermal),
+                            flux_pyharp(
+                                mode, scattering, nlayer, device, thermal
+                            ),
                         )
                     )
             for nstr in PDISORT_STREAMS:
@@ -429,7 +457,12 @@ def benchmark_accuracy(
                 flux_up, flux_down, net_flux = score_accuracy(flux, reference)
                 rows.append(
                     Accuracy(
-                        f"{mode} {label}", solver, device, flux_up, flux_down, net_flux
+                        f"{mode} {label}",
+                        solver,
+                        device,
+                        flux_up,
+                        flux_down,
+                        net_flux,
                     )
                 )
     return rows
@@ -593,8 +626,18 @@ def plot(results: list[Result], output: Path) -> None:
                 )
                 for solver in solvers
             ],
-            Patch(facecolor="#777777", alpha=0.55, edgecolor="#333333", label="CPU"),
-            Patch(facecolor="#777777", edgecolor="#333333", hatch="//", label="CUDA"),
+            Patch(
+                facecolor="#777777",
+                alpha=0.55,
+                edgecolor="#333333",
+                label="CPU",
+            ),
+            Patch(
+                facecolor="#777777",
+                edgecolor="#333333",
+                hatch="//",
+                label="CUDA",
+            ),
         ],
         loc="lower center",
         ncol=6,
@@ -613,7 +656,11 @@ def plot(results: list[Result], output: Path) -> None:
 
 def main() -> None:
     args = parse_args()
-    if min(*args.profiles, args.repeats) < 1 or args.layers < 11 or args.warmup < 0:
+    if (
+        min(*args.profiles, args.repeats) < 1
+        or args.layers < 11
+        or args.warmup < 0
+    ):
         raise ValueError(
             "profiles and repeats must be positive; layers must be at least 11"
         )
@@ -681,7 +728,11 @@ def main() -> None:
                         )
 
     exofms_root = os.environ.get("EXOFMS_SOURCE_ROOT")
-    exofms_files = ("src/WENO4_mod.f90", "src/sw_Toon_mod.f90", "src/lw_Toon_mod.f90")
+    exofms_files = (
+        "src/WENO4_mod.f90",
+        "src/sw_Toon_mod.f90",
+        "src/lw_Toon_mod.f90",
+    )
     exofms_available = (
         exofms_root
         and shutil.which(os.environ.get("FC", "gfortran"))
@@ -707,7 +758,9 @@ def main() -> None:
     args.output.mkdir(parents=True, exist_ok=True)
     with (args.output / "fp64_solver_benchmark.json").open("w") as stream:
         json.dump([asdict(result) for result in results], stream, indent=2)
-    with (args.output / "fp64_solver_benchmark.csv").open("w", newline="") as stream:
+    with (args.output / "fp64_solver_benchmark.csv").open(
+        "w", newline=""
+    ) as stream:
         writer = csv.DictWriter(stream, fieldnames=Result.__annotations__)
         writer.writeheader()
         writer.writerows(asdict(result) for result in results)
