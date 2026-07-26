@@ -61,7 +61,7 @@ add_library(pydisort::disort ALIAS ${namel}_${buildl})
 
 # CUDA source codes
 if (CUDAToolkit_FOUND)
-  file(GLOB cu_src_files *.cu)
+  file(GLOB cu_src_files CONFIGURE_DEPENDS *.cu)
 
   add_library(${namel}_cuda_${buildl}
       SHARED

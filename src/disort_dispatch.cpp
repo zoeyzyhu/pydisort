@@ -10,8 +10,11 @@
 
 namespace disort {
 
-void call_disort_cpu(at::TensorIterator &iter, int upward, disort_state *ds,
-                     disort_output *ds_out) {
+void call_disort_cpu(at::TensorIterator &iter, int upward, bool force_general,
+                     disort_state *ds,
+                     disort_output *ds_out, at::Tensor *cuda_workspace) {
+  (void)force_general;
+  (void)cuda_workspace;
   AT_DISPATCH_FLOATING_TYPES(iter.dtype(), "call_disort_cpu", [&] {
     auto nprop = at::native::ensure_nonempty_size(iter.input(0), -1);
     int grain_size = iter.numel() / at::get_num_threads();

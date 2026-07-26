@@ -1,5 +1,6 @@
 // C/C++
 #include <map>
+#include <vector>
 
 // disort
 #include "disort.hpp"
@@ -371,39 +372,127 @@ torch::Tensor DisortImpl::forward(torch::Tensor prop,
     tem = torch::empty({ncol, nlyr + 1}, prop.options());
   }
 
-  auto flx = torch::zeros({nwave, ncol, ds().ntau, 2}, prop.options());
-  auto index = torch::range(0, nwave * ncol - 1, 1)
-                   .view({nwave, ncol, 1, 1})
-                   .to(prop.options());
+  auto flx = prop.is_cuda()
+                 ? torch::empty({nwave, ncol, ds().ntau, 2}, prop.options())
+                 : torch::zeros({nwave, ncol, ds().ntau, 2}, prop.options());
+  auto build_iterator = [&](torch::Tensor& output, const torch::Tensor& prop_in,
+                            const torch::Tensor& umu0, const torch::Tensor& phi0,
+                            const torch::Tensor& fbeam,
+                            const torch::Tensor& albedo,
+                            const torch::Tensor& fluor,
+                            const torch::Tensor& fisot,
+                            const torch::Tensor& temis,
+                            const torch::Tensor& btemp,
+                            const torch::Tensor& ttemp,
+                            const torch::Tensor& tem_in) {
+    const int64_t input_nwave = prop_in.size(0);
+    const int64_t input_ncol = prop_in.size(1);
+    at::TensorIteratorConfig iter_config;
+    iter_config.resize_outputs(false)
+        .check_all_same_dtype(true)
+        .declare_static_shape({input_nwave, input_ncol, ds().ntau, 2},
+                              /*squash_dims=*/{2, 3})
+        .add_output(output)
+        .add_input(prop_in)
+        .add_owned_input(
+            umu0.view({1, input_ncol, 1, 1})
+                .expand({input_nwave, input_ncol, 1, 1}))
+        .add_owned_input(
+            phi0.view({1, input_ncol, 1, 1})
+                .expand({input_nwave, input_ncol, 1, 1}))
+        .add_owned_input(fbeam.view({input_nwave, input_ncol, 1, 1}))
+        .add_owned_input(albedo.view({input_nwave, input_ncol, 1, 1}))
+        .add_owned_input(fluor.view({input_nwave, input_ncol, 1, 1}))
+        .add_owned_input(fisot.view({input_nwave, input_ncol, 1, 1}))
+        .add_owned_input(temis.view({input_nwave, input_ncol, 1, 1}))
+        .add_owned_input(
+            btemp.view({1, input_ncol, 1, 1})
+                .expand({input_nwave, input_ncol, 1, 1}))
+        .add_owned_input(
+            ttemp.view({1, input_ncol, 1, 1})
+                .expand({input_nwave, input_ncol, 1, 1}))
+        .add_owned_input(tem_in.view({1, input_ncol, nlyr + 1, 1})
+                             .expand({input_nwave, input_ncol, nlyr + 1, 1}));
+    if (!output.is_cuda()) {
+      auto index = torch::arange(input_nwave * input_ncol, prop_in.options())
+                       .view({input_nwave, input_ncol, 1, 1});
+      iter_config.add_owned_input(index);
+    }
+    return iter_config.build();
+  };
 
-  auto iter =
-      at::TensorIteratorConfig()
-          .resize_outputs(false)
-          .check_all_same_dtype(true)
-          .declare_static_shape({nwave, ncol, ds().ntau, 2},
-                                /*squash_dims=*/{2, 3})
-          .add_output(flx)
-          .add_input(prop)
-          .add_owned_input(
-              bc->at("umu0").view({1, ncol, 1, 1}).expand({nwave, ncol, 1, 1}))
-          .add_owned_input(
-              bc->at("phi0").view({1, ncol, 1, 1}).expand({nwave, ncol, 1, 1}))
-          .add_owned_input(bc->at("fbeam").view({nwave, ncol, 1, 1}))
-          .add_owned_input(bc->at("albedo").view({nwave, ncol, 1, 1}))
-          .add_owned_input(bc->at("fluor").view({nwave, ncol, 1, 1}))
-          .add_owned_input(bc->at("fisot").view({nwave, ncol, 1, 1}))
-          .add_owned_input(bc->at("temis").view({nwave, ncol, 1, 1}))
-          .add_owned_input(
-              bc->at("btemp").view({1, ncol, 1, 1}).expand({nwave, ncol, 1, 1}))
-          .add_owned_input(
-              bc->at("ttemp").view({1, ncol, 1, 1}).expand({nwave, ncol, 1, 1}))
-          .add_owned_input(tem.view({1, ncol, nlyr + 1, 1})
-                               .expand({nwave, ncol, nlyr + 1, 1}))
-          .add_input(index)
-          .build();
+  constexpr double kConservativeScatteringThreshold = 1.e-8;
+  const bool fast_flux_eligible =
+      prop.is_cuda() && c_fast_flux_eligible(&ds());
+  const bool route_conservative = fast_flux_eligible && prop.size(3) > 1;
+  auto run_disort = [&](at::TensorIterator& iter, bool general_path,
+                        disort_state* states) {
+    at::native::call_disort(flx.device().type(), iter, options->upward(),
+                            general_path, states, ds_out_.data(),
+                            &cuda_workspace_);
+  };
 
-  at::native::call_disort(flx.device().type(), iter, options->upward(),
-                          ds_.data(), ds_out_.data());
+  bool general_path = false;
+  if (route_conservative) {
+    const auto conservative_mask =
+        prop.select(-1, 1).gt(1. - kConservativeScatteringThreshold).any(-1);
+    const int64_t nconservative = conservative_mask.sum().item<int64_t>();
+    const int64_t nwork = nwave * ncol;
+
+    if (nconservative > 0 && nconservative < nwork) {
+      const auto conservative_indices =
+          torch::nonzero(conservative_mask.reshape({-1})).reshape({-1});
+      auto fast_iter = build_iterator(
+          flx, prop, bc->at("umu0"), bc->at("phi0"), bc->at("fbeam"),
+          bc->at("albedo"), bc->at("fluor"), bc->at("fisot"),
+          bc->at("temis"), bc->at("btemp"), bc->at("ttemp"), tem);
+      run_disort(fast_iter, false, ds_.data());
+
+      const auto host_indices = conservative_indices.cpu().contiguous();
+      const auto index_ptr = host_indices.data_ptr<int64_t>();
+      std::vector<disort_state> general_ds;
+      general_ds.reserve(nconservative);
+      for (int64_t i = 0; i < nconservative; ++i) {
+        general_ds.push_back(ds_[index_ptr[i]]);
+      }
+
+      const auto column_indices = conservative_indices.remainder(ncol);
+      auto select_column = [&](const torch::Tensor& input) {
+        return input.reshape({ncol}).index_select(0, column_indices);
+      };
+      auto select_wave_column = [&](const torch::Tensor& input) {
+        return input.reshape({nwave * ncol})
+            .index_select(0, conservative_indices)
+            .view({1, nconservative});
+      };
+      auto sub_prop = prop.flatten(0, 1)
+                          .index_select(0, conservative_indices)
+                          .unsqueeze(0);
+      auto sub_flx = torch::empty({1, nconservative, ds().ntau, 2},
+                                  prop.options());
+      auto general_iter = build_iterator(
+          sub_flx, sub_prop, select_column(bc->at("umu0")),
+          select_column(bc->at("phi0")), select_wave_column(bc->at("fbeam")),
+          select_wave_column(bc->at("albedo")),
+          select_wave_column(bc->at("fluor")),
+          select_wave_column(bc->at("fisot")),
+          select_wave_column(bc->at("temis")), select_column(bc->at("btemp")),
+          select_column(bc->at("ttemp")), tem.index_select(0, column_indices));
+      run_disort(general_iter, true, general_ds.data());
+      flx.view({nwave * ncol, ds().ntau, 2})
+          .index_copy_(0, conservative_indices,
+                       sub_flx.view({nconservative, ds().ntau, 2}));
+      result_options_ = flx.options();
+      return flx;
+    }
+    general_path = nconservative == nwork;
+  }
+
+  auto iter = build_iterator(
+      flx, prop, bc->at("umu0"), bc->at("phi0"), bc->at("fbeam"),
+      bc->at("albedo"), bc->at("fluor"), bc->at("fisot"), bc->at("temis"),
+      bc->at("btemp"), bc->at("ttemp"), tem);
+  run_disort(iter, general_path, ds_.data());
 
   // save result tensor options
   result_options_ = flx.options();

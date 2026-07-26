@@ -2,7 +2,7 @@
 #include <cmath>
 
 // cdisort
-#include <cdisort213/cdisort.h>  // c_getmom
+#include <cdisort213/cdisort.hpp>  // c_getmom
 
 // conflict with torch
 #undef A

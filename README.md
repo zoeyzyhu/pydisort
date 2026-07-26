@@ -87,6 +87,12 @@ To support Python integration, the C code was encapsulated in C++ classes. The C
 
 For efficient memory management and potential GPU acceleration, `pydisort` leverages `PyTorch` tensors, paving the way for future applications in machine learning and large-scale parallel computation.
 
+When built with CUDA (`-DCUDA=ON`) and given CUDA tensors, `forward()` runs `c_disort` natively on the GPU: the solver is compiled as `__host__ __device__` code (`cdisort213/cdisort.hpp`), one GPU thread solves one (wave, column) element, and all of cdisort's dynamic allocations are served from a per-thread device memory pool (`cdisort213/pmem.h`). Two limitations relative to the CPU path: results are returned only through the flux tensor that `forward()` returns (`gather_flx`/`gather_rad` read host-side state and remain CPU-only), and the emission function is fixed to `c_planck_func2`.
+
+The common flux-only configuration (plane-parallel, Lambertian, without user angles or depths) uses specialized CUDA paths for 4 and 8 streams. Columns with near-conservative scattering automatically use the general CUDA solver for numerical robustness. The 8-stream block boundary solver applies only to non-thermal calculations.
+
+![Shortwave CUDA solver throughput](docs/img/cuda-shortwave-throughput.png)
+
 ![](docs/img/rainbow.png)
 
 ## Table of Contents

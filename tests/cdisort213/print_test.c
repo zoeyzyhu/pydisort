@@ -1,5 +1,5 @@
 
-#include <cdisort.h>
+#include <cdisort.hpp>
 
 /*========================== print_test() ================================*/
 
@@ -40,7 +40,7 @@ void print_test(disort_state  *ds_calc,
                 disort_state  *ds_good,
                 disort_output *good)
 {
-  register int
+   int
     iu,j,lu,numbad;
   //extern void
     //  c_errmsg();

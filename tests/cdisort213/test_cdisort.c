@@ -88,7 +88,7 @@
  */
 
 // Change header file for cmake
-#include <cdisort.h>
+#include <cdisort.hpp>
 
 /*
  * Disort-specific shift macros.
@@ -166,7 +166,7 @@ void disort_test01(void)
     ds;
   disort_output
     out,good;
-  register int
+   int
     icas;
   //extern void
     //  c_disort(),c_errmsg(),c_getmom();
@@ -346,7 +346,7 @@ void disort_test02(void)
     ds;
   disort_output
     out,good;
-  register int
+   int
     icas,iod,iss;
 
   ds.accur = 0.;
@@ -499,7 +499,7 @@ void disort_test03(void)
     ds;
   disort_output
     out,good;
-  register int
+   int
     icas;
 
   ds.accur = 0.;
@@ -623,7 +623,7 @@ void disort_test04(void)
     ds;
   disort_output
     out,good;
-  register int
+   int
     icas;
 
   ds.accur = 0.;
@@ -816,7 +816,7 @@ void disort_test05(void)
     ds;
   disort_output
     out,good;
-  register int
+   int
     icas;
 
   ds.accur = 0.;
@@ -943,7 +943,7 @@ void disort_test06(void)
     ds;
   disort_output
     out,good;
-  register int
+   int
     icas;
 
   ds.accur = 0.;
@@ -1364,7 +1364,7 @@ void disort_test07(void)
     ds;
   disort_output
     out,good;
-  register int
+   int
     icas;
 
   ds.accur = 0.;
@@ -1699,7 +1699,7 @@ void disort_test08(void)
     ds;
   disort_output
     out,good;
-  register int
+   int
     icas,lc;
 
   ds.accur = 0.;
@@ -1840,7 +1840,7 @@ void disort_test08(void)
 
 void disort_test09(void)
 {
-  register int
+   int
     icas,lc,k;
   const int
     ncase = 1;
@@ -2075,7 +2075,7 @@ void disort_test09(void)
 
 void disort_test10(void)
 {
-  register int
+   int
     lc;
   double
     gg;
@@ -2222,7 +2222,7 @@ void disort_test10(void)
 
 void disort_test11(void)
 {
-  register int
+   int
     lc;
   disort_state
     ds_good,ds_out;
@@ -2355,7 +2355,7 @@ void disort_test11(void)
 
 void disort_test12(void)
 {
-  register int
+   int
     lc;
   double
     gg;
@@ -2493,7 +2493,7 @@ void disort_test12(void)
 
 void disort_test13(void)
 {
-  register int
+   int
     lc;
   double
     gg;
@@ -2687,7 +2687,7 @@ void disort_test13(void)
 
 void disort_test14(void)
 {
-  register int
+   int
     lc;
   double
      radius,

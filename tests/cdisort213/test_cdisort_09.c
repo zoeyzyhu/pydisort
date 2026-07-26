@@ -16,7 +16,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "cdisort.h"
+#include "cdisort.hpp"
 
 #undef DTAUC
 #define DTAUC(lc) ds.dtauc[(lc) - 1]
@@ -66,7 +66,7 @@ int main(int argc, char **argv) {
 }
 
 void run_disort_test09(int nstr, int nlyr, double ssalb) {
-  register int icas, lc, k;
+   int icas, lc, k;
   const int ncase = 1;
   double gg;
   disort_state ds;

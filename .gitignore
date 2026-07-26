@@ -97,13 +97,10 @@ z.junk
 
 # cache
 .cache
+benchmark-results/
 
 # version file
 src/version.h
 
 # stubs
 *stubs/
-
-# agents
-AGENTS.md
-CLAUDE.md

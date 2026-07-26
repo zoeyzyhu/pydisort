@@ -47,6 +47,7 @@ PYBIND11_MODULE(pydisort, m) {
       .def_readonly("options", &disort::DisortImpl::options)
       .def("gather_flx", &disort::DisortImpl::gather_flx)
       .def("gather_rad", &disort::DisortImpl::gather_rad)
+      .def("release_cuda_workspace", &disort::DisortImpl::release_cuda_workspace)
       .def(
           "forward",
           [](disort::DisortImpl &self, torch::Tensor prop, std::string bname,

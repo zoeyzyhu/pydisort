@@ -534,6 +534,14 @@ class Disort(nn.Module):
                   [0.0000, 1.1557]]]])
         """
         ...
+    def release_cuda_workspace(self) -> None:
+        """Release this instance's cached CUDA scratch workspace.
+
+        CUDA forwards allocate and reuse a workspace sized for the largest
+        batch seen by this instance. Call this method when that memory is no
+        longer needed, for example before a large unrelated GPU workload.
+        """
+        ...
     def gather_flx(self) -> torch.Tensor:
         """
         Gather all disort flux outputs

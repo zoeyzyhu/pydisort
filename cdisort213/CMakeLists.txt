@@ -1,7 +1,8 @@
 # Install cdisort submodule
 #
-#   library: libcdisort_debug.o
-#   library: libcdisort_release.o
+# cdisort is header-only since the CUDA port: cdisort.c/locate.c were
+# split into DISPATCH_MACRO inline headers (see cdisort.hpp), so the
+# target is a pure INTERFACE library.
 #
 # Define the following symbols
 #
@@ -12,23 +13,16 @@
 #   target_link_libraries(pydisort::cdisort)
 
 string(TOLOWER ${CMAKE_BUILD_TYPE} buildl)
-string(TOUPPER ${CMAKE_BUILD_TYPE} buildu)
 
 set(namel cdisort)
-string(TOUPPER ${namel} nameu)
 
-file(GLOB src_files *.c)
+add_library(${namel}_${buildl} INTERFACE)
 
-add_library(${namel}_${buildl}
-    OBJECT
-    ${src_files}
+target_include_directories(${namel}_${buildl}
+    INTERFACE
+    ${CMAKE_CURRENT_SOURCE_DIR}/..
     )
 
-set_target_properties(${namel}_${buildl}
-    PROPERTIES
-    COMPILE_FLAGS "${CMAKE_C_FLAGS_${buildu}}"
-    )
-
-target_link_libraries(${namel}_${buildl} m)
+target_link_libraries(${namel}_${buildl} INTERFACE m)
 
 add_library(pydisort::cdisort ALIAS ${namel}_${buildl})

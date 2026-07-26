@@ -5,7 +5,7 @@
 #include <disort/disort_formatter.hpp>
 
 // cdisort
-#include <cdisort213/cdisort.h>
+#include <cdisort213/cdisort.hpp>
 
 namespace py = pybind11;
 
