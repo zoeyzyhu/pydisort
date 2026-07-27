@@ -125,20 +125,28 @@ jobs:
       - name: Build Linux Wheel
         env:
           CIBW_PLATFORM: linux
-          CIBW_MANYLINUX_X86_64_IMAGE: manylinux_2_28
+          CIBW_MANYLINUX_X86_64_IMAGE: docker.io/pytorch/manylinux2_28-builder:cuda12.8
           CIBW_BUILD: cp${{ env.PY_VERSION }}*
           CIBW_ARCHS: ${{ env.LINUX_ARCH }}
           CIBW_SKIP: "*musllinux*"
+          CIBW_ENVIRONMENT: >
+            PIP_NO_CACHE_DIR=1
+            PIP_DISABLE_PIP_VERSION_CHECK=1
+            PIP_NO_COMPILE=1
+
           CIBW_BEFORE_BUILD: |
+            export PATH="/opt/python/cp${{ env.PY_VERSION }}-cp${{ env.PY_VERSION }}/bin:$PATH"
+
             pip install numpy 'torch==2.10.0'
             TORCH_CMAKE_PREFIX_PATH=$(python -c 'import torch.utils; print(torch.utils.cmake_prefix_path)')
             export LD_LIBRARY_PATH=$(python -c "import torch; print(torch.__path__[0] + '/lib')"):$(pwd)/build/lib:$LD_LIBRARY_PATH
-            $LD_LIBRARY_PATH
             cmake -B build -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
                   -DPython3_EXECUTABLE=$(which python) \
-                  -DCMAKE_PREFIX_PATH="$TORCH_CMAKE_PREFIX_PATH"
-            cmake --build build --parallel
+                  -DCMAKE_PREFIX_PATH="$TORCH_CMAKE_PREFIX_PATH" \
+                  -DCUDA=ON
+            cmake --build build --parallel 3
           CIBW_REPAIR_WHEEL_COMMAND_LINUX: |
+            export LD_LIBRARY_PATH=/usr/local/cuda/lib64:/usr/local/lib64:/usr/lib64:$LD_LIBRARY_PATH
             auditwheel repair --exclude lib*.so -w {dest_dir} {wheel}
         run: |
           pip install cibuildwheel
