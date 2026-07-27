@@ -67,7 +67,7 @@ jobs:
           CIBW_BUILD: cp${{ env.PY_VERSION }}*
           CIBW_ARCHS: ${{ env.MACOS_ARCH }}
           CIBW_BEFORE_BUILD: |
-            pip install numpy 'torch==2.10.0'
+            pip install numpy 'cmake<=3.30' 'torch==2.10.0'
             TORCH_CMAKE_PREFIX_PATH=$(python -c 'import torch.utils; print(torch.utils.cmake_prefix_path)')
             cmake -B build -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
                   -DCMAKE_OSX_ARCHITECTURES=${{ env.MACOS_ARCH }} \
@@ -137,7 +137,7 @@ jobs:
           CIBW_BEFORE_BUILD: |
             export PATH="/opt/python/cp${{ env.PY_VERSION }}-cp${{ env.PY_VERSION }}/bin:$PATH"
 
-            pip install numpy 'torch==2.10.0'
+            pip install numpy 'cmake<=3.30' 'torch==2.10.0'
             TORCH_CMAKE_PREFIX_PATH=$(python -c 'import torch.utils; print(torch.utils.cmake_prefix_path)')
             export LD_LIBRARY_PATH=$(python -c "import torch; print(torch.__path__[0] + '/lib')"):$(pwd)/build/lib:$LD_LIBRARY_PATH
             cmake -B build -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
@@ -178,7 +178,14 @@ jobs:
           find . -name '*.whl' -exec mv {} dist/ \;
 
       - name: Publish to PyPI
-        if: ${{ needs.build-macos.result == 'success' || needs.build-linux.result == 'success' }}
+        if: >-
+          ${{
+            needs.build-macos.result != 'failure'
+            && needs.build-macos.result != 'cancelled'
+            && needs.build-linux.result != 'failure'
+            && needs.build-linux.result != 'cancelled'
+            && (needs.build-macos.result == 'success' || needs.build-linux.result == 'success')
+          }}
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           user: __token__
