@@ -91,7 +91,7 @@ When built with CUDA (`-DCUDA=ON`) and given CUDA tensors, `forward()` runs `c_d
 
 The common flux-only configuration (plane-parallel, Lambertian, without user angles or depths) uses specialized CUDA paths for 4 and 8 streams. Columns with near-conservative scattering automatically use the general CUDA solver for numerical robustness. The 8-stream block boundary solver applies only to non-thermal calculations.
 
-![Shortwave CUDA solver throughput](docs/img/cuda-shortwave-throughput.png)
+![FP64 solver benchmark](docs/img/fp64-solver-benchmark.png)
 
 ![](docs/img/rainbow.png)
 

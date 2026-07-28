@@ -226,6 +226,7 @@ def benchmark_pyharp(
 
     toon_options = pyharp.ToonMcKay89Options()
     if mode == "longwave":
+        toon_options.flags("planck")
         toon_options.wave_lower(WAVE_LOWER)
         toon_options.wave_upper(WAVE_UPPER)
     solver = pyharp.ToonMcKay89(toon_options)
@@ -380,6 +381,7 @@ def flux_pyharp(
 
     options = pyharp.ToonMcKay89Options()
     if mode == "longwave":
+        options.flags("planck")
         options.wave_lower(WAVE_LOWER)
         options.wave_upper(WAVE_UPPER)
     solver = pyharp.ToonMcKay89(options)
