@@ -65,6 +65,10 @@ jobs:
         env:
           CIBW_PLATFORM: macos
           CIBW_BUILD: cp${{ env.PY_VERSION }}*
+          # Skip free-threaded (no-GIL) builds: the pybind11 extension is not
+          # declared free-threaded-safe, and cibuildwheel builds cp3XXt by
+          # default on 3.14+.
+          CIBW_SKIP: "*t-*"
           CIBW_ARCHS: ${{ env.MACOS_ARCH }}
           CIBW_BEFORE_BUILD: |
             pip install numpy 'cmake<=3.30' 'torch==2.10.0'
@@ -128,7 +132,8 @@ jobs:
           CIBW_MANYLINUX_X86_64_IMAGE: docker.io/pytorch/manylinux2_28-builder:cuda12.8
           CIBW_BUILD: cp${{ env.PY_VERSION }}*
           CIBW_ARCHS: ${{ env.LINUX_ARCH }}
-          CIBW_SKIP: "*musllinux*"
+          # Skip musllinux and free-threaded (no-GIL) builds.
+          CIBW_SKIP: "*musllinux* *t-*"
           CIBW_ENVIRONMENT: >
             PIP_NO_CACHE_DIR=1
             PIP_DISABLE_PIP_VERSION_CHECK=1
