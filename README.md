@@ -118,8 +118,14 @@ The common flux-only configuration (plane-parallel, Lambertian, without user ang
 We provide the `pydisort` library for Python users. The package can be installed using `pip`:
 
 ```bash
-pip install torch>=2.7.0,<=2.7.1
 pip install pydisort
+```
+
+Prebuilt wheels are published for CPython 3.10–3.14, and `pip` pulls in a compatible `torch` automatically. `pydisort` is a compiled PyTorch extension, so if `pip` falls back to building from source (for example on a platform with no matching wheel), `torch` must be importable at build time. Install it first and disable build isolation so the build can see it:
+
+```bash
+pip install 'torch==2.10.0'
+pip install pydisort --no-build-isolation
 ```
 
 Here is a step-by-step tutorial of how to use the pydisort package:
