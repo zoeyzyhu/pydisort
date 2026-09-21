@@ -71,6 +71,9 @@ repos:
         entry: cppcheck-hook
         types_or: [c++, c#, objective-c]
         language: python
+        # Installed into the hook env so the check does not depend on a
+        # cppcheck binary happening to be on the committer's PATH.
+        additional_dependencies: [cppcheck==1.5.1]
         args: [--check-config]
         files: \.(cpp|cc|cxx|h|hpp|hxx)$
 
@@ -86,7 +89,7 @@ repos:
       - id: black
         args: ["--line-length", "79"]
   - repo: https://github.com/hadialqattan/pycln
-    rev: v2.5.0
+    rev: v2.6.0
     hooks:
       - id: pycln
 
@@ -99,6 +102,9 @@ repos:
         entry: cpplint-hook
         types_or: [c, c++, c#, objective-c, cuda]
         language: python
+        # Installed into the hook env so the check does not depend on a
+        # cpplint binary happening to be on the committer's PATH.
+        additional_dependencies: [cpplint==2.0.2]
         args:
           [
             "--filter=-legal/copyright,-build/include_subdir,-runtime/references,-build/include_order,-runtime/casting,-whitespace/indent_namespace,-build/include_what_you_use,-readability/fn_size,-whitespace/braces,-whitespace/parens,-whitespace/blank_line",

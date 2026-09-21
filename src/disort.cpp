@@ -173,21 +173,27 @@ DisortImpl::~DisortImpl() {
 torch::Tensor DisortImpl::gather_flx() const {
   TORCH_CHECK(allocated_, "DisortImpl::gather_flx: DisortImpl not allocated");
 
-  int nlyr = options->ds().nlyr;
-  auto result = torch::empty({options->nwave() * options->ncol(), nlyr + 1, 8},
+  // `out->rad` holds exactly ds.ntau entries (cdisort213/alloc.h), where ntau
+  // is the value *after* c_disort_state_alloc, not the one set in reset():
+  // alloc overwrites it with nlyr + 1 when usrtau is off and leaves the user's
+  // grid alone when it is on. Reading ds_[i].ntau covers both, whereas the
+  // nlyr + 1 this used to assume is only correct in the usrtau-off case and
+  // ran off the end of the allocation whenever a user asked for fewer output
+  // depths than there are layer boundaries.
+  int ntau = ds().ntau;
+  auto result = torch::empty({options->nwave() * options->ncol(), ntau, 8},
                              result_options_);
 
   for (int i = 0; i < options->nwave() * options->ncol(); ++i) {
-    auto var = torch::from_blob(&ds_out_[i].rad[0].rfldir, {nlyr + 1, 8},
-                                {8, 1}, result_options_.dtype(torch::kFloat64));
+    auto var = torch::from_blob(&ds_out_[i].rad[0].rfldir, {ntau, 8}, {8, 1},
+                                result_options_.dtype(torch::kFloat64));
     result[i].copy_(var);
   }
 
   if (options->upward()) {
-    return result.view({options->nwave(), options->ncol(), nlyr + 1, 8})
-        .flip(2);
+    return result.view({options->nwave(), options->ncol(), ntau, 8}).flip(2);
   } else {
-    return result.view({options->nwave(), options->ncol(), nlyr + 1, 8});
+    return result.view({options->nwave(), options->ncol(), ntau, 8});
   }
 }
 

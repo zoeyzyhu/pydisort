@@ -546,8 +546,12 @@ class Disort(nn.Module):
         """
         Gather all disort flux outputs
 
+        The level dimension is ``ds.ntau``: the ``user_tau`` grid when the
+        ``usrtau`` flag is set, and ``nlyr + 1`` otherwise. It matches the
+        level dimension of the tensor returned by :meth:`forward`.
+
         Returns:
-          torch.Tensor: Disort flux outputs (nwave, ncol, nlvl = nlyr + 1, 8)
+          torch.Tensor: Disort flux outputs (nwave, ncol, ntau, 8)
 
         Examples:
           >>> import torch
