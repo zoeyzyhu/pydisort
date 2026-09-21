@@ -1,0 +1,13 @@
+cff-version: 1.2.0
+message: If you use this software, please cite it as below.
+title: 'Pydisort: A Modern Python Package for Parallelized Discrete Ordinates Radiative Transfer (DISORT)'
+type: software
+authors:
+- given-names: Zoey
+  family-names: Hu
+  orcid: https://orcid.org/0009-0007-1511-3269
+- given-names: Cheng
+  family-names: Li
+  orcid: https://orcid.org/0000-0002-8280-3119
+repository-code: https://github.com/zoeyzyhu/pydisort
+license: GPL-3.0-only
