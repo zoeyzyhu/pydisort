@@ -195,8 +195,12 @@ class DisortImpl : public torch::nn::Cloneable<DisortImpl> {
    * 6 : mean diffuse upward intensity (uavgup)
    * 7 : mean direct beam (uavgso)
    *
+   * The level dimension is ds.ntau: the user_tau grid when the `usrtau` flag
+   * is set, and nlyr + 1 otherwise. It matches the level dimension of the
+   * tensor returned by forward().
+   *
    * \param op tensor options
-   * \return disort flux outputs (nwave, ncol, nlvl = nlyr + 1, 8)
+   * \return disort flux outputs (nwave, ncol, ntau, 8)
    */
   torch::Tensor gather_flx() const;
 

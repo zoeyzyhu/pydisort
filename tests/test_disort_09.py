@@ -77,6 +77,40 @@ def test_case1():
     )
 
 
+def test_case1_gather_flx_levels():
+    """`gather_flx` must report exactly the user_tau levels, and no more.
+
+    Regression test. `gather_flx` used to size its output nlyr + 1, which is
+    the level count only when the `usrtau` flag is off; cdisort allocates
+    `out->rad` with ds.ntau entries (cdisort213/alloc.h). This case asks for 5
+    output depths across 6 layers, so the old code read two rows past the end
+    of that allocation and returned whatever the heap held there.
+    """
+    ds = run_case1(ncol=1, nlyr=6, nstr=8, ssalb=0.05)
+
+    flx = ds.gather_flx()
+    assert_equal(flx.shape, (1, 1, 5, 8))
+
+    # Columns 0, 1 and 2 are rfldir, rfldn and flup. Reference values are
+    # good.rad[*] of disort_test09() case 1 in tests/cdisort213/test_cdisort.c.
+    # rfldir is zero throughout because this problem has no beam.
+    flx.squeeze_()
+    assert_allclose(
+        flx[:, :3],
+        torch.tensor(
+            [
+                [0.0000e00, 1.0000e00, 2.2797e-01],
+                [0.0000e00, 3.5515e-01, 8.7510e-02],
+                [0.0000e00, 1.4427e-01, 3.6182e-02],
+                [0.0000e00, 6.7144e-03, 2.1929e-03],
+                [0.0000e00, 6.1697e-07, 0.0000e00],
+            ]
+        ),
+        atol=1e-4,
+        rtol=1e-4,
+    )
+
+
 def speed_test_case1():
     pass
 
