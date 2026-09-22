@@ -120,6 +120,8 @@ message(STATUS "${Blue}${PROJECT_NAME}-4. Setting up project libraries ...${Colo
 add_subdirectory(src)
 add_subdirectory(cdisort213)
 
+enable_testing()
+
 if (BUILD_TESTS)
   message(STATUS "${Blue}${PROJECT_NAME}-5. Setting up unit tests ...${ColorReset}")
   add_subdirectory(tests)

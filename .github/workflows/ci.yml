@@ -60,7 +60,7 @@ jobs:
 
       - name: Install Python dependencies
         run: |
-          pip install numpy
+          pip install numpy pytest
           if [[ "$RUNNER_OS" == "Linux" ]]; then
             pip install 'torch==2.10.0' --index-url https://download.pytorch.org/whl/cpu
           else
@@ -83,8 +83,8 @@ jobs:
 
       - name: Run C++ & Pybind tests
         run: |
-          cd ${{ github.workspace }}/build/tests
-          ctest --output-on-failure -E test_disort_09
+          ctest --test-dir ${{ github.workspace }}/build \
+                --output-on-failure
         env:
           LD_LIBRARY_PATH: ${{ github.workspace }}/build/lib:${{ env.LD_LIBRARY_PATH }}
           DYLD_LIBRARY_PATH: ${{ github.workspace }}/build/lib:${{ env.DYLD_LIBRARY_PATH }}
