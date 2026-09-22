@@ -84,6 +84,10 @@ Brewfile.lock.json
 Icon
 .dropbox*
 
+# Benchmarks -----------------------------------------------------------
+# - compiled cdisort baseline built by benchmarks/compare_cdisort.py
+benchmarks/_bench_build/
+
 # Other ----------------------------------------------------------------
 *.zip
 **/tests/bin/test_*
