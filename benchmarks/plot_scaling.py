@@ -291,8 +291,11 @@ def main():
         nwave_list, threads, args.repeat, radiance, max_pyd, builddir
     )
 
+    # The thread count belongs to one series, not to the figure: the 1-core
+    # line is unaffected by --threads, and the legend already names the
+    # thread count of each series. Keep the title to what is figure-wide.
     note = (
-        f"{tp9.cpu_model()}, {threads} threads, "
+        f"{tp9.cpu_model()}, "
         f"pydisort {tp9.package_version('pydisort')}, "
         f"torch {torch.__version__}"
     )
