@@ -32,10 +32,10 @@ class disort_state:
     - ``nlyr``: number of layers
     - ``nstr``: number of streams
     - ``nmom``: number of phase function moments
-    - ``nphase``: number of azimuthal angles
+    - ``nphase``: number of explicit phase-function grid points
 
     The result of the variables will be transferred from the :class:`pydisort.DisortOptions`
-    object when the :class:`pydisort.Disort <disort.cpp.Disort>` object is created.
+    object when the :class:`pydisort.Disort` object is created.
     """
 
     nlyr: int
@@ -48,7 +48,7 @@ class disort_state:
     """Number of phase functions moments"""
 
     nphase: int
-    """Number of azimuthal angles"""
+    """Number of explicit phase-function grid points (not the output azimuth count)"""
 
     def __init__(self) -> None:
         """
@@ -61,8 +61,8 @@ class disort_state:
           >>> import pydisort
           >>> ds = pydisort.disort_state()
           >>> ds.nlyr, ds.nstr, ds.nphase = 10, 4, 4
-          >>> print(ds)
-          disort_state(nlyr = 10; nstr = 4; nmom = 0; ibcnd = 0; usrtau = 0; usrang = 0; lamber = 0; planck = 0; spher = 0; onlyfl = 0)
+          >>> ds.nlyr, ds.nstr, ds.nphase
+          (10, 4, 4)
         """
         ...
     def __repr__(self) -> str: ...
@@ -72,40 +72,30 @@ class DisortOptions:
     Set radiation flags and dimension for disort
 
     This is usually the first step in setting up a disort run.
-    Some disort options can be set directly in the  :class:`pydisort.disort_state` object,
-    such as the dimensions and the flags. Others, such as the polar and azimuthal angles requires
+    The layer, stream and moment counts are set on :class:`pydisort.disort_state`.
+    Flags are selected with :meth:`flags`. Viewing directions require
     allocating the internal arrays of :class:`pydisort.disort_state`.
     The :class:`pydisort.DisortOptions` object holds those arrays temporarily
     until the :class:`pydisort.disort_state` object is initialized when a
-    :class:`pydisort.cpp.Disort` object is created based on
+    :class:`pydisort.Disort` object is created based on
     the :class:`pydisort.DisortOptions` object.
 
-    .. note::
-
-      When the :class:`pydisort.DisortOptions` object is printed, it may not truly reflect
-      the state of the :class:`pydisort.disort_state` object. This is because the
-      :class:`pydisort.DisortOptions` object holds temporary arrays that are not
-      yet transferred to the :class:`pydisort.disort_state` object. Transferring happens
-      when the :class:`pydisort.cpp.Disort` object is created by calling:
-
-      .. code-block:: python
-
-        >>> disort = pydisort.Disort(op)
-
-      where ``op`` is the :class:`pydisort.DisortOptions` object.
+    Set all options before constructing the solver; construction allocates
+    internal arrays. Use the getters to inspect configured values rather
+    than depending on the format of the printed representation.
 
     Returns:
-      pydisort.DisortOption: class object
+      pydisort.DisortOptions: class object
 
     Examples:
 
       >>> import pydisort
       >>> op = pydisort.DisortOptions().flags('onlyfl').nwave(10).ncol(10)
       >>> op.ds().nlyr, op.ds().nstr, op.ds().nmom = 10, 4, 4
-      >>> print(op)
-      DisortOptions(flags = onlyfl; nwave = 10; ncol = 10; disort_state = (nlyr = 10; nstr = 4; nmom = 4; ibcnd = 0; usrtau = 0; usrang = 0; lamber = 0; planck = 0; spher = 0; onlyfl = 0); wave = ())
+      >>> op.nwave(), op.ncol(), op.ds().nlyr
+      (10, 10, 10)
 
-    **The following flags are supported:**
+    **Flags usable through the public Python interface:**
 
       .. list-table::
          :widths: 25 25
@@ -113,30 +103,22 @@ class DisortOptions:
 
          * - Flag
            - Description
-         * - 'ibcnd'
-           - General or Specific boundary condition
          * - 'usrtau'
            - use user optical depths
          * - 'usrang'
-           - use user azimuthal angles
+           - use user-specified viewing zenith cosines
          * - 'lamber'
            - turn on lambertian reflection surface
          * - 'planck'
            - turn on planck source (thermal emission)
-         * - 'spher'
-           - turn on spherical correction
          * - 'onlyfl'
            - only compute radiative fluxes
          * - 'quiet'
-           - turn on disort internal printout
+           - suppress disort internal printout
          * - 'intensity_correction'
            - turn on intensity correction
          * - 'old_intensity_correction'
            - turn on old intensity correction
-         * - 'general_source'
-           - turn on general source
-         * - 'output_uum'
-           - output azimuthal components of the intensity
          * - 'print-input'
            - print input parameters
          * - 'print-fluxes'
@@ -148,24 +130,22 @@ class DisortOptions:
          * - 'print-phase-function'
            - print phase function
 
-      A General boundary condition is invoked when 'ibcnd' is unspecified (False).
-      This allows:
-
-        - beam illumination from the top
-        - isotropic illumination from the top
-        - thermal emission from the top
-        - internal thermal emission
-        - reflection at the bottom
-        - thermal emission from the bottom
-
-      A Special boundary condition is invoked when 'ibcnd' is specified (True).
-      Special boundary condition only returns albedo and transmissivity of
-      the entire medium.
+      With 'ibcnd' unset, the solver supports beam and isotropic illumination,
+      thermal emission and Lambertian reflection through the documented inputs.
 
       .. warning::
 
-        - current version of pydisort has limited support for this option.
-        - consult the `documentation <_static/DISORT2.doc>`_ of DISORT for more details on this option.
+        The parser also recognizes backend flags that are not usable as
+        complete features through the public Python interface:
+
+        * 'ibcnd': special-boundary mode is rejected by forward.
+        * 'spher': body radius and level altitudes are not exposed.
+        * 'general_source': user-source arrays are not exposed.
+        * 'output_uum': Fourier-component outputs have no public accessor.
+
+        Do not enable these flags in Python calculations. See
+        :ref:`python-flag-support` for the distinction between backend
+        capabilities and supported Python workflows.
     """
 
     def __init__(self) -> None: ...
@@ -320,19 +300,19 @@ class DisortOptions:
     @overload
     def user_mu(self) -> List[float]:
         """
-        Get user zenith angles for disort
+        Get user viewing zenith cosines (positive upward, negative downward)
 
         Returns:
-          list[float]: user zenith angles for disort
+          list[float]: user viewing zenith cosines (positive upward, negative downward)
         """
         ...
     @overload
     def user_mu(self, user_mu: Union[List[float], ndarray]) -> DisortOptions:
         """
-        Set user zenith angles for disort
+        Set user viewing zenith cosines (positive upward, negative downward)
 
         Args:
-          user_mu (list[float]): user zenith angles for disort
+          user_mu (list[float]): user viewing zenith cosines (positive upward, negative downward)
 
         Returns:
           pydisort.DisortOptions: class object
@@ -341,19 +321,19 @@ class DisortOptions:
     @overload
     def user_phi(self) -> List[float]:
         """
-        Get user azimuthal angles for disort
+        Get user azimuthal angles in degrees
 
         Returns:
-          list[float]: user azimuthal angles for disort
+          list[float]: user azimuthal angles in degrees
         """
         ...
     @overload
     def user_phi(self, user_phi: Union[List[float], ndarray]) -> DisortOptions:
         """
-        Set user azimuthal angles for disort
+        Set user azimuthal angles in degrees
 
         Args:
-          user_phi (list[float]): user azimuthal angles for disort
+          user_phi (list[float]): user azimuthal angles in degrees
 
         Returns:
           pydisort.DisortOptions: class object
@@ -362,10 +342,10 @@ class DisortOptions:
     @overload
     def wave_lower(self) -> List[float]:
         """
-        Get lower wavenumber(length) at each bin for disort
+        Get lower wavenumber in cm^-1 for each spectral bin
 
         Returns:
-          list[float]: lower wavenumber(length) at each bin for disort
+          list[float]: lower wavenumber in cm^-1 for each spectral bin
         """
         ...
     @overload
@@ -373,10 +353,10 @@ class DisortOptions:
         self, wave_lower: Union[List[float], ndarray]
     ) -> DisortOptions:
         """
-        Set lower wavenumber(length) at each bin for disort
+        Set lower wavenumber in cm^-1 for each spectral bin
 
         Args:
-          wave_lower (list[float]): lower wavenumber(length) at each bin for disort
+          wave_lower (list[float]): lower wavenumber in cm^-1 for each spectral bin
 
         Returns:
           pydisort.DisortOptions: class object
@@ -385,10 +365,10 @@ class DisortOptions:
     @overload
     def wave_upper(self) -> List[float]:
         """
-        Get upper wavenumber(length) at each bin for disort
+        Get upper wavenumber in cm^-1 for each spectral bin
 
         Returns:
-          list[float]: upper wavenumber(length) at each bin for disort
+          list[float]: upper wavenumber in cm^-1 for each spectral bin
         """
         ...
     @overload
@@ -396,10 +376,10 @@ class DisortOptions:
         self, wave_upper: Union[List[float], ndarray]
     ) -> DisortOptions:
         """
-        Set upper wavenumber(length) at each bin for disort
+        Set upper wavenumber in cm^-1 for each spectral bin
 
         Args:
-          wave_upper (list[float]): upper wavenumber(length) at each bin for disort
+          wave_upper (list[float]): upper wavenumber in cm^-1 for each spectral bin
 
         Returns:
           pydisort.DisortOptions: class object
@@ -460,7 +440,7 @@ class Disort(nn.Module):
         **kwargs: torch.Tensor,
     ) -> torch.Tensor:
         """
-        Calculate radiative flux or intensity
+        Calculate upward and total downward radiative fluxes
 
         The dimensions of each recognized key in ``kwargs`` are:
 
@@ -502,10 +482,16 @@ class Disort(nn.Module):
         Some keys can have a prefix band name, ``<band>``. If the prefix is an non-empty string,
         a slash "/" is automatically appended to it, such that the key looks like ``B1/umu0``.
         ``btemp`` and ``ttemp`` do not have a band name prefix.
-        If the values are short of wave or column dimensions, they are automatically broadcasted to be the shape of 1.
+        Missing leading dimensions of prop are inserted as singleton axes until
+        it is 4D. Unprefixed fbeam, albedo, fluor, fisot and temis similarly get
+        leading singleton axes until they are 2D. This does not expand an axis
+        to a larger batch: the resulting shapes must match nwave and ncol
+        exactly. Prefixed spectral keys require the full 2D shape. Geometry
+        and boundary temperatures have shape (ncol,) and are shared across
+        wavelengths; temf has shape (ncol, nlyr + 1).
 
         Args:
-          prop (torch.Tensor): Optical properties at each level (nwave, ncol, nlyr, nprop)
+          prop (torch.Tensor): Optical properties in each layer (nwave, ncol, nlyr, nprop)
           bname (str): Name of the radiation band, default is empty string.
             If the name is not empty, a slash "/" is automatically appended to it.
           temf (Optional[torch.Tensor]): Temperature at each level (ncol, nlvl = nlyr + 1),
@@ -513,7 +499,10 @@ class Disort(nn.Module):
           **kwargs (Dict[str, torch.Tensor]): keyword arguments of disort boundary conditions, see keys listed above
 
         Returns:
-          torch.Tensor: Radiative flux or intensity, shape (nwave, ncol, nlvl, nrad)
+          torch.Tensor: Fluxes, shape (nwave, ncol, ntau, 2), with upward flux
+            first and total downward (direct plus diffuse) flux second.
+            Without ``usrtau``, ntau = nlyr + 1; otherwise it is the length
+            of ``user_tau``. Use :meth:`gather_rad` for directional radiances.
 
         Examples:
           >>> import torch
@@ -572,7 +561,10 @@ class Disort(nn.Module):
         Gather all disort radiation outputs
 
         Returns:
-          torch.Tensor: Disort radiation outputs (nwave, ncol, nlvl = nlyr + 1, 6)
+          torch.Tensor: Radiances, shape (nwave, ncol, nphi, ntau, numu).
+            nphi is the output azimuth count, ntau the output depth count,
+            and numu the viewing-direction count. Disable ``onlyfl`` before
+            solving to compute these outputs.
 
         Examples:
           >>> import torch

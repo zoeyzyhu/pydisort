@@ -6,7 +6,7 @@ parallel computation.**
 
 pydisort provides a Python interface to the C version of the DISORT
 (Discrete Ordinates Radiative Transfer) program. It wraps the well-tested
-``cdisort`` numerical core in a C++ class (``DisortWrapper``), which is in turn
+``cdisort`` numerical core in a C++ class (``DisortImpl``), which is in turn
 bound to Python with pybind11, and uses PyTorch tensors as its primary data
 structure.
 
@@ -17,9 +17,9 @@ program, and the C-DISORT publication [2]_ for the C version.
 
   pip install pydisort
 
-Prebuilt wheels are published for CPython 3.10-3.14 on Linux and macOS, so no
-compiler or Fortran toolchain is required. See :doc:`installation` to get
-started.
+Prebuilt wheels are published for CPython 3.10-3.14 on selected Linux and
+macOS targets. No compiler is needed when a wheel matches your platform;
+see :doc:`installation` for architectures, OS requirements and source builds.
 
 Why pydisort?
 -------------
@@ -28,12 +28,12 @@ pydisort features the following benefits over the original C-DISORT program:
 
 - **Parallel by design.** Wavelength and atmospheric column are batch
   dimensions, so a spectral or multi-column calculation spreads across cores.
-  On one thread pydisort matches cdisort exactly; with ten threads it is
-  roughly an order of magnitude faster (see :doc:`benchmarks`).
+  On the measured workload, single-threaded speed closely matches
+  cdisort; ten threads reach roughly an order of magnitude faster (see :doc:`benchmarks` for conditions).
 - **PyTorch-native**, so radiative transfer drops directly into tensor-based
   scientific and machine-learning workflows.
-- **No build step.** Prebuilt binary wheels on PyPI, rather than a local
-  Fortran or C compilation.
+- **No build step.** Prebuilt binaries on PyPI
+  avoid local Fortran or C compilation.
 - **Proper error handling**, rather than abrupt exit of the program. Errors
   can be caught and handled in the Python script.
 - **Automatic memory management**, handled by the C++ class. The user does not
@@ -57,25 +57,7 @@ Every pydisort program has the same two steps: describe the problem with a
 :class:`pydisort.DisortOptions` object, then run it by calling
 :meth:`~pydisort.Disort.forward` on a tensor of optical properties.
 
-.. code-block:: python
-
-  >>> import torch
-  >>> from pydisort import Disort, DisortOptions
-  >>>
-  >>> op = DisortOptions().flags("onlyfl,lamber")
-  >>> op.ds().nlyr = 4
-  >>> op.ds().nstr = 4
-  >>> op.ds().nmom = 4
-  >>> op.ds().nphase = 4
-  >>>
-  >>> ds = Disort(op)
-  >>> tau = torch.tensor([0.1, 0.2, 0.3, 0.4]).unsqueeze(-1)
-  >>> ds.forward(tau, fbeam=torch.tensor([3.14159]))
-  tensor([[[[0.0000, 3.1416],
-          [0.0000, 2.8426],
-          [0.0000, 2.3273],
-          [0.0000, 1.7241],
-          [0.0000, 1.1557]]]])
+.. include:: _snippets/quickstart.rst
 
 The returned tensor has shape ``(nwave, ncol, nlvl, 2)``: wavelength, column,
 level, then upward and downward flux. :doc:`usage` explains those dimensions.
@@ -91,7 +73,7 @@ Where to go next
    * - :doc:`statement_of_need`
      - What problem pydisort solves, who it is for, and its scope.
    * - :doc:`usage`
-     - Input and output dimensions, broadcasting, flags, troubleshooting.
+     - Input/output shapes, singleton dimensions, flags, troubleshooting.
    * - :doc:`examples`
      - Four complete calculations, ending with a real-world solver-validation
        study.
@@ -109,9 +91,11 @@ References
 .. [1] Stamnes, K., Tsay, S. C., Wiscombe, W., & Jayaweera, K. (1988).
        Numerically stable algorithm for discrete-ordinate-method radiative transfer in multiple scattering and emitting layered media.
        Applied Optics, 27(12), 2502-2509.
-.. [2] Buras, R., & Dowling, T. (1996).
-       Discrete-ordinate-method for radiative transfer in planetary atmospheres: Generalization of the doubling and adding method.
-       Journal of Quantitative Spectroscopy and Radiative Transfer, 55(6), 761-779.
+.. [2] Buras, R., Dowling, T., & Emde, C. (2011).
+       New secondary-scattering correction in DISORT with increased efficiency
+       for forward scattering. Journal of Quantitative Spectroscopy and
+       Radiative Transfer, 112(12), 2028-2034.
+       https://doi.org/10.1016/j.jqsrt.2011.03.019
 
 .. toctree::
     :maxdepth: 2

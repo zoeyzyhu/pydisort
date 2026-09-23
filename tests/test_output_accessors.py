@@ -5,6 +5,10 @@
 intensities. They read the same solve through different paths, so they have to
 be consistent: same level count, same fluxes, same ordering.
 
+This module checks requested-depth shapes for all three accessors, flux
+reconciliation with gather_flx, and upward ordering for forward only. The
+no-usrtau check covers forward and gather_flx shapes, not gather_rad.
+
 That consistency is not automatic. ``gather_flx`` used to size its output
 ``nlyr + 1``, which is the level count only when ``usrtau`` is off, and read
 past the end of cdisort's ``out->rad`` whenever a caller asked for fewer

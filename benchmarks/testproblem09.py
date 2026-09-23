@@ -120,9 +120,8 @@ def build_pydisort(nwave, radiance, nstr=NSTR, nlyr=NLYR, slope=SSALB_SLOPE):
 def pydisort_flux(radiance, **kwargs):
     """Flux at each `USER_TAU`, shape (ntau, 2) as [upward, downward].
 
-    `forward` honours `user_tau` and returns exactly those levels, whereas
-    `gather_flx` reports the full internal level grid -- so this return value
-    is what lines up with the other implementations. The downward column is
+    `forward` and `gather_flx` both honour `user_tau`. Here `forward` supplies
+    the two flux fields used to compare the implementations. The downward column is
     direct + diffuse (rfldir + rfldn), matching FLX(...) in
     src/disort_impl.h. Fluxes come back in both radiance and flux mode, which
     is what makes them usable as the common cross-check.

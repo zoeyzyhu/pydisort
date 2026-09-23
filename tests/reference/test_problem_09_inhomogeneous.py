@@ -2,9 +2,8 @@
 
 Six layers, every one of them different: the optical thickness grows 1, 2, ...
 6 and the single-scatter albedo ramps from 0.65 to 0.90. Test Problems 1, 2, 3
-and 6 are all single slabs, so this is the only reference problem in the suite
-where the layer-to-layer interface matching runs at all, and it is the most
-intricate part of the solver.
+and 6 are single slabs; this problem exercises layer-to-layer matching.
+Problem 10 also uses this six-layer medium.
 
 The three cases build on each other:
 
@@ -17,8 +16,8 @@ The three cases build on each other:
 
 Note on 9b and 9c: the upstream C driver sets ``ncase = 1``, so it runs 9a and
 leaves the other two as unreached code. Their reference values are published
-alongside 9a's and are reproduced here to better than 1e-6, which is the
-precision those tables are quoted to.
+alongside 9a's. The assertions use the shared RTOL = 1e-4 and ATOL = 1e-6,
+including an absolute tolerance for small tabulated values.
 
 Reference:
     Devaux, C., Grandjean, P., Ishiguro, Y. and C.E. Siewert, 1979: On

@@ -64,7 +64,8 @@ PYBIND11_MODULE(pydisort, m) {
               std::vector<std::string> items = {"fbeam", "albedo", "fluor",
                                                 "fisot", "temis"};
 
-              // broadcast dimensions to (nwave, ncol)
+              // Insert leading singleton dimensions for unprefixed keys.
+              // forward still requires exact (nwave, ncol) sizes.
               if (std::find(items.begin(), items.end(), key) != items.end()) {
                 while (value.dim() < 2) {
                   value = value.unsqueeze(0);
@@ -72,7 +73,7 @@ PYBIND11_MODULE(pydisort, m) {
               }
             }
 
-            // broadcast dimensions to (nwave, ncol, nlyr, nprop)
+            // Insert leading singleton dimensions, without expanding batches.
             while (prop.dim() < 4) {
               prop = prop.unsqueeze(0);
             }

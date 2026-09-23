@@ -1,11 +1,9 @@
 """DISORT Test Problem 3: Henyey-Greenstein scattering.
 
 A single conservatively scattering layer with a strongly forward-peaked phase
-function (g = 0.75). This is the first reference problem whose phase function
-needs more Legendre moments than there are streams: nmom = 32 against
-nstr = 16, which is what forces DISORT's delta-M truncation to run. Test
-Problems 1 and 2 have 0 and 2 non-zero moments respectively, so neither
-exercises that path.
+function (g = 0.75), with nmom = 32 and nstr = 16. The nonzero moment at
+order nstr activates delta-M scaling. This condition can also hold when
+nmom == nstr, so this is not exclusive coverage of that code path.
 
 Reference:
     Van de Hulst, H.C., 1980: Multiple Light Scattering, Tables, Formulas and

@@ -5,7 +5,7 @@ Performance measurements for pydisort.
 | Script | What it measures |
 | --- | --- |
 | [`compare_cdisort.py`](compare_cdisort.py) | pydisort vs. cdisort: what the Python wrapper costs, and what batching buys. Builds its own C baseline, so no cmake and no libtorch. |
-| [`compare_pythonicdisort.py`](compare_pythonicdisort.py) | pydisort vs. PythonicDISORT: the interpreted/compiled gap. |
+| [`compare_pythonicdisort.py`](compare_pythonicdisort.py) | pydisort vs. PythonicDISORT: end-to-end solver performance. |
 | [`testproblem09.py`](testproblem09.py) | The shared problem definition. Not a benchmark, but imported by both scripts above, so the configuration is written down exactly once. |
 | [`bench_cdisort.cpp`](bench_cdisort.cpp) | The C baseline, compiled on demand by `compare_cdisort.py`. Not run directly. |
 
@@ -22,19 +22,16 @@ atmospheric radiation calculations, and repeat it for a growing number of
 wavenumbers.
 
 Every measurement quoted in this file was taken on an **Apple M5 Max (18
-logical CPUs)** running pydisort 1.8.5, torch 2.10.0 and Apple clang 21. The
-numbers are illustrative rather than portable, so re-run the scripts on your
-own hardware before relying on them.
+logical CPUs)** with the package and compiler versions shown in the recorded
+output below. Re-run the scripts to measure performance on your own hardware.
 
 They answer two different questions, which is why they are separate scripts:
 
 * **`compare_cdisort.py`**: pydisort wraps cdisort, so this measures what the
-  wrapper costs. The single-core ratio should be 1.0; the rest is what
-  batching over wavenumbers buys. This is the durable result: it does not
-  depend on a third-party package's release.
+  wrapper costs on one thread and the benefit of batching over wavenumbers
+  on multiple threads.
 * **`compare_pythonicdisort.py`**: [PythonicDISORT](https://doi.org/10.21105/joss.06442)
-  (Ho 2024) is a pure-Python reimplementation, included to show the
-  interpreted/compiled gap.
+  (Ho 2024) is a pure-Python reimplementation, compared on the same workload.
 
 Both import their problem definition from `testproblem09.py`, so the thing
 being timed is defined in one place rather than copied into each script.
@@ -87,10 +84,13 @@ what establishes that the baseline solves the intended problem.
 
 ### Result
 
-Apple M5 Max (18 logical CPUs), pydisort 1.8.5, torch 2.10.0, Apple clang 21,
-best of 3, radiance mode:
+Apple M5 Max (18 logical CPUs), best of 3, radiance mode:
 
 ```
+pydisort      : 1.8.5
+torch         : 2.10.0
+compiler      : Apple clang 21
+
 Speed-up over cdisort (hoisted)
    nwave         1 core       10 cores
        1          0.98x          0.98x
@@ -102,11 +102,8 @@ Speed-up over cdisort (hoisted)
 (same problem at 18 threads: 12.71x at nwave=1000, 13.25x at nwave=10000)
 ```
 
-**The wrapper is free.** pydisort on one thread is 0.98-1.01x of cdisort
-across four orders of magnitude of workload. That is the expected result,
-since it calls the same `c_disort` on the same inputs, but it is worth pinning
-down, because it is exactly what a tensor-marshalling layer could plausibly
-get wrong.
+**Single-threaded performance closely matches cdisort on this workload.**
+The measured speed ratio is 0.98-1.01x across the spectral batch sizes above.
 
 **Threading is where the gain is, and it is bounded by the core count.** On 10
 threads the ratio saturates around **8.3x** (83% parallel efficiency); raising
@@ -118,7 +115,7 @@ this ratio with the thread count and the CPU, or it does not mean anything.
 ## Against PythonicDISORT
 
 ```bash
-pip install pydisort PythonicDISORT
+pip install pydisort PythonicDISORT threadpoolctl
 python benchmarks/compare_pythonicdisort.py --verify-only   # seconds
 python benchmarks/compare_pythonicdisort.py                 # default sweep
 python benchmarks/compare_pythonicdisort.py \
@@ -147,9 +144,9 @@ Speed-up over PythonicDISORT
    10000          39.9x         334.7x
 ```
 
-The single-core ratio is flat at about 40x, which is the interpreter overhead
-and does not depend on problem size. The multi-threaded ratio climbs while the
-cores fill and then saturates near 335x by about 1000 wavenumbers.
+For this 32-stream, 100-layer problem, the single-thread speed-up is about
+40x across the measured spectral batch sizes. The multi-threaded speed-up
+rises as the cores fill, reaching about 335x by about 1000 wavenumbers.
 
 That saturation is why the sweep above stops at 1000. Extending it to 10000
 costs **552 s** for PythonicDISORT alone on the reference machine, and closer
@@ -158,15 +155,24 @@ script projects the runtime from one solve and says so before it starts, so a
 long sweep is a choice rather than a surprise. Add 10000 when you want the
 asymptote confirmed, not when checking a result.
 
-> ⚠️ **Do not quote this ratio as a property of pydisort.** It is a ratio
-> between two moving targets. PythonicDISORT's own performance has improved
-> across releases (this table used 1.8), and the two codes do not scale
-> identically across hardware, so the same measurement on a different machine
-> or a different PythonicDISORT version can land a factor of two or three
-> away. The durable, reproducible results are the two comparisons against
-> cdisort: **1x on one thread** and **roughly an order of magnitude
-> multi-threaded**. Re-run on your own hardware rather than citing these
-> numbers.
+Each run records package versions, hardware and thread counts alongside the
+timings so you can compare results from your own environment.
+
+### Thread control
+
+The PythonicDISORT benchmark overrides native thread environment variables to
+one, then uses `threadpoolctl` to limit loaded BLAS and OpenMP pools during
+verification and timing, including output evaluation. Limits are applied
+outside the timed loop. The pydisort runs independently select one thread and
+the count requested by `--threads`.
+
+The cdisort baseline uses its bundled, serial LINPACK routines.
+
+Run the benchmark's thread-control regression checks with:
+
+```bash
+python -m pytest benchmarks/tests/ -q
+```
 
 ## Getting the most out of pydisort
 

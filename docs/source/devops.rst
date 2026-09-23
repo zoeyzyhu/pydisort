@@ -4,7 +4,8 @@ Developer's guide to this repo
 pre-commit hooks
 ~~~~~~~~~~~~~~~~
 
-This repo uses `pre-commit` hooks to ensure that code is formatted correctly and that tests pass before committing.
+This repo uses ``pre-commit`` hooks for formatting and lint checks. Run the
+solver tests separately; the hooks do not execute them.
 This `pre-commit` hook is defined in the `.pre-commit-config.yaml` file in the root directory of this repo.
 To install the `pre-commit` hooks, run `pre-commit install` in the root directory.
 This will install the `pre-commit` hooks in the local `.git` directory.
@@ -27,7 +28,7 @@ of a change:
      - What it does
    * - ``ci.yml``
      - Pull request to ``main``, and pushes to ``main``
-     - Style checks, then builds and runs the whole test suite across a matrix
+     - Style checks, then builds and runs the CTest suite across a matrix
        of operating systems and Python versions.
    * - ``cd.yml``
      - A pull request to ``main`` is merged
@@ -60,7 +61,7 @@ hook environments are not rebuilt on every run.
         os: [ubuntu-latest, macOS-latest]
         python-version: ["3.11", "3.14"]
 
-Only the ends of the supported range are exercised here; ``release.yml`` builds
+CI exercises Python 3.11 and 3.14, not every supported Python version; ``release.yml`` builds
 wheels for every version from 3.10 to 3.14.
 
 On Linux, ``torch`` comes from the CPU index so the runner does not download a
@@ -84,8 +85,10 @@ Tests run through CTest rather than pytest directly:
 
     ctest --test-dir build --output-on-failure
 
-The C, C++ and Python tests are all registered as CTest cases (see
-:doc:`testing`), so a single command covers all of them.
+The C, C++ and Python solver tests are registered as CTest cases (see
+:doc:`testing`). Tooling checks for benchmarks, documentation rendering and
+setup guidance are :ref:`separate developer checks <separate-developer-checks>`;
+they are not exercised by this CI command.
 
 The ``cd.yml`` workflow
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -169,7 +172,7 @@ to have succeeded and none to have failed or been cancelled.
 Build system: CMake
 ~~~~~~~~~~~~~~~~~~~
 
-The build needs CMake 3.18 or newer and a C++17 compiler. Three options control
+The build needs CMake 3.20 or newer and a C++17 compiler. Three options control
 what gets configured:
 
 .. list-table::
@@ -219,10 +222,13 @@ whatever already exists in ``build/lib``, so the order matters:
     cmake --build build --parallel
     pip install . --no-build-isolation
 
-Running ``pip install .`` on its own under PEP 517 build isolation hides the
-torch you installed and produces an extension with unresolved symbols.
-``setup.py`` detects the missing import and fails with an explanation rather
-than letting the build proceed.
+The build requirements in ``pyproject.toml`` include PyTorch, so PEP 517
+isolation does not inherently mean that torch is missing. However, an isolated
+build can use a different torch installation from the one used by CMake.
+Install the declared build tools first, then disable isolation to keep the
+C++ library and Python extension on the same environment. Neither form of
+``pip install .`` replaces the CMake step. See :doc:`installation` for the
+complete dependency list and commands.
 
 The extension is linked with rpath entries for ``@loader_path/lib`` and
 ``@loader_path/../torch/lib`` (``$ORIGIN`` on Linux), so at import time it
@@ -233,4 +239,4 @@ depending on whether ``torch.cuda.is_available()``.
 Reference articles
 ~~~~~~~~~~~~~~~~~~
 
-- https://www.the-analytics.club/python-code-formatting-git-pre-commit-hook
+- `Official pre-commit documentation <https://pre-commit.com/>`_

@@ -8,15 +8,11 @@ that price is, is to compare against a trusted multi-stream reference. DISORT
 is that reference, which is why the official DISORT flux-test problems are the
 standard yardstick.
 
-This is a real workflow, not a hypothetical one. ``py2sess`` (Le, Li, Natraj &
-Spurr, submitted, https://github.com/happysky19/py2sess) is a differentiable
-implementation of the two-stream exact single-scattering method; it validates
-its public level-flux convention against exactly these DISORT flux-test cases,
-"because DISORT is a widely used multi-stream discrete-ordinate reference
-solver". Their check reports a median absolute relative difference of 0.36%
-over the comparison rows, with the large outliers concentrated where the
-absolute reference flux is very small or the phase function is strongly
-anisotropic.
+This real-world analysis demonstrates the reference-comparison workflow used
+to assess fast radiative-transfer approximations. Projects such as ``py2sess``
+(https://github.com/happysky19/py2sess) motivate this use of DISORT as a
+reference. Here the calculations use pydisort at different stream counts;
+the example does not run or measure an external two-stream implementation.
 
 This example reproduces that workflow end to end:
 
@@ -26,10 +22,12 @@ This example reproduces that workflow end to end:
    published reference values. This validates the installation against an
    external source rather than against itself.
 2. **Measure the two-stream error.** The same twelve cases are re-solved with
-   ``nstr = 2`` -- which is what a two-stream solver does, reducing the phase
-   function to a single asymmetry parameter -- and the error is summarised the
-   same way py2sess summarises theirs.
-3. **Answer "how many streams do I need?"** by sweeping the stream count.
+   ``nstr = 2`` and ``nmom = 2``. The input retains phase-function moments of
+   orders 1 and 2 plus the implicit zeroth moment; the second-order moment
+   can affect delta-M scaling. The results describe this DISORT approximation,
+   not every two-stream closure.
+3. **Answer "how many streams do I need?"** by sweeping the stream count and
+   comparing with the published fluxes. This example does not time the solves.
 
 Each stream count solves all twelve cases in a single batched
 :meth:`~pydisort.Disort.forward` call, with the cases laid out along the column
@@ -100,7 +98,8 @@ def quiet_backend():
 #
 # All cases use a single layer over a black Lambertian surface. The setups
 # match the C drivers in tests/cdisort213/test_cdisort.c, and cases 1a-1f and
-# 2a-2d are the same problems as tests/test_disort_01.py and test_disort_02.py.
+# 2a-2d are the same problems as tests/reference/test_problem_01_isotropic.py
+# and tests/reference/test_problem_02_rayleigh.py.
 #
 # Beam illumination is normalised as fbeam = pi / mu0 in the official tests,
 # so the downward flux at the top of the atmosphere is exactly pi.
@@ -180,10 +179,9 @@ def solve(nstr: int) -> dict:
     ds = Disort(op)
 
     # Optical properties: one layer per case, laid out along the column axis.
-    # Note what happens at nstr = 2: only two phase-function moments survive,
-    # so a tabulated or strongly forward-peaked phase function collapses to a
-    # single asymmetry parameter. That truncation *is* the two-stream
-    # approximation, and it is the main source of the error measured below.
+    # Supply moments 1..nstr in addition to the implicit zeroth moment.
+    # The moment at order nstr can affect delta-M scaling. Varying nstr here
+    # changes both angular quadrature and the supplied moment expansion.
     prop = torch.zeros((1, ncol, 1, 2 + nstr))
     for i, (_, tau, ssalb, phase, gg, *_rest) in enumerate(CASES):
         prop[0, i, 0, 0] = tau
@@ -228,10 +226,9 @@ def reference_values() -> dict:
     }
 
 
-# `down TOA` is the imposed boundary condition, so it is exact by construction
-# and would only flatter the statistics. Rows whose reference flux is zero have
-# no relative difference. Both are excluded, which makes the summary below
-# stricter than a comparison over every printed row.
+# Exclude imposed `down TOA` and black-surface upward flux from the scored
+# quantities. Zero reference values have undefined relative error and are
+# filtered below. Compare these statistics only with matching scoring rules.
 SCORED = ("up TOA", "down BOA", "net TOA", "net BOA")
 
 
@@ -285,7 +282,7 @@ def make_figure(reference: dict, sweep: dict, path: str) -> None:
     ax.set_xlabel("DISORT flux-test case")
     ax.set_ylabel("two-stream error [%]")
     ax.set_title(
-        "Two-stream error against the 16-stream reference", fontsize=10
+        "Two-stream error against published DISORT fluxes", fontsize=10
     )
     ax.legend(fontsize=8)
 
@@ -303,7 +300,7 @@ def make_figure(reference: dict, sweep: dict, path: str) -> None:
     ax.set_xticklabels([str(n) for n in STREAM_SWEEP])
     ax.set_xlabel("number of streams")
     ax.set_ylabel("|relative difference| [%]")
-    ax.set_title("Convergence towards the published values", fontsize=10)
+    ax.set_title("Discrepancy from published values", fontsize=10)
     ax.grid(True, which="both", lw=0.3, alpha=0.5)
     ax.legend(fontsize=8)
 
@@ -324,7 +321,7 @@ def main() -> None:
 
     reference = reference_values()
 
-    print("Validating a two-stream solver against a multi-stream reference")
+    print("DISORT stream-resolution study against published reference fluxes")
     print(
         f"  {len(CASES)} official DISORT flux-test cases, "
         f"solved in one batched call per stream count"
@@ -395,19 +392,20 @@ def main() -> None:
     print()
     paragraph(
         """
-        The outliers fall in exactly the two places py2sess identifies for the
-        same check. First, cases where the reference flux is nearly zero: 1f
+        The largest relative discrepancies occur in two regimes. First,
+        cases where the reference flux is nearly zero: 1f
         and 2c transmit almost nothing, so a tiny absolute error is a huge
         relative one. Second, the forward-peaked Henyey-Greenstein cases 3a and
-        3b, where two moments cannot represent the phase function.
+        3b, where angular resolution matters.
         """
     )
     paragraph(
         """
-        The percentiles above are not directly comparable to the ones py2sess
-        quotes (median 0.36%, 95th 13.3%): that check spans more test cases and
-        includes rows that are exact by construction. The scoring here drops
-        those rows, so these numbers are the stricter of the two.
+        These percentiles score upward TOA, downward BOA and net boundary
+        fluxes, excluding zero references and imposed boundary fluxes that
+        are exact by construction. Comparisons with another solver require
+        matching cases, output conventions and scoring rules; this selection
+        alone does not establish a stricter validation.
         """
     )
 
@@ -429,21 +427,19 @@ def main() -> None:
     print()
     paragraph(
         """
-        Four streams already remove most of the two-stream error, and by
-        sixteen the solution sits on the published values. The cost of a DISORT
-        solve grows quickly with the stream count, so this table is the
-        accuracy/cost trade-off for a given problem.
+        Four streams remove most of the two-stream discrepancy in these cases,
+        and the sixteen-stream run closely matches the published values. This
+        table measures sensitivity to angular resolution; it does not time
+        the solves or establish a runtime/accuracy trade-off.
         """
     )
     paragraph(
         f"""
-        The agreement is best at {REFERENCE_STREAMS} streams and slightly worse
-        at 32, which looks wrong until you remember what is being measured:
-        these benchmark values were themselves produced at
-        {REFERENCE_STREAMS} streams, so the table measures distance from a
-        {REFERENCE_STREAMS}-stream answer, not distance from the truth. The
-        32-stream solution is the more accurate one; it simply differs from the
-        reference by the reference's own discretisation error.
+        Agreement with the tabulated values is best at {REFERENCE_STREAMS}
+        streams and slightly worse at 32. These are finite-precision reference
+        values, not an exact solution. This comparison alone cannot establish
+        that 32 streams is more accurate or identify the cause of the residual
+        differences; assess convergence for your own quantities and cases.
         """
     )
 
@@ -471,7 +467,8 @@ def main() -> None:
     )
     assert residual < 1e-7, f"energy is not conserved: {residual}"
 
-    # (3) The comparison must converge: more streams cannot be worse.
+    # (3) For these cases the median discrepancy at 32 streams is below that
+    #     at 2 streams. This does not assert monotonic convergence.
     medians = [sweep_stats[n]["median"] for n in STREAM_SWEEP]
     assert medians[0] > medians[-1], "increasing the stream count did not help"
     assert sweep_stats[REFERENCE_STREAMS]["max"] < 0.01

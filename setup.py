@@ -9,13 +9,15 @@ try:
     from torch.utils import cpp_extension
 except ModuleNotFoundError as exc:
     raise ModuleNotFoundError(
-        "Building pydisort requires PyTorch to be importable at build time, "
-        "but 'torch' was not found. This usually happens under PEP 517 build "
-        "isolation, which hides the torch you already installed.\n"
-        "Install the supported torch first, then build without isolation:\n"
-        "    pip install 'torch==2.10.0'\n"
-        "    pip install pydisort --no-build-isolation\n"
-        "See https://github.com/zoeyzyhu/pydisort/issues/187 for details."
+        "PyTorch could not be imported while building pydisort from source. "
+        "For normal use, install a prebuilt PyPI wheel; no repository "
+        "checkout or compiler is needed:\n"
+        "    python -m pip install --only-binary=pydisort pydisort\n"
+        "If pip reports no matching distribution, check the supported "
+        "Python versions and platforms in the installation guide. "
+        "If you intended to build from source, follow its source-build "
+        "instructions:\n"
+        "    https://pydisort.readthedocs.io/en/latest/installation.html"
     ) from exc
 
 

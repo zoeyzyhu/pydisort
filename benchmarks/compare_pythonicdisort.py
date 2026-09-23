@@ -2,30 +2,21 @@
 """Compare pydisort against PythonicDISORT on DISORT Test Problem 9.
 
 PythonicDISORT (Ho 2024) is a pure-Python reimplementation of DISORT; pydisort
-wraps the C one. Comparing them measures the interpreter/compiled gap on a
-realistic radiative transfer problem, which is worth knowing before choosing
-between them.
+wraps the C one. This measures end-to-end solver performance on the same
+radiative transfer problem.
 
-The point of this script is that it compares *the same calculation*. A runtime
-ratio between two solvers only means something if they are solving the same
-problem and producing the same numbers, so the script:
+The script:
 
 1. builds the identical problem for both, from the shared definition in
    ``testproblem09.py``;
-2. **verifies that the two agree numerically, and refuses to report timings if
-   they do not**;
-3. charges both sides for the same deliverable -- PythonicDISORT returns
-   callables and defers the reconstruction at a given optical depth, so the
-   timed loop evaluates them rather than leaving that work untimed;
-4. pins BLAS threading so that "one core" means one core for both;
+2. checks numerical agreement before reporting timings;
+3. includes evaluation of PythonicDISORT's output callables at the requested
+   points in the timed calculation;
+4. limits PythonicDISORT's native thread pools to one thread;
 5. records the full provenance -- CPU, thread counts, and the version of every
    package involved.
 
-Point 5 matters more than it looks. The pydisort/PythonicDISORT ratio is not a
-fixed quantity: it depends on the hardware and on which PythonicDISORT release
-is installed (that project has itself become substantially faster over time).
-Quoting the ratio without the versions attached is not reproducible, which is
-why they are printed at the top of every run.
+Use the recorded settings and versions when comparing runs on your hardware.
 
 Usage
 -----
@@ -50,23 +41,24 @@ it when you want the asymptote confirmed, not when checking a result.
 
 Requirements::
 
-    pip install pydisort PythonicDISORT
-    pip install threadpoolctl      # optional, sharpens the BLAS report
+    pip install pydisort PythonicDISORT threadpoolctl
 """
 
-# Thread limits are read by the BLAS backend when numpy first loads it, so they
-# have to be set before numpy is imported. OMP_NUM_THREADS is deliberately left
-# alone: PyTorch uses it for its own intra-op pool, and pinning it here would
-# silently cap the multi-threaded pydisort run we are trying to measure.
+# Set startup limits before importing numerical libraries, overriding inherited
+# settings. Runtime limits below also cover already-loaded BLAS/OpenMP pools.
+# The pydisort timing sets its own intra-op thread count with torch.set_num_threads.
 import os
 
 for _var in (
     "OPENBLAS_NUM_THREADS",
+    "GOTO_NUM_THREADS",
+    "BLIS_NUM_THREADS",
     "MKL_NUM_THREADS",
     "VECLIB_MAXIMUM_THREADS",
     "NUMEXPR_NUM_THREADS",
+    "OMP_NUM_THREADS",
 ):
-    os.environ.setdefault(_var, "1")
+    os.environ[_var] = "1"
 
 import argparse  # noqa: E402
 import platform  # noqa: E402
@@ -74,6 +66,17 @@ import subprocess  # noqa: E402
 import sys  # noqa: E402
 import time  # noqa: E402
 import warnings  # noqa: E402
+
+try:
+    from threadpoolctl import threadpool_limits
+except ImportError as exc:
+    message = (
+        "This benchmark requires threadpoolctl to enforce single-threaded "
+        "PythonicDISORT runs. Install it with: python -m pip install threadpoolctl"
+    )
+    if __name__ == "__main__":
+        raise SystemExit(message) from exc
+    raise ModuleNotFoundError(message, name="threadpoolctl") from exc
 
 import numpy as np  # noqa: E402
 import torch  # noqa: E402
@@ -144,6 +147,7 @@ def pythonicdisort_call(radiance):
     )
 
 
+@threadpool_limits.wrap(limits=1)
 def pythonicdisort_flux(radiance):
     """Flux at each `user_tau`, shaped like `pydisort_flux`."""
     with warnings.catch_warnings():
@@ -227,14 +231,8 @@ def time_pydisort(nwave, nthreads, repeat, radiance):
 def pythonicdisort_solve_and_evaluate(radiance):
     """One solve *plus* evaluation of the outputs at the requested points.
 
-    PythonicDISORT returns callables and defers the reconstruction at a given
-    optical depth until one is called, whereas c_disort -- and therefore
-    pydisort -- computes its outputs at `user_tau` inside the solve. Timing
-    the bare `pydisort(...)` call against `ds.forward(...)` would let
-    PythonicDISORT off that work. It is only ~0.7% of its runtime on this
-    problem, so the correction is small, but it is the difference between the
-    two sides being charged for the same deliverable and merely looking like
-    they are.
+    Evaluate PythonicDISORT's output callables at the requested optical depths
+    and azimuths so both timed solvers produce the requested outputs.
     """
     out = pythonicdisort_call(radiance)
 
@@ -250,7 +248,9 @@ def pythonicdisort_solve_and_evaluate(radiance):
 
 
 def time_pythonicdisort(nwave, repeat, radiance):
-    with warnings.catch_warnings():
+    # Apply limits outside the timed loop, including after a multi-threaded
+    # pydisort run has changed a shared OpenMP or BLAS runtime's thread count.
+    with threadpool_limits(limits=1), warnings.catch_warnings():
         warnings.simplefilter("ignore")
         pythonicdisort_solve_and_evaluate(radiance)  # warm up
 
@@ -300,18 +300,13 @@ def report_environment(threads, radiance, repeat):
     print(f"PythonicDISORT: {package_version('PythonicDISORT')}")
     print(f"torch         : {torch.__version__}")
     print(f"numpy         : {np.__version__}")
-    for line in blas_info():
-        print(f"BLAS          : {line}")
+    with threadpool_limits(limits=1):
+        for line in blas_info():
+            print(f"Pythonic pools: {line}")
     print(
-        f"threads       : pydisort single=1, multi={threads}; "
+        f"threads       : PythonicDISORT=1; pydisort single=1, multi={threads}; "
         f"timing best of {repeat}"
     )
-    print()
-    print(
-        "NOTE: the pydisort/PythonicDISORT ratio depends on both the machine"
-    )
-    print("      and the PythonicDISORT release. Quote it with the versions")
-    print("      above attached, or it is not reproducible.")
     print()
 
 
@@ -411,7 +406,7 @@ def main():
     # PythonicDISORT dominates the runtime and scales linearly in nwave, so a
     # single solve projects the total closely enough to warn on. Without this
     # a --nwave 10000 sweep looks like a hung process for several minutes.
-    with warnings.catch_warnings():
+    with threadpool_limits(limits=1), warnings.catch_warnings():
         warnings.simplefilter("ignore")
         start = time.perf_counter()
         pythonicdisort_solve_and_evaluate(radiance)
@@ -481,15 +476,7 @@ def main():
         print(f"{nwave:>8} {cell}")
 
     print()
-    print(
-        "The single-core ratio is the interpreter/compiled gap and should be"
-    )
-    print(
-        "roughly flat. The multi-threaded ratio climbs while the cores fill,"
-    )
-    print(
-        "then saturates -- it does not keep growing with spectral resolution."
-    )
+    print("Results correspond to the workload, versions and hardware above.")
 
     if args.compare_modes:
         other = "flux" if radiance else "radiance"

@@ -123,12 +123,13 @@ We provide the `pydisort` library for Python users. The package can be installed
 pip install pydisort
 ```
 
-Prebuilt wheels are published for CPython 3.10-3.14, and `pip` pulls in a compatible `torch` automatically. `pydisort` is a compiled PyTorch extension, so if `pip` falls back to building from source (for example on a platform with no matching wheel), `torch` must be importable at build time. Install it first and disable build isolation so the build can see it:
-
-```bash
-pip install 'torch==2.10.0'
-pip install pydisort --no-build-isolation
-```
+Prebuilt wheels cover CPython 3.10–3.14 on Linux x86-64
+(glibc 2.28 or newer with PyTorch) and Apple Silicon macOS 15 or newer.
+`pip` installs the required PyTorch version automatically.
+The release workflow publishes wheels only, so there is no automatic source-build
+fallback when a wheel does not match. See the
+[installation guide](https://pydisort.readthedocs.io/en/latest/installation.html)
+for the complete checkout → CMake → pip source-build procedure.
 
 Here is a step-by-step tutorial of how to use the pydisort package:
 
@@ -146,10 +147,12 @@ from pydisort import DisortOptions, Disort
 
 DISORT solves plane-parallel radiative transfer problems in a 1D atmosphere
 The dimensions are number of layers (nlyr), number of streams (nstr),
-number of phase moments (nmom), and number of phases (nphase).
-Usually, `nlyr`, `nstr`, `nmom` and `nphase` are the same.
+number of phase-function moments (nmom), and number of explicit phase-function
+grid points (nphase). Layer count is independent of angular resolution;
+these values happen to be equal in this small example. `nphase` is not the
+number of output azimuths.
 
-The example above sets the number of layers to 4, number of streams to 4.
+The example below sets the number of layers to 4, number of streams to 4.
 Radiation flags are packed in a string and passed to the flags function.
 See later for more details on the flags.
 
@@ -182,15 +185,19 @@ which must be the same as the number of layers in the DisortOptions object.
 
 ```python
 import torch
+torch.set_default_dtype(torch.float64)
 tau = torch.tensor([0.1, 0.2, 0.3, 0.4]).unsqueeze(-1)
 ```
 
-- Step 5. Run radiative transfer and get intensity result.
+- Step 5. Run radiative transfer and get fluxes.
 
 A `ds` object is constructed as if it is one layer of a Neural Network model.
 The core function is the forward function, which takes the optical properties and radiation boundary conditions as input.
 Radiation boundary conditions are passed as keyword arguments.
-The dimensions will be automatically expanded to account for degenerate dimensions such as wave and column.
+Missing leading dimensions are inserted as singleton axes; inputs are not
+automatically repeated across larger batches. Shapes must match the configured
+wave and column counts. See the
+[shape rules](https://pydisort.readthedocs.io/en/latest/usage.html#the-two-batch-dimensions).
 The output is the upward and downward fluxes at each level of the atmosphere.
 
 ```python
@@ -226,30 +233,27 @@ It throws exceptions if incompatible dimensions are provided. So, ensure that yo
 
 The [`examples/`](examples/) directory contains four complete, runnable
 calculations that build from the simplest possible DISORT problem to a
-research-level analysis. Each one is standalone, prints its results, and ends
-with assertions against an analytic solution or a conservation law, so running
-one is also a way to verify your installation.
+research-level analysis. Each is standalone, prints its results, and ends
+with assertions against reference values, analytic limits, conservation laws
+or internal consistency relations. Running them checks those configurations.
 
 | Example | What it covers |
 | --- | --- |
 | [`example_01_beam_attenuation.py`](examples/example_01_beam_attenuation.py) | The basic workflow; beam attenuation, validated against the Beer-Lambert law to machine precision. |
 | [`example_02_thermal_emission.py`](examples/example_02_thermal_emission.py) | Thermal emission and longwave cooling rates for an Earth-like column; batching over the **spectral** axis. |
 | [`example_03_aerosol_scattering.py`](examples/example_03_aerosol_scattering.py) | Multiple scattering and radiances; batching over the **column** axis to build a remote-sensing lookup table. |
-| [`example_04_two_stream_validation.py`](examples/example_04_two_stream_validation.py) | **A real-world analysis problem.** Using pydisort as the multi-stream reference to measure the error of a fast two-stream solver. |
+| [`example_04_two_stream_validation.py`](examples/example_04_two_stream_validation.py) | **A real-world analysis problem.** Assessing the two-stream DISORT approximation against published fluxes and exploring stream resolution. |
 
 ```bash
 pip install pydisort
 python examples/example_01_beam_attenuation.py
 ```
 
-Example 4 is the workflow behind every fast radiation scheme: two-stream
-solvers are cheap enough for climate models and operational retrievals, and
-DISORT is the multi-stream reference you check them against. It solves twelve
-official DISORT flux-test cases, reproduces the published benchmark fluxes to
-**0.0005%**, then re-solves them at two streams to show where the approximation
-breaks down, on near-zero fluxes and on forward-peaked phase functions. This is
-the same check [`py2sess`](https://github.com/happysky19/py2sess) uses to
-validate its own two-stream solver. See
+Example 4 solves twelve official DISORT flux-test cases, reproduces selected
+published benchmark fluxes to about **0.0005%** at 16 streams, and inspects
+discrepancies as the stream count changes. It runs pydisort only, not an
+external solver such as py2sess. Its percentiles cannot rank different solvers
+without matching their cases, output conventions and scoring rules. See
 [`examples/README.md`](examples/README.md) for details.
 
 <div align="right"><a href="#table-of-contents"><img src="docs/img/top_green_small.png" width="32px"></div>
@@ -264,7 +268,7 @@ The full documentation is hosted at **[pydisort.readthedocs.io](https://pydisort
 | --- | --- |
 | [Installation and Quickstart](https://pydisort.readthedocs.io/en/latest/installation.html) | Install, verify the install, and a minimal working program. |
 | [Statement of Need](https://pydisort.readthedocs.io/en/latest/statement_of_need.html) | What pydisort solves, and who it is for. |
-| [User Guide](https://pydisort.readthedocs.io/en/latest/usage.html) | Input and output tensor layouts, and broadcasting over wavelengths and columns. |
+| [User Guide](https://pydisort.readthedocs.io/en/latest/usage.html) | Input/output tensor layouts, batching and singleton-dimension rules. |
 | [API Reference](https://pydisort.readthedocs.io/en/latest/api.html) | Every class, method and flag. |
 | [Automated Tests](https://pydisort.readthedocs.io/en/latest/testing.html) | How correctness is established, and how to run and extend the suite. |
 | [Performance](https://pydisort.readthedocs.io/en/latest/benchmarks.html) | Timings against cdisort and PythonicDISORT, and how to reproduce them. |
@@ -313,12 +317,13 @@ reporting any timing**, and exit non-zero if they do not.
 python benchmarks/compare_cdisort.py --verify-only
 python benchmarks/compare_cdisort.py --alloc both
 
-# the interpreted/compiled gap, against the pure-Python PythonicDISORT
+# end-to-end solver performance against PythonicDISORT
+python -m pip install PythonicDISORT threadpoolctl
 python benchmarks/compare_pythonicdisort.py --verify-only
 python benchmarks/compare_pythonicdisort.py --threads 10
 ```
 
-On one thread pydisort matches cdisort exactly, so the wrapper costs nothing;
+Single-threaded performance closely matches cdisort on this workload;
 with ten threads it is roughly an order of magnitude faster. The pure-Python
 PythonicDISORT is slower still, though by how much depends on the machine and
 on its version, so that ratio is worth measuring rather than quoting.
@@ -335,120 +340,37 @@ configuration being timed is written down once rather than copied. See
 
 ## <a id='for-c++-users'><img src="docs/img/cpp.png" alt="C++" align=left width=24> For C++ developers</a>
 
-### <a id='check-dependencies'> 🔻 Check dependences</a>
+### <a id='check-dependencies'>Build requirements</a>
 
-This repository supports both the Linux and MacOS operating systems. The following dependencies are required for building the C++ wrapper:
+Use CMake 3.20 or newer, a C++17 compiler (GCC 9 or newer on Linux, or
+compatible Apple Clang on macOS), and a supported CPython version.
+PyTorch must be installed in the active environment before running CMake.
 
-- `cmake` (version >= 3.18)
-- `g++` (version >= 7.5.0)
-- `python3` (version >= 3.10)
+### <a id='build-and-run-the-c++-wrapper'>Build the C++ wrapper</a>
 
-You could check the versions of these dependencies using the following commands:
-
-```bash
- cmake --version
- g++ --version
- python3 --version
-```
-
-If you need to install these dependencies, use the following commands (replacing `apt-get` with your package manager if you are not using Ubuntu):
+From a clean checkout and an activated virtual environment:
 
 ```bash
- sudo apt-get install cmake
- sudo apt-get install g++
- sudo apt-get install python3
+python -m pip install 'torch==2.10.0' numpy pytest 'cmake>=3.20' ninja setuptools 'setuptools-scm>=8' wheel
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=ON
+cmake --build build --parallel
 ```
 
-### <a id='build-and-run-the-c++-wrapper'> 🔻 Build and run the C++ wrapper</a>
+### <a id='build-and-run-the-python-package'>Build the Python bindings and validate</a>
 
-You could fork or clone this repository to your local machine.
+Run from the repository root, after the CMake build:
 
 ```bash
-git clone https://github.com/zoeyzyhu/pydisort.git
+python -m pip install --no-build-isolation .
+python -m pytest tests/ -v -rs
+ctest --test-dir build --output-on-failure
 ```
 
-Before building the package, you need to install the dependencies for the `pydisort` package and the pre-commit hooks. We recommend that you use a virtual environment for Python to install the `pydisort` package and the dependencies. You could use the following commands to create a virtual environment, install the dependencies, and build the package:
-
-```bash
-cd pydisort
-python3 -m venv env
-source env/bin/activate  # Make sure you are in the virtual environment
-
-# Tools for developing against the repository
-pip3 install pre-commit pytest
-pre-commit install
-```
-
-`pre-commit` runs the checks and lints configured in `.pre-commit-config.yaml`, which are very helpful if you'd like to make changes to the repository cloned. You could run them manually using the following command to ensure that your changes are compliant with the industry standards:
-
-```bash
-pre-commit run --all-files
-```
-
-> 💡 Please feel free to add more checks and lints that suit your need to the `pre-commit` hooks. You could find more information about `pre-commit` [here](https://pre-commit.com/).
-
-If you have no interest in adding or modifying features to the `pydisort` package, and just want to quickly build and run the C++ wrapper to your own use, you can follow the commands below:
-
-The C++ build resolves PyTorch through CMake (`find_package(Torch REQUIRED)`), so `torch` has to be importable in the active environment before you configure. `pip install .` in the next section pulls it in on its own, but a standalone `cmake ..` does not.
-
-```bash
-pip3 install 'torch==2.10.0'  # only when building the C++ side on its own
-
-mkdir build
-cd build
-cmake ..
-make
-```
-
-After the build is complete, you can run the C++ wrapper using the following commands:
-
-```bash
-# Assume that you are still in the build/ directory
-cd tests
-
-# Run the test
-./test_disort.release
-```
-
-### <a id='build-and-run-the-python-package'> 🔻 Build and run the Python package</a>
-
-If you follow the steps in the previous section, you will have a C++ wrapper that can be used by Python, and a Python packaged called `pydisort`, which has been binded via `pybind11`. You could simply install and test the Python package using the following command:
-
-```bash
-# Assume that you are still in the build/tests/ directory
-# Install the Python package
-cd ../..  # Go back to the root directory
-pip install .
-```
-
-You can now run the test cases for the Python package with `pytest`:
-
-```bash
-$ pytest tests/
-======================================= test session starts ========================================
-platform darwin -- Python 3.12.13, pytest-9.1.1, pluggy-1.6.0
-collected 188 items
-
-tests/cuda/test_cpu_cuda_agreement.py ssssssssssssssssssssssssssssssssssssssssssssssssssssss [ 28%]
-ssssssssssssss                                                                               [ 36%]
-tests/cuda/test_fast_flux_routing.py ssssssssssssssssssssss                                  [ 47%]
-tests/reference/test_problem_01_isotropic.py ......                                          [ 51%]
-tests/reference/test_problem_02_rayleigh.py ....                                             [ 53%]
-tests/reference/test_problem_03_henyey_greenstein.py ...                                     [ 54%]
-tests/reference/test_problem_06_lambertian_surface.py ....                                   [ 56%]
-tests/reference/test_problem_09_inhomogeneous.py .....                                       [ 59%]
-tests/reference/test_problem_10_user_vs_quadrature.py ...                                    [ 61%]
-tests/test_attenuation.py .                                                                  [ 61%]
-tests/test_batching.py .........                                                             [ 66%]
-tests/test_examples.py ....                                                                  [ 68%]
-tests/test_input_validation.py ...........                                                   [ 74%]
-tests/test_output_accessors.py .........                                                     [ 79%]
-tests/test_scattering_moments.py .......................................                     [100%]
-
-================================== 98 passed, 90 skipped in 0.45s ==================================
-```
-
-The 90 skips are the CUDA agreement checks in [`tests/cuda/`](tests/cuda/), which run only where a GPU is available. Add `-v` to list the individual test cases instead of one line per file.
+The pip step links the C++ library from `build/lib`; it does not run CMake.
+`-v` lists individual test cases and `-rs` explains skips. CUDA checks are
+skipped when their GPU requirements are not met; counts can change as tests
+are added. See the [contributor guide](CONTRIBUTING.md) for development tools
+and documentation checks.
 
 <div align="right"><a href="#table-of-contents"><img src="docs/img/top_green_small.png" width="32px"></div>
 

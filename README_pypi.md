@@ -14,11 +14,12 @@ A modern Python package for the DISORT (Discrete Ordinate Radiative Transfer) al
 
 `pydisort` provides a high-level Python API to the well-tested C implementation of DISORT, originally developed in Fortran (Stamnes et al. 1988) and later ported to C as `cdisort` by Timothy E. Dowling, which is a critical component of `libRadTran`. To support Python integration, the C code was first encapsulated in C++ classes, which were then exposed to Python using `pybind11`. For efficient memory management and potential GPU acceleration, `pydisort` leverages `PyTorch` tensors, paving the way for future applications in machine learning and large-scale parallel computation.
 
-The normal usage of pydisort is to create a `pydisort.DisortOptions` object first and then initialize the `pydisort.cpp.Disort` object with the `pydisort.DisortOptions` object by:
+The normal usage of pydisort is to create a `pydisort.DisortOptions` object first and then initialize the `pydisort.Disort` object with the `pydisort.DisortOptions` object by:
 
 ```python
 >>> import torch
 >>> from pydisort import DisortOptions, Disort
+>>> torch.set_default_dtype(torch.float64)
 >>> op = DisortOptions().flags("onlyfl,lamber")
 >>> op.ds().nlyr = 4
 >>> op.ds().nstr = 4
@@ -41,11 +42,11 @@ tensor([[[[0.0000, 3.1416],
 pip install pydisort
 ```
 
-Prebuilt wheels are published for CPython 3.10-3.14, and `pip` pulls in a compatible `torch` automatically. `pydisort` is a compiled PyTorch extension, so if `pip` builds from source (e.g. no matching wheel for your platform), `torch` must be importable at build time. Install it first and disable build isolation:
-
-```bash
-pip install 'torch==2.10.0'
-pip install pydisort --no-build-isolation
-```
+Prebuilt wheels cover CPython 3.10–3.14 on Linux x86-64
+(glibc 2.28 or newer with PyTorch) and Apple Silicon macOS 15 or newer.
+`pip` installs the required PyTorch automatically. The release workflow
+publishes wheels only: if no wheel matches, follow the
+[source-build instructions](https://pydisort.readthedocs.io/en/latest/installation.html)
+to build the C++ library with CMake before installing the Python bindings.
 
 For a detailed documentation, please visit https://pydisort.readthedocs.io/.

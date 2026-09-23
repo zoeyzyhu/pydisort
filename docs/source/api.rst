@@ -1,20 +1,12 @@
 API Reference
 =============
 
-Main Classes
-------------
+This reference is generated from ``python/pydisort.pyi`` in the documentation
+checkout, including parameter descriptions, units, shapes and overloads.
+It does not import a separately installed version of pydisort.
 
-.. autoclass:: pydisort.DisortOptions
-   :members:
-   :special-members: __init__
+For a runnable introduction, start with :doc:`installation`; for input layout
+and boundary conditions, see :doc:`usage`.
 
-.. autoclass:: pydisort.cpp.Disort
-   :members: gather_flx, gather_rad, forward
-
-.. autoclass:: pydisort.disort_state
-   :members:
-
-Main Functions
---------------
-
-.. autofunction:: pydisort.scattering_moments
+Tensor arguments use `torch.Tensor
+<https://docs.pytorch.org/docs/stable/tensors.html>`_.

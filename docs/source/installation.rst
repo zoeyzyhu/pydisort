@@ -5,11 +5,12 @@ Install
 -------
 
 pydisort is published on `PyPI <https://pypi.org/project/pydisort/>`_ with
-prebuilt binary wheels, so no compiler and no Fortran toolchain are needed:
+prebuilt binary wheels, so no compiler or Fortran toolchain is needed on a
+matching platform:
 
 .. code-block:: bash
 
-  pip install pydisort
+  python -m pip install pydisort
 
 ``pip`` pulls in a compatible ``torch`` automatically.
 
@@ -24,10 +25,18 @@ Supported platforms
      - Supported
    * - Python
      - CPython 3.10, 3.11, 3.12, 3.13, 3.14
-   * - Operating system
-     - Linux (glibc 2.28 or newer) and macOS
+   * - Linux wheels
+     - x86-64, glibc 2.28 or newer (including the PyTorch dependency)
+   * - macOS wheels
+     - Apple Silicon (arm64), macOS 15 or newer
    * - Dependencies
      - ``numpy``, ``torch`` (installed automatically)
+
+The release workflow targets these platforms; consult the
+`PyPI download files <https://pypi.org/project/pydisort/#files>`_ for available
+wheels. The workflow does not build wheels for Windows, Intel macOS, Linux ARM
+or free-threaded Python. A source build is not a guarantee of support on those
+targets.
 
 The glibc floor of 2.28 is inherited from PyTorch v2.7 and later. Wheels are
 built and published automatically with ``cibuildwheel`` through GitHub Actions.
@@ -35,14 +44,29 @@ built and published automatically with ``cibuildwheel`` through GitHub Actions.
 Installing from source
 ~~~~~~~~~~~~~~~~~~~~~~
 
-If ``pip`` finds no matching wheel it falls back to building from the source
-distribution. pydisort is a compiled PyTorch extension, so ``torch`` must be
-importable *at build time*. Install it first and disable build isolation:
+PyPI releases publish wheels, not a source distribution. If no wheel matches,
+``pip install pydisort`` cannot automatically fall back to a source build.
+Build from a repository checkout instead. Use the same activated Python
+environment for CMake and pip:
 
 .. code-block:: bash
 
-  pip install 'torch==2.10.0'
-  pip install pydisort --no-build-isolation
+  git clone https://github.com/zoeyzyhu/pydisort.git
+  cd pydisort
+  python3 -m venv env
+  source env/bin/activate
+  python -m pip install --upgrade pip
+  python -m pip install 'torch==2.10.0' numpy 'cmake>=3.20' ninja \
+      setuptools 'setuptools-scm>=8' wheel
+  cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=OFF
+  cmake --build build --parallel
+  python -m pip install --no-build-isolation .
+
+This builds the CPU configuration. A C++17 compiler is required (GCC 9 or
+newer on Linux, or a compatible Apple Clang on macOS). CMake builds the C++
+library first; ``setup.py`` only builds the Python bindings and links that
+library. Build isolation is disabled to keep both stages on the same PyTorch
+installation. To reproduce a release, check out its tag before building.
 
 Verify the installation
 -----------------------
@@ -53,15 +77,18 @@ Verify the installation
   >>> pydisort.__version__               # doctest: +SKIP
   '1.8.5'
 
-For an end-to-end check that also validates the numerics, run the first
-example, which compares the solver against the analytic Beer-Lambert solution:
+The quickstart below works directly with an installed wheel. For the
+Beer-Lambert example and the test suite, first obtain the repository files:
 
 .. code-block:: bash
 
+  git clone https://github.com/zoeyzyhu/pydisort.git
+  cd pydisort
   python examples/example_01_beam_attenuation.py
 
-It ends with ``OK: direct beam reproduces the Beer-Lambert law to machine
-precision.`` See :doc:`testing` for the full test suite.
+Use a checkout matching your installed release when validating a release.
+The example ends with ``OK: direct beam reproduces the Beer-Lambert law to
+machine precision.`` See :doc:`testing` for the full test suite.
 
 Quickstart
 ----------
@@ -70,28 +97,7 @@ Every pydisort program has the same two steps: describe the problem with a
 :class:`pydisort.DisortOptions` object, then run it by calling
 :meth:`~pydisort.Disort.forward` on a tensor of optical properties.
 
-.. code-block:: python
-
-  >>> import torch
-  >>> from pydisort import Disort, DisortOptions
-  >>>
-  >>> # 1. describe the problem
-  >>> op = DisortOptions().flags("onlyfl,lamber")
-  >>> op.ds().nlyr = 4      # atmospheric layers
-  >>> op.ds().nstr = 4      # discrete-ordinate streams
-  >>> op.ds().nmom = 4      # phase-function moments
-  >>> op.ds().nphase = 4
-  >>>
-  >>> # 2. build the solver and run it
-  >>> ds = Disort(op)
-  >>> tau = torch.tensor([0.1, 0.2, 0.3, 0.4]).unsqueeze(-1)
-  >>> flx = ds.forward(tau, fbeam=torch.tensor([3.14159]))
-  >>> flx
-  tensor([[[[0.0000, 3.1416],
-          [0.0000, 2.8426],
-          [0.0000, 2.3273],
-          [0.0000, 1.7241],
-          [0.0000, 1.1557]]]])
+.. include:: _snippets/quickstart.rst
 
 The returned tensor has shape ``(nwave, ncol, nlvl, 2)``: wavelength, column,
 level, and then upward and downward flux. :doc:`usage` explains those
@@ -132,12 +138,14 @@ Flags are passed as one comma-separated string to
    * - ``quiet``
      - Suppress cdisort's internal printout.
 
-The full list is documented on :class:`pydisort.DisortOptions`.
+The full list is documented on :class:`pydisort.DisortOptions`. Some backend
+flags are recognized but not supported through Python; see
+:ref:`python-flag-support` before enabling additional flags.
 
 Where to go next
 ----------------
 
-* :doc:`usage`, the input and output dimensions, and how broadcasting works.
+* :doc:`usage`, input/output shapes, batching and singleton dimensions.
 * :doc:`examples`, four complete, self-checking calculations, ending with a
   real-world solver-validation study.
 * :doc:`api`, the full API reference.
@@ -148,22 +156,19 @@ Building the C++ library
 ------------------------
 
 pydisort also ships a C++ API for embedding the solver in larger C or C++
-simulation frameworks. Building it requires ``cmake`` (>= 3.18), a C++17
-compiler and Python 3.10 or newer. CMake resolves PyTorch through
-``find_package(Torch REQUIRED)``, so ``torch`` has to be importable in the
-active environment before you configure:
+simulation frameworks. Building it requires ``cmake`` (>= 3.20), a C++17
+compiler and Python 3.10 or newer. Use the environment and source-build
+procedure above. To enable the C, C++ and Python test targets afterwards:
 
 .. code-block:: bash
 
-  git clone https://github.com/zoeyzyhu/pydisort.git
-  cd pydisort
-  pip install 'torch==2.10.0'
+  python -m pip install pytest
   cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=ON
-  cmake --build build
-  ctest --test-dir build
+  cmake --build build --parallel
+  python -m pip install --no-build-isolation .
+  ctest --test-dir build --output-on-failure
 
-See the repository ``README.md`` for the full C++ developer instructions, and
-:doc:`contribute` for the contributor workflow.
+See :doc:`contribute` for the contributor workflow.
 
 Getting help
 ------------

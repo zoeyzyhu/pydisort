@@ -19,8 +19,9 @@ incoming direction to every outgoing one. For realistic atmospheres with many
 vertical layers, strong scattering and many wavelengths, radiative transfer
 often dominates the total cost of a simulation.
 
-Anyone who needs DISORT from Python has, until now, faced a **trade-off between
-build complexity and performance**:
+The implementations below illustrate different build and performance
+trade-offs. This is context for pydisort's design, not an exhaustive survey
+of current Python interfaces:
 
 * The **original Fortran DISORT** [1]_ is the reference implementation, but it
   relies on static memory allocation. The number of layers and streams must be
@@ -39,8 +40,8 @@ build complexity and performance**:
 * **cdisort** [3]_, the C reimplementation used inside libRadtran [4]_, is fast
   and numerically robust, adding dynamic memory allocation, consistent
   double-precision arithmetic and improved intensity corrections, but it is a
-  low-level, single-threaded library with no Python interface and no route into
-  parallel or machine-learning frameworks.
+  low-level, single-threaded C interface. Python integration and batching
+  require an additional interface layer, such as pydisort.
 
 What pydisort provides
 ----------------------
@@ -50,11 +51,13 @@ reimplementing DISORT again, and addresses cdisort's accessibility and
 scalability limitations. Specifically, it:
 
 #. **eliminates build complexity.** Prebuilt binary wheels are published on
-   PyPI for CPython 3.10 through 3.14 on Linux and macOS, so
+   PyPI for CPython 3.10 through 3.14 on the Linux and macOS targets listed in
+   :doc:`installation`, so
    ``pip install pydisort`` needs no compiler, no Fortran toolchain and no
    local build (see :doc:`installation`);
-#. **matches compiled performance.** On a single thread pydisort is as fast as
-   cdisort, with no measurable wrapper overhead;
+#. **matches compiled performance.** On the workload and hardware in
+   :doc:`benchmarks`, single-threaded performance closely matches
+   the cdisort baseline;
 #. **parallelises the dimensions that matter:** wavelength and atmospheric
    column are naturally separable in plane-parallel radiative transfer, and
    pydisort batches over both, giving roughly an order of magnitude speed-up
@@ -93,14 +96,16 @@ Scope and limitations
 pydisort inherits DISORT's physical assumptions, and it is worth being explicit
 about them:
 
-* the medium is **plane-parallel** and horizontally homogeneous within a
-  column (an approximate spherical correction is available via the ``spher``
-  flag);
+* the medium is **plane-parallel** and horizontally homogeneous
+  within a column. The backend's spherical correction requires geometry inputs
+  that are not exposed in Python (see :ref:`python-flag-support`);
 * scattering is described by **azimuthally symmetric phase-function moments**;
   polarisation is not treated;
-* the underlying numerical engine is cdisort, so results are expected to agree
-  with cdisort and with other DISORT implementations to near machine precision.
-  This is checked continuously; see :doc:`testing` and :doc:`benchmarks`.
+* the underlying numerical engine is cdisort. Agreement with its direct C
+  interface is checked for the benchmark configuration; published-reference
+  tests use documented absolute and relative tolerances. This does not imply
+  machine-precision agreement with every DISORT implementation or configuration;
+  see :doc:`testing` and :doc:`benchmarks`.
 
 References
 ----------

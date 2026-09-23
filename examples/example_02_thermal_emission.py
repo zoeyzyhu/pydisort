@@ -64,9 +64,9 @@ BANDS = [
 
 
 def standard_atmosphere(plev: np.ndarray) -> np.ndarray:
-    """US Standard Atmosphere temperature on the given pressure levels."""
+    """Idealized temperature profile inspired by the US Standard Atmosphere."""
     # Hydrostatic height of each level for a 7.5 km scale height, then the
-    # standard troposphere/stratosphere piecewise-linear temperature profile.
+    # simplified troposphere/stratosphere profile, not the full standard model.
     z = -7.5e3 * np.log(plev / P_SURF)
     t = np.where(z < 11.0e3, T_SURF - 6.5e-3 * z, 216.65)
     t = np.where(z > 20.0e3, 216.65 + 1.0e-3 * (z - 20.0e3), t)
@@ -133,14 +133,17 @@ def run(plev: np.ndarray, temf: np.ndarray, tsurf: float) -> np.ndarray:
 
 
 def isothermal_check() -> float:
-    """An isothermal column over a surface at the same temperature must emit
-    exactly sigma*T^4 at every level.  Returns the relative error."""
+    """Return the relative variation of upward finite-band flux with height.
+
+    This checks uniformity, not absolute normalization against a Planck
+    integral. The reference is the computed bottom-level upward flux.
+    """
     plev = np.linspace(P_TOP, P_SURF, NLYR + 1)
     temf = np.full(NLYR + 1, T_SURF)
     flx = run(plev, temf, T_SURF)
     upward = flx[:, 0, :, 0].sum(dim=0).numpy()  # summed over bands
-    # Bands 10-3000 cm-1 capture ~99.9% of a 288 K Planck curve, so compare
-    # against that fraction of sigma*T^4 rather than the full integral.
+    # All levels share the same finite-band spectrum. A common multiplicative
+    # error could pass; an independent Planck integral is a separate check.
     return float(np.abs(upward - upward[-1]).max() / upward[-1])
 
 
@@ -179,7 +182,7 @@ def main() -> None:
     print(f"surface emission (sigma T^4) : {SIGMA * T_SURF ** 4:8.2f} W m-2")
     print(f"downward flux at the surface : {down_surface:8.2f} W m-2")
     print(
-        f"greenhouse effect            : {SIGMA * T_SURF ** 4 - olr:8.2f} W m-2"
+        f"full-spectrum surface minus band OLR: {SIGMA * T_SURF ** 4 - olr:8.2f} W m-2"
     )
 
     # Radiative heating rate.  With levels ordered top-to-bottom and F_net the
@@ -201,30 +204,32 @@ def main() -> None:
     # --- validation -------------------------------------------------------
     print()
 
-    # (1) An isothermal column over a surface at the same temperature must
-    #     emit sigma*T^4 uniformly.  This is exact, to machine precision.
+    # (1) Upward emission is uniform for an isothermal column and surface.
+    #     The finite-band flux is not the full-spectrum sigma*T^4.
     err = isothermal_check()
     print(f"isothermal-column check      : max relative deviation {err:.2e}")
     assert err < 1e-10, f"isothermal column is not uniform: {err}"
 
-    # (2) Energy conservation: integrating the heating rate over the mass of
-    #     the column must return the net flux divergence across the column,
-    #     i.e. what the surface supplies minus what escapes to space.
+    # (2) Bookkeeping: this sum telescopes the flux differences used to define
+    #     heating above. It is not an independent solver energy-balance check.
     column = (CP / GRAV * (heating / 86400.0) * dp).sum()
     expected = net_up[-1] - net_up[0]
     rel = abs(column - expected) / abs(expected)
     print(
-        f"column energy budget         : {column:.6f} vs {expected:.6f} W m-2"
+        f"heating/flux consistency     : {column:.6f} vs {expected:.6f} W m-2"
         f"  (rel. err {rel:.2e})"
     )
-    assert rel < 1e-12, f"heating rate is not energy conserving: {rel}"
+    assert rel < 1e-12, f"heating and flux differences are inconsistent: {rel}"
 
-    # (3) The OLR must lie between the emission of the coldest emitting level
-    #     and that of the surface, and the troposphere must cool to space.
+    # (3) Broad sanity checks for this chosen spectrum/profile, not universal
+    #     bounds on finite-band emission: thermal bands need their own Planck
+    #     integral for an absolute reference.
     assert SIGMA * temf.min() ** 4 < olr < SIGMA * T_SURF**4
     troposphere = players > 2.0e4
     assert heating[troposphere].max() < 0.0, "troposphere is not cooling"
-    print("OK: isothermal limit exact, energy conserved, troposphere cools.")
+    print(
+        "OK: isothermal flux uniform, heating consistent, troposphere cools."
+    )
 
 
 if __name__ == "__main__":

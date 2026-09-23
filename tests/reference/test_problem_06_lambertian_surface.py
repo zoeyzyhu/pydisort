@@ -7,9 +7,8 @@ cases 6d-6h with a Hapke BRDF and ``lamber = FALSE``, and pydisort has no way
 to select a BRDF (``brdf_type`` is fixed at ``BRDF_NONE``), so those are out of
 scope rather than omitted by oversight.
 
-Case 6c is the only reference problem in this suite with a reflecting surface.
-Every other one sets ``albedo = 0``, so without it the Lambertian reflection
-term is never exercised at all.
+Case 6c isolates Lambertian reflection without scattering. Problems 9c and
+10 also exercise reflection, in multilayer scattering and emitting media.
 
 Reference:
     Expected values transcribed from disort_test06() in
