@@ -42,12 +42,11 @@ Larger sweep::
 
     python compare_pythonicdisort.py --nwave 1,10,100,1000 --threads 10
 
-The paper's figure extends this to 10000 wavenumbers. That point costs about
-nine minutes on an Apple M5 Max and closer to an hour on the M1 Max the paper
-used, essentially all of it PythonicDISORT, and it does not change the
-conclusion: the single-core ratio is flat in nwave and the multi-threaded one
-has already saturated by 1000. Add it when reproducing the figure, not when
-checking a result.
+Extending the sweep to 10000 wavenumbers costs about nine minutes on an Apple
+M5 Max, and closer to an hour on an M1 Max, essentially all of it
+PythonicDISORT, and it does not change the conclusion: the single-core ratio
+is flat in nwave and the multi-threaded one has already saturated by 1000. Add
+it when you want the asymptote confirmed, not when checking a result.
 
 Requirements::
 

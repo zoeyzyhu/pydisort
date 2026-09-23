@@ -71,6 +71,8 @@
 <p align="center">
 <a href="#introduction">Introduction</a> &nbsp;&bull;&nbsp;
 <a href="#how-to-use">How to use</a> &nbsp;&bull;&nbsp;
+<a href="#examples">Examples</a> &nbsp;&bull;&nbsp;
+<a href="https://pydisort.readthedocs.io/en/latest/">Documentation</a> &nbsp;&bull;&nbsp;
 <a href="#contributing">Contributing</a> &nbsp;&bull;&nbsp;
 <a href="#issues">Issues?</a>
 </p>
@@ -87,6 +89,7 @@ To support Python integration, the C code was encapsulated in C++ classes. The C
 
 For efficient memory management and potential GPU acceleration, `pydisort` leverages `PyTorch` tensors, paving the way for future applications in machine learning and large-scale parallel computation.
 
+
 ![](docs/img/rainbow.png)
 
 ## Table of Contents
@@ -94,14 +97,16 @@ For efficient memory management and potential GPU acceleration, `pydisort` lever
 - [Introduction](#introduction)
 - [How to use](#how-to-use)
   - [For Python users](#for-python-users)
-  - [For C++ developers](#for-c++-users)
-    - [Check dependencies](#check-dependencies)
-    - [Build and run the C++ wrapper](#build-and-run-the-c++-wrapper)
-    - [Build and run the Python package](#build-and-run-the-python-package)
 - [Examples](#examples)
+- [Documentation](#documentation)
 - [Tests](#tests)
 - [Benchmarks](#benchmarks)
+- [For C++ developers](#for-c++-users)
+  - [Check dependencies](#check-dependencies)
+  - [Build and run the C++ wrapper](#build-and-run-the-c++-wrapper)
+  - [Build and run the Python package](#build-and-run-the-python-package)
 - [Contributing](#contributing)
+- [Citation](#citation)
 - [Issues?](#issues)
 
 ![](docs/img/rainbow.png)
@@ -118,7 +123,7 @@ We provide the `pydisort` library for Python users. The package can be installed
 pip install pydisort
 ```
 
-Prebuilt wheels are published for CPython 3.10–3.14, and `pip` pulls in a compatible `torch` automatically. `pydisort` is a compiled PyTorch extension, so if `pip` falls back to building from source (for example on a platform with no matching wheel), `torch` must be importable at build time. Install it first and disable build isolation so the build can see it:
+Prebuilt wheels are published for CPython 3.10-3.14, and `pip` pulls in a compatible `torch` automatically. `pydisort` is a compiled PyTorch extension, so if `pip` falls back to building from source (for example on a platform with no matching wheel), `torch` must be importable at build time. Install it first and disable build isolation so the build can see it:
 
 ```bash
 pip install 'torch==2.10.0'
@@ -215,21 +220,128 @@ It throws exceptions if incompatible dimensions are provided. So, ensure that yo
 
 <div align="right"><a href="#table-of-contents"><img src="docs/img/top_green_small.png" width="32px"></div>
 
-[//]: <> (!!Do not remove the following line, which is used for dividing the content)
+![](docs/img/rainbow.png)
 
-#
+## Examples
+
+The [`examples/`](examples/) directory contains four complete, runnable
+calculations that build from the simplest possible DISORT problem to a
+research-level analysis. Each one is standalone, prints its results, and ends
+with assertions against an analytic solution or a conservation law, so running
+one is also a way to verify your installation.
+
+| Example | What it covers |
+| --- | --- |
+| [`example_01_beam_attenuation.py`](examples/example_01_beam_attenuation.py) | The basic workflow; beam attenuation, validated against the Beer-Lambert law to machine precision. |
+| [`example_02_thermal_emission.py`](examples/example_02_thermal_emission.py) | Thermal emission and longwave cooling rates for an Earth-like column; batching over the **spectral** axis. |
+| [`example_03_aerosol_scattering.py`](examples/example_03_aerosol_scattering.py) | Multiple scattering and radiances; batching over the **column** axis to build a remote-sensing lookup table. |
+| [`example_04_two_stream_validation.py`](examples/example_04_two_stream_validation.py) | **A real-world analysis problem.** Using pydisort as the multi-stream reference to measure the error of a fast two-stream solver. |
+
+```bash
+pip install pydisort
+python examples/example_01_beam_attenuation.py
+```
+
+Example 4 is the workflow behind every fast radiation scheme: two-stream
+solvers are cheap enough for climate models and operational retrievals, and
+DISORT is the multi-stream reference you check them against. It solves twelve
+official DISORT flux-test cases, reproduces the published benchmark fluxes to
+**0.0005%**, then re-solves them at two streams to show where the approximation
+breaks down, on near-zero fluxes and on forward-peaked phase functions. This is
+the same check [`py2sess`](https://github.com/happysky19/py2sess) uses to
+validate its own two-stream solver. See
+[`examples/README.md`](examples/README.md) for details.
+
+<div align="right"><a href="#table-of-contents"><img src="docs/img/top_green_small.png" width="32px"></div>
+
+![](docs/img/rainbow.png)
+
+## Documentation
+
+The full documentation is hosted at **[pydisort.readthedocs.io](https://pydisort.readthedocs.io/en/latest/)**.
+
+| Page | Contents |
+| --- | --- |
+| [Installation and Quickstart](https://pydisort.readthedocs.io/en/latest/installation.html) | Install, verify the install, and a minimal working program. |
+| [Statement of Need](https://pydisort.readthedocs.io/en/latest/statement_of_need.html) | What pydisort solves, and who it is for. |
+| [User Guide](https://pydisort.readthedocs.io/en/latest/usage.html) | Input and output tensor layouts, and broadcasting over wavelengths and columns. |
+| [API Reference](https://pydisort.readthedocs.io/en/latest/api.html) | Every class, method and flag. |
+| [Automated Tests](https://pydisort.readthedocs.io/en/latest/testing.html) | How correctness is established, and how to run and extend the suite. |
+| [Performance](https://pydisort.readthedocs.io/en/latest/benchmarks.html) | Timings against cdisort and PythonicDISORT, and how to reproduce them. |
+
+<div align="right"><a href="#table-of-contents"><img src="docs/img/top_green_small.png" width="32px"></div>
+
+![](docs/img/rainbow.png)
+
+## Tests
+
+The Python test suite only needs an installed `pydisort`:
+
+```bash
+pip install pydisort pytest
+pytest tests/ -v
+```
+
+The full suite, including the C and C++ tests, is driven by CTest:
+
+```bash
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=ON
+cmake --build build
+ctest --test-dir build --output-on-failure
+```
+
+Correctness is established three ways: against **published DISORT reference
+values** (`tests/reference/` ports six of the fourteen DISORT test problems), against **analytic solutions**, and
+against **conservation laws**. See the
+[testing documentation](https://pydisort.readthedocs.io/en/latest/testing.html)
+for the full description.
+
+<div align="right"><a href="#table-of-contents"><img src="docs/img/top_green_small.png" width="32px"></div>
+
+![](docs/img/rainbow.png)
+
+## Benchmarks
+
+Spectral resolution is the dimension that makes radiative transfer expensive,
+and it is the dimension pydisort parallelizes over. Two scripts measure how
+runtime grows along it, on DISORT Test Problem 9 with 32 streams and 100
+layers. Both **verify that the two implementations agree on the fluxes before
+reporting any timing**, and exit non-zero if they do not.
+
+```bash
+# what the Python wrapper costs; builds its own C baseline, needs no cmake
+python benchmarks/compare_cdisort.py --verify-only
+python benchmarks/compare_cdisort.py --alloc both
+
+# the interpreted/compiled gap, against the pure-Python PythonicDISORT
+python benchmarks/compare_pythonicdisort.py --verify-only
+python benchmarks/compare_pythonicdisort.py --threads 10
+```
+
+On one thread pydisort matches cdisort exactly, so the wrapper costs nothing;
+with ten threads it is roughly an order of magnitude faster. The pure-Python
+PythonicDISORT is slower still, though by how much depends on the machine and
+on its version, so that ratio is worth measuring rather than quoting.
+
+Both import the problem definition from `benchmarks/testproblem09.py`, so the
+configuration being timed is written down once rather than copied. See
+[`benchmarks/README.md`](benchmarks/README.md).
+
+<div align="right"><a href="#table-of-contents"><img src="docs/img/top_green_small.png" width="32px"></div>
+
+![](docs/img/rainbow.png)
 
 <!-- For C++ developers------------------------------>
 
-### <a id='for-c++-users'><img src="docs/img/cpp.png" alt="C++" align=left width=24> For C++ developers</a>
+## <a id='for-c++-users'><img src="docs/img/cpp.png" alt="C++" align=left width=24> For C++ developers</a>
 
-#### <a id='check-dependencies'> 🔻 Check dependences</a>
+### <a id='check-dependencies'> 🔻 Check dependences</a>
 
 This repository supports both the Linux and MacOS operating systems. The following dependencies are required for building the C++ wrapper:
 
-- `cmake` (version >= 3.16)
+- `cmake` (version >= 3.18)
 - `g++` (version >= 7.5.0)
-- `python3` (version >= 3.9)
+- `python3` (version >= 3.10)
 
 You could check the versions of these dependencies using the following commands:
 
@@ -247,7 +359,7 @@ If you need to install these dependencies, use the following commands (replacing
  sudo apt-get install python3
 ```
 
-#### <a id='build-and-run-the-c++-wrapper'> 🔻 Build and run the C++ wrapper</a>
+### <a id='build-and-run-the-c++-wrapper'> 🔻 Build and run the C++ wrapper</a>
 
 You could fork or clone this repository to your local machine.
 
@@ -298,12 +410,12 @@ cd tests
 ./test_disort.release
 ```
 
-#### <a id='build-and-run-the-python-package'> 🔻 Build and run the Python package</a>
+### <a id='build-and-run-the-python-package'> 🔻 Build and run the Python package</a>
 
 If you follow the steps in the previous section, you will have a C++ wrapper that can be used by Python, and a Python packaged called `pydisort`, which has been binded via `pybind11`. You could simply install and test the Python package using the following command:
 
 ```bash
-# Assume that you are still in the build/bin/ directory
+# Assume that you are still in the build/tests/ directory
 # Install the Python package
 cd ../..  # Go back to the root directory
 pip install .
@@ -342,103 +454,6 @@ The 90 skips are the CUDA agreement checks in [`tests/cuda/`](tests/cuda/), whic
 
 ![](docs/img/rainbow.png)
 
-## Examples
-
-The [`examples/`](examples/) directory contains four complete, runnable
-calculations that build from the simplest possible DISORT problem to a
-research-level analysis. Each one is standalone, prints its results, and ends
-with assertions against an analytic solution or a conservation law, so running
-one is also a way to verify your installation.
-
-| Example | What it covers |
-| --- | --- |
-| [`example_01_beam_attenuation.py`](examples/example_01_beam_attenuation.py) | The basic workflow; beam attenuation, validated against the Beer–Lambert law to machine precision. |
-| [`example_02_thermal_emission.py`](examples/example_02_thermal_emission.py) | Thermal emission and longwave cooling rates for an Earth-like column; batching over the **spectral** axis. |
-| [`example_03_aerosol_scattering.py`](examples/example_03_aerosol_scattering.py) | Multiple scattering and radiances; batching over the **column** axis to build a remote-sensing lookup table. |
-| [`example_04_two_stream_validation.py`](examples/example_04_two_stream_validation.py) | **A real-world analysis problem.** Using pydisort as the multi-stream reference to measure the error of a fast two-stream solver. |
-
-```bash
-pip install pydisort
-python examples/example_01_beam_attenuation.py
-```
-
-Example 4 is the workflow behind every fast radiation scheme: two-stream
-solvers are cheap enough for climate models and operational retrievals, and
-DISORT is the multi-stream reference you check them against. It solves twelve
-official DISORT flux-test cases, reproduces the published benchmark fluxes to
-**0.0005%**, then re-solves them at two streams to show where the approximation
-breaks down, on near-zero fluxes and on forward-peaked phase functions. This is
-the same check [`py2sess`](https://github.com/happysky19/py2sess) uses to
-validate its own two-stream solver. See
-[`examples/README.md`](examples/README.md) for details.
-
-<div align="right"><a href="#table-of-contents"><img src="docs/img/top_green_small.png" width="32px"></div>
-
-![](docs/img/rainbow.png)
-
-## Tests
-
-The Python test suite only needs an installed `pydisort`:
-
-```bash
-pip install pydisort pytest
-pytest tests/ -v
-```
-
-The full suite, including the C and C++ tests, is driven by CTest:
-
-```bash
-cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=ON
-cmake --build build
-ctest --test-dir build --output-on-failure
-```
-
-Correctness is established three ways: against **published DISORT reference
-values** (`tests/reference/` ports six of the fourteen DISORT test problems), against **analytic solutions**, and
-against **conservation laws**. See the
-[testing documentation](https://pydisort.readthedocs.io/en/latest/testing.html)
-for the full description.
-
-> 💡 Older instructions exclude Test Problem 9 with `-E test_disort_09`,
-> because that module used to carry a performance driver in its `__main__`
-> block. The timing code now lives in [`benchmarks/`](benchmarks/README.md)
-> and the exclusion would now only skip coverage.
-
-<div align="right"><a href="#table-of-contents"><img src="docs/img/top_green_small.png" width="32px"></div>
-
-![](docs/img/rainbow.png)
-
-## Benchmarks
-
-Spectral resolution is the dimension that makes radiative transfer expensive,
-and it is the dimension pydisort parallelizes over. Two scripts measure how
-runtime grows along it, on DISORT Test Problem 9 with 32 streams and 100
-layers. Both **verify that the two implementations agree on the fluxes before
-reporting any timing**, and exit non-zero if they do not.
-
-```bash
-# what the Python wrapper costs; builds its own C baseline, needs no cmake
-python benchmarks/compare_cdisort.py --verify-only
-python benchmarks/compare_cdisort.py --alloc both
-
-# the interpreted/compiled gap, against the pure-Python PythonicDISORT
-python benchmarks/compare_pythonicdisort.py --verify-only
-python benchmarks/compare_pythonicdisort.py --threads 10
-```
-
-On one thread pydisort matches cdisort exactly, so the wrapper costs nothing;
-with ten threads it is roughly an order of magnitude faster. The pure-Python
-PythonicDISORT is slower still, though by how much depends on the machine and
-on its version, so that ratio is worth measuring rather than quoting.
-
-Both import the problem definition from `benchmarks/testproblem09.py`, so the
-configuration being timed is written down once rather than copied. See
-[`benchmarks/README.md`](benchmarks/README.md).
-
-<div align="right"><a href="#table-of-contents"><img src="docs/img/top_green_small.png" width="32px"></div>
-
-![](docs/img/rainbow.png)
-
 ## Contributing
 
 [![Good first issues open](https://img.shields.io/github/issues/zoeyzyhu/pydisort/good%20first%20issue?label=good%20first%20issues&logo=git&logoColor=white&style=flat-square)](https://github.com/zoeyzyhu/pydisort/labels/good%20first%20issue)
@@ -446,7 +461,7 @@ configuration being timed is written down once rather than copied. See
 Pull-Requests are welcomed. Fork repository, make changes, send us a pull request. We will review your changes and apply them to the main branch shortly, provided they don't violate our quality standards. Please read the [contribution guide](CONTRIBUTING.md) for details on the workflow, conventions, etc.
 
 If you need to make changes to the `cdisort` library, please use patches to record your
-modification. We keep a sole branch called `cidosrt_patches`, which contains the
+modification. We keep a sole branch called `cdisort_patches`, which contains the
 cmake-built version of the `cdisort` library (v2.1.3) and all the patches that we have
 applied to it. Please refer to the [`cdisort_patches` branch](https://github.com/zoeyzyhu/pydisort/tree/cdisort_patches) for more information.
 
@@ -455,6 +470,14 @@ If you need to include more libraries to the `Disort` wrapper, please use the `C
 If you need to make changes to the `pydisort` package, please use the `pybind11` library to bind the C++ wrapper to Python, expose the functions and classes to Python, and add more test cases to the `pydisort` package. You could find more information about the `pybind11` library [here](https://pybind11.readthedocs.io/en/stable/).
 
 For more information to assist your development, please refer to the `docs/` folder in this repository.
+
+<div align="right"><a href="#table-of-contents"><img src="docs/img/top_green_small.png" width="32px"></div>
+
+![](docs/img/rainbow.png)
+
+## Citation
+
+If you use `pydisort` in your work, please cite it. Machine-readable metadata lives in [`CITATION.cff`](CITATION.cff), which GitHub renders as BibTeX or APA through the **Cite this repository** button in the sidebar.
 
 <div align="right"><a href="#table-of-contents"><img src="docs/img/top_green_small.png" width="32px"></div>
 

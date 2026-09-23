@@ -88,6 +88,10 @@ Icon
 # - compiled cdisort baseline built by benchmarks/compare_cdisort.py
 benchmarks/_bench_build/
 
+# Agents ---------------------------------------------------------------
+CLAUDE.md
+AGENTS.md
+
 # Other ----------------------------------------------------------------
 *.zip
 **/tests/bin/test_*

@@ -61,99 +61,11 @@ This section will help you install the Python tools and packages locally, which 
 
 After finishing this section, you’ll have a folder called `env/` that contains all the Python packages you need for this project.
 
-.. warning::
+.. note::
 
-    **Pitfall**: Do not use the version of Python provided by Anaconda.
-
-    .. code-block:: bash
-
-        $ which python3
-        /Users/zoeyzyhu/anaconda/bin/python3
-
-    If you see `/anaconda/` in the path, then you’re using Anaconda. You’ll need to deactivate Anaconda before continuing.
-
-    **Option 1 (recommended)**: Permanently deactivate Anaconda. After running this command, close your shell and reopen it.
-
-    .. code-block:: bash
-
-        $ conda init --reverse
-
-    Close your shell and open a new shell. Your path might be different.
-
-    .. code-block:: bash
-
-        $ which python3
-        /usr/local/bin/python3 # NOT anaconda
-
-    **Option 2**: Temporarily deactivate Anaconda. You’ll have to do this every time you start a new shell. Your path might be different.
-
-    .. code-block:: bash
-
-        $ conda deactivate
-        $ which python3
-        /usr/local/bin/python3 # NOT anaconda
-
-    **Option 3**: Uninstall Anaconda completely ([docs](https://docs.anaconda.com/free/anaconda/install/uninstall/)).
-
-    .. code-block:: bash
-
-        $ conda install anaconda-clean
-        $ anaconda-clean --yes
-
-    Close your shell and open a new shell. Your path might be different.
-
-    .. code-block:: bash
-
-        $ which python3
-        /usr/local/bin/python3 # NOT anaconda
-
-    **Option 4**: Manually deactivate Anaconda. If none of the above options work, then this one will.
-
-    Figure out which hidden shell startup file contains the Anaconda initialization code.
-
-    .. code-block:: bash
-
-        $ pwd
-        /Users/zoeyzyhu
-        $ grep -s conda .profile .bashrc .bash_profile .zshrc .zlogin .cshrc .tshrc .login
-        .bash_profile:# >>> conda initialize >>>
-        .bash_profile:# !! Contents within this block are managed by 'conda init' !!
-        ...
-
-    In this case, the file to edit is `.bash_profile`. Yours might be different. Use any text editor. If you’re using VS Code, here’s a shortcut. Remember, your filename might be different.
-
-    .. code-block:: bash
-
-        $ code .bash_profile
-
-    Remove everything you find about Anaconda and save the file. In this case, we’ll delete a chunk that looks like this.
-
-    .. code-block:: bash
-
-        # >>> conda initialize >>>
-
-        # !! Contents within this block are managed by 'conda init' !!
-
-        **conda_setup="$('/usr/local/anaconda3/bin/conda' 'shell.bash' 'hook' 2> /dev/null)"
-        if [ $? -eq 0 ]; then
-            eval "$**conda_setup"
-        else
-            if [ -f "/usr/local/anaconda3/etc/profile.d/conda.sh" ]; then
-                . "/usr/local/anaconda3/etc/profile.d/conda.sh"
-            else
-                export PATH="/usr/local/anaconda3/bin:$PATH"
-            fi
-        fi
-        unset \_\_conda_setup
-
-        # <<< conda initialize <<<
-
-    Close your shell and open a new shell. Your path might be different.
-
-    .. code-block:: bash
-
-        $ which python3
-        /usr/local/bin/python3 # NOT anaconda
+    These instructions use a standard Python virtual environment. Conda
+    environments are not currently tested in CI. If using conda, keep Python,
+    pip, PyTorch, and build dependencies in the same activated environment.
 
 
 .. warning::
@@ -172,7 +84,7 @@ After finishing this section, you’ll have a folder called `env/` that contains
         $ pwd
         /Users/zoeyzyhu
         $ grep -s PYTHONPATH .profile .bashrc .bash_profile .zshrc .zlogin .cshrc .tshrc .login
-        .bashrc: export PYTHONPATH=/Users/zoeyzyhu/local/lib/python3.9/site-packages/
+        .bashrc: export PYTHONPATH=/Users/zoeyzyhu/local/lib/python3.11/site-packages/
 
         # Edit the file and remove the line.
 
@@ -426,32 +338,51 @@ In the previous section, we created a Python virtual environment, activated it, 
     pip 22.3.1
     setuptools 65.6.3
 
-A `requirements.txt` file lists the exact third party Python packages and their versions needed to replicate another virtual environment. This is useful for ensuring that developers and production servers have identical packages with identical versions. It’s also useful for ensuring that students and the autograder have identical packages with identical versions.
-
-See an example list of package dependencies provided in a `requirements.txt` file below.bei
-
-.. code-block:: bash
-
-    $ cat requirements.txt
-    tomli==2.0.1
-    ...
-    zipp==3.15.0
-
-Install the package dependencies. Your output might be different.
+Third party packages are declared in ``pyproject.toml`` rather than in a
+``requirements.txt`` file. ``dependencies`` lists what pydisort needs at run
+time and ``build-system.requires`` lists what is needed to compile it, so one
+``pip install`` reproduces the same packages at the same versions for every
+developer.
 
 .. code-block:: bash
 
-    $ pip install -r requirements.txt
+    $ sed -n '/^dependencies/,/]/p' pyproject.toml
+    dependencies = [
+      "numpy",
+      "torch==2.10.0",
+    ]
+
+Installing the project pulls those in. Use an editable install while working on
+the repository, and disable build isolation so the build can see the ``torch``
+already in this environment. Your versions may be different.
+
+.. code-block:: bash
+
+    $ pip install 'torch==2.10.0'
+    $ pip install -e . --no-build-isolation
     ...
-    Successfully installed tomli-2.0.1 ... zipp-3.15.0
     $ pip list
-    Package Version
+
+    Package  Version
 
     ---
 
-    tomli 2.0.1
-    ...
-    zipp 3.15.0
+    numpy    2.5.2
+    pydisort 1.8.5
+    torch    2.10.0
+
+The development tools are installed separately, since they are not needed to
+use the package.
+
+.. code-block:: bash
+
+    $ pip install pre-commit pytest
+
+.. note::
+
+    ``pip install -e .`` links against the libraries CMake wrote into
+    ``build/lib``, so configure and build with CMake first. :doc:`devops`
+    explains how the two steps fit together.
 
 Deactivate a virtual environment
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

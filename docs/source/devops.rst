@@ -15,193 +15,220 @@ To run the `pre-commit` hooks manually, run `pre-commit run --all-files` in the 
 CI/CD
 ~~~~~
 
-Starting from v0.5, This repo enables continuous deployment (CD). The main resource we consult for configuring CD
-is the `cantera` repo: https://github.com/Cantera/cantera.
+Three workflows live in ``.github/workflows`` and between them cover the life
+of a change:
 
-The `cantera` repo has three workflows:
+.. list-table::
+   :widths: 22 30 48
+   :header-rows: 1
 
-- `main.yml`
-- `packaging.yml`
-- `post-merge-tests.yml`
+   * - Workflow
+     - Trigger
+     - What it does
+   * - ``ci.yml``
+     - Pull request to ``main``, and pushes to ``main``
+     - Style checks, then builds and runs the whole test suite across a matrix
+       of operating systems and Python versions.
+   * - ``cd.yml``
+     - A pull request to ``main`` is merged
+     - Works out the next version from the PR labels, pushes the tag, and
+       creates a GitHub release.
+   * - ``release.yml``
+     - Manual dispatch, given a tag
+     - Builds wheels with ``cibuildwheel`` and publishes them to PyPI.
 
-In the `cantera` repo, the `main.yml` workflow is triggered by
+Publishing is the only manual step. Merging a pull request produces a tag and a
+release on its own, but nothing reaches PyPI until someone runs **Publish to
+PyPI** against that tag.
 
-1. push to the `main` branch.
-2. pull request to the `main` branch.
-3. release creation.
+The ``ci.yml`` workflow
+~~~~~~~~~~~~~~~~~~~~~~~
 
-The following code snippet explains rule:
+Two jobs, the second gated on the first.
+
+``pre-commit`` runs the hooks from ``.pre-commit-config.yaml`` across the whole
+repository, with ``~/.cache/pre-commit`` cached against the hash of that file so
+hook environments are not rebuilt on every run.
+
+``build-and-test`` then builds and tests on a four-way matrix:
+
+.. code-block:: yaml
+
+    strategy:
+      fail-fast: true
+      matrix:
+        os: [ubuntu-latest, macOS-latest]
+        python-version: ["3.11", "3.14"]
+
+Only the ends of the supported range are exercised here; ``release.yml`` builds
+wheels for every version from 3.10 to 3.14.
+
+On Linux, ``torch`` comes from the CPU index so the runner does not download a
+multi-gigabyte CUDA wheel it has no use for:
+
+.. code-block:: yaml
+
+    if [[ "$RUNNER_OS" == "Linux" ]]; then
+      pip install 'torch==2.10.0' --index-url https://download.pytorch.org/whl/cpu
+    else
+      pip install 'torch==2.10.0'
+    fi
+
+The package is then installed with ``pip install --no-build-isolation --no-deps
+.``, which reuses the library CMake has just built rather than compiling a
+second copy inside an isolated build environment.
+
+Tests run through CTest rather than pytest directly:
+
+.. code-block:: bash
+
+    ctest --test-dir build --output-on-failure
+
+The C, C++ and Python tests are all registered as CTest cases (see
+:doc:`testing`), so a single command covers all of them.
+
+The ``cd.yml`` workflow
+~~~~~~~~~~~~~~~~~~~~~~~
+
+This fires when a pull request to ``main`` closes, and stops immediately unless
+the pull request was actually merged:
+
+.. code-block:: yaml
+
+    if: ${{ github.event.pull_request.merged == true }}
+
+The size of the version bump comes from the labels on the merged pull request.
+``release:major``, ``release:minor`` and ``release:patch`` choose which
+component to increment, ``patch`` is assumed when none is present, and more
+than one is an error. The new number is derived from the most recent tag, and
+the workflow queries the remote before claiming a tag so it can never reuse one
+that already exists.
+
+Three guards are worth knowing about:
+
+- The job is serialised through ``concurrency: {group: auto-tag-main}`` with
+  ``cancel-in-progress: false``, so two pull requests merged close together
+  cannot race for the same version number.
+- If the merge commit already carries a ``vX.Y.Z`` tag, the job skips instead
+  of bumping again.
+- It authenticates as a GitHub App (``bump-bot``) through
+  ``actions/create-github-app-token`` rather than using the default token.
+
+The trigger is ``pull_request_target`` rather than ``pull_request`` so that the
+App credentials are available even when the pull request comes from a fork.
+That event is privileged, so the job is careful never to check out or execute
+contributor code: the checkout takes the base branch, and every value read from
+the pull request is passed through ``env:`` instead of being interpolated into a
+shell command or a script body.
+
+It finishes by creating the GitHub release with ``--generate-notes`` and posting
+those notes back as a comment on the merged pull request.
+
+The ``release.yml`` workflow
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Triggered by hand, taking the tag to publish and a choice of platforms:
 
 .. code-block:: yaml
 
     on:
-      push:
-        # Build on tags that look like releases
-        tags:
-          - v*
-        # Build when main or testing is pushed to
-        branches:
-          - main
-          - testing
-      pull_request:
-        # Build when a pull request targets main
-        branches:
-          - main
+      workflow_dispatch:
+        inputs:
+          tag:
+            description: "Tag to publish, for example v2.1.0"
+            required: true
+          build_os:
+            description: "OS"
+            default: "Both"
+            type: choice
+            options: [Both, MacOS, Ubuntu]
 
-The `main.yml` workflow
-~~~~~~~~~~~~~~~~~~~~~~~
+``build-macos`` and ``build-linux`` each run ``cibuildwheel`` over Python 3.10
+to 3.14, producing ``arm64`` wheels on macOS and ``x86_64`` on Linux. Both skip
+free-threaded builds (``*t-*``), because the pybind11 extension is not declared
+free-threaded safe and cibuildwheel would otherwise build ``cp3XXt`` on 3.14 and
+later. Linux additionally skips ``musllinux``.
 
-The `main.yml` workflow builds multiple `cantera` libraries (`.so` files) and Python wheels using the CI-based matrix runner.
-For example, the following code snippet shows how to build the library for different python versions:
+Two details matter for a compiled PyTorch extension:
 
-.. code-block:: yaml
+- ``CIBW_BEFORE_BUILD`` configures and builds the C++ library first, pointing
+  CMake at the installed torch through ``torch.utils.cmake_prefix_path``. The
+  Linux job does this inside ``pytorch/manylinux2_28-builder:cuda12.8`` and
+  configures with ``-DCUDA=ON``.
+- The repair step deliberately leaves the torch libraries out of the wheel,
+  using ``delocate-wheel -e torch -e disort_release`` on macOS and
+  ``auditwheel repair --exclude lib*.so`` on Linux. Vendoring them would
+  duplicate the user's own torch installation and clash with it at import time.
 
-    ubuntu-multiple-pythons:
-      name: ${{ matrix.os }} with Python ${{ matrix.python-version }}
-      runs-on: ${{ matrix.os }}
-      timeout-minutes: 60
-      strategy:
-        matrix:
-          python-version: ["3.8", "3.10", "3.11"]
-          os: ["ubuntu-20.04", "ubuntu-22.04"]
-        fail-fast: false
+``publish-pypi`` collects every ``wheels-*`` artifact into ``dist/`` and uploads
+through ``pypa/gh-action-pypi-publish``. The job itself runs with ``if:
+always()`` so that a failure on one platform does not throw away the wheels from
+the other, but the upload step is still guarded: it needs at least one build job
+to have succeeded and none to have failed or been cancelled.
 
-Once built, these libraries and wheels are uploaded for future use (explained later).
-We can use the following code snippet to upload the wheels:
+Build system: CMake
+~~~~~~~~~~~~~~~~~~~
 
-.. code-block:: yaml
+The build needs CMake 3.18 or newer and a C++17 compiler. Three options control
+what gets configured:
 
-    - name: Save the wheel file to install Cantera
-      uses: actions/upload-artifact@v3
-      with:
-        path: build/python/dist/Cantera*.whl
-        retention-days: 2
-        name: cantera-wheel-${{ matrix.python-version }}-${{ matrix.os }}
-        if-no-files-found: error
+.. list-table::
+   :widths: 25 15 60
+   :header-rows: 1
 
-Similarly, multiple python versions are built with clang on MacOS.
+   * - Option
+     - Default
+     - Effect
+   * - ``BUILD_TESTS``
+     - ``ON``
+     - Adds ``tests/``, which registers the C, C++ and Python tests with CTest.
+   * - ``BUILD_EXAMPLES``
+     - ``OFF``
+     - Adds ``examples/``, registering each example script as a test.
+   * - ``CUDA``
+     - ``OFF``
+     - Declares CUDA as a project language and requires ``CUDAToolkit``. When
+       ``CMAKE_CUDA_ARCHITECTURES`` is not set, a list is chosen from the
+       detected toolkit version.
 
-During the test phase, these libraries and wheels are downloaded and installed for testing.
-For example, the following code downloads libraries and wheels for testing:
+Configuration starts by importing the installed ``torch`` to read
+``_GLIBCXX_USE_CXX11_ABI``, then mirrors that value with
+``add_compile_definitions``. This is why ``torch`` has to be importable before
+``cmake`` runs, and why configuration fails outright rather than producing a
+library whose ABI disagrees with the torch it will be loaded beside.
 
-.. code-block:: yaml
+``cmake/modules/`` is added to ``CMAKE_MODULE_PATH`` (it holds
+``FindTorch.cmake``), and every file in ``cmake/macros/`` is globbed and
+included, which is where ``setup_test`` and friends come from. Libraries are
+written to ``build/lib``.
 
-      - name: Download the wheel artifact
-        uses: actions/download-artifact@v3
-        with:
-          name: cantera-wheel-${{ matrix.python-version }}-${{ matrix.os }}
-          path: dist
-      - name: Download the Cantera shared library (.so)
-        uses: actions/download-artifact@v3
-        with:
-          name: libcantera_shared-${{ matrix.os }}.so
-          path: build/lib
+Two subdirectories build the library itself. ``cdisort213/`` is a header-only
+``INTERFACE`` target exposed as ``pydisort::cdisort``, and ``src/`` compiles the
+C++ wrapper into ``libdisort_<buildtype>`` and exposes it as
+``pydisort::disort``.
 
+The two-step build
+~~~~~~~~~~~~~~~~~~
 
-The `packaging.yml` workflow
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+``setup.py`` does not invoke CMake. It links the pybind11 extension against
+whatever already exists in ``build/lib``, so the order matters:
 
-The packaging.yml workflow builds the python/conda packages and upload them to pypi automatically.
-Specifically, we can use the `gh` command to trigger a manual run of github actions.
-You can install `gh` on a mac using `brew install gh`. With `gh`, a dispatch workflow is defined as:
+.. code-block:: bash
 
-.. code-block:: yaml
+    cmake -B build -DCMAKE_BUILD_TYPE=Release
+    cmake --build build --parallel
+    pip install . --no-build-isolation
 
-    workflow_dispatch:  # allow manual triggering of this workflow
-      inputs:
-        outgoing_ref:
-          description: "The ref to be built. Can be a tag, commit hash, or branch name"
-          required: true
-          default: "main"
-        upload_to_pypi:
-          description: "Try to upload wheels and sdist to PyPI after building"
-          required: false
-          default: "false"
-        upload_to_anaconda:
-          description: "Try to upload package to Anaconda after building"
-          required: false
-          default: "false"
+Running ``pip install .`` on its own under PEP 517 build isolation hides the
+torch you installed and produces an extension with unresolved symbols.
+``setup.py`` detects the missing import and fails with an explanation rather
+than letting the build proceed.
 
-The action steps that build and upload the pypi packages are here:
-
-.. code-block:: yaml
-
-      - name: Trigger PyPI/Wheel builds
-        run: >
-          gh workflow run -R cantera/pypi-packages
-          python-package.yml
-          -f incoming_ref=${{ env.REF }}
-          -f upload=${{ env.UPLOAD_TO_PYPI }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.PYPI_PACKAGE_PAT }}
-
-Note that, in the code above, `cantera/pypi-packages` is **another repository** that contains the workflow for building
-a python package and uploading it to pypi (see https://github.com/Cantera/pypi-packages).
-
-Inspecting the `pypi-packages` repo, we can find the workflow file `python-package.yml` that builds the python package
-The most important part is the `linux-wheel` step. Here is a simple illustration
-
-.. code-block:: yaml
-
-  linux-wheel:
-    name: Build ${{ matrix.libc }}linux_${{ matrix.arch }} for py${{ matrix.py }}
-    runs-on: ubuntu-20.04
-    needs: ["sdist", "post-pending-status"]
-    outputs:
-      job-status: ${{ job.status }}
-    strategy:
-      matrix:
-        py: ["38", "39", "310", "311"]
-        arch: ["x86_64", "i686"]
-        libc: ["many", "musl"]
-        include:
-          - py: "311"
-            arch: "aarch64"
-            libc: "many"
-          - py: "311"
-            arch: "ppc64le"
-            libc: "many"
-          ...
-
-This builds a matrix combining different Python versions, architectures, and libc.
-The building steps include downloading the pre-built libraries (in this case, sdist):
-
-.. code-block:: yaml
-
-    steps:
-      - name: Download pre-built sdist
-        uses: actions/download-artifact@v3
-        with:
-          name: sdist
-
-and building the wheels using `cibuildwheel`:
-
-.. code-block:: yaml
-
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v2
-        with:
-          platforms: all
-      - name: Build wheels
-        uses: pypa/cibuildwheel@v2.12.3
-
-and archiving (uploading) them:
-
-.. code-block:: yaml
-
-      - name: Archive the built wheels
-        uses: actions/upload-artifact@v3
-        with:
-          path: ./wheelhouse/*.whl
-          name: wheels
-
-The major difference between `pydisort` and `cantera` is that `pydisort` is built with `pybind11` and `cmake`,
-while `cantera` is built with `cython` and `scons`.
-
-Build System - cmake
-~~~~~~~~~~~~~~~~~~~~
-
-Placeholder.
+The extension is linked with rpath entries for ``@loader_path/lib`` and
+``@loader_path/../torch/lib`` (``$ORIGIN`` on Linux), so at import time it
+resolves both the disort library and torch's own shared objects.
+``setup.py`` also chooses between ``CppExtension`` and ``CUDAExtension``
+depending on whether ``torch.cuda.is_available()``.
 
 Reference articles
 ~~~~~~~~~~~~~~~~~~

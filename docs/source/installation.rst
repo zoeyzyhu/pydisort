@@ -149,12 +149,15 @@ Building the C++ library
 
 pydisort also ships a C++ API for embedding the solver in larger C or C++
 simulation frameworks. Building it requires ``cmake`` (>= 3.18), a C++17
-compiler and Python 3:
+compiler and Python 3.10 or newer. CMake resolves PyTorch through
+``find_package(Torch REQUIRED)``, so ``torch`` has to be importable in the
+active environment before you configure:
 
 .. code-block:: bash
 
   git clone https://github.com/zoeyzyhu/pydisort.git
   cd pydisort
+  pip install 'torch==2.10.0'
   cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=ON
   cmake --build build
   ctest --test-dir build

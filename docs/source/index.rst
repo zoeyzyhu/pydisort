@@ -30,6 +30,8 @@ pydisort features the following benefits over the original C-DISORT program:
   dimensions, so a spectral or multi-column calculation spreads across cores.
   On one thread pydisort matches cdisort exactly; with ten threads it is
   roughly an order of magnitude faster (see :doc:`benchmarks`).
+- **PyTorch-native**, so radiative transfer drops directly into tensor-based
+  scientific and machine-learning workflows.
 - **No build step.** Prebuilt binary wheels on PyPI, rather than a local
   Fortran or C compilation.
 - **Proper error handling**, rather than abrupt exit of the program. Errors
@@ -38,8 +40,6 @@ pydisort features the following benefits over the original C-DISORT program:
   need to worry about allocation and deallocation.
 - **Safety guards** that prevent setting incorrect values for arrays or
   calling methods in the wrong order.
-- **PyTorch-native**, so radiative transfer drops directly into tensor-based
-  scientific and machine-learning workflows.
 - **Documented and tested**, with documentation automated through Sphinx and
   Read the Docs, and a test suite validated against published DISORT reference
   values (see :doc:`testing`).

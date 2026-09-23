@@ -11,8 +11,8 @@ which in turn generalizes case 9a of ``disort_test09()`` in
 the two coincide exactly, and the fluxes reproduce the published reference
 values in that file (``good.rad[*].rfldn`` / ``.flup``).
 
-The benchmark configuration is the one described in the paper: 32 streams, 100
-layers, workload scaled by repeating the solve over wavenumbers.
+The benchmark configuration is 32 streams and 100 layers, with the workload
+scaled by repeating the solve over wavenumbers.
 
 Caveat worth knowing before quoting anything from these scripts
 ---------------------------------------------------------------
@@ -22,8 +22,7 @@ depths deep, so tau = 21 sits about 7% of the way down and the deepest output
 level is no longer the lower boundary. This is inherited from the C driver, it
 is identical for every implementation being compared, and it therefore does not
 bias the comparison -- but the benchmark configuration is not literally "Test
-Problem 9 with more layers", and the paper's phrase "all other parameters are
-kept consistent with the original test case" is loose on this point.
+Problem 9 with more layers".
 """
 
 import os

@@ -20,9 +20,9 @@ additionally draw a summary figure if `matplotlib` is installed.
 
 | Example | What it covers | Validated against |
 | --- | --- | --- |
-| [`example_01_beam_attenuation.py`](example_01_beam_attenuation.py) | The two-step `DisortOptions` → `Disort.forward` workflow; direct beam attenuation in a purely absorbing atmosphere; reading the flux tensor. | The Beer–Lambert law, to machine precision. |
+| [`example_01_beam_attenuation.py`](example_01_beam_attenuation.py) | The two-step `DisortOptions` → `Disort.forward` workflow; direct beam attenuation in a purely absorbing atmosphere; reading the flux tensor. | The Beer-Lambert law, to machine precision. |
 | [`example_02_thermal_emission.py`](example_02_thermal_emission.py) | Thermal emission with the `planck` flag; **batching over the spectral axis** (8 bands in one call); outgoing longwave radiation and radiative cooling rates for an Earth-like column. | An isothermal column emits exactly σT⁴; the column-integrated heating rate equals the net flux divergence. |
-| [`example_03_aerosol_scattering.py`](example_03_aerosol_scattering.py) | Multiple scattering with a Henyey–Greenstein phase function; radiances at user viewing angles via `gather_rad`; **batching over the column axis** to build a remote-sensing lookup table. | A transparent atmosphere returns the surface albedo exactly; conservative scattering conserves energy. |
+| [`example_03_aerosol_scattering.py`](example_03_aerosol_scattering.py) | Multiple scattering with a Henyey-Greenstein phase function; radiances at user viewing angles via `gather_rad`; **batching over the column axis** to build a remote-sensing lookup table. | A transparent atmosphere returns the surface albedo exactly; conservative scattering conserves energy. |
 | [`example_04_two_stream_validation.py`](example_04_two_stream_validation.py) | **Real-world analysis problem.** Using pydisort as the multi-stream reference to measure the error of a fast two-stream solver, over the official DISORT flux-test cases. | The published DISORT benchmark flux values, reproduced to 0.0005%. |
 
 ## The real-world example
@@ -45,7 +45,7 @@ The example runs the workflow end to end:
 
 1. **Reproduce the published DISORT benchmark fluxes.** Twelve official
    flux-test cases (Test 1 isotropic, Test 2 Rayleigh, Test 3
-   Henyey–Greenstein) are solved at 16 streams and compared against the
+   Henyey-Greenstein) are solved at 16 streams and compared against the
    published values, agreement to **0.0005%**. This validates the
    installation against an external source rather than against itself.
 2. **Measure the two-stream error.** The same twelve cases are re-solved with
@@ -53,7 +53,7 @@ The example runs the workflow end to end:
    parameter. That truncation *is* the two-stream approximation. The errors
    concentrate exactly where py2sess reports theirs: on near-zero fluxes,
    where a tiny absolute error is a huge relative one, and on the
-   forward-peaked Henyey–Greenstein cases, where two moments cannot represent
+   forward-peaked Henyey-Greenstein cases, where two moments cannot represent
    the phase function.
 3. **Answer "how many streams do I need?"** by sweeping the stream count from
    2 to 32, the accuracy/cost trade-off for a given problem.

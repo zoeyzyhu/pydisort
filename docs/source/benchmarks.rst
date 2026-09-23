@@ -135,12 +135,12 @@ while the cores fill and then saturates near 335x by about 1000 wavenumbers.
 .. note::
 
    The sweep above stops at 1000 because the ratio has stopped moving by then.
-   Extending it to 10000, as the paper's figure does, costs about nine minutes
-   on this machine and closer to an hour on the M1 Max the paper used, almost
-   all of it PythonicDISORT. ``compare_pythonicdisort.py`` projects the
-   runtime from one solve and prints it before starting, so a long sweep is a
-   choice rather than a surprise. ``compare_cdisort.py`` has no such problem:
-   the same point costs about 30 seconds there.
+   Extending it to 10000 costs about nine minutes on the Apple M5 Max quoted
+   above, and closer to an hour on an M1 Max, almost all of it PythonicDISORT.
+   ``compare_pythonicdisort.py`` projects the runtime from one solve and prints
+   it before starting, so a long sweep is a choice rather than a surprise.
+   ``compare_cdisort.py`` has no such problem: the same point costs about 30
+   seconds there.
 
 .. warning::
 

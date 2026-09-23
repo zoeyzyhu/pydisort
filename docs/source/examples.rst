@@ -204,7 +204,7 @@ asymmetry parameter. That truncation *is* the two-stream approximation:
 The outliers fall in exactly the two places py2sess identifies. First, cases
 where the reference flux is nearly zero: 1f and 2c transmit almost nothing, so
 a tiny absolute error is a huge relative one. Second, the forward-peaked
-Henyey–Greenstein cases 3a and 3b, where two moments cannot represent the phase
+Henyey-Greenstein cases 3a and 3b, where two moments cannot represent the phase
 function.
 
 .. note::

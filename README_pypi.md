@@ -41,7 +41,7 @@ tensor([[[[0.0000, 3.1416],
 pip install pydisort
 ```
 
-Prebuilt wheels are published for CPython 3.10–3.14, and `pip` pulls in a compatible `torch` automatically. `pydisort` is a compiled PyTorch extension, so if `pip` builds from source (e.g. no matching wheel for your platform), `torch` must be importable at build time. Install it first and disable build isolation:
+Prebuilt wheels are published for CPython 3.10-3.14, and `pip` pulls in a compatible `torch` automatically. `pydisort` is a compiled PyTorch extension, so if `pip` builds from source (e.g. no matching wheel for your platform), `torch` must be importable at build time. Install it first and disable build isolation:
 
 ```bash
 pip install 'torch==2.10.0'
