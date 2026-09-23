@@ -24,7 +24,7 @@
   <img alt="GitHub Workflow Status"
     src="https://img.shields.io/github/actions/workflow/status/zoeyzyhu/pydisort/ci.yml?style=flat-square&logo=github"/>
 </a>
-<a href="">
+<a href="https://pydisort.readthedocs.io/en/latest/">
   <img alt="Documentation Status"
     src="https://app.readthedocs.org/projects/pydisort/badge/?version=latest&style=flat-square"/>
 </a>
@@ -98,6 +98,9 @@ For efficient memory management and potential GPU acceleration, `pydisort` lever
     - [Check dependencies](#check-dependencies)
     - [Build and run the C++ wrapper](#build-and-run-the-c++-wrapper)
     - [Build and run the Python package](#build-and-run-the-python-package)
+- [Examples](#examples)
+- [Tests](#tests)
+- [Benchmarks](#benchmarks)
 - [Contributing](#contributing)
 - [Issues?](#issues)
 
@@ -203,7 +206,7 @@ In the last dimension, the first element is the upward flux and the second eleme
 Number of levels is one more than the number of layers.
 
 Please note that this is a generic tutorial and you would need to adapt this to your specific use-case.
-Detailed documentation of the function calls can be found at [pydisort documentation](https://pydisort.readthedocs.io/en/latest/).
+Detailed documentation of the function calls can be found at [pydisort documentation](https://pydisort.readthedocs.io/en/latest/), and complete worked calculations are in [`examples/`](examples/).
 
 > 💡 We keep the parameters consistent to the original `DISORT` library, so you can refer to the [DISORT documentation](cdisort213/DISORT2.doc) for more information such as input/out variables, flags, model usage and caveats.
 
@@ -258,11 +261,13 @@ Before building the package, you need to install the dependencies for the `pydis
 cd pydisort
 python3 -m venv env
 source env/bin/activate  # Make sure you are in the virtual environment
-pip3 install -r requirements.txt
+
+# Tools for developing against the repository
+pip3 install pre-commit pytest
 pre-commit install
 ```
 
-Installing `requirements.txt` also covers packages for the `pre-commit` hooks, which are very helpful if you'd like to make changes to the repository cloned. You could run the checks and lints manually using the following command to ensure that your changes are compliant with the industry standards:
+`pre-commit` runs the checks and lints configured in `.pre-commit-config.yaml`, which are very helpful if you'd like to make changes to the repository cloned. You could run them manually using the following command to ensure that your changes are compliant with the industry standards:
 
 ```bash
 pre-commit run --all-files
@@ -272,7 +277,11 @@ pre-commit run --all-files
 
 If you have no interest in adding or modifying features to the `pydisort` package, and just want to quickly build and run the C++ wrapper to your own use, you can follow the commands below:
 
+The C++ build resolves PyTorch through CMake (`find_package(Torch REQUIRED)`), so `torch` has to be importable in the active environment before you configure. `pip install .` in the next section pulls it in on its own, but a standalone `cmake ..` does not.
+
 ```bash
+pip3 install 'torch==2.10.0'  # only when building the C++ side on its own
+
 mkdir build
 cd build
 cmake ..
@@ -286,7 +295,6 @@ After the build is complete, you can run the C++ wrapper using the following com
 cd tests
 
 # Run the test
-cd tests
 ./test_disort.release
 ```
 
@@ -301,16 +309,131 @@ cd ../..  # Go back to the root directory
 pip install .
 ```
 
-You can now run the test cases for the Python package using the following command:
+You can now run the test cases for the Python package with `pytest`:
 
 ```bash
-$ python build/tests/test_attenuation.py
-.
-----------------------------------------------------------------------
-Ran 1 test in 0.001s
+$ pytest tests/
+======================================= test session starts ========================================
+platform darwin -- Python 3.12.13, pytest-9.1.1, pluggy-1.6.0
+collected 188 items
 
-OK
+tests/cuda/test_cpu_cuda_agreement.py ssssssssssssssssssssssssssssssssssssssssssssssssssssss [ 28%]
+ssssssssssssss                                                                               [ 36%]
+tests/cuda/test_fast_flux_routing.py ssssssssssssssssssssss                                  [ 47%]
+tests/reference/test_problem_01_isotropic.py ......                                          [ 51%]
+tests/reference/test_problem_02_rayleigh.py ....                                             [ 53%]
+tests/reference/test_problem_03_henyey_greenstein.py ...                                     [ 54%]
+tests/reference/test_problem_06_lambertian_surface.py ....                                   [ 56%]
+tests/reference/test_problem_09_inhomogeneous.py .....                                       [ 59%]
+tests/reference/test_problem_10_user_vs_quadrature.py ...                                    [ 61%]
+tests/test_attenuation.py .                                                                  [ 61%]
+tests/test_batching.py .........                                                             [ 66%]
+tests/test_examples.py ....                                                                  [ 68%]
+tests/test_input_validation.py ...........                                                   [ 74%]
+tests/test_output_accessors.py .........                                                     [ 79%]
+tests/test_scattering_moments.py .......................................                     [100%]
+
+================================== 98 passed, 90 skipped in 0.45s ==================================
 ```
+
+The 90 skips are the CUDA agreement checks in [`tests/cuda/`](tests/cuda/), which run only where a GPU is available. Add `-v` to list the individual test cases instead of one line per file.
+
+<div align="right"><a href="#table-of-contents"><img src="docs/img/top_green_small.png" width="32px"></div>
+
+![](docs/img/rainbow.png)
+
+## Examples
+
+The [`examples/`](examples/) directory contains four complete, runnable
+calculations that build from the simplest possible DISORT problem to a
+research-level analysis. Each one is standalone, prints its results, and ends
+with assertions against an analytic solution or a conservation law, so running
+one is also a way to verify your installation.
+
+| Example | What it covers |
+| --- | --- |
+| [`example_01_beam_attenuation.py`](examples/example_01_beam_attenuation.py) | The basic workflow; beam attenuation, validated against the Beer–Lambert law to machine precision. |
+| [`example_02_thermal_emission.py`](examples/example_02_thermal_emission.py) | Thermal emission and longwave cooling rates for an Earth-like column; batching over the **spectral** axis. |
+| [`example_03_aerosol_scattering.py`](examples/example_03_aerosol_scattering.py) | Multiple scattering and radiances; batching over the **column** axis to build a remote-sensing lookup table. |
+| [`example_04_two_stream_validation.py`](examples/example_04_two_stream_validation.py) | **A real-world analysis problem.** Using pydisort as the multi-stream reference to measure the error of a fast two-stream solver. |
+
+```bash
+pip install pydisort
+python examples/example_01_beam_attenuation.py
+```
+
+Example 4 is the workflow behind every fast radiation scheme: two-stream
+solvers are cheap enough for climate models and operational retrievals, and
+DISORT is the multi-stream reference you check them against. It solves twelve
+official DISORT flux-test cases, reproduces the published benchmark fluxes to
+**0.0005%**, then re-solves them at two streams to show where the approximation
+breaks down, on near-zero fluxes and on forward-peaked phase functions. This is
+the same check [`py2sess`](https://github.com/happysky19/py2sess) uses to
+validate its own two-stream solver. See
+[`examples/README.md`](examples/README.md) for details.
+
+<div align="right"><a href="#table-of-contents"><img src="docs/img/top_green_small.png" width="32px"></div>
+
+![](docs/img/rainbow.png)
+
+## Tests
+
+The Python test suite only needs an installed `pydisort`:
+
+```bash
+pip install pydisort pytest
+pytest tests/ -v
+```
+
+The full suite, including the C and C++ tests, is driven by CTest:
+
+```bash
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=ON
+cmake --build build
+ctest --test-dir build --output-on-failure
+```
+
+Correctness is established three ways: against **published DISORT reference
+values** (`tests/reference/` ports six of the fourteen DISORT test problems), against **analytic solutions**, and
+against **conservation laws**. See the
+[testing documentation](https://pydisort.readthedocs.io/en/latest/testing.html)
+for the full description.
+
+> 💡 Older instructions exclude Test Problem 9 with `-E test_disort_09`,
+> because that module used to carry a performance driver in its `__main__`
+> block. The timing code now lives in [`benchmarks/`](benchmarks/README.md)
+> and the exclusion would now only skip coverage.
+
+<div align="right"><a href="#table-of-contents"><img src="docs/img/top_green_small.png" width="32px"></div>
+
+![](docs/img/rainbow.png)
+
+## Benchmarks
+
+Spectral resolution is the dimension that makes radiative transfer expensive,
+and it is the dimension pydisort parallelizes over. Two scripts measure how
+runtime grows along it, on DISORT Test Problem 9 with 32 streams and 100
+layers. Both **verify that the two implementations agree on the fluxes before
+reporting any timing**, and exit non-zero if they do not.
+
+```bash
+# what the Python wrapper costs; builds its own C baseline, needs no cmake
+python benchmarks/compare_cdisort.py --verify-only
+python benchmarks/compare_cdisort.py --alloc both
+
+# the interpreted/compiled gap, against the pure-Python PythonicDISORT
+python benchmarks/compare_pythonicdisort.py --verify-only
+python benchmarks/compare_pythonicdisort.py --threads 10
+```
+
+On one thread pydisort matches cdisort exactly, so the wrapper costs nothing;
+with ten threads it is roughly an order of magnitude faster. The pure-Python
+PythonicDISORT is slower still, though by how much depends on the machine and
+on its version, so that ratio is worth measuring rather than quoting.
+
+Both import the problem definition from `benchmarks/testproblem09.py`, so the
+configuration being timed is written down once rather than copied. See
+[`benchmarks/README.md`](benchmarks/README.md).
 
 <div align="right"><a href="#table-of-contents"><img src="docs/img/top_green_small.png" width="32px"></div>
 
@@ -325,7 +448,7 @@ Pull-Requests are welcomed. Fork repository, make changes, send us a pull reques
 If you need to make changes to the `cdisort` library, please use patches to record your
 modification. We keep a sole branch called `cidosrt_patches`, which contains the
 cmake-built version of the `cdisort` library (v2.1.3) and all the patches that we have
-applied to it. Please refer to the [patching guide](docs/README_patches.md) for more information.
+applied to it. Please refer to the [`cdisort_patches` branch](https://github.com/zoeyzyhu/pydisort/tree/cdisort_patches) for more information.
 
 If you need to include more libraries to the `Disort` wrapper, please use the `CMakeLists.txt` file to add them. You could find more information about the cmake build system [here](https://cmake.org/cmake/help/latest/guide/tutorial/index.html).
 
