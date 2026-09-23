@@ -165,20 +165,3 @@ computation is substantially cheaper.
 **Control the thread count** with ``torch.set_num_threads(n)``. The default is
 usually reasonable, but when pydisort runs inside an already-parallel
 application, oversubscription can cost more than it gains.
-
-Other benchmarks
-----------------
-
-The ``benchmarks/`` directory also contains:
-
-* ``benchmark_cuda_fp64.py`` — FP64 flux-only solvers on one CPU thread and on
-  CUDA, optionally against Exo-FMS Fortran Toon solvers, through the Fortran
-  driver ``benchmark_exofms_toon.f90`` and its build script;
-* ``benchmark_cuda_agreement.py`` — numerical agreement between the CPU and
-  CUDA solver paths;
-* ``validate_fast_flux_routing.py`` — checks that the specialised fast
-  flux-only paths agree with the general solver.
-
-See `benchmarks/README.md
-<https://github.com/zoeyzyhu/pydisort/blob/main/benchmarks/README.md>`_ for
-details.

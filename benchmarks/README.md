@@ -8,16 +8,6 @@ Performance measurements for pydisort.
 | [`compare_pythonicdisort.py`](compare_pythonicdisort.py) | pydisort vs. PythonicDISORT: the interpreted/compiled gap. |
 | [`testproblem09.py`](testproblem09.py) | The shared problem definition. Not a benchmark — imported by both scripts above, so the configuration is written down exactly once. |
 | [`bench_cdisort.cpp`](bench_cdisort.cpp) | The C baseline, compiled on demand by `compare_cdisort.py`. Not run directly. |
-| [`benchmark_cuda_fp64.py`](benchmark_cuda_fp64.py) | FP64 flux-only solvers on one CPU thread and on CUDA, optionally against Exo-FMS Fortran Toon solvers. |
-| [`benchmark_cuda_agreement.py`](benchmark_cuda_agreement.py) | Numerical agreement between the CPU and CUDA solver paths. |
-| [`validate_fast_flux_routing.py`](validate_fast_flux_routing.py) | Checks that the specialised fast flux-only paths agree with the general solver. |
-
-Two further files belong to `benchmark_cuda_fp64.py` rather than standing on
-their own: [`benchmark_exofms_toon.f90`](benchmark_exofms_toon.f90) is a
-Fortran driver for the Exo-FMS Toon shortwave and longwave solvers, and
-[`run_exofms_toon_benchmark.sh`](run_exofms_toon_benchmark.sh) compiles and
-runs it against an Exo-FMS checkout. They are used only when
-`EXOFMS_SOURCE_ROOT` is set, and skipped otherwise.
 
 ## What is measured
 
