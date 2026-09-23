@@ -13,7 +13,7 @@ routed near conservative scattering, all of it shortwave. Here both
 emission, ``btemp``, ``ttemp``, wavenumber bounds -- is covered too, across
 clear-sky and scattering media, four optical depths, and three solar angles.
 
-On the tolerance: see ``AGREEMENT_TOLERANCE`` below. It is deliberately loose.
+On the tolerance: see ``AGREEMENT_TOLERANCE`` below.
 """
 
 import pytest
@@ -30,20 +30,18 @@ WAVE_UPPER = [50000.0]
 
 # Relative RMSE between the CPU and CUDA fluxes.
 #
-# This bound is loose on purpose. The two devices run the same double
-# precision code, so well-conditioned cases agree to roughly machine
-# precision, but `forward` also routes 4- and 8-stream flux-only work to
-# specialised CUDA kernels that reach the same answer by a different route;
-# `test_fast_flux_routing.py` allows those 2e-6. A single threshold covering
-# every configuration here has to sit above that.
+# The two devices run the same double precision code, so well-conditioned
+# cases agree to roughly machine precision (about 1e-15 measured). `forward`
+# also routes 4- and 8-stream flux-only work to specialised CUDA kernels that
+# reach the same answer by a different route; the largest disagreement those
+# produce here is 1.3e-7 (shortwave, scattering, nstr=8, tau=0.1, umu0=0.9),
+# measured on an RTX 5090 with CUDA 12.9.
 #
-# 1e-4 is therefore not a precision claim. It is a regression guard: it
-# catches the failures that matter -- a kernel returning zeros, NaNs, a stale
-# buffer, or the thermal source being dropped on the GPU -- without risking
-# false failures on hardware this was never calibrated against. Tighten it
-# once there are measurements from a real GPU; the printed values below are
-# what to tighten it against.
-AGREEMENT_TOLERANCE = 1.0e-4
+# 1e-6 leaves roughly an order of magnitude of headroom over that, for other
+# GPUs and compilers, while staying tight enough to catch the failures that
+# matter -- a kernel returning zeros, NaNs, a stale buffer, or the thermal
+# source being dropped on the GPU. `pytest -s` prints the measured values.
+AGREEMENT_TOLERANCE = 1.0e-6
 
 
 def scattering_properties(nstr, device, scattering):
@@ -123,13 +121,19 @@ def solve(mode, scattering, nstr, device, optical_depth, albedo, umu0):
     return output.cpu()
 
 
-def relative_rmse(value, reference):
-    """RMS difference over RMS reference; None when the reference is zero."""
+def relative_rmse(value, reference, fallback_scale):
+    """RMS difference over RMS reference.
+
+    A component can be identically zero on the CPU -- the upward flux under a
+    clear sky thick enough to extinguish the beam, say. Dividing by its own
+    RMS is then meaningless, so the difference is measured against
+    `fallback_scale`, the RMS of the whole flux field, instead. Skipping the
+    comparison would let a kernel return garbage exactly where the reference
+    is zero.
+    """
     scale = float(reference.square().mean().sqrt())
     error = float((value - reference).square().mean().sqrt())
-    if scale:
-        return error / scale
-    return 0.0 if error == 0.0 else None
+    return error / (scale or fallback_scale)
 
 
 # (mode, scattering, optical_depth, albedo, umu0)
@@ -173,12 +177,16 @@ def test_cuda_matches_cpu(
     assert value.shape == reference.shape
     assert torch.isfinite(value).all(), "CUDA produced non-finite fluxes"
 
+    flux_scale = float(reference.square().mean().sqrt())
+    assert flux_scale > 0.0, "the CPU reference carries no flux at all"
+
     metrics = {
-        "up": relative_rmse(value[..., 0], reference[..., 0]),
-        "down": relative_rmse(value[..., 1], reference[..., 1]),
+        "up": relative_rmse(value[..., 0], reference[..., 0], flux_scale),
+        "down": relative_rmse(value[..., 1], reference[..., 1], flux_scale),
         "net": relative_rmse(
             value[..., 0] - value[..., 1],
             reference[..., 0] - reference[..., 1],
+            flux_scale,
         ),
     }
     max_abs = float((value - reference).abs().max())
@@ -188,18 +196,11 @@ def test_cuda_matches_cpu(
     print(
         f"{mode:<10} {'scat' if scattering else 'clear':<5} nstr={nstr} "
         f"tau={optical_depth:<5g} alb={albedo:<4g} umu0={umu0:<4g} "
-        + " ".join(
-            f"{name}={'N/A' if v is None else f'{100 * v:.3g}%'}"
-            for name, v in metrics.items()
-        )
+        + " ".join(f"{name}={100 * v:.3g}%" for name, v in metrics.items())
         + f" max_abs={max_abs:.3g}"
     )
 
     for name, value_ in metrics.items():
-        # None means the reference was identically zero and so was the
-        # difference, which is agreement rather than a failure.
-        if value_ is None:
-            continue
         assert value_ <= AGREEMENT_TOLERANCE, (
             f"{mode} {'scattering' if scattering else 'clear-sky'} "
             f"nstr={nstr} tau={optical_depth:g} albedo={albedo:g} "
