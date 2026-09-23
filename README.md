@@ -105,10 +105,10 @@ For efficient memory management and potential GPU acceleration, `pydisort` lever
 - [Documentation](#documentation)
 - [Tests](#tests)
 - [Benchmarks](#benchmarks)
-- [For C++ developers](#for-c++-users)
-  - [Check dependencies](#check-dependencies)
-  - [Build and run the C++ wrapper](#build-and-run-the-c++-wrapper)
-  - [Build and run the Python package](#build-and-run-the-python-package)
+- [For C++ developers](#for-c-developers)
+  - [Build requirements](#build-requirements)
+  - [Build the C++ wrapper](#build-the-c-wrapper)
+  - [Build the Python bindings and validate](#build-the-python-bindings-and-validate)
 - [Contributing](#contributing)
 - [Citation](#citation)
 - [Issues?](#issues)
@@ -119,7 +119,7 @@ For efficient memory management and potential GPU acceleration, `pydisort` lever
 
 <!-- For Python users-------------------------------->
 
-### <a id='for-python-users'><img src="docs/img/python.png" alt="Python" align=left width=24> For Python users</a>
+### For Python users
 
 We provide the `pydisort` library for Python users. The package can be installed using `pip`:
 
@@ -342,15 +342,15 @@ configuration being timed is written down once rather than copied. See
 
 <!-- For C++ developers------------------------------>
 
-## <a id='for-c++-users'><img src="docs/img/cpp.png" alt="C++" align=left width=24> For C++ developers</a>
+## For C++ developers
 
-### <a id='check-dependencies'>Build requirements</a>
+### Build requirements
 
 Use CMake 3.20 or newer, a C++17 compiler (GCC 9 or newer on Linux, or
 compatible Apple Clang on macOS), and a supported CPython version.
 PyTorch must be installed in the active environment before running CMake.
 
-### <a id='build-and-run-the-c++-wrapper'>Build the C++ wrapper</a>
+### Build the C++ wrapper
 
 From a clean checkout and an activated virtual environment:
 
@@ -360,7 +360,7 @@ cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=ON
 cmake --build build --parallel
 ```
 
-### <a id='build-and-run-the-python-package'>Build the Python bindings and validate</a>
+### Build the Python bindings and validate
 
 Run from the repository root, after the CMake build:
 
