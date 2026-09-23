@@ -9,8 +9,8 @@ A runtime ratio between two programs only means something if the two solve the
 same problem and the timing is fair in both directions. This script therefore:
 
 1. builds the C baseline itself, from `bench_cdisort.cpp`, against the
-   repository's own bundled cdisort headers and with the repository's Release
-   flags -- no cmake, no libtorch, nothing preinstalled;
+   repository's own bundled cdisort headers and optimized compiler flags
+   -- no cmake or libtorch needed for the baseline;
 2. **verifies that the two implementations agree numerically before reporting
    any timing**, and refuses to time them if they do not;
 3. times the C solve loop *inside* the C program, so process startup is not
@@ -50,8 +50,8 @@ Requirements: a C++17 compiler, and `pip install pydisort`.
 # alone: PyTorch uses it for its own intra-op pool, and pinning it here would
 # silently cap the multi-threaded pydisort run we are trying to measure.
 # cdisort itself uses bundled LINPACK routines, not BLAS, so it is unaffected
-# either way -- the pinning is here to keep the environment identical to
-# compare_pythonicdisort.py.
+# either way. Preserve any thread settings already supplied by the caller.
+# compare_pythonicdisort.py instead enforces one thread for its Python baseline.
 import os
 
 for _var in (
@@ -515,9 +515,9 @@ def main():
 
     print()
     print(
-        "A ratio near 1.0 on one core means the wrapper is free: pydisort is"
+        "A ratio near 1.0 suggests small wrapper overhead for this workload."
     )
-    print("calling the same c_disort on the same inputs. The multi-threaded")
+    print("Both call c_disort on the same inputs. The multi-threaded")
     print(
         "ratio climbs while the cores fill and then saturates -- it is bounded"
     )

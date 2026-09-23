@@ -1,67 +1,120 @@
-How to contribute
-=================
+Contributing
+============
 
-You may need to modify the pydisort source code. To ensure a clean version of the code is maintained, follow the procedure outlined below.
+Discuss substantial changes in a
+`GitHub issue <https://github.com/zoeyzyhu/pydisort/issues>`_ first.
+Small documentation corrections can go straight to a pull request.
 
-We adopt the idea of **linear history** and a **squash merging** approach in this repository, meaning there is only one permanent branch (`main`), and the only way to push changes to main is by submitting a Pull Request (PR). The main branch is protected to prevent direct pushes. **A linear history ensures that the main branch remains clean and organized**. Squash merging means that **the smallest unit of change is a PR, rather than a commit**.
+Set up a working branch
+------------------------
 
-This workflow differs from some individual workflows where the smallest unit is usually a commit. For collaborative projects, commits can be too fine-grained and don't track issues effectively. Our aim is to ensure that each stage in the history solves a problem that can be traced back, providing context for that problem. In other words, development is `issue-driven`. The git workflow recommended for this repository goes as follows:
+Fork the repository if you do not have push access, clone your fork, and
+create a branch for the change:
 
-#. **Create a New Branch**
+.. code-block:: bash
 
-   Start by creating a new branch in the repository, named using the format ``<username>/<branch>``. This will serve as your dedicated branch for making changes.
+   git switch -c your-name/describe-the-change
 
-   Example:
+Follow :doc:`installation` to build from source in an isolated environment.
+Then install the development tools:
 
-   .. code-block:: bash
+.. code-block:: bash
 
-    git checkout -b <username/issue_description>
+   python -m pip install pytest pre-commit
+   pre-commit install
 
-#. **Update the .gitignore File**
+Make and validate the change
+----------------------------
 
-   The ``.gitignore`` file helps keep your working directory clean. Each folder can have its own ``.gitignore`` file, which lists files that should not be tracked by Git. For example, model output files should not be added to Git. Ideally, when you run ``git status``, there should be no untracked files in your working directory.
+Read neighboring tests and examples before changing behavior. Add or update
+a regression test when practical. Keep generated outputs and local
+environments out of commits, and stage only files relevant to the change.
 
-#. **Update the Source Code**
+.. code-block:: bash
 
-   Make the necessary modifications to the source code. You may use any suitable code editor or integrated development environment (IDE) to implement these changes.
+   python -m pytest tests/ -v -rs
+   pre-commit run --all-files
 
-#. **Commit Your Changes**
+Pre-commit checks formatting and lint rules; it does not run the solver's
+test suite. If a hook rewrites files, review its changes before staging them.
+For the C/C++ checks, configure with ``-DBUILD_TESTS=ON``, build, and run:
 
-   After updating the code, commit your changes to the branch. Provide a clear and concise commit message that describes the purpose of your modifications. When you want to pause your work on the issue, add your changes to git using the command:
+.. code-block:: bash
 
-   Example:
+   ctest --test-dir build --output-on-failure
 
-    .. code-block:: bash
+See :doc:`testing` for the validation cases and skip conditions.
 
-      git add .
-      commit -m "<message>"
+Documentation changes
+~~~~~~~~~~~~~~~~~~~~~
 
-#. **Run and Pass the Tests**
+Sphinx pages live in ``docs/source/``. The API reference reads descriptions
+from ``python/pydisort.pyi`` in this checkout, without importing the compiled
+package. Update that stub when changing the public API.
 
-   Before proceeding further, ensure that your changes pass all existing tests. Run the full test suite to verify that the modified code functions correctly and does not introduce any regressions.
+.. code-block:: bash
 
-   Example:
+   python -m pip install -r docs/requirements.txt
+   python -m unittest discover -s docs/_ext -p 'test_*.py'
+   python -m sphinx -E -b html -W --keep-going docs/source docs/_build/html
+   python -m sphinx -b doctest -W docs/source docs/_build/doctest
 
-    .. code-block:: bash
+The HTML build needs only the documentation dependencies. Doctests also need
+the built/installed solver and run the shared quickstart, type-hints and
+batch-shape examples. Ordinary ``code-block`` examples are not executed automatically.
+Preview ``docs/_build/html/index.html`` before submitting.
 
-      git push origin <username/issue_description>
+.. _separate-developer-checks:
 
+Separate developer checks
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#. **Submit a Pull Request (PR) and Await Approval**
+The following checks are run separately from the CI/CTest solver suite.
+Run them from the repository root when changing the relevant tooling:
 
-   Once your changes have passed the tests, submit a pull request (PR) to merge your branch into the main repository. Provide a detailed description of your changes along with any relevant information that might assist the reviewers. Then, wait for approval from the repository maintainers.
+.. code-block:: bash
 
-#. **Update Your Local Branch**
+   # Benchmark thread control and optional-dependency handling
+   python -m pip install PythonicDISORT threadpoolctl
+   python -m pytest benchmarks/tests/ -v -rs
 
-   If the PR is approved, the maintainers will squash merge your changes into the main branch. After that, you can update your local branch to reflect the latest changes in the main repository. To do this, run the following commands:
+   # Documentation API renderer (no compiled solver needed)
+   python -m pip install -r docs/requirements.txt
+   python -m unittest discover -s docs/_ext -p 'test_*.py'
 
-   Example:
+   # Source-build installation guidance
+   python -m pytest tests/test_setup_guidance.py -v -rs
 
-    .. code-block:: bash
+The benchmark and renderer tests are not registered with CTest. The setup
+guidance check runs with direct ``pytest tests/`` in a checkout, but its
+CTest copy skips because the build tree does not contain the repository's
+``setup.py``. Use the source-tree command above to exercise that check.
+These checks are not added to GitHub Actions by the current workflow.
 
-      git checkout main
-      git fetch origin main
-      git rebase origin/main
-      git branch -D <username/issue_description>
+Submit a pull request
+----------------------
 
-  where the `<username/issue_description>` refers to the branch you created in Step 2. This command will delete the local branch. You can then continue to start a new cycle and work on new issues.
+.. code-block:: bash
+
+   git diff --check
+   git add path/to/changed-file
+   git commit -m "Describe the change"
+   git push -u origin your-name/describe-the-change
+
+Open a PR against ``main``. Explain the problem, the changes, and the exact
+validation commands and results, including any tests you could not run.
+Push follow-up commits to the same branch to update the PR.
+
+The repository uses squash merging to keep a linear main-branch history.
+After the PR is merged and your worktree is clean, return to ``main`` and
+update it with ``git pull --ff-only`` (use the upstream remote when working
+from a fork). Keeping or deleting the old local branch is your choice.
+
+Conventions and upstream code
+------------------------------
+
+Follow the style of neighboring code and the rules in
+``.pre-commit-config.yaml``; do not reformat unrelated files.
+Explain changes to the bundled ``cdisort213/`` separately from wrapper
+changes, and preserve their upstream provenance. See :doc:`devops` for
+build and release details.

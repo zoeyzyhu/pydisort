@@ -2,15 +2,15 @@ User Guide
 ==========
 
 This page explains the pieces every pydisort program is built from: how a run
-is configured, what shape the inputs and outputs have, and how the degenerate
-dimensions are broadcast. If you just want to get something running, start with
+is configured, what shape the inputs and outputs have, and which singleton
+dimensions can be omitted. If you just want to get something running, start with
 :doc:`installation`; for complete worked calculations, see :doc:`examples`.
 
 How a run is configured
 -----------------------
 
 The normal usage of pydisort is to create a :class:`pydisort.DisortOptions`
-object first and then initialize the :class:`pydisort.cpp.Disort` object with
+object first and then initialize the :class:`pydisort.Disort` object with
 the :class:`pydisort.DisortOptions` object by:
 
 .. code-block:: python
@@ -25,22 +25,17 @@ the :class:`pydisort.DisortOptions` object by:
 
 .. note::
 
-  You can print the :class:`pydisort.DisortOptions` object to see its current settings:
+   Inspect dimensions through the options' state rather than relying on the
+   formatting of the printed representation:
 
-  .. code-block:: python
+   .. code-block:: python
 
-    >>> print(op)
-    DisortOptions(flags = onlyfl,lamber; nwave = 1; ncol = 1; wave = (); disort_state = (nlyr = 539784046; nstr = 1701994784; nmom = 2036689012; ibcnd = 0; usrtau = 0; usrang = 0; lamber = 0; planck = 0; spher = 0; onlyfl = 0))
+      >>> op.ds().nlyr, op.ds().nstr, op.ds().nmom
+      (4, 4, 4)
 
-  Note that the numbers in `disort_state` are not meaningful now because disort has not been properly initialized yet.
-  Initializing of the disort state is done when the :class:`pydisort.cpp.Disort` object is created
-  from the :class:`pydisort.DisortOptions` object:
-
-  .. code-block:: python
-
-    >>> ds = pydisort.Disort(op)
-    >>> print(ds.options)
-    DisortOptions(flags = onlyfl,lamber; nwave = 1; ncol = 1; wave = (); disort_state = (nlyr = 4; nstr = 4; nmom = 4; ibcnd = 0; usrtau = 0; usrang = 0; lamber = 1; planck = 0; spher = 0; onlyfl = 1))
+   Configure options before constructing the solver. Construction allocates
+   its internal arrays. Do not change dimensions or flags afterwards;
+   construct a new solver for a new configuration.
 
 Understanding the dimensions
 ----------------------------
@@ -76,18 +71,21 @@ Since this problem only has optical thickness, the property dimension is 1.
 In the general case the property dimension holds, in order, the optical
 thickness, the single-scattering albedo, and then ``nmom`` phase-function
 moments, so ``nprop = 2 + nmom``.
-If not specified, both the wavelength/wavenumber dimension and the column dimension
-are assumed to be 1 and are automatically added internally to the input array.
+The binding inserts missing leading singleton dimensions: ``(nlyr, nprop)``
+becomes ``(1, 1, nlyr, nprop)``, and ``(ncol, nlyr, nprop)`` becomes
+``(1, ncol, nlyr, nprop)``. It does not replicate optical properties across
+larger batch dimensions. The resulting shape must match the configured
+``nwave``, ``ncol`` and ``nlyr``.
 
-The boundary condition for the problem such as the beam illuminance is provided as the keyword argument of the `forward` method.
-The dimensions are automatically broadcasted to account for the degenerate wavelength/wavenumber and column dimensions:
-
-  #. The wavelength/wavenumber dimension (nwave = 1),
-  #. The column dimension (ncol = 1).
+Boundary conditions are keyword arguments of ``forward``. For the unprefixed
+spectral keys ``fbeam``, ``albedo``, ``fluor``, ``fisot`` and ``temis``, the
+binding similarly inserts leading singleton dimensions until the input is 2D.
+This is dimension insertion, not general PyTorch broadcasting: a one-element
+beam tensor becomes ``(1, 1)`` and is rejected for a two-column problem.
 
 In the example above, flx has four dimensions. In order of appearance, they are:
 
-  #. The wavelenth/wavenumber dimension (nwave = 1),
+  #. The wavelength/wavenumber dimension (nwave = 1),
   #. The column dimension (ncol = 1),
   #. The level dimension (nlvl = nlyr + 1 = 5),
   #. The flux field dimension (nflx = 2). The first element is upward flux, and the second element is downward flux.
@@ -120,6 +118,74 @@ call is much faster than making ``nwave * ncol`` separate calls.
 :doc:`examples` shows both axes in use. Example 2 batches eight spectral
 bands, while Examples 3 and 4 batch independent atmospheric cases along the
 column axis. :doc:`benchmarks` quantifies the resulting speed-up.
+
+.. list-table:: Input shapes after singleton insertion
+   :header-rows: 1
+   :widths: 40 30 30
+
+   * - Input
+     - Required shape
+     - Shared across wavelengths?
+   * - ``prop``
+     - ``(nwave, ncol, nlyr, nprop)``
+     - No; fill or expand explicitly.
+   * - ``fbeam``, ``albedo``, ``fluor``, ``fisot``, ``temis``
+     - ``(nwave, ncol)``
+     - No; fill or expand explicitly.
+   * - ``umu0``, ``phi0``, ``btemp``, ``ttemp``
+     - ``(ncol,)``
+     - Yes, by the solver's dispatch layer.
+   * - ``temf``
+     - ``(ncol, nlyr + 1)``
+     - Yes, by the solver's dispatch layer.
+
+For example, give every wave/column the same incident beam by constructing
+the full tensor. Geometry remains one value per column:
+
+.. testcode:: batch-shapes
+
+   import torch
+   from pydisort import Disort, DisortOptions
+
+   torch.set_default_dtype(torch.float64)
+   op = DisortOptions().flags("onlyfl,lamber,quiet").nwave(2).ncol(2)
+   op.ds().nlyr = 4
+   op.ds().nstr = op.ds().nmom = op.ds().nphase = 4
+   solver = Disort(op)
+   prop = torch.full((2, 2, 4, 1), 0.1)
+   flux = solver.forward(
+       prop, fbeam=torch.full((2, 2), 3.14159), umu0=torch.ones(2)
+   )
+   assert flux.shape == (2, 2, 5, 2)
+
+Alternatively, use ``value.expand(nwave, ncol).contiguous()`` to repeat an
+existing scalar or compatible tensor explicitly. With a nonempty ``bname``,
+pass matching prefixed keys such as ``"B1/fbeam"``; these currently require
+the full 2D spectral shape even for singleton batches. ``btemp`` and ``ttemp``
+are never prefixed. Omitted boundary inputs use solver defaults, rather than
+being inferred from another supplied boundary tensor.
+
+.. _python-flag-support:
+
+Flag availability in Python
+---------------------------
+
+Use ``lamber`` for the lower boundary, ``onlyfl`` for flux-only calculations,
+``planck`` for thermal emission, ``usrtau`` for requested output depths and
+``usrang`` for requested viewing directions. The API reference also lists
+intensity-correction and diagnostic flags.
+
+Recognizing a flag name is not the same as exposing a complete feature:
+
+* ``ibcnd`` is recognized, but ``forward`` rejects the special-boundary mode.
+* ``spher`` requires the body's radius and level altitudes; those inputs are
+  not exposed by the public Python interface. Do not enable it.
+* ``general_source`` requires user-source arrays that are not exposed by the
+  public Python interface. Do not enable it.
+* ``output_uum`` requests Fourier components for which there is no public
+  Python output accessor; it is not a supported output workflow.
+
+These are backend capabilities, not supported Python features.
 
 Thermal emission
 ----------------
@@ -175,12 +241,14 @@ You can pass those in as keyword arguments to the `forward` method, or organize 
         [179.6727,  84.7606],
         [188.1117, 124.8982]]]])
 
-The band limits given to ``wave_lower`` and ``wave_upper`` matter: cdisort
-integrates the Planck function over each band, so the band must be wide enough
-to capture the emission at the temperatures involved. A band of
-20-4000 cm\ :sup:`-1` recovers :math:`\sigma T^4` to better than
-10\ :sup:`-5` at terrestrial temperatures; hotter atmospheres need a wider
-upper limit.
+The limits passed to ``wave_lower`` and ``wave_upper`` are wavenumbers in
+cm\ :sup:`-1`. cdisort integrates the Planck function over each finite band;
+:math:`\sigma T^4` is the blackbody flux integrated over the entire spectrum.
+For a 20-4000 cm\ :sup:`-1` band, the omitted fraction of that total is about
+:math:`5.23\times10^{-5}` at 288 K and :math:`1.45\times10^{-4}` at 200 K.
+These are spectral truncation errors, not solver errors. Choose both band
+endpoints for the temperature range and accuracy required, or compare against
+an independently integrated Planck flux over exactly the same bands.
 
 Getting more than the flux
 --------------------------
@@ -248,5 +316,5 @@ Troubleshooting
     data type to double precision.
 
 The underlying DISORT algorithm is described by Stamnes et al. (1988) and its
-C implementation by Buras & Dowling (1996); both are cited on the
+C implementation by Buras, Dowling & Emde (2011); both are cited on the
 :doc:`index` page.

@@ -2,8 +2,9 @@
 
 from docutils import nodes
 from docutils.parsers.rst import roles
+from datetime import date
 import sys
-import os
+from pathlib import Path
 
 
 def greyed_out_role(
@@ -18,43 +19,32 @@ roles.register_local_role("grey", greyed_out_role)
 # -- Project information
 
 project = "pydisort"
-copyright = "2025, Zoey Hu"
+copyright = f"2025–{date.today().year}, Zoey Hu"
 author = "Zoey Hu"
-
-autosummary_generate = True
 
 # Don't show package name
 add_module_names = False
 
-# only show the class name
-autodoc_typehints = "both"
-
 # Don't show the function parentheses
 add_function_parentheses = False
 
-# Adjust the path accordingly
-sys.path.insert(0, os.path.abspath("../python"))
+# Read API descriptions from this checkout, not an installed PyPI binary.
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "_ext"))
 
 # -- General configuration
 
 extensions = [
     "sphinx.ext.duration",
     "sphinx.ext.doctest",
-    "sphinx.ext.autodoc",
     "sphinx.ext.napoleon",
-    "sphinx.ext.autosummary",
-    "sphinx.ext.viewcode",
+    "stub_api",
     "sphinx.ext.githubpages",
     "sphinx.ext.intersphinx",
-    # NOTE: sphinx.ext.autodoc.typehints is not a standalone extension; it is
-    # loaded by sphinx.ext.autodoc itself and is configured through the
-    # `autodoc_typehints` setting above.
 ]
 
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3/", None),
     "sphinx": ("https://www.sphinx-doc.org/en/master/", None),
-    "torch": ("https://pytorch.org/docs/stable/", None),
 }
 intersphinx_disabled_domains = ["std"]
 
@@ -69,6 +59,9 @@ latex_elements = {
 }
 
 templates_path = ["_templates"]
+exclude_patterns = ["_snippets/**"]
+# Only explicitly marked executable examples are part of the doctest suite.
+doctest_test_doctest_blocks = ""
 
 # -- Options for HTML output -------------------------------------------------
 

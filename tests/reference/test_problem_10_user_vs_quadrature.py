@@ -11,13 +11,12 @@ agree. That is the check here as well, on fluxes: the angular grid used for
 reporting intensities must not disturb the flux integration, which is
 performed over the quadrature angles either way.
 
-Fluxes rather than intensities, for two reasons. The published tables for this
-problem are flux tables, and ``gather_rad`` currently reads its dimensions
+This port checks fluxes rather than intensities. ``gather_rad`` reads dimensions
 from the pre-allocation state, so it under-reports when ``usrang`` is clear;
-that defect is tracked separately and is not what this module is for.
+that accessor limitation needs separate code coverage and is not tested here.
 
 Reference:
-    Expected values transcribed from disort_test10() in
+    Consistency-check configuration adapted from disort_test10() in
     tests/cdisort213/test_cdisort.c.
 """
 

@@ -4,9 +4,9 @@ Performance measurements for pydisort.
 
 | Script | What it measures |
 | --- | --- |
-| [`compare_cdisort.py`](compare_cdisort.py) | pydisort vs. cdisort: what the Python wrapper costs, and what batching buys. Builds its own C baseline — no cmake, no libtorch. |
-| [`compare_pythonicdisort.py`](compare_pythonicdisort.py) | pydisort vs. PythonicDISORT: the interpreted/compiled gap. |
-| [`testproblem09.py`](testproblem09.py) | The shared problem definition. Not a benchmark — imported by both scripts above, so the configuration is written down exactly once. |
+| [`compare_cdisort.py`](compare_cdisort.py) | pydisort vs. cdisort: what the Python wrapper costs, and what batching buys. Builds its own C baseline, so no cmake and no libtorch. |
+| [`compare_pythonicdisort.py`](compare_pythonicdisort.py) | pydisort vs. PythonicDISORT: end-to-end solver performance. |
+| [`testproblem09.py`](testproblem09.py) | The shared problem definition. Not a benchmark, but imported by both scripts above, so the configuration is written down exactly once. |
 | [`bench_cdisort.cpp`](bench_cdisort.cpp) | The C baseline, compiled on demand by `compare_cdisort.py`. Not run directly. |
 
 ## What is measured
@@ -21,15 +21,17 @@ Scattering") with **32 streams and 100 layers**, a workload typical of
 atmospheric radiation calculations, and repeat it for a growing number of
 wavenumbers.
 
+Every measurement quoted in this file was taken on an **Apple M5 Max (18
+logical CPUs)** with the package and compiler versions shown in the recorded
+output below. Re-run the scripts to measure performance on your own hardware.
+
 They answer two different questions, which is why they are separate scripts:
 
-* **`compare_cdisort.py`** — pydisort wraps cdisort, so this measures what the
-  wrapper costs. The single-core ratio should be 1.0; the rest is what
-  batching over wavenumbers buys. This is the durable result: it does not
-  depend on a third-party package's release.
-* **`compare_pythonicdisort.py`** — [PythonicDISORT](https://doi.org/10.21105/joss.06442)
-  (Ho 2024) is a pure-Python reimplementation, included to show the
-  interpreted/compiled gap.
+* **`compare_cdisort.py`**: pydisort wraps cdisort, so this measures what the
+  wrapper costs on one thread and the benefit of batching over wavenumbers
+  on multiple threads.
+* **`compare_pythonicdisort.py`**: [PythonicDISORT](https://doi.org/10.21105/joss.06442)
+  (Ho 2024) is a pure-Python reimplementation, compared on the same workload.
 
 Both import their problem definition from `testproblem09.py`, so the thing
 being timed is defined in one place rather than copied into each script.
@@ -53,9 +55,9 @@ Three properties of that baseline each move the number:
 
 * **The solve loop is timed inside the C program.** Running a driver as a
   subprocess and subtracting an estimated process startup leaves a residual of
-  about 0.7% on this machine, and it errs in the direction that flatters
-  pydisort. Timing with `std::chrono` inside the loop removes the correction
-  rather than modelling it.
+  about 0.7% on the reference machine, and it errs in the direction that
+  flatters pydisort. Timing with `std::chrono` inside the loop removes the
+  correction rather than modelling it.
 * **The baseline is cross-validated against pydisort.** `bench_cdisort.cpp`
   has a `--verify` mode, so the two are compared directly before any timing.
   They agree to ~1e-23: pydisort calls the same solver, so anything worse
@@ -63,9 +65,9 @@ Three properties of that baseline each move the number:
 * **Allocation policy is a switch, not an assumption.**
   `tests/cdisort213/test_cdisort_09.c` calls `c_disort_state_alloc`/`_free` on
   every iteration; pydisort allocates once per batch. `--alloc both` measures
-  the difference so it cannot hide inside the ratio. On this machine the two
-  are within **0.3%** of each other, i.e. indistinguishable from run-to-run
-  noise.
+  the difference so it cannot hide inside the ratio. On the reference machine
+  the two are within **0.3%** of each other, i.e. indistinguishable from
+  run-to-run noise.
 
 At `--nstr 8 --nlyr 6 --ssalb 0.05` the driver reproduces the published Test
 Problem 9a reference values to within their six-figure precision, which is
@@ -76,16 +78,19 @@ what establishes that the baseline solves the intended problem.
 | `--alloc hoisted\|percall\|both` | How the C baseline manages `disort_state`. `hoisted` (default) matches what pydisort does and is the like-for-like comparison; `percall` matches `test_cdisort_09.c`. |
 | `--mode radiance\|flux` | What both implementations compute. `radiance` (default) matches the C driver for Test 9. |
 | `--verify-only` | Check agreement and exit. |
-| `--tolerance` | Maximum relative difference accepted (default `1e-12` — both call the same solver, so agreement should be near machine precision). |
+| `--tolerance` | Maximum relative difference accepted (default `1e-12`, since both call the same solver and agreement should be near machine precision). |
 | `--rebuild`, `--builddir` | Force a rebuild / relocate the compiled baseline. |
 | `--nwave`, `--threads`, `--repeat` | Problem sizes, thread count, timing repeats. |
 
 ### Result
 
-Apple M5 Max (18 logical CPUs), pydisort 1.8.5, torch 2.10.0, Apple clang 21,
-best of 3, radiance mode:
+Apple M5 Max (18 logical CPUs), best of 3, radiance mode:
 
 ```
+pydisort      : 1.8.5
+torch         : 2.10.0
+compiler      : Apple clang 21
+
 Speed-up over cdisort (hoisted)
    nwave         1 core       10 cores
        1          0.98x          0.98x
@@ -97,23 +102,20 @@ Speed-up over cdisort (hoisted)
 (same problem at 18 threads: 12.71x at nwave=1000, 13.25x at nwave=10000)
 ```
 
-**The wrapper is free.** pydisort on one thread is 0.98–1.01x of cdisort
-across four orders of magnitude of workload. That is the expected result — it
-calls the same `c_disort` on the same inputs — but it is worth pinning down,
-because it is exactly what a tensor-marshalling layer could plausibly get
-wrong.
+**Single-threaded performance closely matches cdisort on this workload.**
+The measured speed ratio is 0.98-1.01x across the spectral batch sizes above.
 
 **Threading is where the gain is, and it is bounded by the core count.** On 10
 threads the ratio saturates around **8.3x** (83% parallel efficiency); raising
-the thread count to 18 on this machine takes it to 13.3x. There is nothing to
-parallelize at one wavenumber, so the single- and multi-threaded lines meet
-there and separate as the spectral dimension fills the cores. Quote this ratio
-with the thread count and the CPU, or it does not mean anything.
+the thread count to 18, one per logical core, takes it to 13.3x. There is
+nothing to parallelize at one wavenumber, so the single- and multi-threaded
+lines meet there and separate as the spectral dimension fills the cores. Quote
+this ratio with the thread count and the CPU, or it does not mean anything.
 
 ## Against PythonicDISORT
 
 ```bash
-pip install pydisort PythonicDISORT
+pip install pydisort PythonicDISORT threadpoolctl
 python benchmarks/compare_pythonicdisort.py --verify-only   # seconds
 python benchmarks/compare_pythonicdisort.py                 # default sweep
 python benchmarks/compare_pythonicdisort.py \
@@ -142,26 +144,35 @@ Speed-up over PythonicDISORT
    10000          39.9x         334.7x
 ```
 
-The single-core ratio is flat at about 40x — that is the interpreter overhead
-and it does not depend on problem size. The multi-threaded ratio climbs while
-the cores fill and then saturates near 335x by about 1000 wavenumbers.
+For this 32-stream, 100-layer problem, the single-thread speed-up is about
+40x across the measured spectral batch sizes. The multi-threaded speed-up
+rises as the cores fill, reaching about 335x by about 1000 wavenumbers.
 
-That saturation is why the sweep above stops at 1000. The paper's figure
-extends to 10000, where PythonicDISORT alone takes **552 s** on this machine
-and closer to an hour on the M1 Max the paper used, for a ratio that has
-already stopped moving. The script projects the runtime from one solve and
-says so before it starts, so a long sweep is a choice rather than a surprise.
-Add 10000 when reproducing the figure, not when checking a result.
+That saturation is why the sweep above stops at 1000. Extending it to 10000
+costs **552 s** for PythonicDISORT alone on the reference machine, and closer
+to an hour on an M1 Max, for a ratio that has already stopped moving. The
+script projects the runtime from one solve and says so before it starts, so a
+long sweep is a choice rather than a surprise. Add 10000 when you want the
+asymptote confirmed, not when checking a result.
 
-> ⚠️ **Do not quote this ratio as a property of pydisort.** It is a ratio
-> between two moving targets. PythonicDISORT's own performance has improved
-> across releases (this table used 1.8), and the two codes do not scale
-> identically across hardware, so the same measurement on a different machine
-> or a different PythonicDISORT version can land a factor of two or three
-> away. The durable, reproducible results are the two comparisons against
-> cdisort: **1x on one thread** and **roughly an order of magnitude
-> multi-threaded**. Re-run on your own hardware rather than citing these
-> numbers.
+Each run records package versions, hardware and thread counts alongside the
+timings so you can compare results from your own environment.
+
+### Thread control
+
+The PythonicDISORT benchmark overrides native thread environment variables to
+one, then uses `threadpoolctl` to limit loaded BLAS and OpenMP pools during
+verification and timing, including output evaluation. Limits are applied
+outside the timed loop. The pydisort runs independently select one thread and
+the count requested by `--threads`.
+
+The cdisort baseline uses its bundled, serial LINPACK routines.
+
+Run the benchmark's thread-control regression checks with:
+
+```bash
+python -m pytest benchmarks/tests/ -q
+```
 
 ## Getting the most out of pydisort
 

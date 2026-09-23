@@ -1,7 +1,7 @@
 """Run every script in `examples/` as a test.
 
 The examples are self-checking: each one ends with assertions comparing its
-output against an analytic solution or a conservation law. Running them here
+output against a reference value, analytic limit, conservation law or consistency relation. Running them here
 means a change in solver behaviour that breaks a documented example fails the
 test suite rather than being discovered by a user.
 """

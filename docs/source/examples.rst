@@ -3,13 +3,13 @@ Example Usage
 
 The `examples/ <https://github.com/zoeyzyhu/pydisort/tree/main/examples>`_
 directory contains four complete, runnable calculations that build from the
-simplest possible DISORT problem to a research-level analysis.
+simplest possible DISORT problem to a real-world two-stream validation study.
 
 Every example is standalone (copy one file and run it), prints its results,
-and **ends with assertions** that compare against an analytic solution or a
-conservation law. Running them is therefore also a way to verify an
-installation. They are exercised by the test suite (see :doc:`testing`), so
-they cannot silently drift out of date.
+and **ends with assertions** against reference values, analytic limits,
+conservation laws or internal consistency relations. These checks exercise
+specific configurations, not every solver capability. The test suite runs
+them (see :doc:`testing`) to catch regressions in the examples.
 
 .. list-table::
    :widths: 22 42 36
@@ -25,8 +25,8 @@ they cannot silently drift out of date.
    * - ``example_02_thermal_emission.py``
      - Thermal emission with the ``planck`` flag; batching over the
        **spectral axis**; outgoing longwave radiation and cooling rates.
-     - An isothermal column emits exactly :math:`\sigma T^4`; column-integrated
-       heating equals the net flux divergence.
+     - Upward finite-band flux is uniform in an isothermal column;
+       integrated heating reproduces the flux differences used to define it.
    * - ``example_03_aerosol_scattering.py``
      - Multiple scattering with a Henyey-Greenstein phase function; radiances
        via ``gather_rad``; batching over the **column axis** to build a
@@ -34,12 +34,12 @@ they cannot silently drift out of date.
      - A transparent atmosphere returns the surface albedo exactly;
        conservative scattering conserves energy.
    * - ``example_04_two_stream_validation.py``
-     - **A real-world analysis problem.** Using pydisort as the multi-stream
-       reference to measure the error of a fast two-stream solver, over the
-       official DISORT flux-test cases.
+     - **Real-world analysis.** Comparing pydisort at 2-32 streams
+       against published DISORT fluxes. No external two-stream solver runs.
      - The published DISORT benchmark flux values, reproduced to 0.0005%.
 
-Run any of them directly:
+From a repository checkout, run any of them directly (or download one script
+and run it from its directory):
 
 .. code-block:: bash
 
@@ -80,9 +80,11 @@ Example 2: thermal emission and cooling rates
 ---------------------------------------------
 
 A complete longwave calculation for an Earth-like atmosphere: an idealised
-eight-band absorber, a warm Lambertian surface, and a US Standard Atmosphere
-temperature profile. It produces what a climate model needs from its longwave
-scheme: the outgoing longwave radiation and the radiative cooling rate
+eight-band absorber, a warm Lambertian surface, and an idealized temperature
+profile inspired by the US Standard Atmosphere. A fixed scale height maps
+pressure to altitude; this is not the full standard atmosphere or a validated
+spectroscopic scheme. It illustrates band-limited outgoing longwave radiation
+and the radiative cooling rate
 
 .. math::
 
@@ -105,7 +107,18 @@ in a single call** by placing them on the leading ``nwave`` axis.
 
   OLR                          :   259.79 W m-2
   surface emission (sigma T^4) :   390.11 W m-2
-  greenhouse effect            :   130.32 W m-2
+  full-spectrum surface minus band OLR:   130.32 W m-2
+
+The surface value above integrates the entire spectrum, whereas OLR includes
+only the example's 10-3000 cm\ :sup:`-1` bands. Their difference includes
+omitted-band emission as well as atmospheric effects; it is not a like-for-like
+broadband greenhouse diagnostic.
+
+The isothermal check compares every level's upward flux with the computed
+bottom-level flux. It verifies vertical uniformity, not absolute agreement
+with :math:`\sigma T^4`. Integrating the derived heating rate telescopes the
+same flux differences, so that check verifies bookkeeping rather than an
+independent physical energy budget.
 
 Example 3: aerosol scattering and a retrieval lookup table
 ----------------------------------------------------------
@@ -134,27 +147,15 @@ validation check.
 
 .. _real-world-example:
 
-Example 4: validating a fast two-stream solver
-----------------------------------------------
+Example 4: a real-world two-stream validation study
+---------------------------------------------------
 
-This is the real-world case.
-
-**The problem.** Almost every climate model, weather model and operational
-retrieval uses a *two-stream* radiative transfer solver, because two streams
-are cheap enough to call millions of times. The price is accuracy, and the only
-way to know what that price is, is to compare against a trusted multi-stream
-reference. DISORT is that reference, which is why the official DISORT flux-test
-problems are the standard yardstick.
-
-This is a real workflow, not a hypothetical one.
-`py2sess <https://github.com/happysky19/py2sess>`_ (Le, Li, Natraj & Spurr,
-submitted), a differentiable implementation of the two-stream exact
-single-scattering method, validates its public level-flux convention against
-exactly these DISORT flux-test cases, *"because DISORT is a widely used
-multi-stream discrete-ordinate reference solver"*. Their check reports a median
-absolute relative difference of 0.36% over the comparison rows, with the large
-outliers concentrated where the absolute reference flux is very small or the
-phase function is strongly anisotropic.
+This example demonstrates the reference-comparison workflow used to assess
+radiative-transfer approximations. It compares pydisort with published flux
+values and varies pydisort's own stream count; it does not run a separate
+two-stream implementation. Projects such as
+`py2sess <https://github.com/happysky19/py2sess>`_ provide motivation for such
+comparisons, but this example does not measure their accuracy or performance.
 
 **The setup.** Twelve official flux-test cases: Test 1 (isotropic scattering,
 thin and thick), Test 2 (Rayleigh, moderate and thick) and Test 3
@@ -166,9 +167,8 @@ problems as ``tests/reference/test_problem_01_isotropic.py`` and
 stream count solves all twelve cases in a single batched ``forward`` call, with
 the cases laid out along the column axis.
 
-**1. Reproduce the published benchmark values.** Solved at 16 streams, the
-stream count the published values were themselves computed at, and compared
-against the transcribed DISORT reference fluxes:
+**1. Reproduce the published benchmark values.** The example uses a
+16-stream run to compare against the transcribed DISORT reference fluxes:
 
 .. code-block:: text
 
@@ -183,10 +183,12 @@ against the transcribed DISORT reference fluxes:
 This validates the installation against an external source rather than against
 itself.
 
-**2. Measure the two-stream error.** The same twelve cases re-solved with
-``nstr = 2``. At two streams only two phase-function moments survive, so a
-tabulated or strongly forward-peaked phase function collapses to a single
-asymmetry parameter. That truncation *is* the two-stream approximation:
+**2. Measure the two-stream DISORT discrepancy.** The same twelve cases are
+re-solved with ``nstr = 2``. This changes the angular quadrature, and this
+script also sets ``nmom = nstr``. It supplies moments of orders 1 through
+``nstr`` in addition to the implicit zeroth moment; the coefficient at order
+``nstr`` can affect delta-M scaling. This is not just retaining a single
+asymmetry parameter, nor is it a test of every two-stream closure:
 
 .. code-block:: text
 
@@ -201,22 +203,19 @@ asymmetry parameter. That truncation *is* the two-stream approximation:
   over 46 scored rows, |relative difference| in percent:
     median 3.96   75th 10.79   90th 16.42   95th 62.49   max 76.01
 
-The outliers fall in exactly the two places py2sess identifies. First, cases
-where the reference flux is nearly zero: 1f and 2c transmit almost nothing, so
-a tiny absolute error is a huge relative one. Second, the forward-peaked
-Henyey–Greenstein cases 3a and 3b, where two moments cannot represent the phase
-function.
+Large relative discrepancies occur for near-zero transmitted fluxes (1f and
+2c), where the denominator magnifies a small absolute difference, and for the
+forward-peaked Henyey-Greenstein cases (3a and 3b), where angular resolution
+matters. Interpret relative errors alongside absolute fluxes.
 
-.. note::
+The percentiles score upward TOA, downward BOA and net boundary fluxes,
+excluding zero references. They omit imposed downward TOA and black-surface
+upward fluxes, which are exact by construction. Results from another solver
+or a different selection of cases/rows are not directly comparable; this
+selection alone does not establish a "stricter" validation.
 
-  These percentiles are not directly comparable to the ones py2sess quotes
-  (median 0.36%, 95th 13.3%). That check spans more test cases and includes
-  rows that are exact by construction: the imposed top-of-atmosphere boundary
-  condition, and the upward flux at a black surface. The scoring here drops
-  those rows, so these numbers are the stricter of the two.
-
-**3. How many streams are enough?** Sweeping the stream count gives the
-accuracy/cost trade-off directly:
+**3. How sensitive are these results to stream count?** The sweep reports
+discrepancies from the published fluxes; it does not measure runtime:
 
 .. code-block:: text
 
@@ -230,12 +229,12 @@ accuracy/cost trade-off directly:
 Four streams already remove most of the two-stream error, and by sixteen the
 solution sits on the published values.
 
-The agreement is best at 16 streams and slightly worse at 32, which looks wrong
-until you remember what is being measured: the published values were themselves
-produced at 16 streams, so the table measures distance from a 16-stream answer,
-not distance from the truth. The 32-stream solution is the more accurate one;
-it simply differs from the reference by the reference's own discretisation
-error.
+Agreement with these tabulated values is best at 16 streams and slightly
+worse at 32. The table measures distance from finite-precision reference
+values, not from an exact solution. This result alone does not prove that
+32 streams is more accurate, or that discrepancies come solely from the
+reference's discretization. Assess convergence for the quantities and
+configurations relevant to your application.
 
 Run it with a figure:
 

@@ -10,4 +10,4 @@ authors:
   family-names: Li
   orcid: https://orcid.org/0000-0002-8280-3119
 repository-code: https://github.com/zoeyzyhu/pydisort
-license: GPL-3.0-only
+license: GPL-3.0-or-later
