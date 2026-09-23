@@ -42,12 +42,16 @@
   <img alt="GitHub release (latest by date)"
     src="https://img.shields.io/github/v/release/zoeyzyhu/pydisort?style=flat-square&logo=buffer"/>
 </a>
+<a href="https://pepy.tech/projects/pydisort">
+  <img alt="PyPI downloads"
+    src="https://img.shields.io/pepy/dt/pydisort?style=flat-square&logo=python"/>
+</a>
 <br>
 <a href="https://github.com/pre-commit/pre-commit">
   <img alt="pre-commit"
     src="https://img.shields.io/badge/pre--commit-enabled-brightgreen?style=flat-square&logo=pre-commit"/>
 </a>
-<a href="http://makeapullrequest.com">
+<a href="https://github.com/zoeyzyhu/pydisort/blob/main/CONTRIBUTING.md">
   <img alt="pull-request"
     src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square&logo=git"/>
 </a>

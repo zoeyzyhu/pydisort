@@ -19,7 +19,7 @@ roles.register_local_role("grey", greyed_out_role)
 # -- Project information
 
 project = "pydisort"
-copyright = f"2025–{date.today().year}, Zoey Hu"
+copyright = f"2023–{date.today().year}, Zoey Hu"
 author = "Zoey Hu"
 
 # Don't show package name
