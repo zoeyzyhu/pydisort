@@ -46,7 +46,9 @@ extensions = [
     "sphinx.ext.viewcode",
     "sphinx.ext.githubpages",
     "sphinx.ext.intersphinx",
-    "sphinx.ext.autodoc.typehints",
+    # NOTE: sphinx.ext.autodoc.typehints is not a standalone extension; it is
+    # loaded by sphinx.ext.autodoc itself and is configured through the
+    # `autodoc_typehints` setting above.
 ]
 
 intersphinx_mapping = {

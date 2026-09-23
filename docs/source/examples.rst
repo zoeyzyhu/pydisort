@@ -160,8 +160,9 @@ phase function is strongly anisotropic.
 thin and thick), Test 2 (Rayleigh, moderate and thick) and Test 3
 (Henyey-Greenstein, :math:`g = 0.75`, conservative), each a single layer over
 a black Lambertian surface. The configurations match the C drivers in
-``tests/cdisort213/test_cdisort.c``; cases 1a–1f and 2a–2d are the same
-problems as ``tests/test_disort_01.py`` and ``tests/test_disort_02.py``. Every
+``tests/cdisort213/test_cdisort.c``; cases 1a-1f and 2a-2d are the same
+problems as ``tests/reference/test_problem_01_isotropic.py`` and
+``tests/reference/test_problem_02_rayleigh.py``. Every
 stream count solves all twelve cases in a single batched ``forward`` call, with
 the cases laid out along the column axis.
 
