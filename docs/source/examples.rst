@@ -2,11 +2,11 @@ Example Usage
 =============
 
 The `examples/ <https://github.com/zoeyzyhu/pydisort/tree/main/examples>`_
-directory contains four complete, runnable calculations that build from the
+directory contains four runnable calculations that build from the
 simplest possible DISORT problem to a real-world two-stream validation study.
 
 Every example is standalone (copy one file and run it), prints its results,
-and **ends with assertions** against reference values, analytic limits,
+and checks its output against reference values, analytic limits,
 conservation laws or internal consistency relations. These checks exercise
 specific configurations, not every solver capability. The test suite runs
 them (see :doc:`testing`) to catch regressions in the examples.
@@ -52,16 +52,16 @@ additionally draw a summary figure if ``matplotlib`` is installed.
 Example 1: beam attenuation
 ---------------------------
 
-The simplest possible DISORT problem: a purely absorbing, non-emitting medium
-illuminated by a collimated beam. The direct beam must follow the Beer-Lambert
-law exactly,
+This example models a purely absorbing, non-emitting medium illuminated by a
+collimated beam. The analytic solution for direct-beam flux is the Beer-Lambert
+law:
 
 .. math::
 
   F_{\rm dir}(\tau) = F_{\rm beam}\, \mu_0 \, e^{-\tau / \mu_0},
 
-so the answer is known analytically. Three solar zenith angles are solved
-simultaneously as three columns. The example also introduces
+Three solar zenith angles are solved simultaneously as three columns and
+compared with this solution. The example also introduces
 :meth:`~pydisort.Disort.gather_flx`, which exposes the direct-beam component
 separately from the diffuse field.
 
@@ -79,7 +79,7 @@ separately from the diffuse field.
 Example 2: thermal emission and cooling rates
 ---------------------------------------------
 
-A complete longwave calculation for an Earth-like atmosphere: an idealised
+This example computes longwave fluxes for an Earth-like atmosphere: an idealised
 eight-band absorber, a warm Lambertian surface, and an idealized temperature
 profile inspired by the US Standard Atmosphere. A fixed scale height maps
 pressure to altitude; this is not the full standard atmosphere or a validated
@@ -187,8 +187,8 @@ itself.
 re-solved with ``nstr = 2``. This changes the angular quadrature, and this
 script also sets ``nmom = nstr``. It supplies moments of orders 1 through
 ``nstr`` in addition to the implicit zeroth moment; the coefficient at order
-``nstr`` can affect delta-M scaling. This is not just retaining a single
-asymmetry parameter, nor is it a test of every two-stream closure:
+``nstr`` can affect delta-M scaling. With two streams, moments of orders 1 and
+2 are supplied. The results below apply to this DISORT configuration:
 
 .. code-block:: text
 
@@ -226,15 +226,11 @@ discrepancies from the published fluxes; it does not measure runtime:
          16     0.0001     0.0002     0.0005     0.0005     0.0079
          32     0.0010     0.0035     0.0096     0.0135     0.1139
 
-Four streams already remove most of the two-stream error, and by sixteen the
-solution sits on the published values.
-
-Agreement with these tabulated values is best at 16 streams and slightly
-worse at 32. The table measures distance from finite-precision reference
-values, not from an exact solution. This result alone does not prove that
-32 streams is more accurate, or that discrepancies come solely from the
-reference's discretization. Assess convergence for the quantities and
-configurations relevant to your application.
+Discrepancies decrease substantially from two to four streams. Agreement with
+the tabulated values is best at 16 streams and slightly worse at 32. These are
+finite-precision reference values, so the table does not establish error
+relative to an exact solution or identify the cause of each discrepancy.
+Assess convergence for the quantities and configurations in your application.
 
 Run it with a figure:
 

@@ -134,13 +134,12 @@ rises as the cores fill, reaching about 335x.
 
 .. note::
 
-   The sweep above stops at 1000 because the ratio has stopped moving by then.
-   Extending it to 10000 costs about nine minutes on the Apple M5 Max quoted
-   above, and closer to an hour on an M1 Max, almost all of it PythonicDISORT.
-   ``compare_pythonicdisort.py`` projects the runtime from one solve and prints
-   it before starting, so a long sweep is a choice rather than a surprise.
-   ``compare_cdisort.py`` has no such problem: the same point costs about 30
-   seconds there.
+   The command above stops at 1000 wavenumbers to keep the run short. Add
+   10000 to extend it to the largest recorded batch. That point takes about
+   nine minutes for PythonicDISORT on the Apple M5 Max quoted above, and
+   closer to an hour on an M1 Max. The script estimates runtime from one
+   solve before starting the sweep. The cdisort comparison takes about
+   30 seconds at that batch size on the reference machine.
 
 Each run records package versions, hardware and thread counts alongside the
 timings so you can compare results from your own environment.

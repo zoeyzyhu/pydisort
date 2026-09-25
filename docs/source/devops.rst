@@ -107,7 +107,7 @@ than one is an error. The new number is derived from the most recent tag, and
 the workflow queries the remote before claiming a tag so it can never reuse one
 that already exists.
 
-Three guards are worth knowing about:
+The release workflow uses three guards:
 
 - The job is serialised through ``concurrency: {group: auto-tag-main}`` with
   ``cancel-in-progress: false``, so two pull requests merged close together

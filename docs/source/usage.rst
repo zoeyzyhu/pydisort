@@ -61,7 +61,7 @@ Example 1: Calculate attenuation of radiative flux in a plane-parallel atmospher
           [0.0000, 1.7241],
           [0.0000, 1.1557]]]])
 
-It is important to understand the dimensions of the input and output arrays.
+The input and output array dimensions are listed below.
 The input array `tau` has two dimensions. In order of appearance, they are:
 
   #. The layer dimension (nlyr = 4),

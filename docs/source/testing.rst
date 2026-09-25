@@ -235,7 +235,7 @@ C and C++ tests
 How correctness is established
 ------------------------------
 
-The checks have different strengths and should not be conflated:
+The suite uses four types of checks:
 
 **1. Published reference values.** Problems 1, 2, 3, 6 and 9 compare fluxes and
 radiances against tables distributed with DISORT using ``rtol=1e-4`` and

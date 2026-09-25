@@ -70,8 +70,7 @@ Three properties of that baseline each move the number:
   run-to-run noise.
 
 At `--nstr 8 --nlyr 6 --ssalb 0.05` the driver reproduces the published Test
-Problem 9a reference values to within their six-figure precision, which is
-what establishes that the baseline solves the intended problem.
+Problem 9a reference values to within their six-figure precision.
 
 | Option | Meaning |
 | --- | --- |
@@ -148,12 +147,10 @@ For this 32-stream, 100-layer problem, the single-thread speed-up is about
 40x across the measured spectral batch sizes. The multi-threaded speed-up
 rises as the cores fill, reaching about 335x by about 1000 wavenumbers.
 
-That saturation is why the sweep above stops at 1000. Extending it to 10000
-costs **552 s** for PythonicDISORT alone on the reference machine, and closer
-to an hour on an M1 Max, for a ratio that has already stopped moving. The
-script projects the runtime from one solve and says so before it starts, so a
-long sweep is a choice rather than a surprise. Add 10000 when you want the
-asymptote confirmed, not when checking a result.
+The command above stops at 1000 wavenumbers to keep the run short. Add 10000
+to extend it to the largest recorded batch. That point takes 552 seconds for
+PythonicDISORT on the reference machine and closer to an hour on an M1 Max.
+The script estimates runtime from one solve before starting the sweep.
 
 Each run records package versions, hardware and thread counts alongside the
 timings so you can compare results from your own environment.
