@@ -93,19 +93,16 @@ calculations but prefer Python-based, scalable tooling:
 Scope and limitations
 ---------------------
 
-pydisort inherits DISORT's physical assumptions, and it is worth being explicit
-about them:
+pydisort solves radiative transfer in plane-parallel layers. Each atmospheric
+column is horizontally homogeneous and is solved independently. Scattering
+phase functions are supplied as Legendre moments; polarisation is not included.
 
-* the medium is **plane-parallel** and horizontally homogeneous
-  within a column. The backend's spherical correction requires geometry inputs
-  that are not exposed in Python (see :ref:`python-flag-support`);
-* scattering is described by **azimuthally symmetric phase-function moments**;
-  polarisation is not treated;
-* the underlying numerical engine is cdisort. Agreement with its direct C
-  interface is checked for the benchmark configuration; published-reference
-  tests use documented absolute and relative tolerances. This does not imply
-  machine-precision agreement with every DISORT implementation or configuration;
-  see :doc:`testing` and :doc:`benchmarks`.
+The Python interface does not expose the radius and altitude inputs required
+by cdisort's spherical correction. The ``spher`` flag should therefore not be
+enabled. See :ref:`python-flag-support` for other interface restrictions.
+
+Reference problems and numerical tolerances are documented in :doc:`testing`.
+Comparisons with cdisort and PythonicDISORT are described in :doc:`benchmarks`.
 
 References
 ----------
