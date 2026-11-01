@@ -26,7 +26,8 @@ Supported platforms
    * - Python
      - CPython 3.10, 3.11, 3.12, 3.13, 3.14
    * - Linux wheels
-     - x86-64, glibc 2.28 or newer (including the PyTorch dependency)
+     - x86-64 and aarch64 (ARM64), glibc 2.28 or newer
+       (including the PyTorch dependency)
    * - macOS wheels
      - Apple Silicon (arm64), macOS 15 or newer
    * - Dependencies
@@ -34,12 +35,51 @@ Supported platforms
 
 The release workflow targets these platforms; consult the
 `PyPI download files <https://pypi.org/project/pydisort/#files>`_ for available
-wheels. The workflow does not build wheels for Windows, Intel macOS, Linux ARM
+wheels. Linux aarch64 CPU wheels are published to PyPI; CUDA 12.8 wheels
+are distributed separately as workflow artifacts (see below).
+The workflow does not build wheels
+for Windows, Intel macOS, 32-bit Linux ARM
 or free-threaded Python. A source build is not a guarantee of support on those
 targets.
 
 The glibc floor of 2.28 is inherited from PyTorch v2.7 and later. Wheels are
 built and published automatically with ``cibuildwheel`` through GitHub Actions.
+
+Linux aarch64 with NVIDIA GPUs
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The release workflow builds both CPU and CUDA 12.8 aarch64 wheels for
+CPython 3.10–3.14. CUDA wheels also support CPU tensors, but require
+CUDA-enabled PyTorch. They target Linux ARM64 SBSA systems with Ampere,
+Hopper, or Blackwell GPUs (compute capabilities 8.0, 9.0, 10.0, and 12.0,
+with PTX for 12.0). Jetson/JetPack compatibility is not validated.
+
+Download the ``cuda-wheels-linux-<python-version>-aarch64-cu128`` artifact
+from the matching tag's **Publish to PyPI** workflow run on GitHub Actions.
+Extract it, then install in a fresh environment, replacing the wheel path
+with the downloaded file:
+
+.. code-block:: bash
+
+  python -m pip install 'torch==2.10.0' --index-url https://download.pytorch.org/whl/cu128
+  python -m pip install /path/to/pydisort-<version>-<python>-<abi>-<platform>.whl
+  python -c 'import torch, pydisort; print(torch.version.cuda, torch.cuda.is_available())'
+
+GPU execution requires a compatible NVIDIA driver. The final command should
+print ``12.8 True`` on a configured GPU host. CPU and CUDA artifacts contain
+the same package name and version; install only one variant per environment.
+The CUDA artifacts are excluded from PyPI uploads because standard wheel
+tags cannot select a CUDA variant based on the installed GPU or PyTorch build.
+PyPI's default PyTorch 2.10.0 aarch64 wheel is CPU-only.
+
+Release runners compile CUDA without a GPU and run CPU examples against the
+installed wheel. GPU execution must additionally be validated on an aarch64
+CUDA host with a checkout matching the wheel:
+
+.. code-block:: bash
+
+  python -m pip install pytest
+  python -m pytest tests/cuda -v
 
 Installing from source
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -67,6 +107,15 @@ newer on Linux, or a compatible Apple Clang on macOS). CMake builds the C++
 library first; ``setup.py`` only builds the Python bindings and links that
 library. Build isolation is disabled to keep both stages on the same PyTorch
 installation. To reproduce a release, check out its tag before building.
+
+For a CUDA source build, install CUDA-enabled PyTorch and the matching CUDA
+toolkit first, configure CMake with ``-DCUDA=ON``, and set
+``PYDISORT_CUDA=ON`` when running pip. When building without a visible GPU,
+also set ``TORCH_CUDA_ARCH_LIST`` to the target compute capabilities and
+``CMAKE_CUDA_ARCHITECTURES`` to the corresponding CMake values. For the
+aarch64 CUDA 12.8 release these are ``8.0;9.0;10.0;12.0+PTX`` and
+``80;90;100;120``, respectively. ``PYDISORT_CUDA=OFF`` explicitly disables
+CUDA bindings; the default ``auto`` retains GPU detection for source builds.
 
 Verify the installation
 -----------------------

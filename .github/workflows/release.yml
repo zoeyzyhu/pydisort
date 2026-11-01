@@ -22,7 +22,6 @@ concurrency:
 
 env:
   BUILD_TYPE: Release
-  LINUX_ARCH: x86_64
   MACOS_ARCH: arm64
   HOST_PYTHON: 3.11
 
@@ -94,13 +93,37 @@ jobs:
           path: wheelhouse/*.whl
 
   build-linux:
-    name: Build Linux Wheels
+    name: Build Linux Wheels (${{ matrix.target }}, Python ${{ matrix.python-version }})
     if: ${{ github.event.inputs.build_os == 'Both' || github.event.inputs.build_os == 'Ubuntu' }}
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.runner }}
     strategy:
       fail-fast: true
       matrix:
         python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
+        target: [x86_64, aarch64-cpu, aarch64-cu128]
+        include:
+          - target: x86_64
+            arch: x86_64
+            runner: ubuntu-latest
+            cuda: "ON"
+            binding_cuda: "auto"
+            artifact-prefix: wheels
+          - target: aarch64-cpu
+            arch: aarch64
+            runner: ubuntu-24.04-arm
+            cuda: "OFF"
+            binding_cuda: "OFF"
+            image: manylinux_2_28
+            artifact-prefix: wheels
+          - target: aarch64-cu128
+            arch: aarch64
+            runner: ubuntu-24.04-arm
+            cuda: "ON"
+            binding_cuda: "ON"
+            image: docker.io/pytorch/manylinuxaarch64-builder:cuda12.8
+            # CUDA wheels need CUDA PyTorch from its separate package index.
+            # Keep them out of the PyPI download pattern below.
+            artifact-prefix: cuda-wheels
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
@@ -130,14 +153,19 @@ jobs:
         env:
           CIBW_PLATFORM: linux
           CIBW_MANYLINUX_X86_64_IMAGE: docker.io/pytorch/manylinux2_28-builder:cuda12.8
+          CIBW_MANYLINUX_AARCH64_IMAGE: ${{ matrix.image || 'manylinux_2_28' }}
           CIBW_BUILD: cp${{ env.PY_VERSION }}*
-          CIBW_ARCHS: ${{ env.LINUX_ARCH }}
+          CIBW_ARCHS: ${{ matrix.arch }}
           # Skip musllinux and free-threaded (no-GIL) builds.
           CIBW_SKIP: "*musllinux* *t-*"
           CIBW_ENVIRONMENT: >
             PIP_NO_CACHE_DIR=1
             PIP_DISABLE_PIP_VERSION_CHECK=1
             PIP_NO_COMPILE=1
+            PYDISORT_CUDA=${{ matrix.binding_cuda }}
+            PIP_EXTRA_INDEX_URL=${{ matrix.target == 'aarch64-cu128' && 'https://download.pytorch.org/whl/cu128' || 'https://pypi.org/simple' }}
+            TORCH_CUDA_ARCH_LIST="8.0;9.0;10.0;12.0+PTX"
+            MAX_JOBS=3
 
           CIBW_BEFORE_BUILD: |
             export PATH="/opt/python/cp${{ env.PY_VERSION }}-cp${{ env.PY_VERSION }}/bin:$PATH"
@@ -145,14 +173,22 @@ jobs:
             pip install numpy 'cmake<=3.30' 'torch==2.10.0'
             TORCH_CMAKE_PREFIX_PATH=$(python -c 'import torch.utils; print(torch.utils.cmake_prefix_path)')
             export LD_LIBRARY_PATH=$(python -c "import torch; print(torch.__path__[0] + '/lib')"):$(pwd)/build/lib:$LD_LIBRARY_PATH
+            CUDA_OPTIONS=""
+            if [ "${{ matrix.target }}" = "aarch64-cu128" ]; then
+              CUDA_OPTIONS='-DCMAKE_CUDA_ARCHITECTURES=80;90;100;120'
+              python -c 'import torch; assert torch.version.cuda == "12.8", torch.__version__'
+            fi
             cmake -B build -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
                   -DPython3_EXECUTABLE=$(which python) \
                   -DCMAKE_PREFIX_PATH="$TORCH_CMAKE_PREFIX_PATH" \
-                  -DCUDA=ON
+                  -DCUDA=${{ matrix.cuda }} \
+                  ${CUDA_OPTIONS:+"$CUDA_OPTIONS"}
             cmake --build build --parallel 3
           CIBW_REPAIR_WHEEL_COMMAND_LINUX: |
             export LD_LIBRARY_PATH=/usr/local/cuda/lib64:/usr/local/lib64:/usr/lib64:$LD_LIBRARY_PATH
             auditwheel repair --exclude lib*.so -w {dest_dir} {wheel}
+          # Exercise the installed ARM wheel in cibuildwheel's clean test env.
+          CIBW_TEST_COMMAND: ${{ matrix.arch == 'aarch64' && 'python {project}/examples/example_01_beam_attenuation.py && python {project}/examples/example_03_aerosol_scattering.py' || '' }}
         run: |
           pip install cibuildwheel
           python -m cibuildwheel --output-dir wheelhouse
@@ -160,7 +196,7 @@ jobs:
       - name: Upload Linux Wheels
         uses: actions/upload-artifact@v4
         with:
-          name: wheels-linux-${{ matrix.python-version }}-${{ env.LINUX_ARCH }}
+          name: ${{ matrix.artifact-prefix }}-linux-${{ matrix.python-version }}-${{ matrix.target }}
           path: wheelhouse/*.whl
 
   publish-pypi:

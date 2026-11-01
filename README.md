@@ -127,9 +127,14 @@ We provide the `pydisort` library for Python users. The package can be installed
 pip install pydisort
 ```
 
-Prebuilt wheels cover CPython 3.10–3.14 on Linux x86-64
+The release workflow targets CPython 3.10–3.14 on Linux x86-64 and aarch64 (ARM64)
 (glibc 2.28 or newer with PyTorch) and Apple Silicon macOS 15 or newer.
 `pip` installs the required PyTorch version automatically.
+Linux aarch64 CPU wheels are published to PyPI; CUDA 12.8 wheels are provided
+as separate release-workflow artifacts. See the
+[installation guide](https://pydisort.readthedocs.io/en/latest/installation.html)
+for GPU installation and the [PyPI files](https://pypi.org/project/pydisort/#files)
+for available CPU releases.
 The release workflow publishes wheels only, so there is no automatic source-build
 fallback when a wheel does not match. See the
 [installation guide](https://pydisort.readthedocs.io/en/latest/installation.html)

@@ -5,7 +5,7 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 if(APPLE)
   message(STATUS "Compiling on MacOS")
-else()
+elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86_64|AMD64|amd64)$")
   add_compile_definitions(HAVE_AVX512_CPU_DEFINITION=1 HAVE_AVX2_CPU_DEFINITION=1)
 endif()
 

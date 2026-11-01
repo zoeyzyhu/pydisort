@@ -31,6 +31,22 @@ def parse_library_names(libdir):
     return library_names
 
 
+def cuda_build_enabled():
+    """Allow CUDA wheel builds on release runners without a GPU."""
+    mode = os.getenv("PYDISORT_CUDA", "auto").lower()
+    if mode == "auto":
+        return torch.cuda.is_available()
+    if mode == "off":
+        return False
+    if mode != "on":
+        raise ValueError("PYDISORT_CUDA must be ON, OFF, or auto")
+    if torch.version.cuda is None or cpp_extension.CUDA_HOME is None:
+        raise RuntimeError(
+            "PYDISORT_CUDA=ON requires CUDA-enabled PyTorch and a CUDA toolkit"
+        )
+    return True
+
+
 current_dir = os.getenv("WORKSPACE", Path().absolute())
 include_dirs = [
     f"{current_dir}",
@@ -51,7 +67,7 @@ else:
         "-Wl,-rpath,$ORIGIN/../torch/lib",
     ]
 
-if torch.cuda.is_available():
+if cuda_build_enabled():
     ext_module = cpp_extension.CUDAExtension(
         name="pydisort.pydisort",
         sources=glob.glob("python/csrc/*.cpp")

@@ -46,7 +46,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        os: [ubuntu-latest, macOS-latest]
+        os: [ubuntu-latest, ubuntu-24.04-arm, macOS-latest]
         python-version: ["3.11", "3.14"]
     steps:
       - name: Check out code
@@ -72,6 +72,9 @@ jobs:
           cmake -B ${{ github.workspace }}/build \
                 -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
                 -DBUILD_TESTS=ON
+
+      - name: Test packaging configuration
+        run: python -m pytest tests/test_setup_guidance.py tests/test_cuda_build_config.py -v
 
       - name: Build
         run: cmake --build ${{ github.workspace }}/build --config ${{ env.BUILD_TYPE }} --parallel
