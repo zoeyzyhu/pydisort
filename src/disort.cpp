@@ -47,48 +47,31 @@ void DisortOptionsImpl::set_header(std::string const& header) {
 }
 
 void DisortOptionsImpl::set_flags(std::string const& str) {
-  std::vector<std::string> dstr = Vectorize<std::string>(str.c_str(), " ,");
-
-  for (int i = 0; i < dstr.size(); ++i) {
-    if (dstr[i] == "ibcnd") {
-      ds().flag.ibcnd = true;
-    } else if (dstr[i] == "usrtau") {
-      ds().flag.usrtau = true;
-    } else if (dstr[i] == "usrang") {
-      ds().flag.usrang = true;
-    } else if (dstr[i] == "lamber") {
-      ds().flag.lamber = true;
-    } else if (dstr[i] == "planck") {
-      ds().flag.planck = true;
-    } else if (dstr[i] == "spher") {
-      ds().flag.spher = true;
-    } else if (dstr[i] == "onlyfl") {
-      ds().flag.onlyfl = true;
-    } else if (dstr[i] == "quiet") {
-      ds().flag.quiet = true;
-    } else if (dstr[i] == "intensity_correction") {
-      ds().flag.intensity_correction = true;
-    } else if (dstr[i] == "old_intensity_correction") {
-      ds().flag.old_intensity_correction = true;
-    } else if (dstr[i] == "general_source") {
-      ds().flag.general_source = true;
-    } else if (dstr[i] == "output_uum") {
-      ds().flag.output_uum = true;
-    } else if (dstr[i] == "print-input") {
-      ds().flag.prnt[0] = true;
-    } else if (dstr[i] == "print-fluxes") {
-      ds().flag.prnt[1] = true;
-    } else if (dstr[i] == "print-intensity") {
-      ds().flag.prnt[2] = true;
-    } else if (dstr[i] == "print-transmissivity") {
-      ds().flag.prnt[3] = true;
-    } else if (dstr[i] == "print-phase-function") {
-      ds().flag.prnt[4] = true;
-    } else {
-      std::stringstream msg;
-      msg << "flag: '" << dstr[i] << "' unrecognized" << std::endl;
-      throw std::runtime_error("DisortOptionsImpl::set_flags::" + msg.str());
+  std::map<std::string, int*> const table = {
+      {"ibcnd", &ds().flag.ibcnd},
+      {"usrtau", &ds().flag.usrtau},
+      {"usrang", &ds().flag.usrang},
+      {"lamber", &ds().flag.lamber},
+      {"planck", &ds().flag.planck},
+      {"spher", &ds().flag.spher},
+      {"onlyfl", &ds().flag.onlyfl},
+      {"quiet", &ds().flag.quiet},
+      {"intensity_correction", &ds().flag.intensity_correction},
+      {"old_intensity_correction", &ds().flag.old_intensity_correction},
+      {"general_source", &ds().flag.general_source},
+      {"output_uum", &ds().flag.output_uum},
+      {"print-input", &ds().flag.prnt[0]},
+      {"print-fluxes", &ds().flag.prnt[1]},
+      {"print-intensity", &ds().flag.prnt[2]},
+      {"print-transmissivity", &ds().flag.prnt[3]},
+      {"print-phase-function", &ds().flag.prnt[4]}};
+  for (auto const& s : Vectorize<std::string>(str.c_str(), " ,")) {
+    auto it = table.find(s);
+    if (it == table.end()) {
+      throw std::runtime_error("DisortOptionsImpl::set_flags::flag: '" + s +
+                               "' unrecognized\n");
     }
+    *it->second = true;
   }
 }
 
@@ -542,73 +525,22 @@ void print_ds_bc(std::ostream& os, disort_state const& ds) {
 }
 
 void print_ds_flags(std::ostream& os, disort_state const& ds) {
-  if (ds.flag.ibcnd) {
-    os << "- Spectral boundary condition (ibcnd) = True" << std::endl;
-  } else {
-    os << "- Spectral boundary condition (ibcnd) = False" << std::endl;
-  }
-
-  if (ds.flag.usrtau) {
-    os << "- User optical depth (usrtau) = True" << std::endl;
-  } else {
-    os << "- User optical depth (usrtau) = False" << std::endl;
-  }
-
-  if (ds.flag.usrang) {
-    os << "- User angles (usrang) = True" << std::endl;
-  } else {
-    os << "- User angles (usrang) = False" << std::endl;
-  }
-
-  if (ds.flag.lamber) {
-    os << "- Lambertian surface (lamber) = True" << std::endl;
-  } else {
-    os << "- Lambertian surface (lamber) = False" << std::endl;
-  }
-
-  if (ds.flag.planck) {
-    os << "- Planck function (planck) = True" << std::endl;
-  } else {
-    os << "- Planck function (planck) = False" << std::endl;
-  }
-
-  if (ds.flag.spher) {
-    os << "- Spherical correction (spher) = True" << std::endl;
-  } else {
-    os << "- Spherical correction (spher) = False" << std::endl;
-  }
-
-  if (ds.flag.onlyfl) {
-    os << "- Only calculate fluxes (onlyfl) = True" << std::endl;
-  } else {
-    os << "- Only calculate fluxes (onlyfl) = False" << std::endl;
-  }
-
-  if (ds.flag.intensity_correction) {
-    os << "- Intensity correction (intensity_correction) = True" << std::endl;
-  } else {
-    os << "- Intensity correction (intensity_correction) = False" << std::endl;
-  }
-
-  if (ds.flag.old_intensity_correction) {
-    os << "- Old intensity correction (old_intensity_correction) = True"
-       << std::endl;
-  } else {
-    os << "- Old intensity correction (old_intensity_correction) = False"
-       << std::endl;
-  }
-
-  if (ds.flag.general_source) {
-    os << "- General source function (general_source) = True" << std::endl;
-  } else {
-    os << "- General source function (general_source) = False" << std::endl;
-  }
-
-  if (ds.flag.output_uum) {
-    os << "- Output uum (output_uum) = True" << std::endl;
-  } else {
-    os << "- Output uum (output_uum) = False" << std::endl;
-  }
+  std::pair<char const*, int> const rows[] = {
+      {"Spectral boundary condition (ibcnd)", ds.flag.ibcnd},
+      {"User optical depth (usrtau)", ds.flag.usrtau},
+      {"User angles (usrang)", ds.flag.usrang},
+      {"Lambertian surface (lamber)", ds.flag.lamber},
+      {"Planck function (planck)", ds.flag.planck},
+      {"Spherical correction (spher)", ds.flag.spher},
+      {"Only calculate fluxes (onlyfl)", ds.flag.onlyfl},
+      {"Intensity correction (intensity_correction)",
+       ds.flag.intensity_correction},
+      {"Old intensity correction (old_intensity_correction)",
+       ds.flag.old_intensity_correction},
+      {"General source function (general_source)", ds.flag.general_source},
+      {"Output uum (output_uum)", ds.flag.output_uum}};
+  for (auto const& [label, flag] : rows)
+    os << "- " << label << " = " << (flag ? "True" : "False") << std::endl;
 }
 
 }  // namespace disort
